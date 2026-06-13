@@ -164,14 +164,14 @@
   // Se carichi un nuovo gioco non in questa lista, verrà comunque
   // mostrato con emoji e descrizione di default.
   const META = {
-    "bee_game":                    { emoji: "🐝", desc: "Un gioco con le api" },
-    "bruco":                       { emoji: "🐛", desc: "Segui il bruco e impara!" },
-    "cannucce":                    { emoji: "🥤", desc: "Conta con le cannucce" },
-    "chiudi_la_scatola":           { emoji: "📦", desc: "Il classico gioco della scatola" },
-    "gambero rosso":               { emoji: "🦞", desc: "Vai avanti e indietro con i numeri" },
-    "gioco_carte_completo":        { emoji: "🃏", desc: "Matematica con le carte" },
-    "pallottoliere_per_operazioni":{ emoji: "🔢", desc: "Operazioni con il pallottoliere" },
-    "scatolina":                   { emoji: "🎁", desc: "Scopri cosa c'è dentro" },
+    "bee_game":                    { emoji: "🐝", desc: "Coding con le api" },
+    "bruco":                       { emoji: "🐛", desc: "Il Bruco Mangianumeri!" },
+    "cannucce":                    { emoji: "🥤", desc: "Cannucce per contare" },
+    "chiudi_la_scatola":           { emoji: "📦", desc: "Shut the box!" },
+    "gambero rosso":               { emoji: "🦞", desc: "Dov'è nascosto gambero Rosso?" },
+    "gioco_carte_completo":        { emoji: "🃏", desc: "Maggiore, minore o uguale?" },
+    "pallottoliere_per_operazioni":{ emoji: "🔢", desc: "Il pallottoliere" },
+    "scatolina":                   { emoji: "🎁", desc: "Scatolina gialla" },
     "supermercato":                { emoji: "🛒", desc: "Fai la spesa con i numeri" },
   };
 
@@ -185,8 +185,8 @@
   function createCard(filename) {
     const slug = filename.replace(/\.html$/i, "");
     const m = META[slug] || {};
-    const emoji = m.emoji || "🎮";
-    const desc  = m.desc  || "Gioca con la matematica";
+    const emoji = m.emoji || "👻";
+    const desc  = m.desc  || "Sottrazioni a mente";
     const title = slugToTitle(slug);
 
     const a = document.createElement("a");
