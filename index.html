@@ -185,6 +185,8 @@
     const a = document.createElement("a");
     a.className = "card";
     a.href = `${PAGES_BASE}/${filename}`;
+    a.target = "_blank";
+    a.rel = "noopener";
     a.innerHTML = `
       <span class="emoji">${emoji}</span>
       <h2>${title}</h2>
@@ -229,6 +231,22 @@
   }
 
   loadGames();
+
+  // ── Comunica l'altezza al sito che ci ospita (es. WordPress) ────
+  // Così, se questa pagina viene mostrata dentro un <iframe>,
+  // l'iframe può adattare la propria altezza automaticamente,
+  // anche quando vengono aggiunti nuovi giochi.
+  function sendHeightToParent() {
+    const height = document.body.scrollHeight;
+    window.parent.postMessage({ type: "matematiche-resize", height: height }, "*");
+  }
+
+  window.addEventListener("load", sendHeightToParent);
+  window.addEventListener("resize", sendHeightToParent);
+
+  // Ricalcola anche quando i giochi vengono inseriti nella griglia
+  const resizeObserver = new ResizeObserver(sendHeightToParent);
+  resizeObserver.observe(document.body);
 </script>
 
 </body>
