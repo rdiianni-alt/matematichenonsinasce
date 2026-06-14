@@ -75,6 +75,18 @@
   .ok { color: #1d9e75; }
   .ko { color: #e24b4a; }
   .score-note { font-size: 13px; color: #888; margin-top: 10px; min-height: 18px; }
+
+  @media (max-width: 480px) {
+    body { padding: 1rem 0.6rem; }
+    #abacus-container { padding: 1.4rem 0.6rem 1rem; }
+    .ctrl-btn { width: 38px; height: 38px; font-size: 15px; }
+    .ctrl-btn.wide { padding: 0 10px; font-size: 13px; }
+    .controls { gap: 6px; }
+    .op-card { padding: 1rem; gap: 10px; }
+    .op-text { font-size: 26px; min-width: 100px; }
+    .op-input { width: 64px; font-size: 22px; }
+    .logo-bar img { width: 48px; height: 48px; }
+  }
 </style>
 </head>
 <body>
@@ -127,13 +139,28 @@
 const TOTAL = 20;
 const COLORS = Array(5).fill('white').concat(Array(5).fill('red'))
                        .concat(Array(5).fill('white')).concat(Array(5).fill('red'));
-const D = 22;
+let D = 22;
 let railW = 0, leftN = 0, beadEls = [];
+
+function computeD() {
+  const rail = document.getElementById('rail');
+  railW = rail.offsetWidth;
+  // beads must all fit within half the rail width (10 beads side by side)
+  D = Math.max(10, Math.min(22, Math.floor(railW / 10)));
+  rail.style.height = (D + 22) + 'px';
+}
+
+function applyBeadSize() {
+  beadEls.forEach(el => {
+    el.style.width = D + 'px';
+    el.style.height = D + 'px';
+  });
+}
 
 function initAbacus() {
   const rail = document.getElementById('rail');
   rail.querySelectorAll('.bead').forEach(b => b.remove());
-  railW = rail.offsetWidth;
+  computeD();
   beadEls = [];
   for (let i = 0; i < TOTAL; i++) {
     const el = document.createElement('div');
@@ -143,6 +170,7 @@ function initAbacus() {
     rail.appendChild(el);
     beadEls.push(el);
   }
+  applyBeadSize();
   leftN = 0;
   render(false);
   updateDivider();
@@ -176,7 +204,8 @@ function onBeadClick(e) {
 }
 
 window.addEventListener('resize', () => {
-  railW = document.getElementById('rail').offsetWidth;
+  computeD();
+  applyBeadSize();
   updateDivider(); render(false);
 });
 
