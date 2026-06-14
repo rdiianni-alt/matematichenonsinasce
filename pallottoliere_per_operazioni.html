@@ -145,8 +145,8 @@ let railW = 0, leftN = 0, beadEls = [];
 function computeD() {
   const rail = document.getElementById('rail');
   railW = rail.offsetWidth;
-  // beads must all fit within half the rail width (10 beads side by side)
-  D = Math.max(10, Math.min(22, Math.floor(railW / 10)));
+  // all 20 beads must fit side by side in the full rail width when packed on one side
+  D = Math.max(8, Math.min(22, Math.floor(railW / 20)));
   rail.style.height = (D + 22) + 'px';
 }
 
