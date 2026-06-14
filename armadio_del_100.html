@@ -38,6 +38,16 @@
   .hint { font-size: 18px; color: #555; min-height: 28px; text-align: center; }
   .ball.correct { background: #4CAF50; border-color: #2E7D32; color: #fff; }
   .question { font-size: 26px; font-weight: 700; color: #222; text-align: center; }
+
+  @media (max-width: 480px) {
+    .grid { gap: 3px; }
+    .row { gap: 3px; }
+    .col-gap { width: 8px; }
+    .row-gap { height: 8px; }
+    .ball { width: 28px; height: 28px; font-size: 9px; }
+    .num-box { font-size: 48px; }
+    .question { font-size: 20px; }
+  }
   .feedback { font-size: 22px; font-weight: 700; min-height: 32px; text-align: center; }
   .feedback.ok { color: #2E7D32; }
   .feedback.no { color: #E24B4A; }
