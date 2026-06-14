@@ -2,66 +2,101 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:sans-serif;background:#f5f0e8;min-height:100vh;padding:16px}
-h1{text-align:center;font-size:20px;font-weight:500;margin-bottom:12px;color:#333}
-.setup{background:#fff;border-radius:12px;padding:16px;max-width:400px;margin:0 auto 16px;border:1px solid #ddd}
-.setup label{font-size:14px;color:#555;display:block;margin-bottom:6px}
-.setup input{width:100%;padding:8px;border:1px solid #ccc;border-radius:8px;font-size:14px;margin-bottom:10px}
+body{font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,#fef6e4,#e3f6f5);min-height:100vh;padding:16px;color:#333}
+h1{text-align:center;font-size:clamp(22px,4.5vw,34px);font-weight:700;margin-bottom:14px;color:#2d5d4f;letter-spacing:0.5px}
+.wrap{max-width:640px;margin:0 auto}
+.setup{background:#fff;border-radius:16px;padding:clamp(16px,3vw,28px);max-width:480px;margin:0 auto 16px;box-shadow:0 6px 20px rgba(0,0,0,0.08)}
+.setup label{font-size:clamp(13px,2.5vw,16px);color:#555;display:block;margin-bottom:6px;font-weight:600}
+.setup input{width:100%;padding:10px;border:2px solid #dfe6e9;border-radius:10px;font-size:clamp(14px,2.5vw,16px);margin-bottom:10px}
+.setup input:focus{outline:none;border-color:#00b894}
 .mode-btns{display:flex;gap:8px;margin-bottom:14px}
-.mode-btn{flex:1;padding:10px;border:2px solid #ccc;border-radius:8px;background:#fff;font-size:14px;cursor:pointer;color:#555;transition:all .2s}
-.mode-btn.active{border-color:#4a7c59;background:#4a7c59;color:#fff;font-weight:500}
-.setup button,.action-btn{background:#4a7c59;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:15px;cursor:pointer;width:100%}
-.setup button:hover,.action-btn:hover{background:#3a6347}
-.game{display:none;max-width:520px;margin:0 auto}
-.boxes-row{display:flex;gap:8px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px}
-.player-box{flex:1;min-width:100px;background:#8B4513;border-radius:10px;padding:8px;border:2px solid #6b3410;opacity:0.5;transition:all .3s}
-.player-box.active{opacity:1;border-color:#ffd700;border-width:4px;box-shadow:0 0 12px 4px #ffd70088;background:#a0522d}
+.mode-btn{flex:1;padding:12px;border:2px solid #dfe6e9;border-radius:10px;background:#fff;font-size:clamp(13px,2.5vw,16px);cursor:pointer;color:#636e72;transition:all .2s;font-weight:600}
+.mode-btn.active{border-color:#00b894;background:#00b894;color:#fff}
+.setup button.go,.action-btn{background:#00b894;color:#fff;border:none;border-radius:10px;padding:13px 20px;font-size:clamp(14px,2.8vw,17px);cursor:pointer;width:100%;font-weight:700;transition:transform .1s, background .2s}
+.setup button.go:hover,.action-btn:hover{background:#019875}
+.setup button.go:active,.action-btn:active{transform:scale(0.97)}
+.rules{font-size:clamp(12px,2.3vw,14px);color:#777;line-height:1.6;margin-top:14px;padding-top:12px;border-top:1px solid #f0f0f0}
+
+.topbar{max-width:640px;margin:0 auto 8px;text-align:right}
+.topbar button{background:none;border:none;color:#888;font-size:clamp(12px,2.3vw,14px);cursor:pointer;padding:4px 0;font-weight:600}
+.topbar button:hover{color:#00b894}
+
+.game{display:none;max-width:640px;margin:0 auto}
+.boxes-row{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding:4px}
+.player-box{flex:1;min-width:110px;background:linear-gradient(135deg,#27ae60,#1e8449);border-radius:14px;padding:8px;border:3px solid #186a3b;opacity:0.45;transition:all .3s}
+.player-box.active{opacity:1;border-color:#ffd700;border-width:4px;box-shadow:0 0 16px 4px rgba(255,215,0,0.55);background:linear-gradient(135deg,#2ecc71,#27ae60);transform:scale(1.04)}
 .player-box.done{opacity:0.3}
-.box-label{color:#f5deb3;font-size:11px;text-align:center;margin-bottom:5px;font-weight:500}
-.player-box.active .box-label{font-size:15px;font-weight:700;color:#ffd700}
+.box-label{color:#fff;font-size:clamp(11px,2.2vw,14px);text-align:center;margin-bottom:5px;font-weight:600}
+.player-box.active .box-label{font-size:clamp(15px,3.2vw,20px);font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.25)}
 .mini-nums{display:flex;gap:2px;justify-content:center;flex-wrap:wrap}
-.mini-tile{width:22px;height:26px;border-radius:4px;background:#f5deb3;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#333}
-.mini-tile.closed{background:#6b3410;color:#6b3410}
-.mini-score{color:#f5deb3;font-size:11px;text-align:center;margin-top:4px}
-.main-board{background:#fff;border-radius:12px;padding:14px;margin-bottom:12px;border:1px solid #ddd}
-.turn-label{font-size:13px;color:#888;margin-bottom:8px;text-align:center}
-.big-nums{display:flex;gap:6px;justify-content:center;margin-bottom:12px}
-.num-tile{width:42px;height:52px;border-radius:6px;border:2px solid #6b3410;background:#f5deb3;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#333;cursor:pointer;transition:all .2s;user-select:none}
-.num-tile.closed{background:#6b3410;color:#6b3410;cursor:default;border-color:#4a2510}
-.num-tile.selected{background:#ffd700;border-color:#b8860b}
-.num-tile.open:hover{background:#ffe0a0}
-.dice-row{display:flex;gap:12px;justify-content:center;margin-bottom:10px}
-.die{width:156px;height:156px;border-radius:20px;background:#fff;border:3px solid #333;display:flex;align-items:center;justify-content:center;font-size:100px;color:#333}
+.mini-tile{width:clamp(18px,4.5vw,26px);height:clamp(22px,5.5vw,32px);border-radius:5px;background:#fffbe8;display:flex;align-items:center;justify-content:center;font-size:clamp(10px,2.4vw,13px);font-weight:700;color:#555}
+.mini-tile.closed{background:rgba(0,0,0,0.25);color:transparent}
+.mini-score{color:#fff;font-size:clamp(11px,2.2vw,13px);text-align:center;margin-top:4px;font-weight:700}
+
+.main-board{background:#fff;border-radius:16px;padding:clamp(14px,3vw,24px);margin-bottom:12px;box-shadow:0 6px 20px rgba(0,0,0,0.08)}
+.turn-label{font-size:clamp(13px,2.6vw,16px);color:#888;margin-bottom:10px;text-align:center;font-weight:600}
+.big-nums{display:flex;gap:clamp(4px,1.2vw,8px);justify-content:center;margin-bottom:14px;flex-wrap:wrap}
+.num-tile{width:clamp(38px,9vw,56px);height:clamp(48px,11vw,70px);border-radius:10px;border:3px solid #dfe6e9;background:#fffbe8;display:flex;align-items:center;justify-content:center;font-size:clamp(18px,4.5vw,28px);font-weight:800;cursor:pointer;transition:all .15s;user-select:none}
+.num-tile.closed{background:#2d3436;color:transparent;cursor:default;border-color:#1e2426}
+.num-tile.selected{background:#ffeaa7;border-color:#fdcb6e;transform:translateY(-4px) scale(1.05);box-shadow:0 4px 10px rgba(0,0,0,0.15)}
+.num-tile.open:hover{border-color:#00b894;transform:translateY(-2px)}
+.num-tile[data-n="1"]{color:#e74c3c}
+.num-tile[data-n="2"]{color:#e67e22}
+.num-tile[data-n="3"]{color:#f39c12}
+.num-tile[data-n="4"]{color:#27ae60}
+.num-tile[data-n="5"]{color:#16a085}
+.num-tile[data-n="6"]{color:#2980b9}
+.num-tile[data-n="7"]{color:#6c5ce7}
+.num-tile[data-n="8"]{color:#a55eea}
+.num-tile[data-n="9"]{color:#d35400}
+
+.dice-row{display:flex;gap:clamp(8px,3vw,16px);justify-content:center;margin-bottom:10px}
+.die{width:clamp(80px,20vw,150px);height:clamp(80px,20vw,150px);border-radius:18px;background:#fff;border:4px solid #00b894;display:flex;align-items:center;justify-content:center;font-size:clamp(46px,12vw,90px);color:#2d3436;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+.die.empty{border-color:#dfe6e9;color:#dfe6e9}
+@keyframes diceRoll{0%{transform:scale(0.7) rotate(0deg)}50%{transform:scale(1.15) rotate(200deg)}100%{transform:scale(1) rotate(360deg)}}
+.die.rolling{animation:diceRoll .45s ease-out}
+
 .sum-info{font-size:13px;color:#888;text-align:center;margin-bottom:6px;min-height:18px}
-.msg{font-size:14px;color:#555;text-align:center;margin-bottom:10px;min-height:20px}
-.msg.warn{color:#c0392b;font-weight:600}
-.msg.ok{color:#27ae60;font-weight:600}
-.score-input-area{background:#fff9e6;border-radius:10px;padding:12px;border:1px solid #f0d060;margin-bottom:10px}
-.score-input-area p{font-size:14px;color:#555;margin-bottom:8px}
-.score-input-area input{width:100%;padding:8px;border:1px solid #ccc;border-radius:8px;font-size:18px;text-align:center;margin-bottom:8px}
+.msg{font-size:clamp(13px,2.8vw,16px);color:#555;text-align:center;margin-bottom:12px;min-height:22px;font-weight:600}
+.msg.warn{color:#e74c3c}
+.msg.ok{color:#00b894}
+.score-input-area{background:#fff8e1;border-radius:12px;padding:14px;border:2px solid #fdcb6e;margin-bottom:10px}
+.score-input-area p{font-size:clamp(13px,2.6vw,15px);color:#555;margin-bottom:8px;font-weight:600}
+.score-input-area input{width:100%;padding:10px;border:2px solid #fdcb6e;border-radius:10px;font-size:20px;text-align:center;margin-bottom:8px;font-weight:700}
 .btn-row{display:flex;gap:8px;flex-wrap:wrap}
-.action-btn{flex:1;padding:10px;font-size:14px}
-.action-btn.secondary{background:#888}
-.action-btn.secondary:hover{background:#666}
-.action-btn:disabled{background:#ccc;cursor:default}
-.final-results{background:#fff;border-radius:12px;padding:16px;border:1px solid #ddd;text-align:center;display:none;max-width:460px;margin:0 auto}
-.final-results h2{font-size:20px;margin-bottom:12px}
-.result-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;font-size:15px}
+.action-btn{flex:1;min-width:90px}
+.action-btn.secondary{background:#95a5a6}
+.action-btn.secondary:hover{background:#7f8c8d}
+.action-btn.choice{background:#fdcb6e;color:#5a3d00}
+.action-btn.choice:hover{background:#f0b94d}
+.action-btn.myturn{background:#e74c3c}
+.action-btn.myturn:hover{background:#c0392b}
+.action-btn:disabled{background:#dfe6e9;color:#b2bec3;cursor:default}
+
+.final-results{background:#fff;border-radius:16px;padding:clamp(16px,4vw,28px);text-align:center;display:none;max-width:480px;margin:0 auto;box-shadow:0 6px 20px rgba(0,0,0,0.08)}
+.final-results h2{font-size:clamp(18px,4vw,24px);margin-bottom:12px;color:#2d5d4f}
+.result-row{display:flex;justify-content:space-between;padding:10px 4px;border-bottom:1px solid #f0f0f0;font-size:clamp(14px,3vw,17px);font-weight:600}
 .result-row:last-child{border-bottom:none}
+.logo-area{text-align:center;margin-bottom:14px}
+.logo-area a{text-decoration:none;display:inline-flex;flex-direction:column;align-items:center;gap:6px}
+.logo-area img{width:60px;height:60px;object-fit:contain;border-radius:50%}
+.logo-area span{font-size:clamp(13px,2.6vw,16px);font-weight:600;color:#00b894;letter-spacing:0.3px}
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<div style="text-align:center;margin-bottom:14px">
-  <a href="https://matematichenonsinasce.com/" target="_blank" style="text-decoration:none;display:inline-flex;flex-direction:column;align-items:center;gap:6px">
-    <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" style="width:60px;height:60px;object-fit:contain;border-radius:50%">
-    <span style="font-size:15px;font-weight:500;color:#4a7c59;letter-spacing:0.3px">Matematiche non si nasce</span>
+<div class="logo-area">
+  <a href="https://matematichenonsinasce.com/" target="_blank">
+    <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="logo">
+    <span>Matematiche non si nasce</span>
   </a>
 </div>
 
-<h1>Chiudi la Scatola</h1>
+<h1>🎲 Chiudi la Scatola</h1>
 
 <div class="setup" id="setupPanel">
   <label>Modalità di gioco</label>
@@ -78,23 +113,24 @@ h1{text-align:center;font-size:20px;font-weight:500;margin-bottom:12px;color:#33
     <label>Il tuo nome</label>
     <input type="text" id="soloName" placeholder="Il tuo nome">
   </div>
-  <button onclick="startGame()">Inizia la partita</button>
-  <p style="font-size:13px;color:#777;line-height:1.5;margin-top:14px;padding-top:12px;border-top:1px solid #eee">
+  <button class="go" onclick="startGame()">Inizia la partita</button>
+  <p class="rules">
     <strong>Come si gioca:</strong> i numeri da 1 a 9 sono tutti aperti. Si lanciano i dadi e si chiudono numeri (uno o due alla volta) la cui somma corrisponde al risultato. Chi chiude tutti i numeri vince. Chi non ha più mosse calcola il punteggio sommando i numeri rimasti — vince chi ha il punteggio più basso.
   </p>
 </div>
 
-<div style="max-width:520px;margin:0 auto 8px;text-align:right">
-  <button onclick="backToHome()" style="background:none;border:none;color:#888;font-size:13px;cursor:pointer;padding:4px 0">← Torna alla schermata iniziale</button>
+<div class="topbar" id="topbar" style="display:none">
+  <button onclick="backToHome()">← Torna alla schermata iniziale</button>
 </div>
+
 <div class="game" id="gamePanel">
   <div class="boxes-row" id="boxesRow"></div>
   <div class="main-board">
     <div class="turn-label" id="turnLabel"></div>
     <div class="big-nums" id="bigNums"></div>
     <div class="dice-row">
-      <div class="die" id="d1">-</div>
-      <div class="die" id="d2">-</div>
+      <div class="die empty" id="d1">-</div>
+      <div class="die empty" id="d2">-</div>
     </div>
     <div class="sum-info" id="sumInfo"></div>
     <div class="msg" id="msg"></div>
@@ -106,9 +142,9 @@ h1{text-align:center;font-size:20px;font-weight:500;margin-bottom:12px;color:#33
     <div class="btn-row">
       <button class="action-btn" id="btnRoll" onclick="rollDice()">Lancia i dadi</button>
       <button class="action-btn secondary" id="btnConfirm" onclick="confirmSelection()" style="display:none">Conferma scelta</button>
-      <button class="action-btn" id="btn1die" onclick="doRoll(1)" style="display:none">1 dado</button>
-      <button class="action-btn" id="btn2dice" onclick="doRoll(2)" style="display:none">2 dadi</button>
-      <button class="action-btn" id="btnMyTurn" onclick="myTurn()" style="display:none;background:#c0392b">Tocca a me! →</button>
+      <button class="action-btn choice" id="btn1die" onclick="doRoll(1)" style="display:none">1 dado</button>
+      <button class="action-btn choice" id="btn2dice" onclick="doRoll(2)" style="display:none">2 dadi</button>
+      <button class="action-btn myturn" id="btnMyTurn" onclick="myTurn()" style="display:none">Tocca a me! →</button>
     </div>
   </div>
 </div>
@@ -117,9 +153,10 @@ h1{text-align:center;font-size:20px;font-weight:500;margin-bottom:12px;color:#33
   <h2>Risultati finali</h2>
   <div id="resultsList"></div>
   <button class="action-btn" style="margin-top:16px" onclick="location.reload()">Nuova partita</button>
-  <button onclick="backToHome()" style="margin-top:8px;background:none;border:none;color:#888;font-size:13px;cursor:pointer;width:100%">← Torna alla schermata iniziale</button>
+  <button onclick="backToHome()" style="margin-top:8px;background:none;border:none;color:#888;font-size:13px;cursor:pointer;width:100%;font-weight:600">← Torna alla schermata iniziale</button>
 </div>
 
+</div>
 <script>
 const faces=['⚀','⚁','⚂','⚃','⚄','⚅'];
 let players=[], states=[], active=[], currentIdx=0, rolled=false, selected=[], diceSum=0, diceVals=[];
@@ -166,6 +203,7 @@ function startGame(){
   active=players.map((_,i)=>i);
   currentIdx=0;
   document.getElementById('setupPanel').style.display='none';
+  document.getElementById('topbar').style.display='block';
   document.getElementById('gamePanel').style.display='block';
   initTurn();
 }
@@ -173,7 +211,6 @@ function startGame(){
 function cp(){ return active[currentIdx]; }
 function isComputer(){ return players[cp()]===COMPUTER; }
 
-// mostra tutti i bottoni nella loro configurazione iniziale per il turno
 function resetButtons(){
   document.getElementById('btnRoll').style.display='block';
   document.getElementById('btnRoll').disabled=false;
@@ -183,11 +220,21 @@ function resetButtons(){
   document.getElementById('btnMyTurn').style.display='none';
 }
 
+function rollAnim(ids){
+  ids.forEach(id=>{
+    const el=document.getElementById(id);
+    el.classList.remove('rolling');
+    void el.offsetWidth;
+    el.classList.add('rolling');
+  });
+}
+
 function initTurn(){
   rolled=false; selected=[]; diceSum=0; diceVals=[];
   renderMiniBoxes(); renderBigNums();
-  document.getElementById('d1').textContent='-';
-  document.getElementById('d2').textContent='-';
+  const d1=document.getElementById('d1'), d2=document.getElementById('d2');
+  d1.textContent='-'; d1.classList.add('empty');
+  d2.textContent='-'; d2.classList.add('empty');
   document.getElementById('sumInfo').textContent='';
   document.getElementById('scoreInputArea').style.display='none';
   resetButtons();
@@ -216,8 +263,10 @@ function computerDoRoll(numDice){
   const v2=numDice===2?Math.ceil(Math.random()*6):null;
   diceVals=v2?[v1,v2]:[v1];
   diceSum=diceVals.reduce((a,b)=>a+b,0);
-  document.getElementById('d1').textContent=faces[v1-1];
-  document.getElementById('d2').textContent=v2?faces[v2-1]:'-';
+  const d1=document.getElementById('d1'), d2=document.getElementById('d2');
+  d1.classList.remove('empty'); d1.textContent=faces[v1-1];
+  if(v2){ d2.classList.remove('empty'); d2.textContent=faces[v2-1]; rollAnim(['d1','d2']); }
+  else { d2.classList.add('empty'); d2.textContent='-'; rollAnim(['d1']); }
   rolled=true;
   setMsg('Il computer ha lanciato i dadi...','');
 
@@ -232,7 +281,6 @@ function computerDoRoll(numDice){
       renderMiniBoxes();
       setMsg(`Il computer non ha più mosse! Punteggio: ${score}.`,'warn');
       removeFromActive(cp());
-      // aspetta click se c'è ancora un giocatore umano
       if(active.length===0){
         setTimeout(showFinalResults, 2500);
       } else {
@@ -261,7 +309,6 @@ function computerDoRoll(numDice){
           document.getElementById('btnMyTurn').style.display='block';
         }
       } else {
-        // turno finito, aspetta il click del giocatore
         setMsg('Hai visto la mossa del computer?','');
         document.getElementById('btnMyTurn').style.display='block';
       }
@@ -295,8 +342,10 @@ function doRoll(numDice){
   const v2=numDice===2?Math.ceil(Math.random()*6):null;
   diceVals=v2?[v1,v2]:[v1];
   diceSum=diceVals.reduce((a,b)=>a+b,0);
-  document.getElementById('d1').textContent=faces[v1-1];
-  document.getElementById('d2').textContent=v2?faces[v2-1]:'-';
+  const d1=document.getElementById('d1'), d2=document.getElementById('d2');
+  d1.classList.remove('empty'); d1.textContent=faces[v1-1];
+  if(v2){ d2.classList.remove('empty'); d2.textContent=faces[v2-1]; rollAnim(['d1','d2']); }
+  else { d2.classList.add('empty'); d2.textContent='-'; rollAnim(['d1']); }
   rolled=true; selected=[];
   renderBigNums();
   if(!hasMoves()){
@@ -335,8 +384,6 @@ function confirmSelection(){
   } else {
     rolled=false;
     renderBigNums(); renderMiniBoxes();
-    document.getElementById('d1').textContent='-';
-    document.getElementById('d2').textContent='-';
     advanceTurn(); initTurn();
   }
 }
@@ -417,6 +464,7 @@ function renderBigNums(){
     const isClosed=st.closed.includes(n);
     const isSel=selected.includes(n);
     div.className='num-tile'+(isClosed?' closed':isSel?' selected':' open');
+    div.dataset.n=n;
     div.textContent=isClosed?'':n;
     if(!isClosed&&!isComputer()) div.onclick=()=>toggleSelect(n);
     cont.appendChild(div);
@@ -436,6 +484,7 @@ function advanceTurn(){
 
 function showFinalResults(){
   document.getElementById('gamePanel').style.display='none';
+  document.getElementById('topbar').style.display='none';
   document.getElementById('finalResults').style.display='block';
   const sorted=players.map((name,i)=>({name,score:states[i].score??0})).sort((a,b)=>a.score-b.score);
   const minScore=sorted[0].score;
@@ -444,9 +493,9 @@ function showFinalResults(){
   sorted.forEach((p,i)=>{
     const row=document.createElement('div');
     row.className='result-row';
-    row.style.background=p.score===minScore?'#e8f5e9':'';
+    row.style.background=p.score===minScore?'#e8f8f3':'';
     row.style.borderRadius=p.score===minScore?'8px':'';
-    row.style.padding=p.score===minScore?'8px 10px':'8px 0';
+    row.style.padding=p.score===minScore?'10px 8px':'10px 4px';
     row.innerHTML=`<span>${i+1}. ${p.name}</span><span>${p.score} punti</span>`;
     list.appendChild(row);
   });
@@ -455,6 +504,7 @@ function showFinalResults(){
 function backToHome(){
   document.getElementById('gamePanel').style.display='none';
   document.getElementById('finalResults').style.display='none';
+  document.getElementById('topbar').style.display='none';
   document.getElementById('setupPanel').style.display='block';
   buildNameInputs();
 }
