@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz INVALSI Matematica</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    background: #f3f4f6;
+    margin: 0;
+    padding: 20px;
+    color: #1f2937;
+  }
+  .quiz-app-root { max-width: 700px; margin: 0 auto; }
+
+  .quiz-header-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    margin-bottom: 4px;
+  }
+  .quiz-header-link .logo img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    border-radius: 50%;
+  }
+  .quiz-header-link .blog-name {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #1f2937;
+    letter-spacing: 0.02em;
+  }
+  .quiz-disclaimer {
+    text-align: center;
+    font-size: 0.7rem;
+    color: #9ca3af;
+    margin-bottom: 16px;
+    padding: 0 8px;
+  }
+  @media (max-width: 480px) {
+    .quiz-scale-wrapper { zoom: 0.65; }
+  }
+
+  /* Card / layout */
+  .card { max-width: 640px; margin: 0 auto; padding: 24px; background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .progress-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; font-size:0.875rem; font-weight:500; color:#6b7280; }
+  .progress-bar-bg { width:100%; background:#e5e7eb; border-radius:9999px; height:8px; margin-bottom:24px; overflow:hidden; }
+  .progress-bar-fill { background:#3b82f6; height:8px; border-radius:9999px; transition: width 0.3s; }
+  .question-text { font-size:1.125rem; font-weight:600; margin:0 0 16px 0; color:#1f2937; }
+  .options { display:flex; flex-direction:column; gap:8px; }
+  .option-btn { width:100%; text-align:left; padding:12px; border:2px solid #d1d5db; border-radius:8px; font-weight:500; cursor:pointer; background:#fff; color:#1f2937; font-size:1rem; transition: all 0.15s; font-family: inherit; }
+  .option-btn:hover:not([disabled]) { border-color:#60a5fa; background:#eff6ff; }
+  .option-btn.correct { background:#f0fdf4; border-color:#22c55e; color:#166534; }
+  .option-btn.wrong { background:#fef2f2; border-color:#ef4444; color:#991b1b; }
+  .option-btn.dim { border-color:#e5e7eb; color:#9ca3af; }
+  .feedback-correct { color:#15803d; font-weight:600; margin:16px 0 12px 0; }
+  .feedback-wrong { color:#b91c1c; font-weight:600; margin:16px 0 12px 0; }
+  .next-btn, .restart-btn, .back-btn { background:#2563eb; color:#fff; padding:10px 24px; border-radius:8px; font-weight:600; border:none; cursor:pointer; font-size:1rem; font-family: inherit; }
+  .next-btn:hover, .restart-btn:hover, .back-btn:hover { background:#1d4ed8; }
+  .back-btn { background:#6b7280; margin-right:8px; }
+  .back-btn:hover { background:#4b5563; }
+  .finished-card { text-align:center; }
+  .finished-title { font-size:1.5rem; font-weight:700; margin:0 0 12px 0; color:#1f2937; }
+  .finished-score { font-size:1.125rem; margin:0 0 4px 0; color:#374151; }
+  .finished-pct { font-size:1.875rem; font-weight:700; color:#2563eb; margin:0 0 12px 0; }
+  .finished-msg { color:#4b5563; margin:0 0 24px 0; }
+  .finished-buttons { display:flex; justify-content:center; gap:8px; flex-wrap:wrap; }
+  .top-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .level-tag { font-size:0.75rem; font-weight:700; color:#2563eb; background:#eff6ff; padding:4px 10px; border-radius:9999px; }
+
+  /* Menu */
+  .menu-card { text-align:center; }
+  .menu-title { margin:0 0 8px; font-size:1.5rem; }
+  .menu-sub { margin:0 0 24px; color:#6b7280; font-size:0.95rem; }
+  .menu-buttons { display:flex; flex-direction:column; gap:12px; }
+  .menu-btn { padding:18px; font-size:1.15rem; font-weight:700; border:none; border-radius:10px; background:#86efac; color:#14532d; cursor:pointer; font-family:inherit; transition: background 0.15s; }
+  .menu-btn:hover { background:#6ee7a0; }
+  .menu-btn.alt { background:#15803d; color:#fff; }
+  .menu-btn.alt:hover { background:#166534; }
+  .menu-icon { font-size:1.4rem; margin-right:8px; }
+
+  /* Visual components */
+  .tiles-grid { display:grid; grid-template-columns: repeat(6, 36px); border:2px solid #374151; width:max-content; margin-bottom:16px; }
+  .tile { width:36px; height:36px; border:1px solid #9ca3af; }
+  .tile.gray { background:#9ca3af; }
+  .tile.white { background:#fff; }
+
+  .flowers-row { display:flex; gap:16px; margin-bottom:16px; flex-wrap:wrap; }
+  .flowers-box { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; border:2px solid #9ca3af; padding:8px; background:#f9fafb; }
+  .flower { font-size:1.5rem; line-height:1; }
+
+  .bag-numbers { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+  .bag-circle { width:48px; height:48px; border-radius:50%; border:2px solid #4b5563; display:flex; align-items:center; justify-content:center; font-weight:bold; background:#f3f4f6; color:#1f2937; }
+
+  .number-line { margin-bottom:16px; width:100%; max-width:420px; height:auto; display:block; }
+
+  .buttons-grid { display:grid; grid-template-columns:repeat(4,36px); gap:8px; border:2px solid #9ca3af; padding:12px; margin-bottom:16px; background:#f3f4f6; width:max-content; }
+  .button-circle { width:36px; height:36px; border-radius:50%; border:2px solid #374151; display:flex; align-items:center; justify-content:center; background:#fff; }
+  .button-dot { width:12px; height:12px; border-radius:50%; background:#374151; }
+
+  .clocks-row { display:flex; gap:24px; align-items:flex-end; margin-bottom:16px; flex-wrap:wrap; }
+  .clock-label { font-size:0.875rem; color:#4b5563; margin:0 0 4px 0; }
+  .clock-display { background:#111827; color:#4ade80; font-family:monospace; font-size:1.875rem; padding:8px 16px; border-radius:6px; letter-spacing:0.2em; display:inline-block; }
+
+  .coins-row { display:flex; gap:24px; margin-bottom:16px; flex-wrap:wrap; align-items:flex-start; }
+  .coins-label { font-weight:bold; margin:0 0 8px 0; text-align:center; color:#374151; }
+  .coins-group { display:flex; gap:4px; }
+  .coins-group.items-end { align-items:flex-end; }
+  .coins-group.wrap { flex-wrap:wrap; max-width:170px; }
+  .coin { border-radius:50%; border:2px solid #a16207; background:#fde68a; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#78350f; }
+
+  .arrows-row { display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
+  .arrow-box { border:2px solid #9ca3af; padding:8px; text-align:center; background:#f9fafb; }
+  .arrow-svg { width:160px; height:96px; }
+  .arrow-title { font-size:0.875rem; margin:4px 0 0 0; font-weight:600; color:#374151; }
+
+  .stones-svg { margin-bottom:16px; width:100%; max-width:280px; border:2px solid #d1d5db; background:#f3f4f6; border-radius:6px; display:block; }
+
+  .money-box { margin-bottom:16px; }
+  .money-label { font-size:0.875rem; color:#4b5563; margin:0 0 8px 0; }
+  .money-row { display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
+  .coin-2e { width:48px; height:48px; border-radius:50%; border:2px solid #ca8a04; background:#fef9c3; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#713f12; font-size:0.875rem; }
+  .coin-1e { width:40px; height:40px; border-radius:50%; border:2px solid #eab308; background:#fef3c7; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#713f12; font-size:0.75rem; }
+  .banknote { width:112px; height:56px; border:2px solid #15803d; background:#dcfce7; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#166534; border-radius:6px; }
+
+  .battery-svg { margin-bottom:16px; width:160px; }
+
+  .shapes-row { display:flex; gap:24px; margin-bottom:16px; flex-wrap:wrap; align-items:flex-end; }
+  .shape-box { text-align:center; }
+  .shape-svg { width:96px; height:96px; }
+  .shape-label { font-weight:600; margin:4px 0 0 0; color:#374151; }
+
+  .col-add { margin-bottom:16px; display:inline-block; font-family:monospace; }
+  .ca-row { display:flex; }
+  .ca-cell, .ca-box { width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-size:1.25rem; font-weight:bold; border:1px solid #d1d5db; }
+  .ca-box { border:2px dashed #6b7280; background:#f3f4f6; }
+  .ca-result { border-top:2px solid #374151; margin-top:4px; padding-top:4px; }
+
+  .prices-box { margin-bottom:16px; max-width:320px; }
+  .price-row { display:flex; align-items:center; border:2px solid #9ca3af; border-radius:6px; padding:8px; margin-bottom:8px; background:#f9fafb; }
+  .price-items { flex:1; display:flex; }
+  .price-item { font-size:1.5rem; margin:0 4px; }
+  .price-tag { border:2px solid #1f2937; border-radius:6px; padding:4px 12px; font-weight:bold; font-size:1.125rem; margin-left:auto; }
+
+  .books-table-wrap { margin-bottom:16px; overflow-x:auto; }
+  .books-table { border-collapse:collapse; border:1px solid #9ca3af; font-size:0.875rem; }
+  .books-table th, .books-table td { border:1px solid #9ca3af; padding:8px; }
+  .books-table th { background:#f3f4f6; font-weight:600; }
+  .name-cell { font-weight:600; background:#f9fafb; }
+  .emoji-cell { text-align:center; font-size:1.25rem; }
+  .books-legend { font-size:0.75rem; color:#6b7280; margin:4px 0 0 0; }
+
+  .squares-row { display:flex; gap:16px; margin-bottom:16px; flex-wrap:wrap; align-items:flex-end; }
+  .squares-fig { text-align:center; }
+  .squares-box { display:flex; flex-wrap:wrap; gap:2px; border:2px solid #d1d5db; padding:4px; background:#f9fafb; width:96px; min-height:60px; }
+  .square-cell { width:20px; height:20px; background:#9ca3af; border:1px solid #4b5563; }
+  .square-question { width:100%; display:flex; align-items:center; justify-content:center; font-size:1.875rem; font-weight:bold; color:#6b7280; }
+  .squares-label { font-size:0.875rem; font-weight:600; margin:4px 0 0 0; color:#374151; }
+  .squares-count { font-size:0.75rem; color:#6b7280; margin:0; }
+
+  .pencils-box { margin-bottom:16px; }
+  .pencil-row { margin-bottom:12px; }
+  .pencil { height:24px; border-radius:4px; }
+  .pencil.grey { width:180px; background:#374151; }
+  .pencil.black { width:220px; background:#000; }
+  .pencil-label { font-size:0.75rem; color:#6b7280; margin:4px 0 0 0; }
+  .pencil-note { font-size:0.75rem; color:#6b7280; margin:0; }
+
+  /* New visuals for Classe Quinta */
+  .gas-pump-box { margin-bottom:16px; }
+  .gas-pump-display { background:#111827; color:#4ade80; font-family:monospace; font-size:1.5rem; padding:12px 20px; border-radius:6px; display:inline-block; text-align:center; line-height:1.3; }
+  .gas-pump-label { margin:8px 0 0; font-weight:600; color:#374151; }
+
+  .scale-box { margin-bottom:16px; }
+  .scale-display { background:#111827; color:#4ade80; font-family:monospace; font-size:1.875rem; padding:8px 20px; border-radius:6px; display:inline-block; }
+  .scale-label { font-size:0.875rem; color:#4b5563; margin:6px 0 0; font-weight:600; }
+
+  .progress-install { display:flex; gap:2px; border:2px solid #1f2937; border-radius:8px; padding:6px; width:max-content; margin-bottom:8px; }
+  .install-seg { width:18px; height:24px; background:#e5e7eb; border-radius:2px; }
+  .install-seg.filled { background:#9ca3af; }
+  .progress-caption { font-size:0.875rem; color:#4b5563; margin:0 0 16px; font-weight:600; }
+
+  .recipe-box { border:2px solid #9ca3af; border-radius:8px; padding:12px; background:#f9fafb; max-width:280px; margin-bottom:16px; }
+  .recipe-title { font-weight:700; margin:0 0 8px; }
+  .recipe-row { display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed #d1d5db; }
+  .recipe-note { margin:8px 0 0; font-size:0.875rem; color:#4b5563; font-weight:600; }
+
+  .boxes-row { display:flex; gap:14px; align-items:flex-end; margin-bottom:16px; flex-wrap:wrap; }
+  .doubling-box-wrap { text-align:center; }
+  .doubling-box { border:2px solid #4b5563; background:#eff6ff; display:flex; align-items:center; justify-content:center; font-weight:700; color:#1e3a8a; }
+  .doubling-label { text-align:center; font-weight:600; margin:4px 0 0; color:#374151; }
+
+  .pair-circles { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+  .black-ball { width:40px; height:40px; border-radius:50%; background:#111827; }
+  .op-symbol { font-size:1.5rem; font-weight:700; color:#374151; }
+  .op-result { font-size:1.5rem; font-weight:700; color:#1f2937; }
+
+  .coinflips-box { margin-bottom:16px; }
+  .flip-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+  .flip-name { width:60px; font-weight:600; color:#374151; }
+  .flip-ball { width:32px; height:32px; border-radius:50%; }
+
+  .flower-pattern { font-size:2rem; margin-bottom:16px; letter-spacing:4px; }
+
+  .mult-scheme { margin-bottom:16px; }
+  .mult-row { display:flex; align-items:center; gap:8px; }
+  .mult-box { min-width:48px; height:40px; border:2px solid #9ca3af; border-radius:6px; display:flex; align-items:center; justify-content:center; font-weight:700; background:#f9fafb; padding:0 6px; }
+  .mult-unknown { border-style:dashed; color:#9ca3af; }
+  .mult-result { background:#dbeafe; border-color:#3b82f6; }
+  .mult-op, .mult-arrow { font-weight:700; color:#374151; }
+  .mult-note { margin:8px 0 0; font-size:0.875rem; color:#4b5563; font-weight:600; }
+
+  .pie-caption { font-size:0.8rem; color:#6b7280; margin:0 0 16px; max-width:340px; }
+
+  .stacked-bar-wrap { margin-bottom:16px; }
+  .stacked-bar { width:120px; height:200px; display:flex; flex-direction:column; border:2px solid #374151; }
+  .stack-seg { display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:600; color:#fff; text-align:center; }
+  .stacked-bar-label { text-align:center; font-weight:600; color:#374151; margin:4px 0 0; }
+
+  .speech-bubble { border:2px solid #374151; border-radius:16px; padding:16px; max-width:260px; margin-bottom:16px; background:#f9fafb; font-weight:600; color:#1f2937; }
+</style>
+</head>
+<body>
+<div class="quiz-app-root">
+  <a class="quiz-header-link" href="https://matematichenonsinasce.com/" target="_blank" rel="noopener noreferrer">
+    <span class="logo"><img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/a1e6b46acc8ce4f107f497b1e2fd18027f7681f6/logo.png" alt="Matematiche non si nasce"></span>
+    <span class="blog-name">Matematiche non si nasce</span>
+  </a>
+  <p class="quiz-disclaimer" id="quiz-disclaimer">Le domande di questo quiz sono tratte dalle prove INVALSI di Matematica per la Scuola Primaria.</p>
+  <div class="quiz-scale-wrapper">
+    <div id="quiz-root"></div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   DOMANDE - CLASSE SECONDA
+   ========================================================= */
+const secondaQuestions = [
+  {
+    id: 'D1',
+    visual: 'tiles',
+    text: 'Un pavimento è formato da piastrelle bianche e da piastrelle grigie. Una sola di queste affermazioni è VERA. Quale?',
+    options: [
+      'Le piastrelle bianche sono meno di 20',
+      'Le piastrelle grigie sono la metà delle piastrelle bianche',
+      'Le piastrelle grigie sono più di 10'
+    ],
+    answer: 1
+  },
+  {
+    id: 'D2',
+    visual: null,
+    text: 'Completa la frase scrivendo al posto dei puntini un numero adatto. Addiziono il numero 2 e il numero ............ : il risultato è sicuramente maggiore di 6.',
+    options: ['3', '4', '5'],
+    answer: 2
+  },
+  {
+    id: 'D3',
+    visual: 'flowers',
+    text: 'Sara compra questi due fogli con dei fiori adesivi, che vuole usare per decorare dei bigliettini. Sara usa sempre tre fiori adesivi per decorare ogni bigliettino. Al massimo quanti bigliettini riesce a decorare?',
+    options: ['4', '5', '6'],
+    answer: 1
+  },
+  {
+    id: 'D4a',
+    visual: 'bagNumbers',
+    text: 'In un sacchetto di stoffa sono inseriti solo i seguenti numeri: 2, 4, 6, 8, 10. Carmelo prende un numero dal sacchetto senza guardare. Carmelo ha preso un numero dispari?',
+    options: ['È certo', 'È possibile', 'È impossibile'],
+    answer: 2
+  },
+  {
+    id: 'D4b',
+    visual: 'bagNumbers',
+    text: 'In un sacchetto di stoffa sono inseriti solo i seguenti numeri: 2, 4, 6, 8, 10. Carmelo prende un numero dal sacchetto senza guardare. Carmelo ha preso un numero maggiore di 5?',
+    options: ['È certo', 'È possibile', 'È impossibile'],
+    answer: 1
+  },
+  {
+    id: 'D6n',
+    visual: 'numberLine',
+    text: 'Osserva questa retta dei numeri. La macchia nasconde un numero. Quale?',
+    options: ['20', '25', '29'],
+    answer: 1
+  },
+  {
+    id: 'D7b',
+    visual: 'buttons',
+    text: 'La sarta usa tutti questi bottoni per confezionare 2 camicie. Tutte le camicie confezionate dalla sarta hanno sempre lo stesso numero di bottoni. Quanti bottoni userà la sarta per confezionare 6 camicie?',
+    options: ['24', '36', '48'],
+    answer: 1
+  },
+  {
+    id: 'D8c',
+    visual: 'clocks',
+    text: 'Giacomo parte alle 14:10 e arriva alle 15:20. Quanto è durato il viaggio di Giacomo?',
+    options: ['10 minuti', '50 minuti', '1 ora e 10 minuti'],
+    answer: 2
+  },
+  {
+    id: 'D11c',
+    visual: 'coins',
+    text: 'Osserva le monete che hanno Luciana, Mattia e Jacopo. Chi può comprare una gomma che costa 55 centesimi?',
+    options: ['Sia Luciana sia Mattia', 'Solo Mattia', 'Sia Mattia sia Jacopo'],
+    answer: 2
+  },
+  {
+    id: 'D12n',
+    visual: null,
+    text: 'Scrivi nelle caselle vuote due numeri DISPARI, in modo che la somma di tutti e quattro i numeri sia 14. (I numeri dati sono 8 e 2; mancano due numeri dispari in mezzo.)',
+    options: ['1 e 3', '2 e 2', '0 e 4'],
+    answer: 0
+  },
+  {
+    id: 'D15a',
+    visual: 'arrows',
+    text: 'Solo in una di queste immagini la freccia collega sempre un numero con il suo triplo. In quale?',
+    options: ['Immagine A', 'Immagine B', 'Immagine C'],
+    answer: 0
+  },
+  {
+    id: 'D19a',
+    visual: null,
+    text: 'Carla ha scritto correttamente cinque numeri in ordine crescente, ma una macchia nasconde una cifra in uno dei numeri: 123, 127, 1▓6, 145, 190. Qual è la cifra nascosta?',
+    options: ['2', '3', '4'],
+    answer: 1
+  },
+  {
+    id: 'D20a',
+    visual: null,
+    text: 'Giuliano ha 5 figurine. Davide ha il triplo delle figurine di Giuliano. Quante figurine ha Davide in più di Giuliano?',
+    options: ['5', '10', '15'],
+    answer: 1
+  },
+  {
+    id: 'D22a',
+    visual: null,
+    text: 'Per preparare un dolce per 5 persone occorrono 20 biscotti. Puoi preparare il dolce per 15 persone con 40 biscotti?',
+    options: [
+      'Sì, perché ci sono più di due biscotti per ogni persona',
+      'No, perché con 40 biscotti preparo il dolce solo per 10 persone',
+      'No, perché 15 persone sono più di 5'
+    ],
+    answer: 1
+  },
+  {
+    id: 'D23a',
+    visual: null,
+    text: 'Possiamo scrivere il numero 213 usando tutte e tre queste cifre una sola volta: 2, 3, 1. Qual è il numero più grande che possiamo scrivere usando tutte e tre queste cifre una sola volta?',
+    options: ['123', '213', '321'],
+    answer: 2
+  },
+  {
+    id: 'D24a',
+    visual: null,
+    text: 'Osserva questi numeri: 3, 4, 7, 10, 13. Cerchia il numero che ha tutte queste caratteristiche: è dispari; è maggiore di 5; è minore di 12.',
+    options: ['4', '7', '13'],
+    answer: 1
+  },
+  {
+    id: 'sassi',
+    visual: 'stones',
+    text: 'In questa immagine ci sono dei sassi. Una sola di queste frasi è vera. Quale?',
+    options: ['I sassi sono meno di 20', 'I sassi sono più di 20, ma meno di 40', 'I sassi sono più di 40'],
+    answer: 1
+  },
+  {
+    id: 'adesivi',
+    visual: null,
+    text: 'Greta vuole comprare degli adesivi. 5 adesivi costano 2 euro. Quanti euro spende Greta per comprare 20 adesivi?',
+    options: ['4', '8', '10'],
+    answer: 1
+  },
+  {
+    id: 'soldi',
+    visual: 'money',
+    text: "Niccolò è al parco divertimenti e ha questi soldi. Il biglietto per fare un giro sulla ruota panoramica costa 8 euro. Quanti giri al massimo può fare Niccolò?",
+    options: ['1', '2', '3'],
+    answer: 1
+  },
+  {
+    id: 'batteria',
+    visual: 'battery',
+    text: 'Questa immagine mostra quanto è carica la batteria di un cellulare. La batteria del cellulare è carica',
+    options: ['meno della metà', 'a metà', 'più della metà'],
+    answer: 2
+  },
+  {
+    id: 'decine',
+    visual: null,
+    text: 'A quale di questi numeri devi aggiungere 3 decine per ottenere 156?',
+    options: ['126', '153', '186'],
+    answer: 0
+  },
+  {
+    id: 'libri_tabella',
+    visual: 'booksTable',
+    text: 'Sei bambini leggono alcuni libri. La tabella mostra il parere di ogni bambino sui libri che ha letto. Quale libro è stato letto da più bambini?',
+    options: ['Il mago di Oz', "Riccioli d'oro", "L'anello magico"],
+    answer: 2
+  },
+  {
+    id: 'lati_figure',
+    visual: 'shapes',
+    text: 'Osserva queste figure. Una delle seguenti affermazioni è vera. Quale?',
+    options: ['Solo la figura A ha 6 lati', 'Solo le figure A e C hanno 6 lati', 'Tutte e tre le figure hanno 6 lati'],
+    answer: 2
+  },
+  {
+    id: 'addizione_colonna',
+    visual: 'columnAddition',
+    text: "Osserva l'addizione in colonna. Il quadratino nasconde sempre la stessa cifra. Quale cifra nasconde?",
+    options: ['6', '7', '9'],
+    answer: 1
+  },
+  {
+    id: 'scatole_libri',
+    visual: null,
+    text: 'Irene ha messo i suoi libri in queste tre scatole: una PICCOLA, una MEDIA e una GRANDE. I libri nella scatola MEDIA sono 10. I libri nella scatola GRANDE sono il doppio dei libri nella scatola MEDIA. I libri nella scatola PICCOLA sono la metà dei libri nella scatola MEDIA. Quanti sono in tutto i libri nelle scatole?',
+    options: ['30', '35', '40'],
+    answer: 1
+  },
+  {
+    id: 'prezzi',
+    visual: 'prices',
+    text: 'Osserva. Quanto costa il righello?',
+    options: ['2 euro', '3 euro', '5 euro'],
+    answer: 0
+  },
+  {
+    id: 'eta_fratelli',
+    visual: null,
+    text: 'Andrea, Chiara e Giulia sono tre fratelli. Chiara ha 7 anni. Giulia ha 5 anni in più di Chiara. Andrea è nato 2 anni prima di Chiara. Quanti anni hanno Giulia e Andrea?',
+    options: ['Giulia 12 anni, Andrea 9 anni', 'Giulia 12 anni, Andrea 5 anni', 'Giulia 9 anni, Andrea 12 anni'],
+    answer: 0
+  },
+  {
+    id: 'fumetto_numero',
+    visual: null,
+    text: 'Completa il fumetto con il numero che manca. Penso al numero ......... poi aggiungo 6 e ottengo 25. Qual è il numero?',
+    options: ['18', '19', '31'],
+    answer: 1
+  },
+  {
+    id: 'sequenza_quadretti',
+    visual: 'squaresSequence',
+    text: 'Osserva. In questa sequenza ogni figura si ottiene aggiungendo 2 quadretti alla figura precedente (Figura 1 = 3 quadretti, Figura 2 = 5 quadretti, Figura 4 = 9 quadretti). La sequenza continua sempre con la stessa regola: una delle figure è composta da 13 quadretti. Quale?',
+    options: ['La Figura 13', 'La Figura 5', 'La Figura 6'],
+    answer: 2
+  },
+  {
+    id: 'matite',
+    visual: 'pencils',
+    text: "Osserva l'immagine. La matita nera è lunga 11 centimetri. Quanto è lunga la matita grigia?",
+    options: ['13 centimetri', '10 centimetri', '9 centimetri'],
+    answer: 2
+  }
+];
+
+/* =========================================================
+   DOMANDE - CLASSE QUINTA
+   ========================================================= */
+const quintaQuestions = [
+  {
+    id: 'q_5x05',
+    visual: null,
+    text: "Considera il risultato dell'operazione 5 × 0,5. Una sola delle seguenti affermazioni è FALSA. Quale?",
+    options: [
+      'Il risultato è la metà di 5',
+      'Il risultato è maggiore di 5',
+      'Il risultato è uguale a 2,5',
+      'Il risultato è uguale a 25/10'
+    ],
+    answer: 1
+  },
+  {
+    id: 'q_benzina',
+    visual: 'gasPump',
+    text: 'Il serbatoio di un autobus ha una capacità di 500 litri di benzina. Il serbatoio è vuoto. Quanto si deve spendere circa per riempirlo tutto?',
+    options: ['Circa 500 euro', 'Circa 700 euro', 'Circa 800 euro', 'Circa 1600 euro'],
+    answer: 2
+  },
+  {
+    id: 'q_strategia',
+    visual: null,
+    text: 'Immagina di eseguire questa operazione: 730 × 50. Una delle seguenti strategie di calcolo NON è corretta. Quale?',
+    options: [
+      'Calcolare 730 × 100 e poi dividere per 2 il risultato',
+      'Calcolare 730 × 5 e poi moltiplicare per 10 il risultato',
+      'Calcolare 700 × 50 e 30 × 50 e poi sommare i due risultati',
+      'Calcolare 730 × 100 e poi sottrarre 50 dal risultato'
+    ],
+    answer: 3
+  },
+  {
+    id: 'q_dadi',
+    visual: null,
+    text: 'Giulio e Claudio giocano con due dadi a sei facce non truccati. Decidono che: se la somma dei punti sui due dadi è 7 vince Claudio, se la somma è 11 vince Giulio. Lanciano i dadi. Chi ha più probabilità di vincere?',
+    options: [
+      'Giulio perché 11 è maggiore di 7',
+      'Giulio perché 11 si può ottenere come 5+6 e 6+5',
+      'Claudio perché 7 si può ottenere in più di due modi mentre 11 no',
+      'Nessuno dei due perché 7 e 11 sono entrambi numeri dispari'
+    ],
+    answer: 2
+  },
+  {
+    id: 'q_sommadoppio',
+    visual: null,
+    text: 'La somma di due numeri è uguale al doppio di 13. I due numeri sono PARI. Quali possono essere i due numeri?',
+    options: ['6 e 7', '2 e 26', '13 e 13', '12 e 14'],
+    answer: 3
+  },
+  {
+    id: 'q_giornalino',
+    visual: null,
+    text: "Per stampare il loro giornalino i bambini delle quinte hanno a disposizione 44 euro. La stampa di ogni copia costa 1,25 euro. I bambini calcolano 44 : 1,25 con la calcolatrice e ottengono 35,2. Quale informazione ricavano dal risultato?",
+    options: [
+      'Per stampare il giornalino servono 35,20 euro',
+      'Con gli euro a disposizione si possono stampare al massimo 35 copie',
+      'Dopo aver stampato il giornalino avanzano 35,20 euro',
+      'Il numero dei bambini delle quinte è 35,2'
+    ],
+    answer: 1
+  },
+  {
+    id: 'q_fumetto5',
+    visual: 'speechBubble',
+    text: 'Completa il fumetto trovando il numero pensato.',
+    options: ['4', '40', '16'],
+    answer: 0
+  },
+  {
+    id: 'q_bilancia',
+    visual: 'digitalScale',
+    text: 'Marco sale vestito sulla bilancia, che indica il peso mostrato. I vestiti che indossa Marco pesano 400 grammi. Quanto pesa Marco senza vestiti?',
+    options: ['16,9 kg', '17,7 kg', '16,5 kg', '17,0 kg'],
+    answer: 0
+  },
+  {
+    id: 'q_decimali252',
+    visual: null,
+    text: 'Uno di questi numeri è maggiore di tutti gli altri. Quale?',
+    options: ['252,09', '252,78', '252,690', '252,8'],
+    answer: 3
+  },
+  {
+    id: 'q_libri70',
+    visual: null,
+    text: 'Anita ha messo i suoi 70 libri in tre scatole: una PICCOLA, una MEDIA e una GRANDE. I libri nella scatola GRANDE sono il doppio dei libri nella scatola MEDIA. I libri nella scatola PICCOLA sono la metà dei libri nella scatola MEDIA. Quanti sono i libri nella scatola MEDIA?',
+    options: ['10', '20', '35', '40'],
+    answer: 1
+  },
+  {
+    id: 'q_torneo',
+    visual: null,
+    text: 'A un torneo partecipano tre squadre. Ogni squadra è formata dallo stesso numero di bambini. Quale può essere il numero totale dei bambini che partecipano al torneo?',
+    options: ['83', '35', '42', '76'],
+    answer: 2
+  },
+  {
+    id: 'q_frazioni_minori',
+    visual: null,
+    text: 'Uno di questi numeri è minore di tutti gli altri. Quale?',
+    options: ['1/2', '2/3', '3/4', '1/10'],
+    answer: 3
+  },
+  {
+    id: 'q_installazione',
+    visual: 'progressBar75',
+    text: "Questa immagine mostra lo stato di avanzamento dell'installazione di un programma sul computer. L'installazione non è ancora completata. Quale percentuale indica lo stato di avanzamento?",
+    options: ['25%', '54%', '75%', '96%'],
+    answer: 2
+  },
+  {
+    id: 'q_decine_millesimi',
+    visual: null,
+    text: 'Quale numero corrisponde a 15 decine e 86 millesimi?',
+    options: ['150,86', '150,086', '15,086', '15,86'],
+    answer: 1
+  },
+  {
+    id: 'q_pane_mensa',
+    visual: null,
+    text: 'In una scuola di solito si acquistano 6 chilogrammi di pane al giorno per i 100 bambini che pranzano in mensa. Oggi 25 bambini sono in gita e non pranzano in mensa. Quanti chilogrammi di pane bisogna acquistare per i bambini rimasti a scuola?',
+    options: [
+      '5,5 chilogrammi, infatti occorre mezzo chilo di pane in meno',
+      '3 chilogrammi, infatti occorre la metà del pane',
+      '4,5 chilogrammi, infatti occorre un quarto del pane in meno',
+      '5 chilogrammi, infatti occorre un chilogrammo di pane in meno'
+    ],
+    answer: 2
+  },
+  {
+    id: 'q_galloni',
+    visual: null,
+    text: 'Nel Regno Unito si usa il gallone come unità di misura di capacità. Un gallone equivale a circa 4,54 litri. Il serbatoio dell\'automobile di Giulia contiene circa 50 litri di benzina. Quanti galloni di benzina contiene il serbatoio?',
+    options: ['Circa 11', 'Circa 22', 'Circa 45', 'Circa 50'],
+    answer: 0
+  },
+  {
+    id: 'q_retta74',
+    visual: 'numberLineFraction',
+    text: 'Osserva questa retta dei numeri. 3/4 è un numero compreso tra 0,5 e 1 (vedi il punto segnato). 7/4 è un numero compreso tra:',
+    options: ['0 e 0,5', '0,5 e 1', '1 e 1,5', '1,5 e 2'],
+    answer: 3
+  },
+  {
+    id: 'q_sciroppo',
+    visual: 'recipeCard',
+    text: 'Laura vuole preparare dello sciroppo alla menta usando le dosi indicate nella ricetta. Laura usa 800 mL di acqua. Quanti grammi di foglie di menta deve utilizzare?',
+    options: ['40 grammi', '80 grammi', '100 grammi', '160 grammi'],
+    answer: 1
+  },
+  {
+    id: 'q_divisore72',
+    visual: null,
+    text: '3 è divisore di 72?',
+    options: [
+      'No, perché 72 è pari e 3 è dispari',
+      'Sì, perché 72 è la somma di 60 e 12, entrambi multipli di 3',
+      'No, perché 72 non c\'è nella tabellina del 3',
+      'Sì, perché 3 è compreso tra 2 e 4, entrambi divisori di 72'
+    ],
+    answer: 1
+  },
+  {
+    id: 'q_biglie',
+    visual: 'boxesDoubling',
+    text: 'Andrea vuole mettere le sue biglie dentro cinque scatole A, B, C, D, E (dalla più piccola alla più grande). Ha già messo alcune biglie nella scatola A, poi ne mette il doppio nella scatola B, e così via: ogni scatola contiene sempre il doppio di biglie della scatola precedente. Alla fine, nella scatola E ci sono 80 biglie. Quante biglie ci sono nella scatola A?',
+    options: ['5', '10', '20', '40'],
+    answer: 0
+  },
+  {
+    id: 'q_sandali',
+    visual: null,
+    text: 'Camilla ha comprato un paio di sandali e un paio di scarpe da ginnastica. In totale ha speso 140 euro. Per le scarpe da ginnastica Camilla ha speso 20 euro in più rispetto ai sandali. Quanto ha speso per i sandali?',
+    options: ['70 euro', '60 euro', '80 euro', '120 euro'],
+    answer: 1
+  },
+  {
+    id: 'q_pallina25',
+    visual: 'pairCircles',
+    text: 'In questa addizione la pallina nera nasconde sempre lo stesso numero. Quale numero nasconde la pallina nera?',
+    options: ['1,25', '1,5', '2', '5'],
+    answer: 0
+  },
+  {
+    id: 'q_uguaglianze',
+    visual: null,
+    text: 'Una delle seguenti uguaglianze NON è corretta. Quale?',
+    options: ['10/5 = 2', '3/2 = 1,5', '1/4 = 0,4', '50/100 = 0,5'],
+    answer: 2
+  },
+  {
+    id: 'q_moneta3',
+    visual: 'coinFlips',
+    text: 'Anna, Carla e Marco giocano con una moneta non truccata che ha una faccia bianca e una faccia nera. Hanno già lanciato la moneta due volte ottenendo i risultati mostrati. Per chi è più probabile ottenere la faccia bianca al terzo lancio della moneta?',
+    options: [
+      'Per Carla, perché non ha mai ottenuto la faccia bianca',
+      'Per Anna, perché con i suoi lanci ottiene sempre la faccia bianca',
+      'Per nessuno, perché non importa che cosa è uscito nei primi due lanci',
+      'Per Marco, perché nei suoi lanci la faccia bianca si alterna sempre a quella nera'
+    ],
+    answer: 2
+  },
+  {
+    id: 'q_differenza_triplo',
+    visual: null,
+    text: 'Qual è la differenza tra il triplo di 2,5 e il doppio di 3,5?',
+    options: ['0,5', '1', '1,5', '4'],
+    answer: 0
+  },
+  {
+    id: 'q_fiori',
+    visual: 'flowerPattern',
+    text: 'Giulia pianta fiori lungo il vialetto del suo giardino seguendo sempre questo schema: 2 tulipani e 1 narciso, poi di nuovo 2 tulipani e 1 narciso, e così via. Al termine del lavoro ha piantato 12 tulipani e l\'ultimo fiore è un narciso. Quanti narcisi in tutto ha piantato?',
+    options: ['4', '5', '6', '12'],
+    answer: 2
+  },
+  {
+    id: 'q_schema_molt',
+    visual: 'multiplicationScheme',
+    text: 'Osserva lo schema delle moltiplicazioni. Quale numero manca nella prima moltiplicazione (2,5 × ... = 25)?',
+    options: ['5', '10', '20', '100'],
+    answer: 1
+  },
+  {
+    id: 'q_torta_film',
+    visual: 'pieChart',
+    text: 'Una maestra chiede a 60 alunni delle classi quinte quale programma preferiscono guardare in tv. I risultati sono rappresentati nel grafico a torta. Quale settore indica gli alunni che preferiscono guardare i FILM (15%)?',
+    options: ['Settore A', 'Settore B', 'Settore C', 'Settore D'],
+    answer: 0
+  },
+  {
+    id: 'q_torta_doc',
+    visual: 'pieChart',
+    text: 'Considera ancora il grafico: su 60 alunni, quanti preferiscono guardare i DOCUMENTARI (25%)?',
+    options: ['9 alunni', '15 alunni', '25 alunni', '30 alunni'],
+    answer: 1
+  },
+  {
+    id: 'q_ciclismo',
+    visual: null,
+    text: 'In un campionato di ciclismo ci sono 3 gare con questi punteggi: Gara A → 1°: 1000, 2°: 800, 3°: 650 punti. Gara B → 1°: 850, 2°: 650, 3°: 575 punti. Gara C → 1°: 500, 2°: 400, 3°: 325 punti. Elisa è arrivata 3ª nella Gara A e 1ª nelle altre due gare. Quanti punti totali ha ottenuto Elisa?',
+    options: ['1850', '2000', '1925', '2200'],
+    answer: 1
+  },
+  {
+    id: 'q_grafico_letture',
+    visual: 'stackedBar200',
+    text: 'A 200 studenti è stato chiesto di scegliere il tipo di lettura preferito tra fumetti, fiabe o romanzi. Il grafico rappresenta le percentuali delle preferenze. Quanti studenti preferiscono i fumetti?',
+    options: ['50 studenti', '70 studenti', '100 studenti', '200 studenti'],
+    answer: 2
+  }
+];
+
+/* =========================================================
+   Utilità
+   ========================================================= */
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
+
+function prepareQuestions(srcQuestions) {
+  const shuffledQ = shuffle(srcQuestions);
+  return shuffledQ.map((q) => {
+    const idx = q.options.map((_, i) => i);
+    const shuffledIdx = shuffle(idx);
+    const options = shuffledIdx.map((i) => q.options[i]);
+    const answer = shuffledIdx.indexOf(q.answer);
+    return Object.assign({}, q, { options: options, answer: answer });
+  });
+}
+
+/* ---------- Visual generators ---------- */
+const visuals = {
+  tiles: function () {
+    const pattern = [
+      [1,0,1,0,0,1],
+      [0,0,0,1,0,0],
+      [1,0,0,0,0,1],
+      [0,0,1,0,0,0],
+      [1,0,0,1,0,1]
+    ];
+    let html = '<div class="tiles-grid">';
+    pattern.flat().forEach(function (c) {
+      html += '<div class="tile ' + (c ? 'gray' : 'white') + '"></div>';
+    });
+    html += '</div>';
+    return html;
+  },
+  flowers: function () {
+    let html = '<div class="flowers-row">';
+    for (let b = 0; b < 2; b++) {
+      html += '<div class="flowers-box">';
+      for (let i = 0; i < 8; i++) html += '<span class="flower">🌸</span>';
+      html += '</div>';
+    }
+    html += '</div>';
+    return html;
+  },
+  bagNumbers: function () {
+    const nums = [2,4,6,8,10];
+    let html = '<div class="bag-numbers">';
+    nums.forEach(function (n) { html += '<div class="bag-circle">' + n + '</div>'; });
+    html += '</div>';
+    return html;
+  },
+  numberLine: function () {
+    const ticks = [5,10,15,20,25,30,35,40];
+    const x0 = 25, dx = 50;
+    let svg = '<svg viewBox="0 0 420 80" class="number-line"><defs><marker id="arrowhead" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L8,3 z" fill="#374151"/></marker></defs>' +
+      '<line x1="10" y1="35" x2="400" y2="35" stroke="#374151" stroke-width="2" marker-end="url(#arrowhead)"/>';
+    ticks.forEach(function (v, i) {
+      const x = x0 + i * dx;
+      svg += '<line x1="' + x + '" y1="25" x2="' + x + '" y2="45" stroke="#374151" stroke-width="2"/>';
+      if (v === 10 || v === 30 || v === 40) {
+        svg += '<text x="' + x + '" y="65" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">' + v + '</text>';
+      }
+      if (v === 25) svg += '<ellipse cx="' + x + '" cy="35" rx="13" ry="11" fill="#111827"/>';
+    });
+    svg += '</svg>';
+    return svg;
+  },
+  buttons: function () {
+    let html = '<div class="buttons-grid">';
+    for (let i = 0; i < 12; i++) html += '<div class="button-circle"><div class="button-dot"></div></div>';
+    html += '</div>';
+    return html;
+  },
+  clocks: function () {
+    return '<div class="clocks-row">' +
+      '<div><p class="clock-label">Partenza</p><div class="clock-display">14:10</div></div>' +
+      '<div><p class="clock-label">Arrivo</p><div class="clock-display">15:20</div></div>' +
+      '</div>';
+  },
+  coins: function () {
+    function coin(val, size) {
+      return '<div class="coin" style="width:' + size + 'px;height:' + size + 'px;font-size:' + (size * 0.28) + 'px">' + val + '</div>';
+    }
+    return '<div class="coins-row">' +
+      '<div><p class="coins-label">Luciana</p><div class="coins-group">' + coin('5c',42) + coin('5c',42) + '</div></div>' +
+      '<div><p class="coins-label">Mattia</p><div class="coins-group items-end">' + coin('5c',42) + coin('50c',58) + '</div></div>' +
+      '<div><p class="coins-label">Jacopo</p><div class="coins-group wrap">' + coin('10c',44) + coin('10c',44) + coin('10c',44) + coin('10c',44) + coin('10c',44) + coin('5c',42) + '</div></div>' +
+      '</div>';
+  },
+  arrows: function () {
+    const diagrams = [
+      { title: 'Immagine A', nums: [{n:18,x:25,y:75},{n:6,x:95,y:75},{n:2,x:155,y:25}], arrows: [[2,1],[1,0]] },
+      { title: 'Immagine B', nums: [{n:18,x:95,y:25},{n:9,x:55,y:75},{n:3,x:150,y:75}], arrows: [[2,1],[1,0]] },
+      { title: 'Immagine C', nums: [{n:2,x:30,y:25},{n:8,x:155,y:25},{n:4,x:95,y:75}], arrows: [[0,2],[2,1]] }
+    ];
+    let html = '<div class="arrows-row">';
+    diagrams.forEach(function (d, idx) {
+      let svg = '<svg viewBox="0 0 180 100" class="arrow-svg"><defs><marker id="arrowhead-' + idx + '" markerWidth="8" markerHeight="8" refX="4" refY="2" orient="auto"><path d="M0,0 L0,4 L4,2 z" fill="#1f2937"/></marker></defs>';
+      d.arrows.forEach(function (pair) {
+        const a = d.nums[pair[0]], b = d.nums[pair[1]];
+        svg += '<line x1="' + a.x + '" y1="' + a.y + '" x2="' + b.x + '" y2="' + b.y + '" stroke="#1f2937" stroke-width="2" marker-end="url(#arrowhead-' + idx + ')"/>';
+      });
+      d.nums.forEach(function (p) {
+        svg += '<text x="' + p.x + '" y="' + p.y + '" font-size="20" font-weight="bold" text-anchor="middle" dy="-6" fill="#111827">' + p.n + '</text>';
+      });
+      svg += '</svg>';
+      html += '<div class="arrow-box">' + svg + '<p class="arrow-title">' + d.title + '</p></div>';
+    });
+    html += '</div>';
+    return html;
+  },
+  stones: function () {
+    const stones = [
+      {x:10,y:10,r:14,c:'#a8a29e'},{x:30,y:18,r:11,c:'#78716c'},{x:50,y:8,r:16,c:'#d6d3d1'},
+      {x:72,y:15,r:12,c:'#57534e'},{x:95,y:10,r:13,c:'#a8a29e'},{x:118,y:18,r:10,c:'#d6d3d1'},
+      {x:18,y:38,r:13,c:'#78716c'},{x:42,y:35,r:15,c:'#a8a29e'},{x:65,y:40,r:11,c:'#57534e'},
+      {x:88,y:35,r:14,c:'#d6d3d1'},{x:110,y:42,r:12,c:'#78716c'},{x:8,y:62,r:12,c:'#d6d3d1'},
+      {x:32,y:60,r:14,c:'#57534e'},{x:55,y:65,r:11,c:'#a8a29e'},{x:78,y:60,r:13,c:'#78716c'},
+      {x:100,y:65,r:15,c:'#d6d3d1'},{x:122,y:60,r:10,c:'#a8a29e'},{x:15,y:85,r:11,c:'#57534e'},
+      {x:38,y:88,r:13,c:'#d6d3d1'},{x:60,y:85,r:12,c:'#78716c'},{x:82,y:88,r:14,c:'#a8a29e'},
+      {x:105,y:85,r:11,c:'#57534e'},{x:5,y:105,r:10,c:'#78716c'},{x:28,y:108,r:12,c:'#a8a29e'},
+      {x:50,y:105,r:14,c:'#d6d3d1'},{x:72,y:108,r:11,c:'#57534e'},{x:95,y:105,r:13,c:'#78716c'},
+      {x:118,y:110,r:10,c:'#a8a29e'}
+    ];
+    let svg = '<svg viewBox="0 0 135 125" class="stones-svg">';
+    stones.forEach(function (s) {
+      svg += '<ellipse cx="' + s.x + '" cy="' + s.y + '" rx="' + s.r + '" ry="' + (s.r * 0.8) + '" fill="' + s.c + '" stroke="#44403c" stroke-width="0.5"/>';
+    });
+    svg += '</svg>';
+    return svg;
+  },
+  money: function () {
+    let html = '<div class="money-box"><p class="money-label">I soldi di Niccolò:</p><div class="money-row">';
+    for (let i = 0; i < 4; i++) html += '<div class="coin-2e">2€</div>';
+    html += '</div><div class="money-row">';
+    for (let i = 0; i < 4; i++) html += '<div class="coin-1e">1€</div>';
+    html += '</div><div class="banknote">5 EURO</div></div>';
+    return html;
+  },
+  battery: function () {
+    return '<svg viewBox="0 0 100 50" class="battery-svg">' +
+      '<rect x="2" y="5" width="85" height="40" rx="4" fill="none" stroke="#1f2937" stroke-width="3"/>' +
+      '<rect x="87" y="18" width="8" height="14" fill="#1f2937"/>' +
+      '<rect x="10" y="12" width="14" height="26" fill="#1f2937"/>' +
+      '<rect x="28" y="12" width="14" height="26" fill="#1f2937"/>' +
+      '<rect x="46" y="12" width="14" height="26" fill="#1f2937"/>' +
+      '<rect x="64" y="12" width="14" height="26" fill="#1f2937"/>' +
+      '</svg>';
+  },
+  shapes: function () {
+    return '<div class="shapes-row">' +
+      '<div class="shape-box"><svg viewBox="0 0 100 100" class="shape-svg"><polygon points="50,5 90,27 90,73 50,95 10,73 10,27" fill="none" stroke="#1f2937" stroke-width="2.5"/></svg><p class="shape-label">Figura A</p></div>' +
+      '<div class="shape-box"><svg viewBox="0 0 100 100" class="shape-svg"><polygon points="10,10 70,10 70,50 40,50 40,90 10,90" fill="none" stroke="#1f2937" stroke-width="2.5"/></svg><p class="shape-label">Figura B</p></div>' +
+      '<div class="shape-box"><svg viewBox="0 0 100 100" class="shape-svg"><polygon points="50,5 85,20 95,55 75,90 40,95 10,65 15,30" fill="none" stroke="#1f2937" stroke-width="2.5"/></svg><p class="shape-label">Figura C</p></div>' +
+      '</div>';
+  },
+  columnAddition: function () {
+    return '<div class="col-add">' +
+      '<div class="ca-row"><div class="ca-cell">4</div><div class="ca-cell">6</div><div class="ca-cell">+</div></div>' +
+      '<div class="ca-row"><div class="ca-cell">2</div><div class="ca-box">?</div><div class="ca-cell">=</div></div>' +
+      '<div class="ca-row ca-result"><div class="ca-box">?</div><div class="ca-cell">3</div><div class="ca-cell"></div></div>' +
+      '</div>';
+  },
+  prices: function () {
+    function row(items, price) {
+      return '<div class="price-row"><div class="price-items">' + items + '</div><div class="price-tag">' + price + '</div></div>';
+    }
+    return '<div class="prices-box">' +
+      row('<span class="price-item">📓</span><span class="price-item">📓</span>', '8 euro') +
+      row('<span class="price-item">📓</span><span class="price-item">🖊️</span>', '6 euro') +
+      row('<span class="price-item">🖊️</span><span class="price-item">📏</span>', '5 euro') +
+      '</div>';
+  },
+  booksTable: function () {
+    const books = ['Il mago di Oz', "Riccioli d'oro", "L'anello magico", 'Hansel e Gretel'];
+    const data = {
+      Enrico: ['😊','😊','😊',''],
+      Axel: ['','','😐','😊'],
+      Beatrice: ['','😊','😐',''],
+      Gemma: ['','','😞',''],
+      Anna: ['','😊','',''],
+      Thomas: ['😊','😐','😞','']
+    };
+    let html = '<div class="books-table-wrap"><table class="books-table"><thead><tr><th></th>';
+    books.forEach(function (b) { html += '<th>' + b + '</th>'; });
+    html += '</tr></thead><tbody>';
+    Object.keys(data).forEach(function (name) {
+      html += '<tr><td class="name-cell">' + name + '</td>';
+      data[name].forEach(function (v) { html += '<td class="emoji-cell">' + v + '</td>'; });
+      html += '</tr>';
+    });
+    html += '</tbody></table><p class="books-legend">😊 mi è piaciuto molto · 😐 mi è piaciuto poco · 😞 non mi è piaciuto</p></div>';
+    return html;
+  },
+  squaresSequence: function () {
+    const figures = [
+      { label: 'Figura 1', count: 3 },
+      { label: 'Figura 2', count: 5 },
+      { label: 'Figura 3', count: '?' },
+      { label: 'Figura 4', count: 9 }
+    ];
+    let html = '<div class="squares-row">';
+    figures.forEach(function (f) {
+      html += '<div class="squares-fig"><div class="squares-box">';
+      if (typeof f.count === 'number') {
+        for (let j = 0; j < f.count; j++) html += '<div class="square-cell"></div>';
+      } else {
+        html += '<div class="square-question">?</div>';
+      }
+      html += '</div><p class="squares-label">' + f.label + '</p><p class="squares-count">' + (typeof f.count === 'number' ? f.count + ' quadretti' : '') + '</p></div>';
+    });
+    html += '</div>';
+    return html;
+  },
+  pencils: function () {
+    return '<div class="pencils-box">' +
+      '<div class="pencil-row"><div class="pencil grey"></div><p class="pencil-label">matita grigia (lunghezza da scoprire)</p></div>' +
+      '<div class="pencil-row"><div class="pencil black"></div><p class="pencil-label">matita nera = 11 centimetri</p></div>' +
+      '<p class="pencil-note">la matita grigia è 2 centimetri più corta di quella nera</p>' +
+      '</div>';
+  },
+
+  /* ----- Visuals nuovi per la classe quinta ----- */
+  gasPump: function () {
+    return '<div class="gas-pump-box">' +
+      '<div class="gas-pump-display">€ 1,650<br><span style="font-size:0.6em">al litro</span></div>' +
+      '<p class="gas-pump-label">Capacità del serbatoio: 500 litri</p>' +
+      '</div>';
+  },
+  digitalScale: function () {
+    return '<div class="scale-box">' +
+      '<div class="scale-display">17.3 <span style="font-size:0.55em">kg</span></div>' +
+      '<p class="scale-label">Marco è salito vestito sulla bilancia</p>' +
+      '<p class="scale-label">I vestiti che indossa pesano 400 grammi</p>' +
+      '</div>';
+  },
+  progressBar75: function () {
+    let html = '<div class="progress-install">';
+    for (let i = 0; i < 16; i++) {
+      html += '<div class="install-seg ' + (i < 12 ? 'filled' : '') + '"></div>';
+    }
+    html += '</div><p class="progress-caption">La barra mostra lo stato di avanzamento dell\'installazione</p>';
+    return html;
+  },
+  numberLineFraction: function () {
+    const ticks = [
+      { v: 0, label: '0' },
+      { v: 0.5, label: '0,5' },
+      { v: 1, label: '1' },
+      { v: 1.5, label: '1,5' },
+      { v: 2, label: '2' }
+    ];
+    let svg = '<svg viewBox="0 0 420 80" class="number-line"><defs><marker id="arrowhead3" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L8,3 z" fill="#374151"/></marker></defs>' +
+      '<line x1="10" y1="35" x2="400" y2="35" stroke="#374151" stroke-width="2" marker-end="url(#arrowhead3)"/>';
+    ticks.forEach(function (t) {
+      const x = 20 + t.v * 180;
+      svg += '<line x1="' + x + '" y1="25" x2="' + x + '" y2="45" stroke="#374151" stroke-width="2"/>';
+      svg += '<text x="' + x + '" y="65" text-anchor="middle" font-size="15" font-weight="bold" fill="#1f2937">' + t.label + '</text>';
+    });
+    const x34 = 20 + 0.75 * 180;
+    svg += '<circle cx="' + x34 + '" cy="35" r="5" fill="#2563eb"/>';
+    svg += '<text x="' + x34 + '" y="18" text-anchor="middle" font-size="15" font-weight="bold" fill="#2563eb">3/4</text>';
+    svg += '</svg>';
+    return svg;
+  },
+  recipeCard: function () {
+    return '<div class="recipe-box">' +
+      '<p class="recipe-title">Sciroppo alla menta (dose base)</p>' +
+      '<div class="recipe-row"><span>💧 Acqua</span><b>200 mL</b></div>' +
+      '<div class="recipe-row"><span>🌿 Foglie di menta</span><b>20 g</b></div>' +
+      '<div class="recipe-row"><span>🍬 Zucchero</span><b>100 g</b></div>' +
+      '<p class="recipe-note">Laura usa 800 mL di acqua</p>' +
+      '</div>';
+  },
+  boxesDoubling: function () {
+    const sizes = [20, 28, 38, 52, 70];
+    const labels = ['A', 'B', 'C', 'D', 'E'];
+    let html = '<div class="boxes-row">';
+    sizes.forEach(function (s, i) {
+      html += '<div class="doubling-box-wrap"><div class="doubling-box" style="width:' + s + 'px;height:' + s + 'px;">' + (i === 4 ? '80' : '') + '</div><p class="doubling-label">' + labels[i] + '</p></div>';
+    });
+    html += '</div>';
+    return html;
+  },
+  pairCircles: function () {
+    return '<div class="pair-circles">' +
+      '<div class="black-ball"></div><span class="op-symbol">+</span><div class="black-ball"></div>' +
+      '<span class="op-symbol">=</span><span class="op-result">2,5</span>' +
+      '</div>';
+  },
+  coinFlips: function () {
+    function ball(c) {
+      return '<div class="flip-ball" style="background:' + (c === 'white' ? '#fff' : '#111827') + ';border:2px solid #4b5563"></div>';
+    }
+    return '<div class="coinflips-box">' +
+      '<div class="flip-row"><span class="flip-name">Anna</span>' + ball('white') + ball('white') + '</div>' +
+      '<div class="flip-row"><span class="flip-name">Carla</span>' + ball('black') + ball('black') + '</div>' +
+      '<div class="flip-row"><span class="flip-name">Marco</span>' + ball('white') + ball('black') + '</div>' +
+      '</div>';
+  },
+  flowerPattern: function () {
+    let html = '<div class="flower-pattern">';
+    for (let i = 0; i < 2; i++) html += '🌷🌷🌼 ';
+    html += '<span style="color:#9ca3af">...</span></div>';
+    return html;
+  },
+  multiplicationScheme: function () {
+    return '<div class="mult-scheme">' +
+      '<div class="mult-row"><div class="mult-box">2,5</div><div class="mult-op">×</div><div class="mult-box mult-unknown">?</div><div class="mult-arrow">→</div><div class="mult-box mult-result">25</div></div>' +
+      '<div class="mult-row" style="margin-top:8px"><div class="mult-box">0,5</div><div class="mult-op">×</div><div class="mult-box">4</div><div class="mult-arrow">→</div><div class="mult-box">2</div></div>' +
+      '<p class="mult-note">Il risultato finale di 25 × 2 è 50</p>' +
+      '</div>';
+  },
+  pieChart: function () {
+    return '<svg viewBox="0 0 200 200" style="width:200px;height:200px;display:block;margin-bottom:8px">' +
+      '<path d="M100,100 L100,20 A80,80 0 0 1 100,180 Z" fill="#d1d5db" stroke="#fff" stroke-width="2"/>' +
+      '<path d="M100,100 L100,180 A80,80 0 0 1 35.3,147 Z" fill="#6b7280" stroke="#fff" stroke-width="2"/>' +
+      '<path d="M100,100 L35.3,147 A80,80 0 0 1 53,35.3 Z" fill="#9ca3af" stroke="#fff" stroke-width="2"/>' +
+      '<path d="M100,100 L53,35.3 A80,80 0 0 1 100,20 Z" fill="#e5e7eb" stroke="#fff" stroke-width="2"/>' +
+      '<text x="146" y="105" font-size="16" font-weight="bold" fill="#1f2937">D</text>' +
+      '<text x="73" y="148" font-size="16" font-weight="bold" fill="#fff">A</text>' +
+      '<text x="51" y="97" font-size="16" font-weight="bold" fill="#1f2937">C</text>' +
+      '<text x="85" y="55" font-size="16" font-weight="bold" fill="#1f2937">B</text>' +
+      '</svg>' +
+      '<p class="pie-caption">Programmi preferiti da 60 alunni: A = film 15% · B = telegiornali 10% · C = documentari 25% · D = cartoni animati 50%</p>';
+  },
+  stackedBar200: function () {
+    return '<div class="stacked-bar-wrap"><div class="stacked-bar">' +
+      '<div class="stack-seg" style="height:30%;background:#9ca3af">Romanzi<br>30%</div>' +
+      '<div class="stack-seg" style="height:20%;background:#fff;border-top:1px solid #9ca3af;color:#374151">Fiabe<br>20%</div>' +
+      '<div class="stack-seg" style="height:50%;background:#6b7280">Fumetti<br>50%</div>' +
+      '</div><p class="stacked-bar-label">200 studenti</p></div>';
+  },
+  speechBubble: function () {
+    return '<div class="speech-bubble">Penso un numero ...<br>lo moltiplico per 10,<br>poi divido il risultato per 5<br>e ottengo 8</div>';
+  }
+};
+
+/* =========================================================
+   Stato app & rendering
+   ========================================================= */
+const disclaimers = {
+  menu: 'Le domande di questo quiz sono tratte dalle prove INVALSI di Matematica per la Scuola Primaria.',
+  seconda: 'Le domande di questo quiz sono tratte dalle prove INVALSI di Matematica per la classe seconda della Scuola Primaria, anni 2024-2025 e 2023-2024.',
+  quinta: 'Le domande di questo quiz sono tratte dalle prove INVALSI di Matematica per la classe quinta della Scuola Primaria, anni 2024 e 2025.'
+};
+
+let activeLevel = null; // 'seconda' | 'quinta' | null (menu)
+let questions = [];
+let current = 0;
+let selected = null;
+let score = 0;
+let finished = false;
+
+function setDisclaimer() {
+  const el = document.getElementById('quiz-disclaimer');
+  el.textContent = activeLevel ? disclaimers[activeLevel] : disclaimers.menu;
+}
+
+function selectLevel(level) {
+  activeLevel = level;
+  const src = level === 'seconda' ? secondaQuestions : quintaQuestions;
+  questions = prepareQuestions(src);
+  current = 0;
+  selected = null;
+  score = 0;
+  finished = false;
+  setDisclaimer();
+  render();
+}
+
+function goToMenu() {
+  activeLevel = null;
+  questions = [];
+  setDisclaimer();
+  render();
+}
+
+function render() {
+  const root = document.getElementById('quiz-root');
+
+  if (!activeLevel) {
+    root.innerHTML =
+      '<div class="card menu-card">' +
+        '<h2 class="menu-title">Quiz INVALSI Matematica</h2>' +
+        '<p class="menu-sub">Scegli la classe per iniziare</p>' +
+        '<div class="menu-buttons">' +
+          '<button class="menu-btn" id="btn-seconda"><span class="menu-icon">🎈</span>Classe Seconda</button>' +
+          '<button class="menu-btn alt" id="btn-quinta"><span class="menu-icon">🚀</span>Classe Quinta</button>' +
+        '</div>' +
+      '</div>';
+    document.getElementById('btn-seconda').onclick = function () { selectLevel('seconda'); };
+    document.getElementById('btn-quinta').onclick = function () { selectLevel('quinta'); };
+    return;
+  }
+
+  if (finished) {
+    const pct = Math.round((score / questions.length) * 100);
+    let msg = 'Continua ad allenarti, ce la farai!';
+    if (pct >= 80) msg = 'Ottimo lavoro! 🎉';
+    else if (pct >= 50) msg = 'Bel lavoro, continua così! 👍';
+
+    root.innerHTML =
+      '<div class="card finished-card">' +
+        '<div class="level-tag">Classe ' + (activeLevel === 'seconda' ? 'Seconda' : 'Quinta') + '</div>' +
+        '<h2 class="finished-title">Quiz completato!</h2>' +
+        '<p class="finished-score">Hai risposto correttamente a <b>' + score + '</b> domande su <b>' + questions.length + '</b></p>' +
+        '<p class="finished-pct">' + pct + '%</p>' +
+        '<p class="finished-msg">' + msg + '</p>' +
+        '<div class="finished-buttons">' +
+          '<button class="restart-btn" id="restart-btn">Ricomincia</button>' +
+          '<button class="back-btn" id="menu-btn">Cambia classe</button>' +
+        '</div>' +
+      '</div>';
+
+    document.getElementById('restart-btn').onclick = function () { selectLevel(activeLevel); };
+    document.getElementById('menu-btn').onclick = goToMenu;
+    return;
+  }
+
+  const q = questions[current];
+  let optionsHtml = '';
+  q.options.forEach(function (opt, i) {
+    let cls = 'option-btn';
+    if (selected !== null) {
+      if (i === q.answer) cls += ' correct';
+      else if (i === selected) cls += ' wrong';
+      else cls += ' dim';
+    }
+    optionsHtml += '<button class="' + cls + '" data-idx="' + i + '"' + (selected !== null ? ' disabled' : '') + '><b>' + String.fromCharCode(65 + i) + '.</b> ' + opt + '</button>';
+  });
+
+  let feedbackHtml = '';
+  if (selected !== null) {
+    if (selected === q.answer) {
+      feedbackHtml += '<p class="feedback-correct">✓ Corretto!</p>';
+    } else {
+      feedbackHtml += '<p class="feedback-wrong">✗ Risposta sbagliata. La risposta corretta è la ' + String.fromCharCode(65 + q.answer) + '.</p>';
+    }
+    feedbackHtml += '<button class="next-btn" id="next-btn">' + (current + 1 < questions.length ? 'Prossima domanda →' : 'Vedi risultati') + '</button>';
+  }
+
+  root.innerHTML =
+    '<div class="card">' +
+      '<div class="top-bar">' +
+        '<button class="back-btn" id="back-btn" style="padding:6px 14px;font-size:0.8rem;">← Cambia classe</button>' +
+        '<span class="level-tag">Classe ' + (activeLevel === 'seconda' ? 'Seconda' : 'Quinta') + '</span>' +
+      '</div>' +
+      '<div class="progress-row"><span>Domanda ' + (current + 1) + ' di ' + questions.length + '</span><span>Punteggio: ' + score + '</span></div>' +
+      '<div class="progress-bar-bg"><div class="progress-bar-fill" style="width:' + ((current / questions.length) * 100) + '%"></div></div>' +
+      '<h2 class="question-text">' + q.text + '</h2>' +
+      (q.visual ? visuals[q.visual]() : '') +
+      '<div class="options">' + optionsHtml + '</div>' +
+      feedbackHtml +
+    '</div>';
+
+  document.getElementById('back-btn').onclick = goToMenu;
+
+  if (selected === null) {
+    document.querySelectorAll('.option-btn').forEach(function (btn) {
+      btn.onclick = function () { selectOption(parseInt(btn.dataset.idx, 10)); };
+    });
+  } else {
+    document.getElementById('next-btn').onclick = next;
+  }
+}
+
+function selectOption(i) {
+  if (selected !== null) return;
+  selected = i;
+  if (i === questions[current].answer) score++;
+  render();
+}
+
+function next() {
+  if (current + 1 < questions.length) {
+    current++;
+    selected = null;
+  } else {
+    finished = true;
+  }
+  render();
+}
+
+setDisclaimer();
+render();
+</script>
+</body>
+</html>
