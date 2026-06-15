@@ -229,6 +229,16 @@
   button:hover { background: #2980b9; }
   button.secondary { background: #95a5a6; }
   button.secondary:hover { background: #7f8c8d; }
+  a.secondary {
+    font-size: 17px;
+    padding: 10px 26px;
+    margin: 6px 8px;
+    border-radius: 8px;
+    background: #95a5a6;
+    color: #fff;
+    transition: background 0.2s;
+  }
+  a.secondary:hover { background: #7f8c8d; }
   button.next { background: #9b59b6; }
   button.next:hover { background: #8e44ad; }
   #feedback {
@@ -256,17 +266,17 @@
   <div class="mode-buttons">
     <div class="mode-btn manual" id="manualBtn">
       <h3>🎯 Scelgo io i punti</h3>
-      <p>Clicchi tu sulla linea il punto che vuoi, quando vuoi, e puoi lavorare su più punti
+      <p>Clicca sul filo il punto che vuoi, quando vuoi, e puoi lavorare su più punti
       insieme, ai tuoi tempi.</p>
     </div>
     <div class="mode-btn auto" id="autoBtn">
       <h3>🎲 Punti a sorpresa</h3>
-      <p>Ad ogni turno si accende un punto diverso a sorpresa: scegli le frazioni giuste,
+      <p>Ad ogni turno si accende un punto diverso a sorpresa sul filo: scegli le frazioni giuste,
       controlla, e passa al punto successivo. Perfetto per allenarti da solo.</p>
     </div>
     <div class="mode-btn place" id="placeBtn">
       <h3>🧲 Il collocatore</h3>
-      <p>Ti mostriamo una frazione alla volta: clicca sulla linea nel punto dove pensi che vada.
+      <p>Ti mostriamo una frazione alla volta: clicca sul filo nel punto dove pensi che vada.
       Se è giusto si accende di verde, altrimenti di rosso!</p>
     </div>
   </div>
@@ -290,6 +300,8 @@
     <button id="nextBtn" class="next" style="display:none;">Punto successivo ➜</button>
     <button id="resetBtn" class="secondary">Nuova partita</button>
     <button id="menuBtn" class="secondary">Torna al menu</button>
+    <br>
+    <a id="homeBtn" class="secondary" style="display:inline-block; text-decoration:none;" href="https://rdiianni-alt.github.io/matematichenonsinasce/">Torna alla pagina iniziale</a>
   </div>
   <div id="feedback"></div>
 </div>
@@ -632,15 +644,15 @@ window.addEventListener('resize', rescale);
 
 /* ===================== TESTI ISTRUZIONI ===================== */
 
-const manualInstructions = `Clicca su uno dei <b>pallini grigi</b> sulla linea per scegliere il punto su cui vuoi lavorare.
+const manualInstructions = `Clicca su uno dei <b>pallini grigi</b> sul filo per scegliere il punto su cui vuoi lavorare.
   Apparirà un pannello con 5 cartellini: scegli quello (o quelli, se sono più di uno!) che corrispondono esattamente
   a quel punto. Puoi lavorare su più punti contemporaneamente. Quando hai finito, premi <b>"Controlla"</b>.`;
 
-const autoInstructions = `Ad ogni turno si accende un <b>punto a sorpresa</b> sulla linea (segnato dal cursore blu).
+const autoInstructions = `Ad ogni turno si accende un <b>punto a sorpresa</b> sul filo (segnato dal cursore blu).
   Scegli tra i 5 cartellini quello (o quelli) corretto, poi premi <b>"Controlla"</b> per vedere se hai indovinato.
   Premi <b>"Punto successivo"</b> per continuare con un nuovo punto.`;
 
-const placeInstructions = `Guarda la frazione mostrata e clicca sulla linea nel punto dove pensi che si trovi.
+const placeInstructions = `Guarda la frazione mostrata e clicca sul filo nel punto dove pensi che si trovi.
   Se hai cliccato nel punto giusto si accenderà di <b>verde</b>, altrimenti di <b>rosso</b> (e ti mostreremo
   anche dove era il punto corretto). Poi premi <b>"Carta successiva"</b> per continuare.`;
 
