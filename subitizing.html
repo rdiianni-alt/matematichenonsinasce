@@ -6,9 +6,13 @@
 <title>Subitizing – Matematiche non si nasce</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 12px; width: 100%; overflow-x: hidden; }
 
-  /* HEADER centrato */
+  header, .controls, .card-wrap, .actions, .score, .back-link {
+    width: 100%;
+    max-width: 700px;
+  }
+
   header {
     display: flex;
     flex-direction: column;
@@ -18,10 +22,9 @@
     border-radius: 16px;
     padding: 16px 24px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    width: 100%;
-    max-width: 700px;
     margin-bottom: 16px;
     text-align: center;
+    box-sizing: border-box;
   }
 
   .logo a {
@@ -60,29 +63,27 @@
     align-items: center;
     background: #fff;
     border-radius: 12px;
-    padding: 12px 20px;
+    padding: 12px 16px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    width: 100%;
-    max-width: 700px;
     margin-bottom: 16px;
+    box-sizing: border-box;
   }
   .controls label { font-size: 13px; color: #555; display: flex; align-items: center; gap: 6px; }
   .controls input[type=number] { width: 54px; border: 1.5px solid #ddd; border-radius: 6px; padding: 4px 6px; font-size: 14px; text-align: center; }
   .controls select { border: 1.5px solid #ddd; border-radius: 6px; padding: 4px 8px; font-size: 13px; }
 
   .card-wrap {
-    width: 100%;
-    max-width: 700px;
     background: #fff;
     border-radius: 20px;
     border: 2.5px solid #e0e0e0;
     overflow: hidden;
     margin-bottom: 16px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    box-sizing: border-box;
   }
-  canvas { display: block; width: 100%; }
+  canvas { display: block; width: 100%; height: auto; }
 
-  .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; width: 100%; max-width: 700px; margin-bottom: 10px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
   .btn { padding: 9px 20px; border-radius: 8px; border: 1.5px solid #ccc; background: #fff; cursor: pointer; font-size: 14px; font-weight: 500; color: #333; transition: background .15s; }
   .btn:hover { background: #f0f0f0; }
   .btn-new { border-color: #1e88e5; color: #1e88e5; }
@@ -98,8 +99,45 @@
   .result.show-answer { background: #fff8e1; color: #e65100; }
   .timer { font-size: 13px; color: #999; min-width: 52px; }
 
-  .score { display: flex; gap: 20px; font-size: 13px; color: #777; background: #fff; padding: 10px 20px; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); width: 100%; max-width: 700px; }
+  .score {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 13px;
+    color: #777;
+    background: #fff;
+    padding: 10px 16px;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    box-sizing: border-box;
+    margin-bottom: 16px;
+  }
   .score span b { color: #333; font-size: 15px; }
+
+  .back-link {
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .back-link a {
+    display: inline-block;
+    padding: 10px 24px;
+    border-radius: 8px;
+    border: 1.5px solid #999;
+    background: #fff;
+    color: #555;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background .15s;
+  }
+  .back-link a:hover { background: #f0f0f0; }
+
+  @media (max-width: 480px) {
+    .actions { flex-direction: column; align-items: stretch; }
+    .answer-box { justify-content: center; }
+    .controls { flex-direction: column; align-items: stretch; }
+    .controls label { justify-content: center; }
+  }
 </style>
 </head>
 <body>
@@ -147,6 +185,10 @@
   <span>✅ Corrette: <b id="sc">0</b></span>
   <span>❌ Sbagliate: <b id="sw">0</b></span>
   <span>📊 Totale: <b id="st">0</b></span>
+</div>
+
+<div class="back-link">
+  <a href="https://rdiianni-alt.github.io/matematichenonsinasce/">⬅ Torna alla pagina iniziale</a>
 </div>
 
 <script>
