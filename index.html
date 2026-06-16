@@ -73,6 +73,9 @@
     font-weight:600;font-size:15.5px;padding:15px 32px;border-radius:999px;transition:all .18s ease;
     box-shadow:0 4px 14px rgba(200,29,37,.24);white-space:nowrap;}
   .cta:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(200,29,37,.32);}
+  .colophon{text-align:center;margin-top:26px;font-size:13px;color:var(--muted);line-height:1.7;}
+  .colophon .visite{display:none;margin-top:6px;font-size:12.5px;color:#A89E8E;}
+  .colophon .visite b{color:var(--red);font-weight:600;}
 
   /* Player overlay */
   .player{position:fixed;inset:0;z-index:60;display:none;background:#fff;}
@@ -123,6 +126,10 @@
 
   <div class="footcta">
     <a class="cta" href="https://matematichenonsinasce.com/giochi-didattici-online/" target="_blank" rel="noopener">Molto altro su Matematiche non si nasce&nbsp;↗</a>
+    <div class="colophon">
+      © <span id="year"></span> Rita Di Ianni · matematichenonsinasce · fatto con ❤️ per imparare
+      <div class="visite" id="visite">👀 <b id="visiteN">—</b> <span id="visiteLbl">visite</span></div>
+    </div>
   </div>
 </div>
 
@@ -130,9 +137,8 @@
   <iframe id="frame" title="Gioco"></iframe>
   <div class="reveal" id="reveal"></div>
   <div class="pbar" id="pbar">
-    <button class="back" id="backBtn">←&nbsp; Torna ai giochi</button>
+    <a class="back" href="https://matematichenonsinasce.com/giochi-didattici-online/">←&nbsp; Torna alla pagina dei giochi</a>
     <span class="ptitle" id="ptitle"></span>
-    <a class="pblog" href="https://matematichenonsinasce.com/giochi-didattici-online/" target="_blank" rel="noopener">Blog&nbsp;↗</a>
   </div>
 </div>
 
@@ -245,11 +251,9 @@
     window.scrollTo(0, 0);
     showBar();
     frame.addEventListener("load", attachScrollTracking, {once:true});
-    // Il tasto Indietro del browser/telefono riporta all'elenco
-    if(!gameOpen){ history.pushState({game:true}, "", "#gioco"); }
     gameOpen = true;
   }
-  function closeGame(fromPop){
+  function closeGame(){
     if(!gameOpen) return;
     gameOpen = false;
     player.classList.remove("on");
@@ -258,13 +262,10 @@
     document.body.style.overflow = "";
     clearTimeout(hideTimer);
     pbar.classList.remove("hidden");
-    // Se chiudo col pulsante/Esc, annullo anche la voce di cronologia
-    if(!fromPop && history.state && history.state.game){ history.back(); }
   }
-  // Tasto Indietro del browser → chiude il gioco invece di lasciare la pagina
-  window.addEventListener("popstate", () => { if(gameOpen) closeGame(true); });
-  document.getElementById("backBtn").addEventListener("click", () => closeGame(false));
-  document.addEventListener("keydown", e => { if(e.key === "Escape") closeGame(false); });
+  // "Torna alla pagina dei giochi" è un link diretto al blog (vedi barra del gioco).
+  // Esc riporta comunque all'elenco dentro la pagina.
+  document.addEventListener("keydown", e => { if(e.key === "Escape") closeGame(); });
 
   function renderCards(names){
     grid.innerHTML = "";
@@ -367,6 +368,25 @@
   }
 
   init();
+
+  // Anno corrente
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  // Contatore visite (servizio gratuito, senza registrazione).
+  // Se non risponde, la riga resta nascosta: nessun errore in pagina.
+  (function visite(){
+    fetch("https://api.counterapi.dev/v1/matematichenonsinasce/giochi/up")
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(d => {
+        const n = (d && (d.count ?? d.value));
+        if(typeof n === "number"){
+          document.getElementById("visiteN").textContent = n.toLocaleString("it-IT");
+          document.getElementById("visiteLbl").textContent = (n === 1) ? "visita" : "visite";
+          document.getElementById("visite").style.display = "block";
+        }
+      })
+      .catch(() => {});
+  })();
 </script>
 </body>
 </html>
