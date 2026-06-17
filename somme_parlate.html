@@ -74,12 +74,24 @@
     max-width: 420px; width: 100%;
     box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center;
   }
-  .domanda {
-    font-size: 1.35rem; font-weight: bold; color: #222;
-    line-height: 2.2; margin-bottom: 24px; min-height: 100px;
-    display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px;
+  @media (max-width: 480px) {
+    body { padding: 10px; }
+    h1 { font-size: 1.2rem; }
+    .card { padding: 18px 12px 16px; border-radius: 14px; }
+    .btn-livello { padding: 8px 12px; font-size: 0.82rem; }
+    input[type=number] { width: 100px; font-size: 1.6rem; padding: 8px; }
+    .btn { padding: 10px 20px; font-size: 0.9rem; }
+    .feedback { font-size: 1.1rem; }
   }
-  .domanda span { color: #3a3a8c; }
+  .domanda {
+    font-size: clamp(0.7rem, 3vw, 1.35rem);
+    font-weight: bold; color: #222;
+    line-height: 1.5; margin-bottom: 24px; min-height: 70px;
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: nowrap; gap: 4px; white-space: nowrap;
+    width: 100%; overflow: visible;
+  }
+  .domanda span { color: #3a3a8c; white-space: nowrap; }
   .input-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 16px; }
   input[type=number] {
     width: 130px; font-size: 2rem; text-align: center;
@@ -87,10 +99,18 @@
     outline: none; color: #3a3a8c; transition: border-color 0.2s;
   }
   input[type=number]:focus { border-color: #3a3a8c; }
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: nowrap;
+    margin-bottom: 0;
+  }
   .btn {
     background: #3a3a8c; color: white; border: none;
-    border-radius: 12px; padding: 12px 32px; font-size: 1rem;
-    cursor: pointer; margin: 6px; transition: background 0.2s;
+    border-radius: 12px; padding: clamp(7px,2vw,12px) clamp(10px,3vw,24px);
+    font-size: clamp(0.75rem, 2.5vw, 1rem);
+    cursor: pointer; transition: background 0.2s; white-space: nowrap;
   }
   .btn:hover { background: #2a2a6c; }
   .btn-secondary { background: #e0e4ff; color: #3a3a8c; }
@@ -141,9 +161,10 @@
   <div class="input-row">
     <input type="number" id="risposta" placeholder="?" min="0" max="9999">
   </div>
-  <div>
+  <div class="btn-row">
     <button class="btn" onclick="verifica()">✅ Controlla</button>
     <button class="btn btn-secondary" onclick="nuovaDomanda()">⏭ Salta</button>
+    <button class="btn" id="avanti" onclick="nuovaDomanda()" style="display:none;">➡ Prossima</button>
   </div>
   <div class="feedback" id="feedback"></div>
   <div class="spiegazione" id="spiegazione"></div>
@@ -307,11 +328,12 @@ function verifica() {
     const p = punti/totale;
     document.getElementById('stelle').textContent = p>=0.9?'⭐⭐⭐':p>=0.7?'⭐⭐':'⭐';
     setTimeout(nuovaDomanda, 1500);
+    document.getElementById('avanti').style.display = 'none';
   } else {
-    document.getElementById('feedback').textContent = '❌ Riprova!';
+    document.getElementById('feedback').textContent = '❌ No! La risposta è ' + corrente.r;
     document.getElementById('feedback').className = 'feedback sbagliato';
-    document.getElementById('risposta').value = '';
-    document.getElementById('risposta').focus();
+    document.getElementById('spiegazione').textContent = corrente.s;
+    document.getElementById('avanti').style.display = 'inline-block';
   }
 }
 
