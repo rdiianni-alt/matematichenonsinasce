@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:sans-serif;background:#f0f4f8;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px;}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:8px;text-decoration:none;}
+.logo img{width:60px;height:60px;object-fit:contain;border-radius:50%;}
+.logo-text{font-size:15px;font-weight:500;color:#444;}
+#home{display:flex;flex-direction:column;align-items:center;gap:18px;padding-top:24px;}
+#home h1{font-size:22px;font-weight:500;color:#333;text-align:center;}
+#home p{font-size:14px;color:#666;text-align:center;max-width:300px;}
+.card{width:280px;background:white;border-radius:14px;border:1.5px solid #dde;padding:18px 22px;cursor:pointer;transition:box-shadow 0.15s,border-color 0.15s;display:flex;flex-direction:column;gap:6px;}
+.card:hover{box-shadow:0 4px 16px rgba(74,144,217,0.15);border-color:#4a90d9;}
+.card h2{font-size:15px;font-weight:500;color:#333;}
+.card p{font-size:13px;color:#777;line-height:1.5;}
+.badge{align-self:flex-start;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;}
+.b-free{background:#e6f4ea;color:#2d6a3f;}
+.b-measure{background:#e8f0fb;color:#185fa5;}
+#game{display:none;flex-direction:column;align-items:center;gap:10px;width:100%;}
+#topbar{width:500px;display:flex;align-items:center;gap:10px;}
+#btn-home{font-size:13px;padding:5px 12px;border:1px solid #bbb;border-radius:8px;background:white;cursor:pointer;color:#555;}
+#btn-home:hover{background:#f0f0f0;}
+#game-title{font-size:14px;font-weight:500;color:#444;}
+canvas{display:block;touch-action:none;border-radius:10px;background:white;border:1px solid #dde;}
+#controls{display:flex;flex-direction:column;align-items:center;gap:8px;width:500px;}
+#target-display{font-size:18px;font-weight:500;color:#333;min-height:28px;text-align:center;}
+#input-row{display:flex;align-items:center;gap:8px;min-height:36px;}
+input[type=number]{width:76px;padding:6px 8px;font-size:16px;border:1.5px solid #aaa;border-radius:8px;text-align:center;}
+input[type=number]:focus{outline:none;border-color:#4a90d9;}
+.btn-action{padding:7px 20px;font-size:14px;border-radius:8px;border:1.5px solid #4a90d9;background:white;color:#4a90d9;cursor:pointer;}
+.btn-action:hover{background:#e8f0fb;}
+#feedback{font-size:14px;font-weight:500;min-height:26px;padding:4px 14px;border-radius:8px;text-align:center;}
+.ok{background:#e6f4ea;color:#2d6a3f;}
+.no{background:#fdecea;color:#b71c1c;}
+#score{font-size:12px;color:#888;}
+#hint{font-size:12px;color:#999;text-align:center;max-width:400px;}
+#btn-next{display:none;padding:7px 20px;font-size:13px;border-radius:8px;border:1.5px solid #888;background:white;color:#555;cursor:pointer;}
+#btn-next:hover{background:#f0f0f0;}
+</style>
+</head>
+<body>
+<a href="https://matematichenonsinasce.com/" class="logo" target="_blank">
+  <img src="logo.png" alt="logo">
+  <div class="logo-text">Matematiche non si nasce</div>
+</a>
+
+<div id="home">
+  <h1>Goniometro</h1>
+  <p>Scegli come vuoi giocare</p>
+  <div class="card" onclick="startGame('free')">
+    <span class="badge b-free">Forma l'angolo</span>
+    <h2>Ruota il braccio</h2>
+    <p>Il gioco dice quanti gradi formare. Tu giri il braccio e verifichi se hai indovinato.</p>
+  </div>
+  <div class="card" onclick="startGame('measure')">
+    <span class="badge b-measure">Misura l'angolo</span>
+    <h2>Posiziona il goniometro</h2>
+    <p>Appare un angolo disegnato. Trascina il goniometro sul vertice e leggi la misura.</p>
+  </div>
+</div>
+
+<div id="game">
+  <div id="topbar">
+    <button id="btn-home" onclick="goHome()">← Menu</button>
+    <span id="game-title"></span>
+  </div>
+  <canvas id="c" width="500" height="500"></canvas>
+  <div id="controls">
+    <div id="target-display"></div>
+    <div id="input-row">
+      <label id="lbl-ans" for="ans"></label>
+      <input type="number" id="ans" min="0" max="360" placeholder="°">
+      <button class="btn-action" id="btn-action" onclick="check()">Verifica</button>
+    </div>
+    <div id="feedback"></div>
+    <button id="btn-next" onclick="nextRound()">Prossimo angolo →</button>
+    <div id="score">Corrette: <span id="ok">0</span> / <span id="tot">0</span></div>
+    <div id="hint"></div>
+  </div>
+</div>
+
+<script>
+var canvas = document.getElementById('c');
+var ctx = canvas.getContext('2d');
+var W = 500, H = 500, R = 130;
+
+var mode = 'free';
+var okCount = 0, totCount = 0;
+
+// free mode
+var freeAngle = 75;
+var freeTarget = 0;
+
+// measure mode
+var targetAngle = 0, targetDir = 0;
+var vx = 0, vy = 0;
+var gx = 0, gy = 0;
+var gAngle = 30, gRotation = 0;
+var dragWhat = null, dragStart = {x:0,y:0};
+var gxStart = 0, gyStart = 0;
+
+function toRad(d){ return d * Math.PI / 180; }
+function toDeg(r){ return r * 180 / Math.PI; }
+function snapDeg(d){ d = Math.round(d); while(d < 0) d += 360; while(d >= 360) d -= 360; return d; }
+function angDiff(a, b){ var d = (b - a + 360) % 360; if(d > 180) d -= 360; return d; }
+
+function startGame(m) {
+  mode = m;
+  okCount = 0; totCount = 0;
+  document.getElementById('ok').textContent = 0;
+  document.getElementById('tot').textContent = 0;
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = '';
+  document.getElementById('btn-next').style.display = 'none';
+  document.getElementById('ans').value = '';
+  document.getElementById('home').style.display = 'none';
+  document.getElementById('game').style.display = 'flex';
+  if (m === 'free') {
+    document.getElementById('game-title').textContent = 'Forma l\'angolo';
+    document.getElementById('hint').textContent = 'Trascina il braccio azzurro fino all\'angolo richiesto';
+    document.getElementById('lbl-ans').textContent = '';
+    document.getElementById('ans').style.display = 'none';
+    document.getElementById('btn-action').style.display = 'inline-block';
+    freeAngle = 30;
+    newFreeRound();
+  } else {
+    document.getElementById('game-title').textContent = 'Misura l\'angolo';
+    document.getElementById('hint').textContent = 'Trascina il goniometro sul vertice, ruota il corpo (manopola viola) poi il braccio azzurro';
+    document.getElementById('target-display').textContent = '';
+    document.getElementById('lbl-ans').textContent = 'Quanti gradi?';
+    document.getElementById('ans').style.display = 'inline-block';
+    document.getElementById('btn-action').style.display = 'inline-block';
+    newMeasureRound();
+  }
+  draw();
+}
+
+function newFreeRound() {
+  freeTarget = (5 + Math.floor(Math.random() * 71)) * 5;
+  freeAngle = 30;
+  document.getElementById('target-display').textContent = 'Forma un angolo di ' + freeTarget + '°';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = '';
+  document.getElementById('btn-next').style.display = 'none';
+  document.getElementById('btn-action').style.display = 'inline-block';
+}
+
+function newMeasureRound() {
+  targetAngle = 25 + Math.floor(Math.random() * 310);
+  targetDir = Math.floor(Math.random() * 360);
+  var margin = R + 20;
+  vx = margin + Math.random() * (W - 2 * margin);
+  vy = margin + Math.random() * (H - 2 * margin);
+  gx = R + 10; gy = R + 10;
+  gAngle = 30; gRotation = 0;
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = '';
+  document.getElementById('btn-next').style.display = 'none';
+  document.getElementById('ans').value = '';
+}
+
+function nextRound() {
+  if (mode === 'free') newFreeRound();
+  else newMeasureRound();
+  draw();
+}
+
+function goHome() {
+  document.getElementById('home').style.display = 'flex';
+  document.getElementById('game').style.display = 'none';
+}
+
+function check() {
+  var fb = document.getElementById('feedback');
+  if (mode === 'free') {
+    totCount++;
+    var d = Math.abs(freeAngle - freeTarget);
+    if (d > 180) d = 360 - d;
+    if (d <= 3) {
+      fb.textContent = '✓ Esatto! Hai formato ' + freeAngle + '°';
+      fb.className = 'ok';
+      okCount++;
+    } else {
+      fb.textContent = '✗ Hai formato ' + freeAngle + '°, servivano ' + freeTarget + '°';
+      fb.className = 'no';
+    }
+    document.getElementById('btn-next').style.display = 'inline-block';
+    document.getElementById('btn-action').style.display = 'none';
+  } else {
+    var inp = document.getElementById('ans').value.trim();
+    if (!inp) return;
+    var val = parseInt(inp);
+    if (isNaN(val)) return;
+    var distV = Math.hypot(gx - vx, gy - vy);
+    if (distV > 30) {
+      fb.textContent = '⚠ Metti il centro del goniometro sul vertice!';
+      fb.className = 'no';
+      return;
+    }
+    totCount++;
+    var d2 = Math.abs(val - targetAngle);
+    if (d2 > 180) d2 = 360 - d2;
+    var arm0Dir = gRotation - 90;
+    var aligned = Math.min(Math.abs(angDiff(arm0Dir, targetDir)), Math.abs(angDiff(arm0Dir, targetDir + targetAngle))) < 14;
+    if (d2 <= 3 && aligned) {
+      fb.textContent = '✓ Esatto! L\'angolo era ' + targetAngle + '°';
+      fb.className = 'ok';
+      okCount++;
+    } else if (d2 <= 3 && !aligned) {
+      fb.textContent = 'Risposta giusta, ma allinea il braccio fisso a un lato!';
+      fb.className = 'no';
+    } else {
+      fb.textContent = '✗ L\'angolo era ' + targetAngle + '°, hai scritto ' + val + '°';
+      fb.className = 'no';
+    }
+    document.getElementById('btn-next').style.display = 'inline-block';
+    document.getElementById('ans').value = '';
+  }
+  document.getElementById('ok').textContent = okCount;
+  document.getElementById('tot').textContent = totCount;
+}
+
+/* ---- DRAW ---- */
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  if (mode === 'free') drawGoniometro(W/2, H/2, freeAngle, 0);
+  else { drawTargetAngle(); drawGoniometro(gx, gy, gAngle, gRotation); }
+}
+
+function drawTargetAngle() {
+  var len = R + 40;
+  var r1 = toRad(targetDir), r2 = toRad(targetDir + targetAngle);
+  ctx.strokeStyle = '#c0392b'; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(vx, vy); ctx.lineTo(vx + len*Math.cos(r1), vy + len*Math.sin(r1)); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(vx, vy); ctx.lineTo(vx + len*Math.cos(r2), vy + len*Math.sin(r2)); ctx.stroke();
+  ctx.beginPath(); ctx.arc(vx, vy, 30, r1, r2, false);
+  ctx.strokeStyle = 'rgba(192,57,43,0.45)'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.beginPath(); ctx.arc(vx, vy, 5, 0, Math.PI*2);
+  ctx.fillStyle = '#c0392b'; ctx.fill();
+}
+
+function drawGoniometro(cx, cy, armDeg, rotDeg) {
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(toRad(rotDeg));
+
+  ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(225,237,255,0.75)'; ctx.fill();
+  ctx.strokeStyle = '#4a90d9'; ctx.lineWidth = 2; ctx.stroke();
+
+  ctx.beginPath(); ctx.arc(0, 0, R*0.1, 0, Math.PI*2);
+  ctx.strokeStyle = '#99b'; ctx.lineWidth = 1; ctx.stroke();
+
+  for (var deg = 0; deg < 360; deg++) {
+    var rad = toRad(deg - 90);
+    var isMaj = deg % 10 === 0, isMid = deg % 5 === 0;
+    var tl = isMaj ? 14 : (isMid ? 8 : 4);
+    var x1 = R*Math.cos(rad), y1 = R*Math.sin(rad);
+    var x2 = (R-tl)*Math.cos(rad), y2 = (R-tl)*Math.sin(rad);
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+    ctx.strokeStyle = '#334'; ctx.lineWidth = isMaj ? 1.4 : 0.6; ctx.stroke();
+    if (isMaj) {
+      var lx = (R-28)*Math.cos(rad), ly = (R-28)*Math.sin(rad);
+      ctx.save();
+      ctx.translate(lx, ly); ctx.rotate(rad + Math.PI/2);
+      ctx.font = (deg % 30 === 0 ? 'bold 10px' : '9px') + ' sans-serif';
+      ctx.fillStyle = '#223'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(deg === 0 ? '0°' : deg, 0, 0);
+      ctx.restore();
+    }
+  }
+
+  ctx.beginPath(); ctx.moveTo(0, 0);
+  ctx.arc(0, 0, R*0.5, toRad(-90), toRad(armDeg - 90), false);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(74,144,217,0.12)'; ctx.fill();
+
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -R);
+  ctx.strokeStyle = '#778'; ctx.lineWidth = 2; ctx.stroke();
+
+  var ar = toRad(armDeg - 90);
+  var ax = R*Math.cos(ar), ay = R*Math.sin(ar);
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(ax, ay);
+  ctx.strokeStyle = '#4a90d9'; ctx.lineWidth = 3; ctx.stroke();
+  var as = 9;
+  ctx.beginPath(); ctx.moveTo(ax, ay);
+  ctx.lineTo(ax - as*Math.cos(ar-0.3), ay - as*Math.sin(ar-0.3));
+  ctx.lineTo(ax - as*Math.cos(ar+0.3), ay - as*Math.sin(ar+0.3));
+  ctx.closePath(); ctx.fillStyle = '#4a90d9'; ctx.fill();
+
+  ctx.beginPath(); ctx.arc(0, 0, 5, 0, Math.PI*2);
+  ctx.fillStyle = '#334'; ctx.fill();
+
+  ctx.restore();
+
+  if (mode === 'measure') {
+    var hr = toRad(rotDeg + 90);
+    var hx = cx + R*Math.cos(hr), hy = cy + R*Math.sin(hr);
+    ctx.beginPath(); ctx.arc(hx, hy, 9, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(100,80,200,0.3)'; ctx.fill();
+    ctx.strokeStyle = '#668'; ctx.lineWidth = 1.5; ctx.stroke();
+  }
+}
+
+/* ---- INTERACTION ---- */
+function getPos(e) {
+  var rect = canvas.getBoundingClientRect();
+  var sx = W/rect.width, sy = H/rect.height;
+  var src = e.touches ? e.touches[0] : e;
+  return { x: (src.clientX - rect.left)*sx, y: (src.clientY - rect.top)*sy };
+}
+
+function onDown(e) {
+  var p = getPos(e);
+  dragStart = p;
+  if (mode === 'free') {
+    dragWhat = 'arm';
+  } else {
+    var ar = toRad(gAngle + gRotation - 90);
+    var tx = gx + R*Math.cos(ar), ty = gy + R*Math.sin(ar);
+    var hr = toRad(gRotation + 90);
+    var hx = gx + R*Math.cos(hr), hy = gy + R*Math.sin(hr);
+    if (Math.hypot(p.x - tx, p.y - ty) < 22) {
+      dragWhat = 'arm';
+    } else if (Math.hypot(p.x - hx, p.y - hy) < 22) {
+      dragWhat = 'rotate';
+    } else if (Math.hypot(p.x - gx, p.y - gy) < R) {
+      dragWhat = 'proto'; gxStart = gx; gyStart = gy;
+    }
+  }
+}
+
+function onMove(e) {
+  if (!dragWhat) return;
+  var p = getPos(e);
+  if (mode === 'free') {
+    freeAngle = snapDeg(toDeg(Math.atan2(p.y - H/2, p.x - W/2)) + 90);
+  } else {
+    if (dragWhat === 'proto') {
+      gx = Math.max(R+4, Math.min(W-R-4, gxStart + (p.x - dragStart.x)));
+      gy = Math.max(R+4, Math.min(H-R-4, gyStart + (p.y - dragStart.y)));
+    } else if (dragWhat === 'arm') {
+      gAngle = snapDeg(toDeg(Math.atan2(p.y - gy, p.x - gx)) + 90 - gRotation);
+    } else if (dragWhat === 'rotate') {
+      gRotation = snapDeg(toDeg(Math.atan2(p.y - gy, p.x - gx)) - 90);
+    }
+  }
+  draw();
+}
+
+function onUp() { dragWhat = null; }
+
+canvas.addEventListener('mousedown', onDown);
+canvas.addEventListener('mousemove', onMove);
+canvas.addEventListener('mouseup', onUp);
+canvas.addEventListener('touchstart', function(e){ e.preventDefault(); onDown(e); }, {passive:false});
+canvas.addEventListener('touchmove', function(e){ e.preventDefault(); onMove(e); }, {passive:false});
+canvas.addEventListener('touchend', onUp);
+
+document.getElementById('ans').addEventListener('keydown', function(e){ if(e.key==='Enter') check(); });
+
+draw();
+</script>
+</body>
+</html>
