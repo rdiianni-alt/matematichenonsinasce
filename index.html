@@ -57,6 +57,19 @@
     transition:gap .2s ease,color .2s ease;}
   .card:hover .play{gap:11px;color:var(--red-dark);}
 
+  /* Card speciale: gli strumenti fisici da scaricare (non un gioco) */
+  .card.special{background:linear-gradient(135deg,var(--red),var(--red-dark));border-color:var(--red);
+    box-shadow:0 12px 26px rgba(200,29,37,.30);}
+  .card.special:hover{box-shadow:0 20px 40px rgba(200,29,37,.38);}
+  .card.special .bar{background:rgba(255,255,255,.35);}
+  .card.special .cat{background:rgba(255,255,255,.22);color:#fff;letter-spacing:1px;text-transform:uppercase;}
+  .card.special h2{color:#fff;}
+  .card.special .desc{color:rgba(255,255,255,.94);font-weight:400;}
+  .card.special .foot{border-top-color:rgba(255,255,255,.28);}
+  .card.special .meta{color:rgba(255,255,255,.82);}
+  .card.special .play{color:#fff;}
+  .card.special:hover .play{color:#fff;}
+
   /* Status */
   .status{text-align:center;color:var(--faint);font-size:15px;padding:48px 0;font-weight:400;}
 
@@ -81,22 +94,6 @@
   .player{position:fixed;inset:0;z-index:60;display:none;background:#fff;}
   .player.on{display:block;}
   .player iframe{position:absolute;inset:0;width:100%;height:100%;border:none;display:block;}
-  /* La barra galleggia sopra il gioco e si nasconde da sola: il gioco resta a tutto schermo */
-  .player .pbar{position:absolute;top:0;left:0;right:0;z-index:2;
-    display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;
-    background:rgba(250,248,244,.92);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
-    border-bottom:1px solid #ECE5D9;transition:transform .3s ease, opacity .3s ease;}
-  .player .pbar.hidden{transform:translateY(-110%);opacity:0;pointer-events:none;}
-  /* Linguetta sempre disponibile per richiamare la barra */
-  .reveal{position:absolute;top:0;left:0;right:0;height:26px;z-index:1;cursor:pointer;}
-  .back{display:inline-flex;align-items:center;gap:7px;background:#F4F0E9;border:1px solid #E4DCCE;
-    color:#4E4737;font-weight:600;font-size:14px;padding:9px 15px;border-radius:999px;cursor:pointer;
-    font-family:inherit;transition:background .15s ease;}
-  .back:hover{background:#f0eeec;}
-  .ptitle{font-family:'Newsreader',Georgia,serif;font-weight:600;font-size:18px;color:var(--ink);
-    text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
-  .pblog{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--red);
-    font-weight:600;font-size:14px;padding:9px 15px;border:1px solid #F1DADB;border-radius:999px;white-space:nowrap;}
 
   @media (max-width:560px){
     .hero h1{font-size:38px;}
@@ -135,11 +132,6 @@
 
 <div class="player" id="player">
   <iframe id="frame" title="Gioco"></iframe>
-  <div class="reveal" id="reveal"></div>
-  <div class="pbar" id="pbar">
-    <a class="back" href="https://matematichenonsinasce.com/">←&nbsp; Torna al blog</a>
-    <span class="ptitle" id="ptitle"></span>
-  </div>
 </div>
 
 <script>
@@ -176,6 +168,7 @@
 
   // Ordine preferito + lista di RISERVA (se l'API GitHub non risponde)
   const ORDER = [
+    "strumenti da scaricare.html",
     "bee_game.html","armadio_del_100.html","bolle.html","bruco.html","cannucce.html",
     "chiudi_la_scatola.html","fantasmino.html","Frazioni_sul_filo.html","gambero rosso.html",
     "giro_le_cifre.html","invalsi.html","Maggiore_minore.html","mattonelle.html",
@@ -188,46 +181,6 @@
   const statusE = document.getElementById("status");
   const player  = document.getElementById("player");
   const frame   = document.getElementById("frame");
-  const ptitle  = document.getElementById("ptitle");
-  const pbar    = document.getElementById("pbar");
-  const reveal  = document.getElementById("reveal");
-
-  let hideTimer = null;
-  let scrollHandler = null;
-
-  function showBar(){
-    pbar.classList.remove("hidden");
-    clearTimeout(hideTimer);
-    hideTimer = setTimeout(hideBar, 2600);
-  }
-  function hideBar(){
-    pbar.classList.add("hidden");
-    clearTimeout(hideTimer);
-  }
-  // Quando entri in un gioco: barra visibile, poi si nasconde da sola.
-  // Mostra al passaggio del mouse in alto e segue lo scroll del gioco
-  // (scendi → sparisce, sali → torna).
-  reveal.addEventListener("mouseenter", showBar);
-  pbar.addEventListener("mouseenter", () => clearTimeout(hideTimer));
-  pbar.addEventListener("mouseleave", showBar);
-
-  function attachScrollTracking(){
-    // Il gioco è sullo stesso dominio della pagina (github.io), quindi
-    // possiamo seguire lo scroll interno. Se un giorno non fosse possibile,
-    // resta comunque l'auto-hide + il richiamo col mouse.
-    try{
-      const win = frame.contentWindow;
-      const doc = frame.contentDocument || win.document;
-      let last = 0;
-      scrollHandler = () => {
-        const y = win.scrollY || doc.documentElement.scrollTop || doc.body.scrollTop || 0;
-        if(y > last + 6){ hideBar(); }          // scendo → sparisce
-        else if(y < last - 6){ showBar(); }     // salgo → torna
-        last = y;
-      };
-      win.addEventListener("scroll", scrollHandler, {passive:true});
-    }catch(e){ /* cross-origin: niente tracking, resta l'auto-hide */ }
-  }
 
   function slugToTitle(slug){
     return slug.replace(/_/g," ").replace(/\b\w/g, c => c.toUpperCase());
@@ -236,21 +189,23 @@
   function orderGames(names){
     const known = ORDER.filter(n => names.includes(n));
     const extra = names.filter(n => !ORDER.includes(n)).sort((a,b)=>a.localeCompare(b));
-    return known.concat(extra);
+    let all = known.concat(extra);
+    // La pagina degli strumenti fisici va sempre in cima (tasto speciale)
+    const special = all.filter(n => /strument/i.test(n));
+    const rest    = all.filter(n => !/strument/i.test(n));
+    return special.concat(rest);
   }
+  function isSpecial(filename){ return /strument/i.test(filename); }
 
   const gallery = document.getElementById("gallery");
   let gameOpen = false;
 
   function openGame(filename, title){
     frame.src = PAGES_BASE + "/" + encodeURI(filename);
-    ptitle.textContent = title;
     gallery.style.display = "none";      // l'elenco sparisce: il gioco prende il suo posto
     player.classList.add("on");
     document.body.style.overflow = "hidden";
     window.scrollTo(0, 0);
-    showBar();
-    frame.addEventListener("load", attachScrollTracking, {once:true});
     gameOpen = true;
   }
   function closeGame(){
@@ -260,25 +215,24 @@
     frame.src = "about:blank";
     gallery.style.display = "";          // torna l'elenco
     document.body.style.overflow = "";
-    clearTimeout(hideTimer);
-    pbar.classList.remove("hidden");
   }
-  // "Torna alla pagina dei giochi" è un link diretto al blog (vedi barra del gioco).
-  // Esc riporta comunque all'elenco dentro la pagina.
+  // Nessuna barra sul gioco: per chiudere si usa Esc o il tasto Indietro del browser/telefono.
   document.addEventListener("keydown", e => { if(e.key === "Escape") closeGame(); });
 
   function renderCards(names){
     grid.innerHTML = "";
     orderGames(names).forEach(filename => {
       const slug = filename.replace(/\.html$/i,"");
+      const special = isSpecial(filename);
       const m = META[slug] || {};
-      const title = m.title || slugToTitle(slug);
-      const cat   = m.cat   || "Gioco di matematica";
-      const desc  = m.desc  || "Un nuovo gioco per imparare la matematica giocando.";
-      const meta  = m.meta  || "nuovo gioco";
+      const title = special ? "Strumenti da scaricare" : (m.title || slugToTitle(slug));
+      const cat   = special ? "Materiali gratuiti"     : (m.cat   || "Gioco di matematica");
+      const desc  = special ? "Tutti i giochi didattici e gli strumenti fisici da scaricare" : (m.desc || "Un nuovo gioco per imparare la matematica giocando.");
+      const meta  = special ? "schede & materiali"     : (m.meta  || "nuovo gioco");
+      const playLabel = special ? "Apri \u2192" : "\u25B6 Gioca";
 
       const card = document.createElement("button");
-      card.className = "card";
+      card.className = special ? "card special" : "card";
       card.type = "button";
       card.innerHTML =
         '<span class="bar"></span>' +
@@ -286,12 +240,13 @@
           '<span class="cat"></span>' +
           '<h2></h2>' +
           '<span class="desc"></span>' +
-          '<span class="foot"><span class="meta"></span><span class="play">▶ Gioca</span></span>' +
+          '<span class="foot"><span class="meta"></span><span class="play"></span></span>' +
         '</span>';
       card.querySelector(".cat").textContent  = cat;
       card.querySelector("h2").textContent     = title;
       card.querySelector(".desc").textContent  = desc;
       card.querySelector(".meta").textContent  = meta;
+      card.querySelector(".play").textContent  = playLabel;
       card.addEventListener("click", () => openGame(filename, title));
       grid.appendChild(card);
     });
