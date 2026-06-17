@@ -164,6 +164,7 @@
     "supermercato":                 {cat:"Euro & problemi",         title:"Spesa al Supermercato",     desc:"Calcola il totale, paga e controlla il resto: tre livelli per usare la matematica proprio come al supermercato.", meta:"3 livelli · euro"},
     "subitizing":                   {cat:"Senso del numero",        title:"Subitizing",                desc:"Osserva la carta e scrivi al volo quanti pallini vedi: per riconoscere le quantità in un colpo d'occhio, senza contare.", meta:"colpo d'occhio"},
     "scrivo_il_numero":             {cat:"Numeri in lettere",       title:"Scrivo il Numero",          desc:"Scrivi i numeri in lettere o in cifre, nei due versi: per collegare la parola-numero alla sua cifra.", meta:"cifre ↔ lettere"},
+    "macchia_di_caffe":             {cat:"Calcolo & numero mancante", title:"La Macchia di Caffè",        desc:"Una macchia nasconde una cifra dell'operazione: trova il numero mancante. Cinque livelli, in riga o in colonna.", meta:"entro 20 → decimali"},
   };
 
   // Ordine preferito + lista di RISERVA (se l'API GitHub non risponde)
@@ -174,7 +175,8 @@
     "giro_le_cifre.html","invalsi.html","Maggiore_minore.html","mattonelle.html",
     "pallottoliere_per_operazioni.html","quanti_fagioli.html","scatolina.html",
     "tavola_delle_divisioni.html","tabelline.html","supermercato.html","subitizing.html",
-    "scrivo_il_numero.html"
+    "scrivo_il_numero.html",
+    "macchia_di_caffe.html"
   ];
 
   const grid    = document.getElementById("grid");
@@ -186,13 +188,23 @@
     return slug.replace(/_/g," ").replace(/\b\w/g, c => c.toUpperCase());
   }
 
+  function displayTitle(filename){
+    const slug = filename.replace(/\.html$/i,"");
+    const m = META[slug] || {};
+    return m.title || slugToTitle(slug);
+  }
+  // Chiave d'ordinamento: ignora l'articolo iniziale (l', il, lo, la, i, gli, le, un, uno, una)
+  function sortKey(filename){
+    return displayTitle(filename)
+      .replace(/^\s*(l'|gli\s+|le\s+|lo\s+|la\s+|il\s+|i\s+|un'|uno\s+|una\s+|un\s+)/i, "")
+      .trim();
+  }
   function orderGames(names){
-    const known = ORDER.filter(n => names.includes(n));
-    const extra = names.filter(n => !ORDER.includes(n)).sort((a,b)=>a.localeCompare(b));
-    let all = known.concat(extra);
-    // La pagina degli strumenti fisici va sempre in cima (tasto speciale)
-    const special = all.filter(n => /strument/i.test(n));
-    const rest    = all.filter(n => !/strument/i.test(n));
+    // La pagina degli strumenti fisici va sempre in cima (tasto speciale);
+    // tutti i giochi seguono in ordine alfabetico per titolo (senza l'articolo iniziale).
+    const special = names.filter(n => /strument/i.test(n));
+    const rest    = names.filter(n => !/strument/i.test(n))
+      .sort((a,b) => sortKey(a).localeCompare(sortKey(b), "it", {sensitivity:"base"}));
     return special.concat(rest);
   }
   function isSpecial(filename){ return /strument/i.test(filename); }
