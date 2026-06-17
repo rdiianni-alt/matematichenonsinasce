@@ -207,6 +207,23 @@
     document.body.style.overflow = "hidden";
     window.scrollTo(0, 0);
     gameOpen = true;
+    // Quando il gioco si carica, faccio uscire dalla finestrella i link che portano
+    // FUORI dal sito dei giochi (es. il logo verso il blog): cos\u00ec sostituiscono
+    // tutta la pagina e l'indirizzo in alto diventa quello del blog.
+    frame.addEventListener("load", fixGameLinks, {once:true});
+  }
+  function fixGameLinks(){
+    try{
+      const doc = frame.contentDocument || frame.contentWindow.document;
+      const host = location.hostname; // rdiianni-alt.github.io
+      doc.querySelectorAll("a[href]").forEach(a => {
+        let u;
+        try{ u = new URL(a.href, doc.baseURI); }catch(e){ return; }
+        if(u.protocol === "http:" || u.protocol === "https:"){
+          if(u.hostname && u.hostname !== host){ a.target = "_top"; }  // link esterno (blog) \u2192 tutta la pagina
+        }
+      });
+    }catch(e){ /* se non accessibile, nessun problema */ }
   }
   function closeGame(){
     gameOpen = false;
