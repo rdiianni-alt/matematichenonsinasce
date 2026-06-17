@@ -209,7 +209,6 @@
     gameOpen = true;
   }
   function closeGame(){
-    if(!gameOpen) return;
     gameOpen = false;
     player.classList.remove("on");
     frame.src = "about:blank";
@@ -218,6 +217,10 @@
   }
   // Nessuna barra sul gioco: per chiudere si usa Esc o il tasto Indietro del browser/telefono.
   document.addEventListener("keydown", e => { if(e.key === "Escape") closeGame(); });
+
+  // Quando si torna alla pagina (anche dalla cache "avanti/indietro" del browser),
+  // riparti sempre dall'elenco: così i clic sui giochi funzionano sempre.
+  window.addEventListener("pageshow", () => { closeGame(); });
 
   function renderCards(names){
     grid.innerHTML = "";
