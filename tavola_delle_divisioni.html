@@ -80,7 +80,7 @@ body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; min-height: 100
 <body>
 
 <div class="header">
-  <a href="https://matematichenonsinasce.com/" >
+  <a href="https://matematichenonsinasce.com/" target="_blank">
     <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="Logo">
     <span class="blog-name">Matematiche non si nasce</span>
     <span style="font-size:16px;font-weight:800;color:#333;letter-spacing:0.5px;">La Tavola delle Divisioni</span>
@@ -120,9 +120,208 @@ body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; min-height: 100
 <div class="bottom-bar">
   <button class="btn btn-red" onclick="reset()">🔄 Ricomincia</button>
   <button class="btn btn-green" onclick="mostraRisultato()">✅ Risultato</button>
+  <button class="btn" style="background:#e08800;" onclick="apriStampa()">🖨️ Versione stampabile</button>
+  <button class="btn" style="background:#5c3d9e;" onclick="window.location.href='https://rdiianni-alt.github.io/matematichenonsinasce/'">🏠 Torna alla pagina iniziale</button>
 </div>
 
+<script id="stampa-template" type="text/plain">
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>La Tavola delle Divisioni - Stampa</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+@page { size: A4 landscape; margin: 5mm; }
+body { font-family: 'Segoe UI', sans-serif; background: #f0f0f0; }
+.screen-only { text-align: center; padding: 12px; background: #f0f0f0; }
+.print-btn { padding: 10px 28px; background: #5c3d9e; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; }
+@media print { .screen-only { display: none !important; } body { background: #fff; } }
+.page { width: 287mm; height: 200mm; overflow: hidden; margin: 0 auto 20px; padding: 4mm; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.15); page-break-after: always; display: flex; flex-direction: column; }
+.page:last-child { page-break-after: avoid; margin-bottom: 0; }
+.testata { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2mm; }
+.testata .titolo { font-size: 13px; font-weight: 800; color: #5c3d9e; }
+.testata .sotto  { font-size: 8px; color: #aaa; }
+.istruzioni { border: 1px solid #9b72d8; border-radius: 4px; padding: 2mm 3mm; margin-bottom: 2mm; background: #f8f4ff; }
+.istruzioni ol { padding-left: 4mm; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 4mm; }
+.istruzioni li { font-size: 7.5px; line-height: 1.4; margin-bottom: 1mm; }
+.griglia-wrap { border: 1.5px solid #9b72d8; border-radius: 4px; overflow: hidden; flex: 1; }
+.griglia { display: grid; grid-template-columns: repeat(20, 1fr); height: 100%; }
+.cella { border: 0.5px solid #d0bfee; display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 700; }
+.cella.hdr { background: #5c3d9e; color: #fff; }
+.risultato-box { border: 1px solid #9b72d8; border-radius: 4px; padding: 2mm 3mm; background: #f8f4ff; margin-top: 2mm; }
+.risultato-box .rlbl { font-size: 8px; font-weight: 700; color: #5c3d9e; margin-bottom: 1.5mm; }
+.risultato-box .rline { font-size: 10px; margin-bottom: 1.5mm; letter-spacing: 1px; }
+.g-label { font-size: 8px; font-weight: 700; margin-bottom: 1mm; }
+.g-griglia { display: grid; grid-template-columns: repeat(20, 1fr); border: 1px solid #555; width: 100%; }
+.g-cella { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 6.5px; font-weight: 800; color: #fff; border: 0.5px solid rgba(0,0,0,0.15); }
+.g-cella.u { background: #5bc0de; } .g-cella.d { background: #e87fb8; } .g-cella.c { background: #3a9e5c; }
+.ritaglia { border-top: 1px dashed #bbb; margin: 1.5mm 0; position: relative; }
+.ritaglia::before { content: '✂ ritaglia'; position: absolute; top: -6px; left: 50%; transform: translateX(-50%); background: #fff; padding: 0 2mm; font-size: 6.5px; color: #bbb; }
+.freccia-riga { display: flex; align-items: center; gap: 3mm; margin-top: 2mm; }
+.triangolo { width: 0; height: 0; border-left: 5mm solid transparent; border-right: 5mm solid transparent; border-bottom: 7mm solid #f0a500; flex-shrink: 0; }
+.nota { font-size: 7px; color: #888; }
+</style>
+</head>
+<body>
+<div class="screen-only">
+  <button class="print-btn" onclick="window.print()">🖨️ Stampa / Salva PDF</button>
+  <p style="font-size:11px;color:#666;margin-top:6px;">Orientamento <strong>Orizzontale</strong>, margini <strong>Minimi</strong>, scala <strong>100%</strong>.</p>
+</div>
+<div class="page">
+  <div class="testata"><span class="titolo">La Tavola delle Divisioni</span><span class="sotto">matematichenonsinasce.com</span></div>
+  <div class="istruzioni"><ol>
+    <li>Prendi i gettoni per il tuo <strong>dividendo</strong>: celesti per le unità, rosa per le decine, verdi per le centinaia.</li>
+    <li>Scegli il <strong>divisore</strong> e posiziona la freccia arancione sotto quel numero.</li>
+    <li>Distribuisci i gettoni nelle celle riga per riga fino alla freccia.</li>
+    <li>Ogni riga deve avere gettoni tutti dello stesso tipo.</li>
+    <li>I gettoni rimasti che non riempiono una riga intera sono il <strong>resto</strong>.</li>
+    <li>Righe piene × valore del gettone = <strong>quoziente</strong>.</li>
+  </ol></div>
+  <div class="griglia-wrap"><div class="griglia" id="griglia"></div></div>
+  <div class="risultato-box">
+    <div class="rlbl">📊 Risultato</div>
+    <div class="rline">_______ = _______ × _______ + _______</div>
+    <div class="rline">_______ ÷ _______ = _______ + _______ / _______</div>
+  </div>
+</div>
+<div class="page">
+  <div class="testata"><span class="titolo" style="font-size:11px;">Gettoni da ritagliare e plastificare</span><span class="sotto">matematichenonsinasce.com</span></div>
+  <div class="g-label" style="color:#5bc0de;">● UNITÀ — valore 1</div>
+  <div class="g-griglia" id="g-u"></div>
+  <div class="ritaglia"></div>
+  <div class="g-label" style="color:#e87fb8;">● DECINE — valore 10</div>
+  <div class="g-griglia" id="g-d"></div>
+  <div class="ritaglia"></div>
+  <div class="g-label" style="color:#3a9e5c;">● CENTINAIA — valore 100</div>
+  <div class="g-griglia" id="g-c"></div>
+  <div class="ritaglia"></div>
+  <div class="freccia-riga">
+    <div class="triangolo"></div>
+    <div class="nota">Freccia per il divisore — ritaglia, plastifica e posiziona sotto il numero scelto.</div>
+  </div>
+</div>
 <script>
+const g=document.getElementById('griglia');
+for(let r=0;r<=10;r++) for(let c=0;c<20;c++){const d=document.createElement('div');d.className='cella '+(r===0?'hdr':'');if(r===0)d.textContent=c+1;g.appendChild(d);}
+function mkG(id,cls,lbl,n){const el=document.getElementById(id);for(let i=0;i<n;i++){const d=document.createElement('div');d.className='g-cella '+cls;d.textContent=lbl;el.appendChild(d);}}
+mkG('g-u','u','1',100);mkG('g-d','d','10',60);mkG('g-c','c','100',40);
+<\/script>
+</body>
+</html>
+</script>
+
+<script>
+function apriStampa() {
+  const html = `<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>La Tavola delle Divisioni - Stampa</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+@page { size: A4 landscape; margin: 5mm; }
+body { font-family: 'Segoe UI', sans-serif; background: #f0f0f0; }
+.screen-only { text-align: center; padding: 12px; }
+.print-btn { padding: 10px 28px; background: #5c3d9e; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; }
+@media print { .screen-only { display: none !important; } body { background: #fff; } }
+.page { width: 287mm; height: 200mm; overflow: hidden; margin: 0 auto 20px; padding: 4mm; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.15); page-break-after: always; display: flex; flex-direction: column; }
+.page:last-child { page-break-after: avoid; margin-bottom: 0; }
+.testata { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2mm; }
+.testata .titolo { font-size: 13px; font-weight: 800; color: #5c3d9e; }
+.testata .sotto { font-size: 8px; color: #aaa; }
+.istruzioni { border: 1px solid #9b72d8; border-radius: 4px; padding: 2mm 3mm; margin-bottom: 2mm; background: #f8f4ff; }
+.istruzioni ol { padding-left: 4mm; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 4mm; }
+.istruzioni li { font-size: 7.5px; line-height: 1.4; margin-bottom: 1mm; }
+.griglia-wrap { border: 1.5px solid #9b72d8; border-radius: 4px; overflow: hidden; flex: 1; }
+.griglia { display: grid; grid-template-columns: repeat(20, 1fr); height: 100%; }
+.cella { border: 0.5px solid #d0bfee; display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 700; }
+.cella.hdr { background: #5c3d9e; color: #fff; }
+.risultato-box { border: 1px solid #9b72d8; border-radius: 4px; padding: 2mm 3mm; background: #f8f4ff; margin-top: 2mm; }
+.risultato-box .rlbl { font-size: 8px; font-weight: 700; color: #5c3d9e; margin-bottom: 1.5mm; }
+.risultato-box .rline { font-size: 10px; margin-bottom: 1.5mm; letter-spacing: 1px; }
+.g-label { font-size: 8px; font-weight: 700; margin-bottom: 1mm; }
+.g-griglia { display: grid; grid-template-columns: repeat(20, 1fr); border: 1px solid #555; width: 100%; }
+.g-cella { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 6.5px; font-weight: 800; color: #fff; border: 0.5px solid rgba(0,0,0,0.15); }
+.g-cella.u { background: #5bc0de; } .g-cella.d { background: #e87fb8; } .g-cella.c { background: #3a9e5c; }
+.ritaglia { border-top: 1px dashed #bbb; margin: 1.5mm 0; position: relative; }
+.ritaglia::before { content: '✂ ritaglia'; position: absolute; top: -6px; left: 50%; transform: translateX(-50%); background: #fff; padding: 0 2mm; font-size: 6.5px; color: #bbb; }
+.freccia-riga { display: flex; align-items: center; gap: 3mm; margin-top: 2mm; }
+.triangolo { width: 0; height: 0; border-left: 5mm solid transparent; border-right: 5mm solid transparent; border-bottom: 7mm solid #f0a500; flex-shrink: 0; }
+.nota { font-size: 7px; color: #888; }
+</style>
+</head>
+<body>
+<div class="screen-only">
+  <button class="print-btn" onclick="window.print()">🖨️ Stampa / Salva PDF</button>
+  <p style="font-size:11px;color:#666;margin-top:6px;">Orientamento <strong>Orizzontale</strong>, margini <strong>Minimi</strong>, scala <strong>100%</strong>.</p>
+</div>
+<div class="page">
+  <div class="testata"><span class="titolo">La Tavola delle Divisioni</span><span class="sotto">matematichenonsinasce.com</span></div>
+  <div class="istruzioni"><ol>
+    <li>Prendi i gettoni per il tuo <strong>dividendo</strong>: celesti per le unità, rosa per le decine, verdi per le centinaia.</li>
+    <li>Scegli il <strong>divisore</strong> e posiziona la freccia arancione sotto quel numero.</li>
+    <li>Distribuisci i gettoni nelle celle riga per riga fino alla freccia.</li>
+    <li>Ogni riga deve avere gettoni tutti dello stesso tipo.</li>
+    <li>I gettoni rimasti che non riempiono una riga intera sono il <strong>resto</strong>.</li>
+    <li>Righe piene × valore del gettone = <strong>quoziente</strong>.</li>
+  </ol></div>
+  <div class="griglia-wrap"><div class="griglia" id="griglia"></div></div>
+  <div class="risultato-box">
+    <div class="rlbl">📊 Risultato</div>
+    <div class="rline">_______ = _______ × _______ + _______</div>
+    <div class="rline">_______ ÷ _______ = _______ + _______ / _______</div>
+  </div>
+</div>
+<div class="page">
+  <div class="testata"><span class="titolo" style="font-size:11px;">Gettoni da ritagliare e plastificare</span><span class="sotto">matematichenonsinasce.com</span></div>
+  <div class="g-label" style="color:#5bc0de;">● UNITÀ — valore 1</div>
+  <div class="g-griglia" id="g-u"></div>
+  <div class="ritaglia"></div>
+  <div class="g-label" style="color:#e87fb8;">● DECINE — valore 10</div>
+  <div class="g-griglia" id="g-d"></div>
+  <div class="ritaglia"></div>
+  <div class="g-label" style="color:#3a9e5c;">● CENTINAIA — valore 100</div>
+  <div class="g-griglia" id="g-c"></div>
+  <div class="ritaglia"></div>
+  <div class="freccia-riga">
+    <div class="triangolo"></div>
+    <div class="nota">Freccia per il divisore — ritaglia, plastifica e posiziona sotto il numero scelto.</div>
+  </div>
+</div>
+${buildGrigliaHTML()}
+${buildGettoniHTML()}
+</body>
+</html>`;
+
+  const blob = new Blob([html], {type: 'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'tavola-divisioni-stampa.html';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function buildGrigliaHTML() {
+  let cells = '';
+  for (let r=0; r<=10; r++)
+    for (let c=0; c<20; c++)
+      cells += `<div class="cella ${r===0?'hdr':''}">${r===0?c+1:''}</div>`;
+  return `<script>
+    document.getElementById('griglia').innerHTML = '${cells}';
+    function mkG(id,cls,lbl,n){
+      let h=''; for(let i=0;i<n;i++) h+='<div class="g-cella '+cls+'">'+lbl+'</div>';
+      document.getElementById(id).innerHTML=h;
+    }
+    mkG('g-u','u','1',100);
+    mkG('g-d','d','10',60);
+    mkG('g-c','c','100',40);
+  ${'<'}/script>`;
+}
+
+function buildGettoniHTML() { return ''; }
+
 const COLS = 20;
 const TK = [
   {l:'Unità',        v:1,     c:'#5bc0de'},
@@ -301,14 +500,16 @@ function rigaValida(row) {
 }
 
 function aggRis() {
-  let q=0,ok=0;
+  let q=0, ok=0, totValido=0;
   cells.forEach(row=>{
     if(!rigaValida(row)) return;
-    q+=TK[row[0]].v; ok++;
+    totValido += TK[row[0]].v * DIV;
+    q += TK[row[0]].v;
+    ok++;
   });
-  let tot=0; TK.forEach((t,i)=>tot+=inGrid[i]*t.v);
-  document.getElementById('rq').textContent=ok>0?q:'—';
-  document.getElementById('rr').textContent=tot>0?DVD-tot:'—';
+  const resto = DVD - totValido;
+  document.getElementById('rq').textContent = ok>0 ? q : '—';
+  document.getElementById('rr').textContent = ok>0 ? resto : '—';
 }
 
 function mostraRisultato() {
