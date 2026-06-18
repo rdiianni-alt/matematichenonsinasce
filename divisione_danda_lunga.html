@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;background:transparent}
+body{font-family:'Nunito',sans-serif;color:#222;padding:clamp(8px,2vw,24px)}
+
+/* unità base: tutto scala da questa */
+:root{--u:clamp(22px,4vw,48px)}
+
+.logo{display:flex;align-items:center;gap:calc(var(--u)*0.4);margin-bottom:calc(var(--u)*0.6);text-decoration:none}
+.logo img{width:var(--u);height:var(--u);object-fit:contain;border-radius:50%}
+.logo-text{font-size:calc(var(--u)*0.45);font-weight:500;color:#333}
+
+.controls{display:flex;gap:calc(var(--u)*0.4);margin-bottom:calc(var(--u)*0.7);align-items:center;flex-wrap:wrap}
+.controls label{font-size:calc(var(--u)*0.4);color:#555}
+.controls input{width:calc(var(--u)*2.2);text-align:center;font-size:calc(var(--u)*0.5);font-family:'Open Sans',sans-serif;padding:calc(var(--u)*0.1)}
+.controls button{font-size:calc(var(--u)*0.38);padding:calc(var(--u)*0.15) calc(var(--u)*0.5);font-family:'Open Sans',sans-serif}
+
+.wrapper{display:flex;gap:calc(var(--u)*1.5);align-items:flex-start;flex-wrap:wrap}
+
+/* griglia divisione */
+.division-grid{display:flex;flex-direction:row;align-items:flex-start}
+.left-col{display:flex;flex-direction:column}
+.sep-line{width:calc(var(--u)*0.07);min-width:2px;background:#333;align-self:stretch;min-height:var(--u);margin:0 calc(var(--u)*0.1)}
+.right-col{display:flex;flex-direction:column;min-width:calc(var(--u)*2)}
+
+.row{display:flex;align-items:center;min-height:var(--u)}
+.cell{width:var(--u);height:var(--u);display:flex;align-items:center;justify-content:center;font-size:calc(var(--u)*0.6);font-weight:600}
+.cell.marked{border-top:calc(var(--u)*0.06) solid #333}
+
+.divisore-row{display:flex;align-items:center;min-height:var(--u);padding-left:calc(var(--u)*0.2)}
+.divisore-val{font-size:calc(var(--u)*0.6);font-weight:600}
+.horiz-line{height:calc(var(--u)*0.07);min-height:2px;background:#333;margin:0 calc(var(--u)*0.2)}
+.quot-row{display:flex;align-items:center;min-height:var(--u);padding-left:calc(var(--u)*0.2)}
+
+.result-input{width:var(--u);height:var(--u);border:none;border-bottom:calc(var(--u)*0.06) solid #185FA5;background:transparent;text-align:center;font-size:calc(var(--u)*0.6);font-weight:700;font-family:'Nunito',sans-serif;color:#185FA5;outline:none}
+.result-input:focus{background:#e8f0fb}
+.q-digit{width:var(--u);height:var(--u);display:flex;align-items:center;justify-content:center;font-size:calc(var(--u)*0.6);font-weight:600;color:#185FA5}
+
+.sub-row{display:flex;align-items:center;min-height:var(--u)}
+.sub-cell{width:var(--u);height:var(--u);display:flex;align-items:center;justify-content:center;font-size:calc(var(--u)*0.6);font-weight:600}
+.sub-cell.underline{border-bottom:calc(var(--u)*0.05) solid #333}
+.sub-cell.lowered{color:#0F6E56}
+
+.msg{font-size:calc(var(--u)*0.38);margin:calc(var(--u)*0.3) 0;min-height:calc(var(--u)*0.5);color:#222}
+.msg.ok{color:#0F6E56;font-weight:500}
+.msg.err{color:#A32D2D}
+
+.tabellina{font-size:calc(var(--u)*0.35);line-height:1.8;padding:calc(var(--u)*0.3) calc(var(--u)*0.4);border:1px solid #ddd;border-radius:8px;background:#f7f7f7;min-width:calc(var(--u)*3)}
+.tabellina .hl{font-weight:700;background:#dbeafe;border-radius:3px;padding:0 4px;color:#1e40af}
+
+.step-hint{font-size:calc(var(--u)*0.38);color:#555;margin-top:calc(var(--u)*0.3);max-width:500px;line-height:1.5}
+.resto-info{font-size:calc(var(--u)*0.4);color:#555;margin-top:calc(var(--u)*0.2)}
+
+.num-input{width:calc(var(--u)*2);text-align:center;font-size:calc(var(--u)*0.5);font-family:'Nunito',sans-serif;margin-top:calc(var(--u)*0.1)}
+.confirm-btn{font-size:calc(var(--u)*0.35);margin-top:calc(var(--u)*0.2);margin-left:8px;font-family:'Open Sans',sans-serif}
+</style>
+</head>
+<body>
+<a href="https://matematichenonsinasce.com/" target="_blank" class="logo">
+  <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/main/logo.png" alt="logo">
+  <div class="logo-text">Matematiche non si nasce</div>
+</a>
+<h2 style="font-size:calc(var(--u)*0.55);font-weight:700;margin-bottom:calc(var(--u)*0.5);letter-spacing:0.5px">
+  <span style="color:#185FA5">D</span><span style="color:#0F6E56">i</span><span style="color:#A32D2D">v</span><span style="color:#854F0B">i</span><span style="color:#185FA5">s</span><span style="color:#7C3D8A">i</span><span style="color:#0F6E56">o</span><span style="color:#A32D2D">n</span><span style="color:#185FA5">e</span>
+  <span style="color:#444"> a </span>
+  <span style="color:#854F0B">d</span><span style="color:#7C3D8A">a</span><span style="color:#0F6E56">n</span><span style="color:#A32D2D">d</span><span style="color:#185FA5">a</span>
+  <span style="color:#444"> </span>
+  <span style="color:#0F6E56">l</span><span style="color:#854F0B">u</span><span style="color:#7C3D8A">n</span><span style="color:#A32D2D">g</span><span style="color:#185FA5">a</span>
+</h2>
+<div class="controls">
+  <label>Dividendo</label>
+  <input type="number" id="inp-div" value="592" min="1">
+  <label>Divisore</label>
+  <input type="number" id="inp-dsr" value="16" min="1">
+  <button onclick="startGame()">Inizia</button>
+</div>
+<div id="msg" class="msg"></div>
+<div class="wrapper">
+  <div class="division-grid" id="division-grid"></div>
+  <div id="tabellina" class="tabellina" style="display:none"></div>
+</div>
+<div id="step-hint" class="step-hint"></div>
+<div id="resto-info" class="resto-info"></div>
+
+<script>
+let DIV,DSR,digits,steps,currentStep,partialQuotient,lastRemainder;
+
+function startGame(){
+  DIV=parseInt(document.getElementById('inp-div').value);
+  DSR=parseInt(document.getElementById('inp-dsr').value);
+  if(!DIV||!DSR||DSR===0){setMsg('Inserisci numeri validi.',false);return;}
+  if(DIV<DSR){setMsg('Il dividendo deve essere ≥ del divisore.',false);return;}
+  digits=String(DIV).split('').map(Number);
+  steps=computeSteps(DIV,DSR);
+  currentStep=0;partialQuotient=[];lastRemainder=null;
+  document.getElementById('tabellina').style.display='none';
+  document.getElementById('step-hint').textContent='';
+  document.getElementById('resto-info').textContent='';
+  setMsg('');
+  renderLayout();
+}
+
+function computeSteps(div,dsr){
+  let s=[],rem=0,d=String(div).split('').map(Number),pos=0;
+  while(pos<d.length){
+    rem=rem*10+d[pos];
+    while(rem<dsr&&pos<d.length-1){pos++;rem=rem*10+d[pos];}
+    let q=Math.floor(rem/dsr),prod=q*dsr,r=rem-prod;
+    s.push({partial:rem,q,prod,r,endPos:pos});
+    rem=r;pos++;
+  }
+  return s;
+}
+
+function spacer(n){
+  let arr=[];
+  for(let i=0;i<n;i++){const c=document.createElement('div');c.className='sub-cell';arr.push(c);}
+  return arr;
+}
+
+function renderLayout(){
+  const grid=document.getElementById('division-grid');
+  grid.innerHTML='';
+  const leftCol=document.createElement('div');leftCol.className='left-col';leftCol.id='left-col';
+  const row=document.createElement('div');row.className='row';row.id='row-dividend';
+  const firstLen=steps[0].endPos+1;
+  digits.forEach((d,i)=>{
+    const c=document.createElement('div');
+    c.className='cell'+(i<firstLen?' marked':'');
+    c.id='dg-'+i;c.textContent=d;row.appendChild(c);
+  });
+  leftCol.appendChild(row);
+  const sub=document.createElement('div');sub.id='sub-blocks';leftCol.appendChild(sub);
+  const sepLine=document.createElement('div');sepLine.className='sep-line';sepLine.id='sep-line';
+  const rightCol=document.createElement('div');rightCol.className='right-col';rightCol.id='right-col';
+  const dRow=document.createElement('div');dRow.className='divisore-row';
+  const dVal=document.createElement('div');dVal.className='divisore-val';dVal.textContent=DSR;
+  dRow.appendChild(dVal);rightCol.appendChild(dRow);
+  const hLine=document.createElement('div');hLine.className='horiz-line';hLine.id='horiz-line';rightCol.appendChild(hLine);
+  const qRow=document.createElement('div');qRow.className='quot-row';qRow.id='quot-row';rightCol.appendChild(qRow);
+  grid.appendChild(leftCol);grid.appendChild(sepLine);grid.appendChild(rightCol);
+  updateQuotientDisplay([],()=>validateQuotient(0));
+  askQuotient(0);
+}
+
+function askQuotient(idx){
+  const s=steps[idx];
+  renderTabellina(DSR,s.q);
+  document.getElementById('tabellina').style.display='block';
+  document.getElementById('step-hint').textContent=`Quante volte entra ${DSR} in ${s.partial}?`;
+  updateQuotientDisplay(partialQuotient,()=>validateQuotient(idx));
+}
+
+function askSubtraction(idx){
+  const s=steps[idx];
+  const sub=document.getElementById('sub-blocks');
+  let block=document.getElementById('sub-'+idx);
+  if(!block){block=document.createElement('div');block.id='sub-'+idx;sub.appendChild(block);}
+  const pLen=String(s.partial).length;
+  const offset=s.endPos-pLen+1;
+  const prodRow=document.createElement('div');prodRow.className='sub-row';
+  spacer(offset).forEach(c=>prodRow.appendChild(c));
+  const prodStr=String(s.prod).padStart(pLen,'0');
+  [...prodStr].forEach(ch=>{
+    const c=document.createElement('div');c.className='sub-cell underline';c.textContent=ch;prodRow.appendChild(c);
+  });
+  block.appendChild(prodRow);
+  document.getElementById('step-hint').textContent=`Calcola ${s.partial} − ${s.prod} = ?`;
+  const ri=document.createElement('input');
+  ri.type='number';ri.className='num-input';ri.id='rest-input-'+idx;
+  ri.style.marginLeft=(offset*getCellSize())+'px';ri.placeholder='?';
+  ri.addEventListener('keydown',e=>{if(e.key==='Enter')validateResto(idx);});
+  block.appendChild(ri);
+  const btn=document.createElement('button');
+  btn.textContent='Conferma';btn.className='confirm-btn';btn.onclick=()=>validateResto(idx);
+  block.appendChild(btn);
+  setTimeout(()=>ri.focus(),50);
+}
+
+function getCellSize(){
+  const u=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--u'))||36;
+  return u;
+}
+
+function validateQuotient(idx){
+  const inp=document.getElementById('q-input');if(!inp)return;
+  const val=parseInt(inp.value);const s=steps[idx];
+  if(isNaN(val)||val<0||val>9){setMsg('Inserisci una cifra da 0 a 9.',false);inp.value='';return;}
+  if(val!==s.q){setMsg(`Non è corretto. ${DSR} × ${val} = ${DSR*val}, ma il parziale è ${s.partial}. Riprova.`,false);inp.value='';inp.focus();return;}
+  setMsg('');partialQuotient.push(s.q);
+  updateQuotientDisplay(partialQuotient,null);
+  askSubtraction(idx);
+}
+
+function validateResto(idx){
+  const s=steps[idx];
+  const inp=document.getElementById('rest-input-'+idx);if(!inp)return;
+  const val=parseInt(inp.value);
+  if(isNaN(val)){setMsg('Inserisci il risultato della sottrazione.',false);return;}
+  if(val!==s.r){setMsg(`Non è corretto. ${s.partial} − ${s.prod} = ${s.r}, non ${val}. Riprova.`,false);inp.value='';inp.focus();return;}
+  setMsg('');lastRemainder=s.r;
+  inp.remove();
+  const btn=document.getElementById('sub-'+idx)?.querySelector('button');if(btn)btn.remove();
+  const block=document.getElementById('sub-'+idx);
+  const pLen=String(s.partial).length;const offset=s.endPos-pLen+1;
+  const restRow=document.createElement('div');restRow.className='sub-row';
+  spacer(offset).forEach(c=>restRow.appendChild(c));
+  const restStr=String(s.r).padStart(pLen,' ');
+  [...restStr].forEach(ch=>{
+    const c=document.createElement('div');c.className='sub-cell';c.textContent=ch.trim();restRow.appendChild(c);
+  });
+  block.appendChild(restRow);
+  currentStep=idx+1;
+  if(currentStep>=steps.length){finalize();}
+  else{
+    const nextS=steps[currentStep];
+    const lc=document.createElement('div');lc.className='sub-cell lowered';lc.textContent=digits[nextS.endPos];restRow.appendChild(lc);
+    document.getElementById('step-hint').textContent=`Abbassa il ${digits[nextS.endPos]}…`;
+    setTimeout(()=>askQuotient(currentStep),400);
+  }
+}
+
+function updateQuotientDisplay(qDigits,onEnter){
+  const qRow=document.getElementById('quot-row');if(!qRow)return;
+  const old=document.getElementById('q-input');if(old)old.remove();
+  qRow.innerHTML='';
+  qDigits.forEach(d=>{
+    const sp=document.createElement('div');sp.className='q-digit';sp.textContent=d;qRow.appendChild(sp);
+  });
+  if(onEnter){
+    const inp=document.createElement('input');
+    inp.type='text';inp.maxLength=1;inp.className='result-input';inp.id='q-input';
+    inp.setAttribute('autocomplete','off');
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter')onEnter();});
+    inp.addEventListener('input',()=>{if(inp.value.length===1)onEnter();});
+    qRow.appendChild(inp);setTimeout(()=>inp.focus(),50);
+  }
+  setTimeout(()=>{
+    const hl=document.getElementById('horiz-line');const rc=document.getElementById('right-col');
+    if(hl&&rc)hl.style.width=(rc.offsetWidth-12)+'px';
+  },20);
+}
+
+function renderTabellina(dsr,correctQ){
+  const tab=document.getElementById('tabellina');
+  let html=`<div style="font-size:calc(var(--u)*0.38);font-weight:500;color:#555;margin-bottom:calc(var(--u)*0.2)">Tabellina del ${dsr}</div>`;
+  for(let i=1;i<=9;i++){
+    const hl=i===correctQ?'hl':'';
+    html+=`<div class="${hl}">${dsr} × ${i} = <strong>${dsr*i}</strong></div>`;
+  }
+  tab.innerHTML=html;
+}
+
+function finalize(){
+  const lastR=steps[steps.length-1].r;const q=partialQuotient.join('');
+  document.getElementById('tabellina').style.display='none';
+  document.getElementById('step-hint').textContent='';
+  const ri=document.getElementById('resto-info');
+  ri.textContent=lastR===0?`${DIV} = ${DSR} × ${q}`:`${DIV} = ${DSR} × ${q} + ${lastR}`;
+  ri.style.color=lastR===0?'#0F6E56':'#555';
+  setMsg('Divisione completata!',true);
+}
+
+function setMsg(txt,ok){
+  const el=document.getElementById('msg');el.textContent=txt;
+  el.className='msg'+(ok===true?' ok':ok===false?' err':'');
+}
+
+startGame();
+</script>
+</body>
+</html>
