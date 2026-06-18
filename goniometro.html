@@ -41,7 +41,7 @@ input[type=number]:focus{outline:none;border-color:#4a90d9;}
 </style>
 </head>
 <body>
-<a href="https://matematichenonsinasce.com/" class="logo">
+<a href="https://matematichenonsinasce.com/" class="logo" target="_blank">
   <img src="logo.png" alt="logo">
   <div class="logo-text">Matematiche non si nasce</div>
 </a>
@@ -127,7 +127,7 @@ function startGame(m) {
     newFreeRound();
   } else {
     document.getElementById('game-title').textContent = 'Misura l\'angolo';
-    document.getElementById('hint').textContent = 'Trascina il goniometro sul vertice, ruota il corpo (manopola viola) poi il braccio azzurro';
+    document.getElementById('hint').textContent = 'Trascina il goniometro sul vertice, ruota il corpo (manopola gialla) poi il braccio azzurro';
     document.getElementById('target-display').textContent = '';
     document.getElementById('lbl-ans').textContent = 'Quanti gradi?';
     document.getElementById('ans').style.display = 'inline-block';
@@ -223,20 +223,63 @@ function check() {
 }
 
 /* ---- DRAW ---- */
+function drawFreeAngle() {
+  var cx = W/2, cy = H/2;
+  var r1 = toRad(-90); // braccio fisso a 0°
+  var r2 = toRad(freeAngle - 90);
+  var fadeRadius = Math.max(W, H);
+  var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, fadeRadius);
+  grad.addColorStop(0,   'rgba(255,180,0,0.55)');
+  grad.addColorStop(0.18,'rgba(255,200,80,0.35)');
+  grad.addColorStop(0.5, 'rgba(255,220,120,0.15)');
+  grad.addColorStop(1,   'rgba(255,255,255,0)');
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.arc(cx, cy, fadeRadius, r1, r2, false);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.restore();
+}
+
 function draw() {
   ctx.clearRect(0, 0, W, H);
-  if (mode === 'free') drawGoniometro(W/2, H/2, freeAngle, 0);
+  if (mode === 'free') { drawFreeAngle(); drawGoniometro(W/2, H/2, freeAngle, 0); }
   else { drawTargetAngle(); drawGoniometro(gx, gy, gAngle, gRotation); }
 }
 
 function drawTargetAngle() {
   var len = R + 40;
   var r1 = toRad(targetDir), r2 = toRad(targetDir + targetAngle);
+
+  // gradient fill — intense at vertex, fades to white at canvas edge
+  var fadeRadius = Math.max(W, H);
+  var grad = ctx.createRadialGradient(vx, vy, 0, vx, vy, fadeRadius);
+  grad.addColorStop(0,   'rgba(255,180,0,0.55)');
+  grad.addColorStop(0.18,'rgba(255,200,80,0.35)');
+  grad.addColorStop(0.5, 'rgba(255,220,120,0.15)');
+  grad.addColorStop(1,   'rgba(255,255,255,0)');
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(vx, vy);
+  ctx.arc(vx, vy, fadeRadius, r1, r2, false);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.restore();
+
+  // sides
   ctx.strokeStyle = '#c0392b'; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
   ctx.beginPath(); ctx.moveTo(vx, vy); ctx.lineTo(vx + len*Math.cos(r1), vy + len*Math.sin(r1)); ctx.stroke();
   ctx.beginPath(); ctx.moveTo(vx, vy); ctx.lineTo(vx + len*Math.cos(r2), vy + len*Math.sin(r2)); ctx.stroke();
+
+  // small arc near vertex
   ctx.beginPath(); ctx.arc(vx, vy, 30, r1, r2, false);
   ctx.strokeStyle = 'rgba(192,57,43,0.45)'; ctx.lineWidth = 2; ctx.stroke();
+
+  // vertex dot
   ctx.beginPath(); ctx.arc(vx, vy, 5, 0, Math.PI*2);
   ctx.fillStyle = '#c0392b'; ctx.fill();
 }
@@ -281,13 +324,16 @@ function drawGoniometro(cx, cy, armDeg, rotDeg) {
   ctx.strokeStyle = '#778'; ctx.lineWidth = 2; ctx.stroke();
 
   var ar = toRad(armDeg - 90);
+  var ext = 22; // quanto sporge oltre il cerchio
   var ax = R*Math.cos(ar), ay = R*Math.sin(ar);
-  ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(ax, ay);
+  var ex = (R+ext)*Math.cos(ar), ey = (R+ext)*Math.sin(ar);
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(ex, ey);
   ctx.strokeStyle = '#4a90d9'; ctx.lineWidth = 3; ctx.stroke();
+  // freccia sulla punta sporgente
   var as = 9;
-  ctx.beginPath(); ctx.moveTo(ax, ay);
-  ctx.lineTo(ax - as*Math.cos(ar-0.3), ay - as*Math.sin(ar-0.3));
-  ctx.lineTo(ax - as*Math.cos(ar+0.3), ay - as*Math.sin(ar+0.3));
+  ctx.beginPath(); ctx.moveTo(ex, ey);
+  ctx.lineTo(ex - as*Math.cos(ar-0.3), ey - as*Math.sin(ar-0.3));
+  ctx.lineTo(ex - as*Math.cos(ar+0.3), ey - as*Math.sin(ar+0.3));
   ctx.closePath(); ctx.fillStyle = '#4a90d9'; ctx.fill();
 
   ctx.beginPath(); ctx.arc(0, 0, 5, 0, Math.PI*2);
@@ -299,8 +345,8 @@ function drawGoniometro(cx, cy, armDeg, rotDeg) {
     var hr = toRad(rotDeg + 90);
     var hx = cx + R*Math.cos(hr), hy = cy + R*Math.sin(hr);
     ctx.beginPath(); ctx.arc(hx, hy, 9, 0, Math.PI*2);
-    ctx.fillStyle = 'rgba(100,80,200,0.3)'; ctx.fill();
-    ctx.strokeStyle = '#668'; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.fillStyle = '#f5c500'; ctx.fill();
+    ctx.strokeStyle = '#b8900a'; ctx.lineWidth = 1.5; ctx.stroke();
   }
 }
 
