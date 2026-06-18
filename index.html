@@ -152,7 +152,6 @@
     "fantasmino":                   {cat:"Sottrazioni",             title:"Fantasmino",                desc:"Aiuta il fantasmino con le sottrazioni a mente: veloce, divertente e tutto da scoprire.", meta:"calcolo · sottrazioni"},
     "Frazioni_sul_filo":            {cat:"Frazioni",                title:"Frazioni sul Filo",         desc:"Posiziona ogni frazione sulla linea dei numeri: un gioco per dare senso alle frazioni, non solo per calcolarle.", meta:"linea dei numeri"},
     "gambero rosso":                {cat:"Logica & deduzione",      title:"Gambero Rosso",             desc:"Fai domande, elimina le carte e scopri dov'è nascosto Gambero Rosso. Pura logica e deduzione.", meta:"indizi · deduzione"},
-    "goniometro":                {cat:"Spazio & figure",      title:"Goniometro interattivo",             desc:"Impariamo insieme ad usare il goniometro. Trascinalo sul vertice e calcola la misura dell'agolo.", meta:"geometria"},
     "giro_le_cifre":                {cat:"Valore posizionale",      title:"Giro le Cifre",             desc:"Un abaco girevole per esplorare unità, decine e centinaia e fare operazioni ragionando sul valore delle cifre.", meta:"abaco · operazioni"},
     "invalsi":                      {cat:"Prove & verifica",        title:"Quiz INVALSI",              desc:"Domande tratte dalle prove INVALSI di matematica per la primaria: mettiti alla prova classe per classe.", meta:"Classe 2ª e 5ª"},
     "Maggiore_minore":              {cat:"Confronti",               title:"Maggiore, Minore o Uguale", desc:"Confronta i numeri e scegli il simbolo giusto: maggiore, minore o uguale, da leggere in entrambi i versi.", meta:"< = > · confronti"},
@@ -264,8 +263,8 @@
       const m = META[slug] || {};
       const title = special ? "Strumenti da scaricare" : (m.title || slugToTitle(slug));
       const cat   = special ? "Materiali gratuiti"     : (m.cat   || "Gioco di matematica");
-      const desc  = special ? "Tutti i giochi didattici e gli strumenti fisici da scaricare" : (m.desc || "Un nuovo gioco per imparare la matematica giocando.");
-      const meta  = special ? "schede & materiali"     : (m.meta  || "nuovo gioco");
+      const desc  = special ? "Tutti i giochi didattici e gli strumenti fisici da scaricare" : (m.desc || "Nuovissimo gioco appena caricato");
+      const meta  = special ? "schede & materiali"     : (m.meta  || "Nuovo gioco");
       const playLabel = special ? "Apri \u2192" : "\u25B6 Gioca";
 
       const card = document.createElement("button");
