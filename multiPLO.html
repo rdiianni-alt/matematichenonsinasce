@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multipli con le carte</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: sans-serif; background: #f5f4f0; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 1.5rem; }
+  h1 { font-size: 18px; font-weight: 400; color: #444; margin-bottom: 1.5rem; }
+  h1 span { font-weight: 700; color: #222; }
+  .logo-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 1.2rem; text-decoration: none; }
+  .logo-wrap img { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; }
+  .logo-text { font-size: 15px; font-weight: 500; color: #444; }
+  @media (max-width: 480px) {
+    .carta { width: 80px; height: 115px; }
+    .carta-numero { font-size: 36px; }
+    .freccia { font-size: 20px; }
+    .input-ris { width: 70px; font-size: 22px; }
+    .tavolo { gap: 0.6rem; }
+  }
+  .tavolo { display: flex; align-items: center; justify-content: center; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .carta {
+    width: 110px; height: 155px;
+    border-radius: 10px;
+    border: 2px solid #ccc;
+    background: #fff;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .carta-numero { font-size: 52px; font-weight: 500; line-height: 1; }
+  .carta-jolly { font-size: 50px; }
+  .carta-mult {
+    font-weight: 600;
+    text-align: center;
+    padding: 0 0.5rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    width: 100%;
+    display: block;
+  }
+  .carta-spieg {
+    font-size: clamp(10px, 3vw, 12px);
+    color: #666;
+    text-align: center;
+    padding: 0.4rem 0.6rem;
+    line-height: 1.4;
+    word-break: break-word;
+    width: 100%;
+  }
+  .aiuto-badge {
+    position: absolute; top: 6px; right: 8px;
+    font-size: 10px; color: #999;
+    border: 0.5px solid #ddd;
+    border-radius: 4px; padding: 2px 5px;
+    cursor: pointer;
+  }
+  .carta-clic { cursor: pointer; }
+  .freccia { font-size: 28px; color: #888; flex-shrink: 0; }
+  .area-risposta { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .risultato-label { font-size: 13px; color: #888; }
+  .input-ris {
+    width: 90px; text-align: center;
+    font-size: 28px; font-weight: 500;
+    padding: 0.4rem;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    background: #fff;
+    color: #222;
+  }
+  .input-ris:focus { outline: none; border-color: #888; }
+  .btn {
+    padding: 8px 20px; border-radius: 8px;
+    border: 1px solid #ccc; background: #fff;
+    color: #222; font-size: 14px; cursor: pointer;
+  }
+  .btn:hover { background: #f0ede8; }
+  .btn-nuova { font-size: 13px; color: #888; background: none; border: none; cursor: pointer; padding: 4px 8px; }
+  .btn-nuova:hover { color: #222; }
+  .credits { font-size: 11px; color: #bbb; margin-top: 2rem; text-align: center; }
+  .credits a { color: #bbb; text-decoration: underline; }
+  .credits a:hover { color: #888; }
+  .feedback { font-size: 18px; font-weight: 500; min-height: 26px; text-align: center; margin-bottom: 0.5rem; }
+  .ok { color: #2a7a4b; }
+  .no { color: #c0392b; }
+  .punteggio { font-size: 13px; color: #888; text-align: center; margin-bottom: 0.3rem; }
+  .aiuto-hint { font-size: 12px; color: #bbb; text-align: center; margin-bottom: 1rem; }
+</style>
+</head>
+<body>
+<a href="https://matematichenonsinasce.com/" target="_blank" class="logo-wrap">
+  <img src="https://rdiianni-alt.github.io/matematichenonsinasce/logo.png" alt="Logo Matematiche non si nasce">
+  <span class="logo-text">Matematiche non si nasce</span>
+</a>
+<h1>multi<span>PLO</span></h1>
+
+<div class="tavolo">
+  <div class="carta" id="cartaNum"></div>
+  <div class="freccia">→</div>
+  <div class="carta carta-clic" id="cartaMult" onclick="toggleAiuto()" title="Tocca per aiuto">
+    <span class="aiuto-badge">aiuto</span>
+    <span id="multDisplay" class="carta-mult"></span>
+    <span id="spiegDisplay" class="carta-spieg" style="display:none"></span>
+  </div>
+  <div class="area-risposta">
+    <span class="risultato-label">risultato</span>
+    <input class="input-ris" type="number" id="inputRis" min="0" placeholder="?" />
+    <button class="btn" onclick="controlla()">Conferma</button>
+  </div>
+</div>
+
+<div class="feedback" id="feedback"></div>
+<div class="punteggio" id="punteggio"></div>
+<div class="aiuto-hint">tocca la carta del nome per vedere la spiegazione</div>
+<button class="btn-nuova" onclick="nuovaMano()">↻ nuova carta</button>
+<p class="credits">gioco ispirato a <a href="https://www.pianodilavoro.org/2023/12/06/doppio-e-plo/" target="_blank">Doppio e …pló!</a></p>
+
+<script>
+const NOMI = [
+  { nome: 'DOPPIO', spieg: 'il numero preso due volte', molt: 2 },
+  { nome: 'TRIPLO', spieg: 'il numero preso tre volte', molt: 3 },
+  { nome: 'QUADRUPLO', spieg: 'il numero preso quattro volte', molt: 4 },
+  { nome: 'QUINTUPLO', spieg: 'il numero preso cinque volte', molt: 5 },
+  { nome: 'SESTUPLO', spieg: 'il numero preso sei volte', molt: 6 },
+  { nome: 'SETTUPLO', spieg: 'il numero preso sette volte', molt: 7 },
+  { nome: 'OTTUPLO', spieg: 'il numero preso otto volte', molt: 8 },
+  { nome: 'NONUPLO', spieg: 'il numero preso nove volte', molt: 9 },
+  { nome: 'DECUPLO', spieg: 'il numero preso dieci volte', molt: 10 },
+  { nome: 'CENTUPLO', spieg: 'il numero preso cento volte', molt: 100 },
+];
+const VALORI = [1,2,3,4,5,6,7,8,9,10];
+
+let stato = { num:1, molt:2, aiutoAperto:false, risposto:false, corretti:0, totali:0 };
+
+function fitText(el, maxWidth) {
+  let size = 22;
+  el.style.fontSize = size + 'px';
+  while (el.scrollWidth > maxWidth && size > 10) {
+    size--;
+    el.style.fontSize = size + 'px';
+  }
+}
+
+function rnd(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+function nuovaMano(){
+  const v = rnd(VALORI);
+  const mult = rnd(NOMI);
+  const num = v;
+  stato = { num, molt: mult.molt, nomeObj: mult, aiutoAperto: false, risposto: false, corretti: stato.corretti, totali: stato.totali };
+
+  const cn = document.getElementById('cartaNum');
+  cn.style.color = '#222';
+  cn.innerHTML = `<span class="carta-numero">${num}</span>`;
+
+  document.getElementById('multDisplay').textContent = mult.nome;
+  document.getElementById('multDisplay').style.display = '';
+  fitText(document.getElementById('multDisplay'), 100);
+  document.getElementById('spiegDisplay').style.display = 'none';
+  document.getElementById('spiegDisplay').textContent = mult.spieg;
+  document.getElementById('inputRis').value = '';
+  document.getElementById('inputRis').disabled = false;
+  document.getElementById('feedback').textContent = '';
+  aggPunteggio();
+  document.getElementById('inputRis').focus();
+}
+
+function toggleAiuto(){
+  if(stato.risposto) return;
+  stato.aiutoAperto = !stato.aiutoAperto;
+  document.getElementById('multDisplay').style.display = stato.aiutoAperto ? 'none' : '';
+  document.getElementById('spiegDisplay').style.display = stato.aiutoAperto ? '' : 'none';
+}
+
+document.getElementById('inputRis').addEventListener('keydown', e => { if(e.key === 'Enter') controlla(); });
+
+function controlla(){
+  if(stato.risposto) return;
+  const val = parseInt(document.getElementById('inputRis').value, 10);
+  if(isNaN(val)) return;
+  const corretto = stato.num * stato.molt;
+  stato.risposto = true;
+  stato.totali++;
+  const fb = document.getElementById('feedback');
+  if(val === corretto){
+    stato.corretti++;
+    fb.textContent = 'Esatto!';
+    fb.className = 'feedback ok';
+  } else {
+    fb.innerHTML = `No: ${stato.num} × ${stato.molt} = <strong>${corretto}</strong>`;
+    fb.className = 'feedback no';
+  }
+  document.getElementById('inputRis').disabled = true;
+  aggPunteggio();
+}
+
+function aggPunteggio(){
+  const p = document.getElementById('punteggio');
+  if(stato.totali === 0){ p.textContent = ''; return; }
+  p.textContent = `${stato.corretti} su ${stato.totali}`;
+}
+
+nuovaMano();
+</script>
+</body>
+</html>
