@@ -6,21 +6,28 @@
 <title>Divisione Canadese</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f7ff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+
   .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; text-decoration: none; }
   .logo img { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; }
   .logo-text { font-size: 1em; color: #2c5f8a; font-weight: bold; }
-  body { font-family: 'Segoe UI', sans-serif; background: #f0f7ff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-  h1 { color: #2c5f8a; font-size: 1.6em; margin-bottom: 18px; text-align: center; }
 
+  h1 { color: #2c5f8a; font-size: 1.5em; margin-bottom: 16px; text-align: center; }
+
+  /* SETUP */
   #setup { background: white; border-radius: 16px; padding: 28px 32px; box-shadow: 0 2px 12px #0001; max-width: 360px; width: 100%; }
   #setup label { display: block; margin-bottom: 6px; color: #444; font-size: 1em; }
   #setup input { width: 100%; padding: 9px 12px; border: 2px solid #b0cfe8; border-radius: 8px; font-size: 1.1em; margin-bottom: 16px; }
   #setup button { width: 100%; padding: 11px; background: #2c7be5; color: white; border: none; border-radius: 10px; font-size: 1.1em; cursor: pointer; }
   #setup button:hover { background: #1a5cbf; }
 
-  #game { display: none; width: 100%; max-width: 700px; flex-direction: column; align-items: center; gap: 12px; }
+  /* GAME */
+  #game { display: none; width: 100%; max-width: 980px; flex-direction: column; align-items: center; gap: 12px; }
 
-  /* STICKY INFO BAR */
+  .restart-btn { padding: 8px 20px; background: #e74c3c; color: white; border: none; border-radius: 9px; font-size: 0.93em; cursor: pointer; }
+  .restart-btn:hover { background: #c0392b; }
+
+  /* STICKY BAR */
   #sticky-bar {
     position: sticky; top: 8px; z-index: 10;
     background: #2c7be5; color: white;
@@ -34,6 +41,7 @@
   .bar-label { font-size: 0.78em; opacity: 0.85; }
   .bar-value { font-size: 1.3em; font-weight: bold; }
 
+  /* DIST AREA */
   #dist-area { background: white; border-radius: 14px; padding: 14px 20px; box-shadow: 0 2px 8px #0001; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px; }
   #dist-area label { color: #444; font-size: 0.97em; text-align: center; }
   #dist-row { display: flex; gap: 10px; align-items: center; }
@@ -42,21 +50,45 @@
   #dist-btn:hover { background: #1a5cbf; }
   #dist-msg { color: #c0392b; font-size: 0.92em; min-height: 1.2em; text-align: center; }
 
-  #table-wrap { position: relative; width: 560px; height: 560px; }
+  /* MAIN ROW: table + algorithm */
+  #main-row { display: flex; gap: 20px; align-items: flex-start; justify-content: center; width: 100%; }
+
+  /* TABLE */
+  #table-wrap { position: relative; width: 500px; height: 500px; flex-shrink: 0; }
   #table-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
   #balls-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-
   .ball {
-    position: absolute; width: 20px; height: 20px; border-radius: 50%;
+    position: absolute; width: 18px; height: 18px; border-radius: 50%;
     background: radial-gradient(circle at 35% 35%, #74c0fc, #1971c2);
     box-shadow: 1px 2px 4px #0004;
     transition: left 0.65s ease, top 0.65s ease;
     transform: translate(-50%, -50%);
   }
   .child-wrap { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 2px; transform: translate(-50%, -50%); }
-  .child-emoji { font-size: 2.6em; line-height: 1; }
-  .bubble { background: white; border: 2px solid #2c7be5; border-radius: 12px; padding: 2px 9px; font-size: 0.92em; color: #2c5f8a; font-weight: bold; min-width: 32px; text-align: center; }
+  .child-emoji { font-size: 2.2em; line-height: 1; }
+  .bubble { background: white; border: 2px solid #2c7be5; border-radius: 12px; padding: 2px 8px; font-size: 0.88em; color: #2c5f8a; font-weight: bold; min-width: 28px; text-align: center; }
 
+  /* ALGORITHM TABLE */
+  #algo-wrap {
+    background: white; border-radius: 14px; padding: 18px 20px;
+    box-shadow: 0 2px 8px #0001;
+    min-width: 220px; flex-shrink: 0;
+    font-family: 'Courier New', monospace;
+  }
+  #algo-wrap h3 { color: #2c5f8a; font-size: 0.95em; margin-bottom: 12px; text-align: center; font-family: 'Segoe UI', sans-serif; }
+  #algo-table { width: 100%; border-collapse: collapse; }
+  #algo-table td { padding: 3px 10px; font-size: 1em; text-align: right; }
+  #algo-table td.left-col { border-right: 2px solid #2c5f8a; text-align: right; min-width: 80px; }
+  #algo-table td.right-col { text-align: left; min-width: 120px; color: #555; padding-left: 14px; }
+  .algo-header td { font-weight: bold; color: #2c5f8a; font-size: 1em; padding-bottom: 6px; border-bottom: 2px solid #2c5f8a; }
+  .algo-sub { color: #888 !important; font-size: 0.9em !important; }
+  .algo-line td { border-top: none; }
+  .algo-result td.left-col { border-top: 1px solid #ccc; font-weight: bold; color: #2c5f8a; padding-top: 4px; }
+  .algo-result td.right-col { border-top: none; }
+  .algo-partial { color: #1971c2; font-weight: bold; }
+  #algo-total-row td { border-top: 2px solid #2c5f8a; font-weight: bold; color: #27ae60; padding-top: 5px; }
+
+  /* FINAL FORM */
   #final-form { display: none; background: white; border-radius: 14px; padding: 20px 24px; box-shadow: 0 2px 8px #0001; width: 100%; }
   #final-form h2 { color: #2c5f8a; font-size: 1.1em; margin-bottom: 14px; text-align: center; }
   .q-row { display: flex; flex-direction: column; margin-bottom: 12px; }
@@ -65,50 +97,43 @@
   #final-btn { margin-top: 8px; padding: 10px 28px; background: #2c7be5; color: white; border: none; border-radius: 9px; font-size: 1em; cursor: pointer; }
   #final-btn:hover { background: #1a5cbf; }
 
+  /* RESULT */
   #result { display: none; background: white; border-radius: 14px; padding: 22px 26px; box-shadow: 0 2px 8px #0001; width: 100%; }
   #result h2 { color: #2c5f8a; font-size: 1.1em; margin-bottom: 12px; text-align: center; }
   .feedback-row { margin-bottom: 8px; font-size: 0.97em; color: #333; }
   .wrong { color: #c0392b; }
   .formulas { margin-top: 14px; background: #f0f7ff; border-radius: 10px; padding: 14px 18px; }
   .formulas p { font-size: 1.15em; color: #2c5f8a; font-weight: bold; margin-bottom: 6px; text-align: center; }
-  .restart-btn { padding: 9px 24px; background: #e74c3c; color: white; border: none; border-radius: 9px; font-size: 0.95em; cursor: pointer; }
-  .restart-btn:hover { background: #c0392b; }
-  #restart-final { margin-top: 14px; }
 </style>
 </head>
 <body>
+
 <a href="https://matematichenonsinasce.com/" class="logo">
   <img src="https://rdiianni-alt.github.io/matematichenonsinasce/logo.png" alt="logo">
   <div class="logo-text">Matematiche non si nasce</div>
 </a>
+
 <h1>🔵 Divisione Canadese</h1>
 
+<!-- SETUP -->
 <div id="setup">
   <label>Quante palline?</label>
-  <input type="number" id="inp-balls" min="2" max="200" placeholder="es. 62">
+  <input type="number" id="inp-balls" min="2" max="9999" placeholder="es. 62">
   <label>Quante bambine?</label>
   <input type="number" id="inp-children" min="2" max="8" placeholder="es. 10">
   <button onclick="startGame()">Inizia</button>
 </div>
 
+<!-- GAME -->
 <div id="game">
   <div style="width:100%;display:flex;justify-content:flex-end;">
     <button class="restart-btn" onclick="restart()">↩ Ricomincia</button>
   </div>
 
   <div id="sticky-bar">
-    <div class="bar-item">
-      <span class="bar-label">Bambine</span>
-      <span class="bar-value" id="lbl-children">0</span>
-    </div>
-    <div class="bar-item">
-      <span class="bar-label">Palline totali</span>
-      <span class="bar-value" id="lbl-total">0</span>
-    </div>
-    <div class="bar-item">
-      <span class="bar-label">Da distribuire</span>
-      <span class="bar-value" id="lbl-remaining">0</span>
-    </div>
+    <div class="bar-item"><span class="bar-label">Bambine</span><span class="bar-value" id="lbl-children">0</span></div>
+    <div class="bar-item"><span class="bar-label">Palline totali</span><span class="bar-value" id="lbl-total">0</span></div>
+    <div class="bar-item"><span class="bar-label">Da distribuire</span><span class="bar-value" id="lbl-remaining">0</span></div>
   </div>
 
   <div id="dist-area">
@@ -120,14 +145,29 @@
     <div id="dist-msg"></div>
   </div>
 
-  <div id="table-wrap">
-    <svg id="table-svg">
-      <ellipse cx="280" cy="280" rx="225" ry="225" fill="#c8a05a" stroke="#9e7a32" stroke-width="7"/>
-      <ellipse cx="280" cy="280" rx="210" ry="210" fill="#ddb96a" stroke="none"/>
-    </svg>
-    <div id="balls-layer"></div>
+  <div id="main-row">
+    <!-- TAVOLO -->
+    <div id="table-wrap">
+      <svg id="table-svg">
+        <ellipse cx="250" cy="250" rx="210" ry="210" fill="#c8a05a" stroke="#9e7a32" stroke-width="7"/>
+        <ellipse cx="250" cy="250" rx="195" ry="195" fill="#ddb96a" stroke="none"/>
+      </svg>
+      <div id="balls-layer"></div>
+    </div>
+
+    <!-- ALGORITMO -->
+    <div id="algo-wrap">
+      <h3>Schema della divisione canadese</h3>
+      <table id="algo-table">
+        <tr class="algo-header">
+          <td class="left-col" id="algo-hdr-left">—</td>
+          <td class="right-col" id="algo-hdr-right">—</td>
+        </tr>
+      </table>
+    </div>
   </div>
 
+  <!-- FINAL FORM -->
   <div id="final-form">
     <h2>Rispondi alle domande</h2>
     <div class="q-row"><label>Quante bambine in tutto?</label><input type="number" id="q1" placeholder=" "></div>
@@ -137,6 +177,7 @@
     <button id="final-btn" onclick="checkAnswers()">Controlla</button>
   </div>
 
+  <!-- RESULT -->
   <div id="result">
     <h2>Ecco il risultato</h2>
     <div id="feedbacks"></div>
@@ -144,13 +185,14 @@
       <p id="formula1"></p>
       <p id="formula2"></p>
     </div>
-    <button id="restart-final" class="restart-btn" onclick="restart()">↩ Ricomincia</button>
+    <button class="restart-btn" style="margin-top:14px;" onclick="restart()">↩ Ricomincia</button>
   </div>
 </div>
 
 <script>
 let totalBalls, numChildren, remaining, perChild, childPositions, balls, childCounts;
-const CX = 280, CY = 280, R = 160;
+let steps = []; // { partial, product, remainingBefore, remainingAfter }
+const CX = 250, CY = 250, R = 148;
 
 function startGame() {
   totalBalls = parseInt(document.getElementById('inp-balls').value);
@@ -160,6 +202,7 @@ function startGame() {
   remaining = totalBalls;
   perChild = 0;
   childCounts = new Array(numChildren).fill(0);
+  steps = [];
   document.getElementById('setup').style.display = 'none';
   document.getElementById('game').style.display = 'flex';
   document.getElementById('lbl-children').textContent = numChildren;
@@ -167,6 +210,7 @@ function startGame() {
   document.getElementById('lbl-remaining').textContent = remaining;
   buildTable();
   placeBalls();
+  initAlgoTable();
   updateDistArea();
 }
 
@@ -197,7 +241,7 @@ function placeBalls() {
     b.className = 'ball';
     b.id = 'ball-' + i;
     const angle = Math.random() * 2 * Math.PI;
-    const r = Math.random() * Math.random() * 80; // cluster al centro con distribuzione non uniforme
+    const r = Math.random() * Math.random() * 80;
     b.style.left = (CX + r * Math.cos(angle)) + 'px';
     b.style.top = (CY + r * Math.sin(angle)) + 'px';
     layer.appendChild(b);
@@ -205,16 +249,56 @@ function placeBalls() {
   }
 }
 
+function initAlgoTable() {
+  const t = document.getElementById('algo-table');
+  // header row
+  t.innerHTML = `<tr class="algo-header">
+    <td class="left-col">${totalBalls}</td>
+    <td class="right-col">${numChildren}</td>
+  </tr>`;
+}
+
+function renderAlgoTable() {
+  const t = document.getElementById('algo-table');
+  let html = `<tr class="algo-header">
+    <td class="left-col">${totalBalls}</td>
+    <td class="right-col">${numChildren}</td>
+  </tr>`;
+
+  for (let i = 0; i < steps.length; i++) {
+    const s = steps[i];
+    // subtraction line
+    html += `<tr class="${i === 0 ? 'algo-line' : ''}">
+      <td class="left-col algo-sub">− ${s.product}</td>
+      <td class="right-col"><span class="algo-partial">${numChildren} × ${s.partial} = ${s.product}</span></td>
+    </tr>`;
+    // remainder
+    html += `<tr class="algo-result">
+      <td class="left-col">${s.remainingAfter}</td>
+      <td class="right-col"></td>
+    </tr>`;
+  }
+
+  // total quoziente
+  if (steps.length > 0) {
+    const quotient = steps.map(s => s.partial).reduce((a, b) => a + b, 0);
+    const partials = steps.map(s => s.partial).join(' + ');
+    html += `<tr id="algo-total-row">
+      <td class="left-col"></td>
+      <td class="right-col">${steps.length > 1 ? partials + ' = ' : ''}${quotient}</td>
+    </tr>`;
+  }
+
+  t.innerHTML = html;
+}
+
 function updateDistArea() {
-  const da = document.getElementById('dist-area');
   document.getElementById('lbl-remaining').textContent = remaining;
   if (remaining < numChildren) {
-    da.style.display = 'none';
+    document.getElementById('dist-area').style.display = 'none';
     showFinalForm();
   } else {
-    da.style.display = 'flex';
-    document.getElementById('dist-label').textContent =
-      `Quante palline vuoi dare a ciascuna bambina?`;
+    document.getElementById('dist-area').style.display = 'flex';
     document.getElementById('dist-input').value = '';
     document.getElementById('dist-msg').textContent = '';
   }
@@ -229,10 +313,16 @@ function distribute() {
     return;
   }
   msg.textContent = '';
-  let ballIdx = 0;
-  // find first unassigned
-  while (ballIdx < balls.length && balls[ballIdx].dataset.assigned === '1') ballIdx++;
+  const product = n * numChildren;
+  const remainingBefore = remaining;
+  const remainingAfter = remaining - product;
 
+  steps.push({ partial: n, product, remainingBefore, remainingAfter });
+  renderAlgoTable();
+
+  // move balls
+  let ballIdx = 0;
+  while (ballIdx < balls.length && balls[ballIdx].dataset.assigned === '1') ballIdx++;
   for (let c = 0; c < numChildren; c++) {
     for (let k = 0; k < n; k++) {
       while (ballIdx < balls.length && balls[ballIdx].dataset.assigned === '1') ballIdx++;
@@ -249,7 +339,7 @@ function distribute() {
     childCounts[c] += n;
   }
   perChild += n;
-  remaining -= n * numChildren;
+  remaining -= product;
 
   setTimeout(() => {
     for (let c = 0; c < numChildren; c++) {
@@ -261,19 +351,21 @@ function distribute() {
 }
 
 function showFinalForm() {
-  // Disponi le palline rimaste in fila centrata nel tavolo
+  // disponi palline avanzate in fila
   const unassigned = balls.filter(b => b.dataset.assigned !== '1');
   const n = unassigned.length;
-  const spacing = 28;
-  const totalW = (n - 1) * spacing;
-  const startX = CX - totalW / 2;
-  unassigned.forEach((b, i) => {
-    b.style.left = (startX + i * spacing) + 'px';
-    b.style.top = CY + 'px';
-    b.style.width = '22px';
-    b.style.height = '22px';
-    b.style.zIndex = '10';
-  });
+  if (n > 0) {
+    const spacing = 28;
+    const totalW = (n - 1) * spacing;
+    const startX = CX - totalW / 2;
+    unassigned.forEach((b, i) => {
+      b.style.left = (startX + i * spacing) + 'px';
+      b.style.top = CY + 'px';
+      b.style.width = '22px';
+      b.style.height = '22px';
+      b.style.zIndex = '10';
+    });
+  }
   document.getElementById('final-form').style.display = 'block';
 }
 
@@ -286,7 +378,6 @@ function checkAnswers() {
     { label: 'Quante palline ha ricevuto ciascuna bambina', correct: quotient, val: parseInt(document.getElementById('q3').value) },
     { label: 'Quante palline sono avanzate', correct: rest, val: parseInt(document.getElementById('q4').value) },
   ];
-
   let html = '';
   answers.forEach(q => {
     if (q.val === q.correct) {
@@ -295,7 +386,6 @@ function checkAnswers() {
       html += `<div class="feedback-row wrong">⚠️ Attenzione: "${q.label}" — in realtà era <strong>${q.correct}</strong></div>`;
     }
   });
-
   document.getElementById('feedbacks').innerHTML = html;
   if (rest === 0) {
     document.getElementById('formula1').textContent = `${totalBalls} = ${quotient} × ${numChildren}`;
@@ -304,7 +394,6 @@ function checkAnswers() {
     document.getElementById('formula1').textContent = `${totalBalls} = ${quotient} × ${numChildren} + ${rest}`;
     document.getElementById('formula2').textContent = `${totalBalls} ÷ ${numChildren} = ${quotient} + ${rest}/${numChildren}`;
   }
-
   document.getElementById('final-form').style.display = 'none';
   document.getElementById('result').style.display = 'block';
 }
