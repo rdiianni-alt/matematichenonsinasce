@@ -63,17 +63,18 @@ body>*{width:100%;max-width:700px}
 </style>
 </head>
 <body>
-<a href="https://matematichenonsinasce.com/" class="logo">
+<a href="https://matematichenonsinasce.com/" target="_blank" class="logo">
   <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/main/logo.png" alt="logo">
   <div class="logo-text">Matematiche non si nasce</div>
 </a>
-<h2 style="font-size:calc(var(--u)*0.55);font-weight:700;margin-bottom:calc(var(--u)*0.5);letter-spacing:0.5px">
+<h2 style="font-size:calc(var(--u)*0.55);font-weight:700;margin-bottom:calc(var(--u)*0.3);letter-spacing:0.5px">
   <span style="color:#185FA5">D</span><span style="color:#0F6E56">i</span><span style="color:#A32D2D">v</span><span style="color:#854F0B">i</span><span style="color:#185FA5">s</span><span style="color:#7C3D8A">i</span><span style="color:#0F6E56">o</span><span style="color:#A32D2D">n</span><span style="color:#185FA5">e</span>
   <span style="color:#444"> a </span>
   <span style="color:#854F0B">d</span><span style="color:#7C3D8A">a</span><span style="color:#0F6E56">n</span><span style="color:#A32D2D">d</span><span style="color:#185FA5">a</span>
   <span style="color:#444"> </span>
   <span style="color:#0F6E56">l</span><span style="color:#854F0B">u</span><span style="color:#7C3D8A">n</span><span style="color:#A32D2D">g</span><span style="color:#185FA5">a</span>
 </h2>
+<p style="font-size:calc(var(--u)*0.35);color:#666;margin-bottom:calc(var(--u)*0.6);line-height:1.5;max-width:600px">Un algoritmo passo dopo passo per eseguire la divisione classica. La tabellina del divisore è sempre a disposizione per aiutarti nei calcoli.</p>
 <div class="controls">
   <label>Dividendo</label>
   <input type="number" id="inp-div" value="592" min="1">
@@ -154,7 +155,7 @@ function askQuotient(idx){
   const s=steps[idx];
   renderTabellina(DSR,s.q);
   document.getElementById('tabellina').style.display='block';
-  document.getElementById('step-hint').textContent=`Quante volte entra ${DSR} in ${s.partial}?`;
+  document.getElementById('step-hint').textContent=`Quante volte ${DSR} entra in ${s.partial}?`;
   updateQuotientDisplay(partialQuotient,()=>validateQuotient(idx));
 }
 
