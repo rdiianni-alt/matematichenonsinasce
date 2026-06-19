@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:sans-serif;background:#fff;color:#222;padding:1rem;display:flex;flex-direction:column;align-items:center;min-height:100vh}
+
+/* LOGO */
+.logo-block{display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:1.4rem}
+.logo-block img{width:60px;height:60px;object-fit:contain;border-radius:50%}
+.logo-block span{font-size:14px;font-weight:500;color:#185FA5}
+
+/* PAGINA INTRO */
+#page-intro{width:100%;max-width:480px;display:flex;flex-direction:column;align-items:center;gap:1.2rem}
+#page-intro h1{font-size:20px;font-weight:500;text-align:center}
+.spiegazione{background:#f0f4ff;border-radius:10px;padding:1rem 1.2rem;font-size:14px;line-height:1.7;text-align:left;width:100%}
+.spiegazione h2{font-size:15px;font-weight:500;margin-bottom:0.5rem;color:#185FA5}
+.spiegazione ol{padding-left:1.2rem}
+.spiegazione li{margin-bottom:0.4rem}
+.input-row{display:flex;gap:10px;align-items:flex-end;justify-content:center;flex-wrap:wrap}
+.field{display:flex;flex-direction:column;align-items:center;gap:4px}
+.field label{font-size:13px;color:#666}
+.field input{width:110px;font-size:24px;text-align:center;padding:6px 8px;border:0.5px solid #bbb;border-radius:8px;background:#fff;color:#222}
+.times{font-size:26px;padding-bottom:4px}
+
+/* PAGINA GIOCO */
+#page-game{width:100%;display:none;flex-direction:column;align-items:center}
+
+button{padding:7px 16px;font-size:14px;border:0.5px solid #aaa;border-radius:7px;background:transparent;color:#222;cursor:pointer}
+button:hover{background:#f2f2f2}
+.bp{border-color:#378ADD;color:#185FA5;font-weight:500}
+#cvs{display:block}
+#float-inp{position:fixed;font-size:20px;text-align:center;width:52px;height:44px;border:2px solid #378ADD;border-radius:6px;background:#fff;color:#222;z-index:100;display:none;padding:0}
+#msg{font-size:13px;color:#555;margin-top:8px;min-height:18px;text-align:center}
+#btn2{margin-top:1rem}
+#result-area{margin-top:1.2rem;display:none;flex-direction:column;align-items:center;gap:8px}
+#result-area p{font-size:13px;color:#444;line-height:1.5;text-align:center;max-width:360px}
+.ans-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center}
+#fans{width:180px;height:40px;text-align:center;font-size:21px;font-weight:500;border:0.5px solid #bbb;border-radius:7px;background:#fff;color:#222}
+#numkb{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;justify-content:center;max-width:260px}
+#numkb button{width:42px;height:42px;font-size:18px;font-weight:500;padding:0;border:0.5px solid #bbb;border-radius:7px;background:#fff}
+.fb{font-size:14px;padding:4px 12px;border-radius:6px;display:inline-block;margin-top:6px}
+.ok{background:#EAF3DE;color:#3B6D11}
+.er{background:#FCEBEB;color:#A32D2D}
+.hidden{display:none}
+#back-btn{margin-top:1rem;font-size:13px;color:#888;border:none;background:none;cursor:pointer;text-decoration:underline}
+</style>
+</head>
+<body>
+
+<!-- LOGO -->
+<div class="logo-block">
+  <a href="https://matematichenonsinasce.com/" target="_blank" rel="noopener">
+    <img src="logo.png" alt="logo">
+  </a>
+  <span>Matematiche non si nasce</span>
+</div>
+
+<!-- PAGINA INTRO -->
+<div id="page-intro">
+  <h1>Moltiplicazione a gelosia</h1>
+
+  <div class="spiegazione">
+    <h2>Come funziona?</h2>
+    <p>La moltiplicazione a gelosia (o araba) è un antico metodo grafico per eseguire moltiplicazioni. Separa le moltiplicazioni dalle somme, rendendo il calcolo più semplice e visivo. Inserisci i due numeri: per ogni cella della griglia scrivi il risultato del prodotto parziale nei due triangoli. Quando hai finito, la griglia ruota e puoi leggere il risultato.</p>
+  </div>
+
+  <div class="input-row">
+    <div class="field">
+      <label>Primo numero</label>
+      <input type="text" id="n1" maxlength="4" inputmode="numeric" placeholder="es. 23">
+    </div>
+    <div class="times">×</div>
+    <div class="field">
+      <label>Secondo numero</label>
+      <input type="text" id="n2" maxlength="4" inputmode="numeric" placeholder="es. 45">
+    </div>
+  </div>
+
+  <button class="bp" style="font-size:16px;padding:10px 28px" onclick="startGame()">Costruisci la griglia</button>
+</div>
+
+<!-- PAGINA GIOCO -->
+<div id="page-game">
+  <canvas id="cvs"></canvas>
+  <input id="float-inp" maxlength="1" type="text" inputmode="numeric">
+  <div id="msg">Tocca una cella per inserire il prodotto parziale.</div>
+  <div id="btn2" class="hidden"><button class="bp" onclick="checkGrid()">Controlla le caselle</button></div>
+  <div id="result-area">
+    <p>Osserva il diagramma. Leggi le cifre partendo dall'angolo in basso a destra (unità) e risali verso sinistra.<br>Scrivi il risultato partendo dalle unità:</p>
+    <div class="ans-row">
+      <span id="rlabel" style="font-size:16px"></span>
+      <input id="fans" type="text" readonly placeholder="...">
+      <button class="bp" onclick="checkFinal()">Verifica</button>
+    </div>
+    <div id="numkb"></div>
+    <div id="ffb"></div>
+  </div>
+  <button id="back-btn" onclick="goBack()">← Nuova moltiplicazione</button>
+</div>
+
+<script>
+var C=72, PAD=36;
+var N1='', N2='', vals={}, correct={}, colorsT={}, colorsU={};
+var cvs, ctx, activeKey=null, angle=0, animating=false;
+
+function startGame() {
+  N1 = document.getElementById('n1').value.replace(/\s/g,'');
+  N2 = document.getElementById('n2').value.replace(/\s/g,'');
+  if (!/^\d+$/.test(N1) || !/^\d+$/.test(N2) || !N1 || !N2) {
+    alert('Inserisci due numeri validi.'); return;
+  }
+  document.getElementById('page-intro').style.display='none';
+  document.getElementById('page-game').style.display='flex';
+  build();
+}
+
+function goBack() {
+  document.getElementById('page-game').style.display='none';
+  document.getElementById('page-intro').style.display='flex';
+  document.getElementById('n1').value='';
+  document.getElementById('n2').value='';
+}
+
+function build() {
+  vals={}; correct={}; colorsT={}; colorsU={};
+  activeKey=null; angle=0; animating=false;
+  document.getElementById('btn2').className='hidden';
+  document.getElementById('result-area').style.display='none';
+  document.getElementById('ffb').innerHTML='';
+  document.getElementById('fans').value='';
+  document.getElementById('fans').style.background='';
+  document.getElementById('numkb').innerHTML='';
+  document.getElementById('msg').style.color='#555';
+  document.getElementById('msg').textContent='Tocca una cella per inserire il prodotto parziale.';
+  cvs = document.getElementById('cvs');
+  ctx = cvs.getContext('2d');
+  var cols=N1.length, rows=N2.length;
+  var gw=cols*C, gh=rows*C;
+  var diag=Math.ceil(Math.sqrt(gw*gw+gh*gh));
+  var side=diag+PAD*4;
+  cvs.width=side; cvs.height=side;
+  cvs.onclick=onCanvasClick;
+  for (var r=0; r<rows; r++)
+    for (var c=0; c<cols; c++) {
+      var p=(+N1[c])*(+N2[r]);
+      correct[r+'-'+c+'-t']=Math.floor(p/10);
+      correct[r+'-'+c+'-u']=p%10;
+    }
+  render();
+}
+
+function gridOrigin() {
+  var cols=N1.length, rows=N2.length;
+  return { x:(cvs.width-cols*C)/2, y:(cvs.height-rows*C)/2 };
+}
+
+function render() {
+  var cols=N1.length, rows=N2.length;
+  var o=gridOrigin(), ox=o.x, oy=o.y;
+  var gcx=ox+cols*C/2, gcy=oy+rows*C/2;
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,cvs.width,cvs.height);
+  ctx.save();
+  ctx.translate(gcx,gcy); ctx.rotate(angle); ctx.translate(-gcx,-gcy);
+  ctx.font='bold 18px sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillStyle='#222';
+  for (var c=0; c<cols; c++) ctx.fillText(N1[c], ox+c*C+C/2, oy-16);
+  for (var r=0; r<rows; r++) ctx.fillText(N2[r], ox+cols*C+20, oy+r*C+C/2);
+  for (var r=0; r<rows; r++) {
+    for (var c=0; c<cols; c++) {
+      var x=ox+c*C, y=oy+r*C;
+      var kt=r+'-'+c+'-t', ku=r+'-'+c+'-u';
+      ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x+C,y); ctx.lineTo(x,y+C); ctx.closePath();
+      ctx.fillStyle=colorsT[kt]||'#f0f4ff'; ctx.fill();
+      ctx.beginPath(); ctx.moveTo(x+C,y); ctx.lineTo(x+C,y+C); ctx.lineTo(x,y+C); ctx.closePath();
+      ctx.fillStyle=colorsU[ku]||'#f8f8f8'; ctx.fill();
+      ctx.strokeStyle='#888'; ctx.lineWidth=1;
+      ctx.strokeRect(x,y,C,C);
+      ctx.beginPath(); ctx.moveTo(x+C,y); ctx.lineTo(x,y+C); ctx.stroke();
+      ctx.font='bold 20px sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      if (vals[kt]!==undefined) { ctx.fillStyle='#185FA5'; ctx.fillText(vals[kt], x+C/3, y+C/3); }
+      if (vals[ku]!==undefined) { ctx.fillStyle='#185FA5'; ctx.fillText(vals[ku], x+C*2/3, y+C*2/3); }
+    }
+  }
+  ctx.strokeStyle='#333'; ctx.lineWidth=2;
+  ctx.strokeRect(ox,oy,cols*C,rows*C);
+  var numD=cols+rows-1;
+  for (var d=0; d<numD; d++) {
+    var dc=(cols-1)-d, bx, by;
+    if (dc+rows-1>=0 && dc+rows-1<cols) { bx=ox+(dc+rows-1)*C; by=oy+rows*C; }
+    else { bx=ox; by=oy+(-dc)*C; }
+    ctx.beginPath(); ctx.moveTo(bx,by); ctx.lineTo(bx-18,by+18);
+    ctx.strokeStyle='#bbb'; ctx.lineWidth=1; ctx.setLineDash([3,3]); ctx.stroke(); ctx.setLineDash([]);
+  }
+  ctx.restore();
+}
+
+function onCanvasClick(e) {
+  if (animating) return;
+  var rect=cvs.getBoundingClientRect();
+  var scaleX=cvs.width/rect.width, scaleY=cvs.height/rect.height;
+  var mx=(e.clientX-rect.left)*scaleX, my=(e.clientY-rect.top)*scaleY;
+  var cols=N1.length, rows=N2.length;
+  var o=gridOrigin(), ox=o.x, oy=o.y;
+  var gcx=ox+cols*C/2, gcy=oy+rows*C/2;
+  var dx=mx-gcx, dy=my-gcy;
+  var ca=Math.cos(-angle), sa=Math.sin(-angle);
+  var lx=gcx+dx*ca-dy*sa, ly=gcy+dx*sa+dy*ca;
+  for (var r=0; r<rows; r++)
+    for (var c=0; c<cols; c++) {
+      var x=ox+c*C, y=oy+r*C;
+      if (lx>=x && lx<=x+C && ly>=y && ly<=y+C) {
+        var upper=(lx-x)+(ly-y)<C;
+        activeKey=upper ? r+'-'+c+'-t' : r+'-'+c+'-u';
+        showInput(e.clientX, e.clientY);
+        return;
+      }
+    }
+}
+
+function showInput(cx,cy) {
+  var inp=document.getElementById('float-inp');
+  inp.style.display='block';
+  inp.style.left=(cx-26)+'px'; inp.style.top=(cy-22)+'px';
+  inp.value=''; inp.focus();
+  inp.oninput=function() {
+    var v=inp.value.replace(/\D/g,'');
+    if (!v.length) return;
+    vals[activeKey]=parseInt(v[0]);
+    render();
+    inp.style.display='none'; activeKey=null;
+    checkAllCells();
+  };
+  inp.onblur=function() { inp.style.display='none'; };
+}
+
+function checkAllCells() {
+  var cols=N1.length, rows=N2.length;
+  for (var r=0; r<rows; r++)
+    for (var c=0; c<cols; c++)
+      if (vals[r+'-'+c+'-t']===undefined || vals[r+'-'+c+'-u']===undefined) return;
+  document.getElementById('btn2').className='';
+  document.getElementById('msg').textContent='Tutte le caselle compilate. Premi Controlla!';
+}
+
+function checkGrid() {
+  var cols=N1.length, rows=N2.length, ok=true;
+  colorsT={}; colorsU={};
+  for (var r=0; r<rows; r++)
+    for (var c=0; c<cols; c++) {
+      var kt=r+'-'+c+'-t', ku=r+'-'+c+'-u';
+      colorsT[kt]=vals[kt]===correct[kt]?'#d4edda':'#f8d7da';
+      colorsU[ku]=vals[ku]===correct[ku]?'#d4edda':'#f8d7da';
+      if (vals[kt]!==correct[kt] || vals[ku]!==correct[ku]) ok=false;
+    }
+  render();
+  if (!ok) { document.getElementById('msg').textContent='Ci sono errori (in rosso). Correggi e riprova.'; return; }
+  document.getElementById('btn2').className='hidden';
+  document.getElementById('msg').textContent='Tutto corretto! La griglia ruota...';
+  animateRotation(-Math.PI/4, function() {
+    document.getElementById('msg').textContent='';
+    document.getElementById('rlabel').textContent=N1+' × '+N2+' =';
+    document.getElementById('result-area').style.display='flex';
+    buildKeyboard();
+  });
+}
+
+function animateRotation(target, cb) {
+  var start=angle, t0=performance.now(), dur=900;
+  animating=true;
+  function step(now) {
+    var t=Math.min((now-t0)/dur,1);
+    var e=t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+    angle=start+(target-start)*e;
+    render();
+    if (t<1) { requestAnimationFrame(step); }
+    else { angle=target; animating=false; render(); if(cb) cb(); }
+  }
+  requestAnimationFrame(step);
+}
+
+function buildKeyboard() {
+  var kb=document.getElementById('numkb');
+  kb.innerHTML='';
+  for (var i=0; i<=9; i++) {
+    (function(d) {
+      var btn=document.createElement('button');
+      btn.textContent=d;
+      btn.onclick=function() { addDigit(String(d)); };
+      kb.appendChild(btn);
+    })(i);
+  }
+  var del=document.createElement('button');
+  del.textContent='←';
+  del.onclick=function() {
+    var f=document.getElementById('fans');
+    f.value=f.value.slice(1);
+    f.style.background='';
+    document.getElementById('ffb').innerHTML='';
+  };
+  kb.appendChild(del);
+}
+
+function addDigit(d) {
+  var f=document.getElementById('fans');
+  f.value=d+f.value;
+  f.style.background='';
+  document.getElementById('ffb').innerHTML='';
+}
+
+function checkFinal() {
+  var v=document.getElementById('fans').value.trim();
+  var exp=String(parseInt(N1)*parseInt(N2));
+  var fb=document.getElementById('ffb'), inp=document.getElementById('fans');
+  if (v===exp) {
+    fb.innerHTML='<span class="fb ok">Esatto! '+N1+' × '+N2+' = '+exp+'</span>';
+    inp.style.background='#EAF3DE';
+  } else {
+    fb.innerHTML='<span class="fb er">Non ancora. Riprova.</span>';
+    inp.style.background='#FCEBEB';
+  }
+}
+</script>
+</body>
+</html>
