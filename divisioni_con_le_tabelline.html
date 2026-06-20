@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gioco delle Divisioni</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f0f4f8;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 20px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+  .logo img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    border-radius: 50%;
+  }
+  .logo-text {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #2d3748;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    color: #2d3748;
+    text-align: center;
+  }
+
+  #info {
+    font-size: 1rem;
+    color: #4a5568;
+  }
+
+  .scene {
+    width: 220px;
+    height: 150px;
+    perspective: 600px;
+    cursor: pointer;
+  }
+
+  @media (max-width: 480px) {
+    h1 { font-size: 1.1rem; }
+    .logo-text { font-size: 0.85rem; }
+    .scene { width: 170px; height: 115px; }
+    .face { font-size: 1.8rem; }
+    #btn-next, #btn-restart { font-size: 0.9rem; padding: 8px 20px; }
+  }
+
+  .card {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.5s ease;
+    border-radius: 16px;
+  }
+
+  .card.flipped {
+    transform: rotateY(180deg);
+  }
+
+  .face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 16px;
+    backface-visibility: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.4rem;
+    font-weight: bold;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    user-select: none;
+  }
+
+  .front {
+    background: #4a90d9;
+    color: #fff;
+  }
+
+  .back {
+    background: #48bb78;
+    color: #fff;
+    transform: rotateY(180deg);
+  }
+
+  #btn-next {
+    padding: 10px 28px;
+    font-size: 1rem;
+    background: #4a90d9;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    display: none;
+  }
+
+  #btn-next:hover { background: #357abd; }
+
+  #fine {
+    display: none;
+    text-align: center;
+    font-size: 1.1rem;
+    color: #2d3748;
+  }
+
+  #btn-restart {
+    margin-top: 12px;
+    padding: 10px 24px;
+    font-size: 1rem;
+    background: #48bb78;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  #btn-restart:hover { background: #38a169; }
+</style>
+</head>
+<body>
+
+<a href="https://matematichenonsinasce.com/" target="_blank" class="logo">
+  <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/main/logo.png" alt="logo">
+  <div class="logo-text">Matematiche non si nasce</div>
+</a>
+
+<h1>Divisioni con le tabelline</h1>
+<div id="info"></div>
+
+<div class="scene" id="scene" onclick="gira()">
+  <div class="card" id="card">
+    <div class="face front" id="front"></div>
+    <div class="face back" id="back"></div>
+  </div>
+</div>
+
+<button id="btn-next" onclick="prossima()">Prossima carta</button>
+
+<div id="fine">
+  <p>Hai visto tutte le carte!</p>
+  <button id="btn-restart" onclick="inizia()">Ricomincia</button>
+</div>
+
+<script>
+  // Genera tutte le carte: per ogni tabellina t (2..10),
+  // tutti i multipli da t*1 a t*10, divisi per t
+  function generaCarte() {
+    const carte = [];
+    for (let t = 2; t <= 10; t++) {
+      for (let m = 1; m <= 10; m++) {
+        const dividendo = t * m;
+        carte.push({ domanda: `${dividendo} : ${t}`, risposta: `${m}` });
+      }
+    }
+    return carte;
+  }
+
+  function mescola(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  let mazzo = [];
+  let indice = 0;
+  let girata = false;
+
+  function inizia() {
+    mazzo = mescola(generaCarte());
+    indice = 0;
+    girata = false;
+    document.getElementById('fine').style.display = 'none';
+    document.getElementById('scene').style.display = 'block';
+    document.getElementById('btn-next').style.display = 'none';
+    mostraCarta();
+  }
+
+  function mostraCarta() {
+    const c = mazzo[indice];
+    document.getElementById('front').textContent = c.domanda;
+    document.getElementById('back').textContent = c.risposta;
+    document.getElementById('card').classList.remove('flipped');
+    document.getElementById('info').textContent = `Carta ${indice + 1} di ${mazzo.length}`;
+    girata = false;
+    document.getElementById('btn-next').style.display = 'none';
+  }
+
+  function gira() {
+    if (girata) return;
+    girata = true;
+    document.getElementById('card').classList.add('flipped');
+    document.getElementById('btn-next').style.display = 'inline-block';
+  }
+
+  function prossima() {
+    indice++;
+    if (indice >= mazzo.length) {
+      document.getElementById('scene').style.display = 'none';
+      document.getElementById('btn-next').style.display = 'none';
+      document.getElementById('info').textContent = '';
+      document.getElementById('fine').style.display = 'block';
+    } else {
+      mostraCarta();
+    }
+  }
+
+  inizia();
+</script>
+</body>
+</html>
