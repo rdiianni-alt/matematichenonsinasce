@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carte delle Frazioni</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:sans-serif;background:#f5f3ee;color:#222;min-height:100vh}
+h1{font-size:1.3rem;font-weight:500;padding:1rem 1.2rem 0.3rem;color:#444}
+nav{display:flex;gap:8px;padding:0.5rem 1.2rem 1rem;flex-wrap:wrap}
+nav button{padding:7px 18px;border-radius:20px;border:1.5px solid #bbb;background:#fff;cursor:pointer;font-size:0.85rem}
+nav button.active{background:#3a6e4e;color:#fff;border-color:#3a6e4e}
+section{display:none;padding:0 1rem 2rem}
+section.visible{display:block}
+
+/* GALLERIA */
+#grid-carte{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;padding:8px 0}
+.card-scene{height:110px;perspective:700px;cursor:pointer}
+.card-3d{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .45s}
+.card-scene.flipped .card-3d{transform:rotateY(180deg)}
+.card-face{position:absolute;inset:0;border-radius:8px;backface-visibility:hidden;border:1.5px solid #ccc;overflow:hidden}
+.card-front{background:#fff}
+.card-back{background:#3a6e4e;transform:rotateY(180deg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.card-back img{width:55%;max-height:45px;object-fit:contain;filter:brightness(10);opacity:.9}
+.card-back .frac-back{font-size:1.25rem;color:#fff;font-weight:500;letter-spacing:.02em}
+
+/* GIOCO 1 */
+#g1-wrap{max-width:520px;margin:0 auto;text-align:center}
+#g1-card{margin:1rem auto;width:220px}
+#g1-domanda{font-size:1rem;margin:0.5rem 0 1rem;color:#333}
+#g1-opzioni{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-bottom:1rem}
+#g1-opzioni button{padding:10px 20px;font-size:1rem;border-radius:8px;border:1.5px solid #aaa;background:#fff;cursor:pointer}
+#g1-feedback{min-height:1.8rem;font-size:0.95rem;font-weight:500;margin:0.5rem 0}
+#g1-feedback.ok{color:#2d7a4f}
+#g1-feedback.no{color:#b33}
+#g1-punteggio{font-size:0.88rem;color:#666;margin-bottom:0.8rem}
+#g1-next{padding:8px 22px;border-radius:8px;border:1.5px solid #3a6e4e;background:#3a6e4e;color:#fff;cursor:pointer;font-size:0.9rem;display:none}
+
+/* MEMORY */
+#g2-wrap{max-width:680px;margin:0 auto}
+#g2-controls{display:flex;gap:10px;align-items:center;margin-bottom:1rem;flex-wrap:wrap}
+#g2-controls select,#g2-controls button{padding:7px 14px;border-radius:8px;border:1.5px solid #bbb;background:#fff;font-size:0.85rem;cursor:pointer}
+#g2-controls button.start{background:#3a6e4e;color:#fff;border-color:#3a6e4e}
+#g2-punteggio{font-size:0.88rem;color:#555;margin-left:auto}
+#g2-board{display:grid;gap:8px}
+.mem-card{aspect-ratio:3/2;border-radius:8px;border:1.5px solid #ccc;background:#fff;cursor:pointer;position:relative;perspective:600px}
+.mem-card:hover:not(.flipped):not(.matched) .mem-inner{transform:rotateY(8deg)}
+.mem-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .38s}
+.mem-card.flipped .mem-inner{transform:rotateY(180deg)}
+.mem-card.matched{opacity:.45;pointer-events:none}
+.mem-face{position:absolute;inset:0;border-radius:7px;backface-visibility:hidden;display:flex;align-items:center;justify-content:center}
+.mem-back-face{background:#3a6e4e}
+.mem-back-face img{width:55%;opacity:.85;filter:brightness(10)}
+.mem-front-face{transform:rotateY(180deg);background:#fff}
+.mem-front-face svg{width:88%;height:88%}
+.mem-front-face .frac-text{font-size:1.35rem;color:#333;font-weight:500}
+#g2-msg{text-align:center;font-size:1rem;font-weight:500;margin:0.5rem 0;min-height:1.5rem;color:#2d7a4f}
+</style>
+</head>
+<body>
+<h1>Carte delle frazioni</h1>
+<nav>
+  <button class="active" onclick="showSection('carte',this)">Galleria carte</button>
+  <button onclick="showSection('g1',this)">Gioco 1 — Quanto manca a 1?</button>
+  <button onclick="showSection('g2',this)">Gioco 2 — Memory</button>
+</nav>
+<section id="s-carte" class="visible"><div id="grid-carte"></div></section>
+<section id="s-g1">
+  <div id="g1-wrap">
+    <p style="color:#555;font-size:.9rem;margin-bottom:.5rem">Guarda la carta. Scegli la frazione che, sommata a quella mostrata, fa 1.</p>
+    <div id="g1-card"></div>
+    <div id="g1-domanda"></div>
+    <div id="g1-opzioni"></div>
+    <div id="g1-feedback"></div>
+    <div id="g1-punteggio">Punti: 0</div>
+    <button id="g1-next" onclick="g1Next()">Prossima carta</button>
+  </div>
+</section>
+<section id="s-g2">
+  <div id="g2-wrap">
+    <p style="color:#555;font-size:.9rem;margin-bottom:.8rem">Abbina ogni carta-immagine alla sua frazione scritta.</p>
+    <div id="g2-controls">
+      <label style="font-size:.85rem;color:#555">Coppie:
+        <select id="g2-size"><option value="6">6</option><option value="8" selected>8</option><option value="10">10</option><option value="12">12</option></select>
+      </label>
+      <button class="start" onclick="g2Start()">Nuova partita</button>
+      <span id="g2-punteggio"></span>
+    </div>
+    <div id="g2-msg"></div>
+    <div id="g2-board"></div>
+  </div>
+</section>
+
+<script>
+const LOGO="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/main/logo.png";
+const PALETTE=["#a8d5ba","#b5c9e8","#f0b8b8","#c5b8e8","#f5d6a0","#a8c8e8","#e8c5d0","#b8d8c8","#c8e8d0","#e8b8c8","#b8c8e8","#d0e8b8","#e8d8b8","#b8e8e0","#d8c8f0","#f0d8b8","#c8f0e0","#f0c8d8"];
+
+function bestGrid(d,W,H){
+  let best=[1,d],bestScore=Infinity;
+  for(let r=1;r<=d;r++){
+    if(d%r!==0)continue;
+    const c=d/r;
+    const score=Math.abs(Math.log((W/c)/(H/r)));
+    if(score<bestScore){bestScore=score;best=[r,c];}
+  }
+  return best;
+}
+
+function buildSVG(n,d,patIdx,colore,W,H){
+  const [rows,cols]=bestGrid(d,W,H);
+  const cw=W/cols,ch=H/rows;
+
+  // Pattern di colorazione — tutti garantiti corretti
+  const patterns=[
+    (n,d,r,c)=>Array.from({length:d},(_,i)=>i<n),                          // 0 seq riga
+    (n,d,r,c)=>{const a=Array(d).fill(false);for(let ci=0;ci<c;ci++)for(let ri=0;ri<r;ri++){const i=ci*r+ri;if(i<n)a[ri*c+ci]=true;}return a;}, // 1 seq col
+    (n,d,r,c)=>Array.from({length:d},(_,i)=>i>=d-n),                       // 2 dal basso
+    (n,d,r,c)=>{const a=Array(d).fill(false);const ord=[];for(let ri=r-1;ri>=0;ri--)for(let ci=c-1;ci>=0;ci--)ord.push(ri*c+ci);ord.slice(0,n).forEach(i=>a[i]=true);return a;}, // 3 angolo BR
+    (n,d,r,c)=>{const a=Array(d).fill(false);const e=[],o=[];for(let ri=0;ri<r;ri++)for(let ci=0;ci<c;ci++){const i=ri*c+ci;((ri+ci)%2===0?e:o).push(i);}[...e,...o].slice(0,n).forEach(i=>a[i]=true);return a;}, // 4 scacchiera
+    (n,d,r,c)=>{const a=Array(d).fill(false);const ord=[];for(let s=0;s<r+c;s++)for(let ri=0;ri<r;ri++){const ci=s-ri;if(ci>=0&&ci<c)ord.push(ri*c+ci);}ord.slice(0,n).forEach(i=>a[i]=true);return a;}, // 5 gradini
+    (n,d,r,c)=>{const a=Array(d).fill(false);const ord=[];for(let ci=0;ci<c;ci++)ord.push(0*c+ci);for(let ri=1;ri<r;ri++)ord.push(ri*c+0);for(let ri=1;ri<r;ri++)for(let ci=1;ci<c;ci++)ord.push(ri*c+ci);[...new Set(ord)].slice(0,n).forEach(i=>a[i]=true);return a;}, // 6 L
+    (n,d,r,c)=>{const a=Array(d).fill(false);const ord=[];for(let ci=c-1;ci>=0;ci--)ord.push((r-1)*c+ci);for(let ri=r-2;ri>=0;ri--)ord.push(ri*c+(c-1));for(let ri=r-2;ri>=0;ri--)for(let ci=c-2;ci>=0;ci--)ord.push(ri*c+ci);[...new Set(ord)].slice(0,n).forEach(i=>a[i]=true);return a;}, // 7 L inversa
+  ];
+
+  const patFn=patterns[patIdx%patterns.length];
+  const colored=patFn(n,d,rows,cols);
+
+  // Riempi celle
+  let svg=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="display:block"><rect width="${W}" height="${H}" fill="#fff" rx="3"/>`;
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+    const i=r*cols+c;
+    svg+=`<rect x="${(c*cw).toFixed(2)}" y="${(r*ch).toFixed(2)}" width="${cw.toFixed(2)}" height="${ch.toFixed(2)}" fill="${colored[i]?colore:'#fff'}" stroke="none"/>`;
+  }
+  // Bordi solo tra celle di colore diverso
+  for(let r=0;r<rows-1;r++)for(let c=0;c<cols;c++){
+    if(colored[r*cols+c]!==colored[(r+1)*cols+c]){
+      const y=((r+1)*ch).toFixed(2);
+      svg+=`<line x1="${(c*cw).toFixed(2)}" y1="${y}" x2="${((c+1)*cw).toFixed(2)}" y2="${y}" stroke="#555" stroke-width="1"/>`;
+    }
+  }
+  for(let c=0;c<cols-1;c++)for(let r=0;r<rows;r++){
+    if(colored[r*cols+c]!==colored[r*cols+c+1]){
+      const x=((c+1)*cw).toFixed(2);
+      svg+=`<line x1="${x}" y1="${(r*ch).toFixed(2)}" x2="${x}" y2="${((r+1)*ch).toFixed(2)}" stroke="#555" stroke-width="1"/>`;
+    }
+  }
+  svg+=`<rect width="${W}" height="${H}" fill="none" stroke="#555" stroke-width="1.5" rx="3"/></svg>`;
+  return svg;
+}
+
+// MAZZO: una carta per ogni valore unico
+const FRAZIONI_UNICHE=[
+  {n:1,d:2,v:0},{n:1,d:3,v:1},{n:2,d:3,v:2},
+  {n:1,d:4,v:0},{n:2,d:4,v:4},{n:3,d:4,v:6},
+  {n:1,d:5,v:1},{n:2,d:5,v:5},{n:3,d:5,v:2},{n:4,d:5,v:7},
+  {n:1,d:6,v:0},{n:2,d:6,v:4},{n:3,d:6,v:6},{n:4,d:6,v:5},{n:5,d:6,v:3},
+  {n:1,d:8,v:0},{n:2,d:8,v:4},{n:3,d:8,v:5},{n:4,d:8,v:6},{n:5,d:8,v:1},{n:6,d:8,v:7},
+  {n:1,d:9,v:0},{n:2,d:9,v:5},{n:3,d:9,v:6},{n:4,d:9,v:4},{n:6,d:9,v:1},{n:7,d:9,v:3},
+  {n:1,d:10,v:0},{n:2,d:10,v:4},{n:3,d:10,v:5},{n:4,d:10,v:6},{n:5,d:10,v:7},{n:6,d:10,v:1},{n:7,d:10,v:3},{n:9,d:10,v:2},
+  {n:1,d:12,v:0},{n:2,d:12,v:4},{n:3,d:12,v:5},{n:4,d:12,v:6},{n:5,d:12,v:1},
+  {n:6,d:12,v:7},{n:7,d:12,v:3},{n:8,d:12,v:2},{n:9,d:12,v:4},{n:10,d:12,v:5},{n:11,d:12,v:0},
+];
+
+const CARDS=FRAZIONI_UNICHE.map((f,i)=>({...f,colore:PALETTE[i%PALETTE.length],label:`${f.n}/${f.d}`}));
+
+// ---- GALLERIA ----
+function buildGalleria(){
+  const grid=document.getElementById("grid-carte");
+  grid.innerHTML="";
+  CARDS.forEach(c=>{
+    const scene=document.createElement("div");
+    scene.className="card-scene";
+    scene.onclick=()=>scene.classList.toggle("flipped");
+    const card3d=document.createElement("div");
+    card3d.className="card-3d";
+    // fronte
+    const front=document.createElement("div");
+    front.className="card-face card-front";
+    front.innerHTML=buildSVG(c.n,c.d,c.v,c.colore,158,108);
+    // retro
+    const back=document.createElement("div");
+    back.className="card-face card-back";
+    back.innerHTML=`<img src="${LOGO}" alt="logo" onerror="this.style.opacity='.4';this.src='';this.alt='⚠ logo'"><span class="frac-back">${c.n}/${c.d}</span>`;
+    card3d.appendChild(front);card3d.appendChild(back);
+    scene.appendChild(card3d);
+    grid.appendChild(scene);
+  });
+}
+
+// ---- GIOCO 1 ----
+let g1score=0,g1total=0,g1waiting=false;
+function g1Next(){
+  g1waiting=false;
+  document.getElementById("g1-next").style.display="none";
+  document.getElementById("g1-feedback").textContent="";
+  document.getElementById("g1-feedback").className="";
+  const c=CARDS[Math.floor(Math.random()*CARDS.length)];
+  document.getElementById("g1-card").innerHTML=buildSVG(c.n,c.d,c.v,c.colore,220,130);
+  document.getElementById("g1-domanda").innerHTML=`La carta mostra <strong>${c.n}/${c.d}</strong>. Quanto manca per arrivare a 1?`;
+  const corrN=c.d-c.n,corrD=c.d;
+  const opts=[{n:corrN,d:corrD,ok:true}];
+  const usati=new Set([`${corrN}/${corrD}`]);
+  let tries=0;
+  while(opts.length<3&&tries<300){
+    tries++;
+    const fd=[2,3,4,5,6,8,9,10,12][Math.floor(Math.random()*9)];
+    const fn=Math.floor(Math.random()*(fd-1))+1;
+    const k=`${fn}/${fd}`;
+    if(!usati.has(k)){usati.add(k);opts.push({n:fn,d:fd,ok:false});}
+  }
+  opts.sort(()=>Math.random()-.5);
+  const opDiv=document.getElementById("g1-opzioni");
+  opDiv.innerHTML="";
+  opts.forEach(o=>{
+    const b=document.createElement("button");
+    b.textContent=`${o.n}/${o.d}`;
+    b.onclick=()=>{
+      if(g1waiting)return;
+      if(o.ok){
+        g1score++;g1waiting=true;g1total++;
+        document.getElementById("g1-feedback").textContent="Esatto!";
+        document.getElementById("g1-feedback").className="ok";
+        b.style.background="#d4f0e0";b.style.borderColor="#2d7a4f";
+        document.getElementById("g1-punteggio").textContent=`Punti: ${g1score} / ${g1total}`;
+        document.getElementById("g1-next").style.display="inline-block";
+      } else {
+        document.getElementById("g1-feedback").textContent="Non è quella giusta, riprova.";
+        document.getElementById("g1-feedback").className="no";
+        b.style.background="#f8d7d7";b.style.borderColor="#b33";
+        setTimeout(()=>{b.style.background="";b.style.borderColor="";document.getElementById("g1-feedback").textContent="";},800);
+      }
+    };
+    opDiv.appendChild(b);
+  });
+}
+
+// ---- MEMORY ----
+let g2flipped=[],g2matched=0,g2mosse=0,g2busy=false;
+function g2Start(){
+  const n=parseInt(document.getElementById("g2-size").value);
+  g2matched=0;g2mosse=0;g2flipped=[];g2busy=false;
+  document.getElementById("g2-msg").textContent="";
+  document.getElementById("g2-punteggio").textContent="";
+  const sel=[...CARDS].sort(()=>Math.random()-.5).slice(0,n);
+  const pairs=[];
+  sel.forEach((c,i)=>{pairs.push({id:i,type:"img",card:c});pairs.push({id:i,type:"txt",card:c});});
+  pairs.sort(()=>Math.random()-.5);
+  const cols=n<=6?4:5;
+  const board=document.getElementById("g2-board");
+  board.style.gridTemplateColumns=`repeat(${cols},1fr)`;
+  board.innerHTML="";
+  pairs.forEach(p=>{
+    const div=document.createElement("div");div.className="mem-card";
+    const inner=document.createElement("div");inner.className="mem-inner";
+    const bf=document.createElement("div");bf.className="mem-face mem-back-face";
+    bf.innerHTML=`<img src="${LOGO}" alt="" onerror="this.style.display='none'">`;
+    const ff=document.createElement("div");ff.className="mem-face mem-front-face";
+    if(p.type==="img") ff.innerHTML=buildSVG(p.card.n,p.card.d,p.card.v,p.card.colore,130,87);
+    else ff.innerHTML=`<span class="frac-text">${p.card.n}/${p.card.d}</span>`;
+    inner.appendChild(bf);inner.appendChild(ff);div.appendChild(inner);
+    div.onclick=()=>{
+      if(g2busy||div.classList.contains("flipped")||div.classList.contains("matched"))return;
+      div.classList.add("flipped");
+      g2flipped.push({div,p});
+      if(g2flipped.length===2){
+        g2busy=true;g2mosse++;
+        const [a,b]=g2flipped;
+        if(a.p.id===b.p.id&&a.p.type!==b.p.type){
+          a.div.classList.add("matched");b.div.classList.add("matched");
+          g2matched++;g2flipped=[];g2busy=false;
+          document.getElementById("g2-punteggio").textContent=`Mosse: ${g2mosse} | Coppie: ${g2matched}`;
+          if(g2matched===n)document.getElementById("g2-msg").textContent=`Completato in ${g2mosse} mosse!`;
+        } else {
+          setTimeout(()=>{
+            a.div.classList.remove("flipped");b.div.classList.remove("flipped");
+            g2flipped=[];g2busy=false;
+            document.getElementById("g2-punteggio").textContent=`Mosse: ${g2mosse} | Coppie: ${g2matched}`;
+          },1100);
+        }
+      }
+    };
+    board.appendChild(div);
+  });
+}
+
+function showSection(id,btn){
+  document.querySelectorAll("section").forEach(s=>s.classList.remove("visible"));
+  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+  document.getElementById("s-"+id).classList.add("visible");
+  btn.classList.add("active");
+  if(id==="g1"&&g1total===0)g1Next();
+  if(id==="g2"&&document.getElementById("g2-board").innerHTML==="")g2Start();
+}
+
+buildGalleria();
+</script>
+</body>
+</html>
