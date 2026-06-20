@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carte delle Frazioni</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:sans-serif;background:#f5f3ee;color:#222;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+header{display:flex;flex-direction:column;align-items:center;gap:6px;padding:1rem 1.2rem 0.5rem;border-bottom:1px solid #ddd;text-align:center;width:100%}
+.logo{display:flex;flex-direction:column;align-items:center;gap:6px}
+.logo a{display:block;text-decoration:none}
+.logo img{width:60px;height:60px;object-fit:contain;border-radius:50%}
+h1{font-size:1.1rem;font-weight:500;padding:0.8rem 1.2rem 0.2rem;color:#444;text-align:center}
+nav{display:flex;gap:8px;padding:0.3rem 1.2rem 0.8rem;flex-wrap:wrap;justify-content:center}
+nav button{padding:6px 14px;border-radius:20px;border:1.5px solid #bbb;background:#fff;cursor:pointer;font-size:0.82rem}
+nav button.active{background:#3a6e4e;color:#fff;border-color:#3a6e4e}
+section{display:none;padding:0.5rem 1rem 2rem;width:100%}
+section.visible{display:flex;flex-direction:column;align-items:center;text-align:center}
+.card-scene{perspective:700px;cursor:pointer}
+.card-3d{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .45s}
+.card-flipped .card-3d{transform:rotateY(180deg)}
+.card-face{position:absolute;inset:0;backface-visibility:hidden;overflow:visible}
+.card-front{background:#fff}
+.card-back{background:#3a6e4e;transform:rotateY(180deg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.card-back img{width:55%;max-height:45px;object-fit:contain;filter:brightness(0) invert(1);opacity:.95}
+.card-back .frac-back{font-size:1.4rem;color:#fff;font-weight:500}
+@media(max-width:480px){
+  .logo img{width:44px;height:44px}
+  nav button{font-size:0.75rem;padding:5px 10px}
+  #g0-scene{width:90vw!important;height:calc(90vw*0.68)!important}
+  #g1-card,#g2-card,#g3-card{width:88vw!important}
+  #g2-opzioni>div,#g3-opzioni>div{width:26vw!important}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <a href="https://matematichenonsinasce.com/" target="_blank">
+      <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="logo" onerror="this.style.display='none'">
+    </a>
+    <span style="font-size:1rem;font-weight:500;color:#3a6e4e;white-space:nowrap">Matematiche non si nasce</span>
+  </div>
+</header>
+<h1>Carte delle frazioni</h1>
+<nav>
+  <button class="active" onclick="showSection('g0',this)">Chi sono?</button>
+  <button onclick="showSection('g1',this)">Quale frazione?</button>
+  <button onclick="showSection('g2',this)">Quale carta?</button>
+  <button onclick="showSection('g3',this)">Quali carte?</button>
+</nav>
+
+<section id="s-g0" class="visible">
+  <p style="color:#555;font-size:.9rem;margin:0 0 1rem">Gira la carta per scoprire la frazione.</p>
+  <div id="g0-scene" class="card-scene" style="width:240px;height:164px;padding:3px 2px 4px" onclick="g0Flip()">
+    <div class="card-3d" id="g0-3d">
+      <div class="card-face card-front" id="g0-front"></div>
+      <div class="card-face card-back">
+        <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="logo" onerror="this.style.display='none'">
+        <span class="frac-back" id="g0-label"></span>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:1.2rem">
+    <button id="g0-btn" onclick="g0New()" style="padding:8px 24px;border-radius:8px;border:1.5px solid #3a6e4e;background:#3a6e4e;color:#fff;cursor:pointer;font-size:0.9rem;display:none">Prossima carta</button>
+  </div>
+</section>
+
+<section id="s-g1">
+  <p style="color:#555;font-size:.9rem;margin:0 0 1rem">Quanto manca per arrivare a 1?</p>
+  <div id="g1-card" style="width:220px;padding:3px 2px 4px"></div>
+  <div id="g1-opzioni" style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:1.2rem"></div>
+  <div id="g1-feedback" style="min-height:1.8rem;font-size:0.95rem;font-weight:500;margin-top:0.8rem"></div>
+  <div style="margin-top:0.8rem">
+    <button id="g1-next-btn" onclick="g1Next()" style="padding:8px 24px;border-radius:8px;border:1.5px solid #3a6e4e;background:#3a6e4e;color:#fff;cursor:pointer;font-size:0.9rem;display:none">Prossima carta</button>
+  </div>
+</section>
+
+<section id="s-g2">
+  <p style="color:#555;font-size:.9rem;margin:0 0 1rem">Quale carta, sommata a questa, fa 1?</p>
+  <div id="g2-card" style="width:220px;padding:3px 2px 4px;margin-bottom:1.5rem"></div>
+  <div id="g2-opzioni" style="display:flex;flex-wrap:wrap;justify-content:center;gap:14px"></div>
+  <div id="g2-feedback" style="min-height:1.8rem;font-size:0.95rem;font-weight:500;margin-top:0.8rem"></div>
+  <div style="margin-top:0.8rem">
+    <button id="g2-next-btn" onclick="g2Next()" style="padding:8px 24px;border-radius:8px;border:1.5px solid #3a6e4e;background:#3a6e4e;color:#fff;cursor:pointer;font-size:0.9rem;display:none">Prossima carta</button>
+  </div>
+</section>
+
+<section id="s-g3">
+  <p style="color:#555;font-size:.9rem;margin:0 0 0.5rem">Scegli <strong>due carte</strong> che, sommate a questa, fanno 1.</p>
+  <div id="g3-card" style="width:220px;padding:3px 2px 4px;margin-bottom:1.2rem"></div>
+  <div id="g3-opzioni" style="display:flex;flex-wrap:wrap;justify-content:center;gap:12px;max-width:520px"></div>
+  <div id="g3-feedback" style="min-height:1.8rem;font-size:0.95rem;font-weight:500;margin-top:0.8rem"></div>
+  <div style="margin-top:0.8rem">
+    <button id="g3-next-btn" onclick="g3Next()" style="padding:8px 24px;border-radius:8px;border:1.5px solid #3a6e4e;background:#3a6e4e;color:#fff;cursor:pointer;font-size:0.9rem;display:none">Prossima carta</button>
+  </div>
+</section>
+
+<script>
+const LOGO="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png";
+const PALETTE=["#a8d5ba","#b5c9e8","#f0b8b8","#c5b8e8","#f5d6a0","#a8c8e8","#e8c5d0","#b8d8c8","#c8e8d0","#e8b8c8","#b8c8e8","#d0e8b8","#e8d8b8","#b8e8e0","#d8c8f0","#f0d8b8","#c8f0e0","#f0c8d8"];
+
+const GO={
+  2:[{r:1,c:2},{r:2,c:1}],3:[{r:1,c:3},{r:3,c:1}],4:[{r:1,c:4},{r:4,c:1},{r:2,c:2}],
+  5:[{r:1,c:5},{r:5,c:1}],6:[{r:1,c:6},{r:6,c:1},{r:2,c:3},{r:3,c:2}],
+  8:[{r:1,c:8},{r:8,c:1},{r:2,c:4},{r:4,c:2}],9:[{r:1,c:9},{r:9,c:1},{r:3,c:3}],
+  10:[{r:1,c:10},{r:10,c:1},{r:2,c:5},{r:5,c:2}],
+  12:[{r:1,c:12},{r:12,c:1},{r:2,c:6},{r:6,c:2},{r:3,c:4},{r:4,c:3}],
+};
+function getGrid(d,gi){const o=GO[d]||[{r:1,c:d}];return o[gi%o.length];}
+function gcd(a,b){return b===0?a:gcd(b,a%b);}
+function addFrac(n1,d1,n2,d2){const n=n1*d2+n2*d1,d=d1*d2,g=gcd(n,d);return{n:n/g,d:d/g};}
+
+function gridOrders(total,rows,cols){
+  function seq(){return Array.from({length:total},(_,i)=>i);}
+  function byCol(){const o=[];for(let c=0;c<cols;c++)for(let r=0;r<rows;r++)o.push(r*cols+c);return o;}
+  function diag(){const o=[];for(let s=0;s<rows+cols-1;s++)for(let r=0;r<rows;r++){const c=s-r;if(c>=0&&c<cols)o.push(r*cols+c);}return o;}
+  function check(){const e=[],o=[];for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)((r+c)%2===0?e:o).push(r*cols+c);return[...e,...o];}
+  function lTL(){const o=new Set();for(let c=0;c<cols;c++)o.add(c);for(let r=1;r<rows;r++)o.add(r*cols);for(let r=1;r<rows;r++)for(let c=1;c<cols;c++)o.add(r*cols+c);return[...o];}
+  function lBR(){const o=new Set();for(let c=cols-1;c>=0;c--)o.add((rows-1)*cols+c);for(let r=rows-2;r>=0;r--)o.add(r*cols+(cols-1));for(let r=rows-2;r>=0;r--)for(let c=cols-2;c>=0;c--)o.add(r*cols+c);return[...o];}
+  return[seq(),byCol(),seq().reverse(),diag(),check(),lTL(),lBR(),byCol().reverse()];
+}
+
+function drawGrid(s,d,gi,pat,nC,col,x0,y0,w,h){
+  const{r:rows,c:cols}=getGrid(d,gi);
+  const cw=w/cols,ch=h/rows,total=rows*cols;
+  const order=gridOrders(total,rows,cols)[pat%8];
+  const colored=Array(total).fill(false);
+  order.slice(0,nC).forEach(i=>colored[i]=true);
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)
+    s.push(`<rect x="${(x0+c*cw).toFixed(2)}" y="${(y0+r*ch).toFixed(2)}" width="${cw.toFixed(2)}" height="${ch.toFixed(2)}" fill="${colored[r*cols+c]?col:'#fff'}" stroke="none"/>`);
+  for(let c=1;c<cols;c++){const x=(x0+c*cw).toFixed(2);s.push(`<line x1="${x}" y1="${y0.toFixed(2)}" x2="${x}" y2="${(y0+h).toFixed(2)}" stroke="#555" stroke-width="1"/>`);}
+  for(let r=1;r<rows;r++){const y=(y0+r*ch).toFixed(2);s.push(`<line x1="${x0.toFixed(2)}" y1="${y}" x2="${(x0+w).toFixed(2)}" y2="${y}" stroke="#555" stroke-width="1"/>`);}
+}
+
+const XP=[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1],[1,1,0,0],[1,0,1,0],[0,1,0,1],[0,0,1,1],[1,1,1,0],[1,1,0,1],[1,0,1,1],[0,1,1,1]];
+
+function drawX(s,xpat,col,x0,y0,w,h){
+  const cx=x0+w/2,cy=y0+h/2;
+  const tris=[[[x0,y0],[x0+w,y0],[cx,cy]],[[x0+w,y0],[x0+w,y0+h],[cx,cy]],[[x0+w,y0+h],[x0,y0+h],[cx,cy]],[[x0,y0+h],[x0,y0],[cx,cy]]];
+  tris.forEach((pts,i)=>{
+    const p=pts.map(([x,y])=>`${x.toFixed(2)},${y.toFixed(2)}`).join(' ');
+    s.push(`<polygon points="${p}" fill="${XP[xpat][i]?col:'#fff'}" stroke="#555" stroke-width="0.8"/>`);
+  });
+}
+
+function buildGridSVG(n,d,gi,pat,col,W,H){
+  const s=[`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="display:block">`,`<rect width="${W}" height="${H}" fill="#fff"/>`];
+  drawGrid(s,d,gi,pat,n,col,0,0,W,H);
+  const{r:rows,c:cols}=getGrid(d,gi);
+  for(let c=1;c<cols;c++){const x=(c*W/cols).toFixed(2);s.push(`<line x1="${x}" y1="0" x2="${x}" y2="${H}" stroke="#555" stroke-width="1"/>`);}
+  for(let r=1;r<rows;r++){const y=(r*H/rows).toFixed(2);s.push(`<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="#555" stroke-width="1"/>`);}
+  s.push(`<rect width="${W}" height="${H}" fill="none" stroke="#555" stroke-width="1.5"/></svg>`);
+  return s.join('');
+}
+
+function buildXSVG(xpat,col,W,H){
+  const s=[`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="display:block">`,`<rect width="${W}" height="${H}" fill="#fff"/>`];
+  drawX(s,xpat,col,0,0,W,H);
+  s.push(`<rect width="${W}" height="${H}" fill="none" stroke="#555" stroke-width="1.5"/></svg>`);
+  return s.join('');
+}
+
+function buildMixedSVG(card,W,H){
+  const{split,metaA,metaB,colore}=card;
+  const s=[`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="display:block">`,`<rect width="${W}" height="${H}" fill="#fff"/>`];
+  function drawHalf(meta,x0,y0,w,h){
+    if(meta.tipo==='x') drawX(s,meta.xpat,colore,x0,y0,w,h);
+    else drawGrid(s,meta.d,meta.gi,meta.pat,meta.nC,colore,x0,y0,w,h);
+  }
+  if(split==='v'){
+    drawHalf(metaA,0,0,W/2,H); drawHalf(metaB,W/2,0,W/2,H);
+    s.push(`<line x1="${W/2}" y1="0" x2="${W/2}" y2="${H}" stroke="#333" stroke-width="2"/>`);
+  } else {
+    drawHalf(metaA,0,0,W,H/2); drawHalf(metaB,0,H/2,W,H/2);
+    s.push(`<line x1="0" y1="${H/2}" x2="${W}" y2="${H/2}" stroke="#333" stroke-width="2"/>`);
+  }
+  s.push(`<rect width="${W}" height="${H}" fill="none" stroke="#555" stroke-width="1.5"/></svg>`);
+  return s.join('');
+}
+
+function cardSVG(c,W,H){
+  if(c.tipo==='x') return buildXSVG(c.xpat,c.colore,W,H);
+  if(c.tipo==='mixed') return buildMixedSVG(c,W,H);
+  return buildGridSVG(c.n,c.d,c.gi,c.pat,c.colore,W,H);
+}
+
+function halfValue(meta){
+  if(meta.tipo==='x'){const count=XP[meta.xpat].reduce((a,b)=>a+b,0);return{n:count,d:8};}
+  return{n:meta.nC,d:meta.d*2};
+}
+
+// MAZZO
+const MAZZO_GRID=[
+  {n:1,d:2,gi:0,pat:0},{n:1,d:3,gi:0,pat:0},{n:2,d:3,gi:1,pat:2},
+  {n:1,d:4,gi:2,pat:0},{n:2,d:4,gi:2,pat:5},{n:3,d:4,gi:2,pat:2},
+  {n:1,d:5,gi:0,pat:0},{n:2,d:5,gi:1,pat:0},{n:3,d:5,gi:0,pat:2},{n:4,d:5,gi:1,pat:2},
+  {n:1,d:6,gi:2,pat:0},{n:2,d:6,gi:3,pat:1},{n:3,d:6,gi:2,pat:5},{n:4,d:6,gi:3,pat:2},{n:5,d:6,gi:2,pat:2},
+  {n:1,d:8,gi:2,pat:0},{n:2,d:8,gi:3,pat:1},{n:3,d:8,gi:2,pat:3},{n:4,d:8,gi:3,pat:5},{n:5,d:8,gi:2,pat:6},{n:6,d:8,gi:3,pat:2},
+  {n:1,d:9,gi:2,pat:0},{n:2,d:9,gi:2,pat:1},{n:3,d:9,gi:2,pat:3},{n:4,d:9,gi:2,pat:5},{n:6,d:9,gi:2,pat:6},{n:7,d:9,gi:2,pat:2},
+  {n:1,d:10,gi:2,pat:0},{n:2,d:10,gi:3,pat:1},{n:3,d:10,gi:2,pat:3},{n:5,d:10,gi:3,pat:5},{n:7,d:10,gi:2,pat:6},{n:9,d:10,gi:3,pat:2},
+  {n:1,d:12,gi:4,pat:0},{n:2,d:12,gi:5,pat:1},{n:3,d:12,gi:4,pat:3},{n:4,d:12,gi:5,pat:5},{n:5,d:12,gi:4,pat:6},
+  {n:6,d:12,gi:5,pat:7},{n:7,d:12,gi:4,pat:4},{n:8,d:12,gi:5,pat:2},{n:9,d:12,gi:4,pat:1},{n:10,d:12,gi:5,pat:3},{n:11,d:12,gi:4,pat:2},
+];
+const MAZZO_X=[
+  {n:1,d:4,xpat:0},{n:1,d:4,xpat:1},{n:1,d:4,xpat:2},{n:1,d:4,xpat:3},
+  {n:2,d:4,xpat:4},{n:2,d:4,xpat:5},{n:2,d:4,xpat:6},{n:2,d:4,xpat:7},
+  {n:3,d:4,xpat:8},{n:3,d:4,xpat:9},{n:3,d:4,xpat:10},{n:3,d:4,xpat:11},
+];
+const MAZZO_MIXED_DEF=[
+  {split:'v',metaA:{tipo:'x',xpat:0},metaB:{tipo:'grid',d:4,gi:0,pat:0,nC:0}},
+  {split:'v',metaA:{tipo:'x',xpat:4},metaB:{tipo:'grid',d:4,gi:0,pat:0,nC:0}},
+  {split:'v',metaA:{tipo:'x',xpat:0},metaB:{tipo:'grid',d:4,gi:0,pat:0,nC:1}},
+  {split:'v',metaA:{tipo:'x',xpat:8},metaB:{tipo:'grid',d:4,gi:0,pat:0,nC:0}},
+  {split:'v',metaA:{tipo:'x',xpat:4},metaB:{tipo:'grid',d:4,gi:0,pat:0,nC:1}},
+  {split:'v',metaA:{tipo:'x',xpat:0},metaB:{tipo:'grid',d:4,gi:0,pat:0,nC:2}},
+  {split:'v',metaA:{tipo:'x',xpat:8},metaB:{tipo:'grid',d:4,gi:0,pat:0,nC:1}},
+  {split:'v',metaA:{tipo:'x',xpat:4},metaB:{tipo:'grid',d:4,gi:1,pat:0,nC:2}},
+  {split:'v',metaA:{tipo:'x',xpat:0},metaB:{tipo:'grid',d:4,gi:0,pat:0,nC:3}},
+  {split:'v',metaA:{tipo:'x',xpat:8},metaB:{tipo:'grid',d:4,gi:1,pat:0,nC:2}},
+  {split:'v',metaA:{tipo:'x',xpat:11},metaB:{tipo:'grid',d:4,gi:0,pat:0,nC:3}},
+  {split:'v',metaA:{tipo:'x',xpat:0},metaB:{tipo:'grid',d:4,gi:2,pat:2,nC:2}},
+  {split:'h',metaA:{tipo:'x',xpat:2},metaB:{tipo:'grid',d:4,gi:1,pat:0,nC:0}},
+  {split:'h',metaA:{tipo:'x',xpat:6},metaB:{tipo:'grid',d:4,gi:1,pat:0,nC:0}},
+  {split:'h',metaA:{tipo:'x',xpat:2},metaB:{tipo:'grid',d:4,gi:1,pat:0,nC:2}},
+  {split:'h',metaA:{tipo:'x',xpat:9},metaB:{tipo:'grid',d:4,gi:1,pat:0,nC:2}},
+  {split:'h',metaA:{tipo:'x',xpat:11},metaB:{tipo:'grid',d:4,gi:1,pat:0,nC:2}},
+  {split:'h',metaA:{tipo:'x',xpat:11},metaB:{tipo:'grid',d:4,gi:1,pat:0,nC:3}},
+  {split:'v',metaA:{tipo:'grid',d:3,gi:0,pat:0,nC:1},metaB:{tipo:'grid',d:3,gi:1,pat:0,nC:0}},
+  {split:'v',metaA:{tipo:'grid',d:3,gi:0,pat:0,nC:2},metaB:{tipo:'grid',d:3,gi:1,pat:0,nC:0}},
+  {split:'v',metaA:{tipo:'grid',d:3,gi:0,pat:0,nC:1},metaB:{tipo:'grid',d:3,gi:1,pat:0,nC:1}},
+  {split:'v',metaA:{tipo:'grid',d:3,gi:0,pat:0,nC:2},metaB:{tipo:'grid',d:3,gi:1,pat:0,nC:1}},
+  {split:'v',metaA:{tipo:'grid',d:3,gi:0,pat:2,nC:3},metaB:{tipo:'grid',d:3,gi:1,pat:0,nC:1}},
+  {split:'v',metaA:{tipo:'grid',d:3,gi:0,pat:2,nC:3},metaB:{tipo:'grid',d:3,gi:1,pat:0,nC:2}},
+  {split:'h',metaA:{tipo:'grid',d:3,gi:0,pat:0,nC:1},metaB:{tipo:'grid',d:3,gi:1,pat:0,nC:0}},
+  {split:'h',metaA:{tipo:'grid',d:3,gi:1,pat:0,nC:1},metaB:{tipo:'grid',d:3,gi:0,pat:0,nC:1}},
+  {split:'h',metaA:{tipo:'grid',d:3,gi:1,pat:2,nC:2},metaB:{tipo:'grid',d:3,gi:0,pat:0,nC:2}},
+  {split:'h',metaA:{tipo:'grid',d:3,gi:0,pat:2,nC:3},metaB:{tipo:'grid',d:3,gi:1,pat:0,nC:2}},
+  {split:'v',metaA:{tipo:'grid',d:6,gi:0,pat:0,nC:1},metaB:{tipo:'grid',d:6,gi:2,pat:0,nC:1}},
+  {split:'v',metaA:{tipo:'grid',d:6,gi:0,pat:0,nC:2},metaB:{tipo:'grid',d:6,gi:2,pat:0,nC:1}},
+  {split:'v',metaA:{tipo:'grid',d:6,gi:2,pat:0,nC:2},metaB:{tipo:'grid',d:6,gi:0,pat:0,nC:2}},
+  {split:'v',metaA:{tipo:'grid',d:6,gi:0,pat:2,nC:3},metaB:{tipo:'grid',d:6,gi:2,pat:0,nC:3}},
+  {split:'v',metaA:{tipo:'grid',d:6,gi:2,pat:2,nC:4},metaB:{tipo:'grid',d:6,gi:0,pat:0,nC:4}},
+  {split:'v',metaA:{tipo:'grid',d:6,gi:0,pat:2,nC:6},metaB:{tipo:'grid',d:6,gi:2,pat:0,nC:3}},
+  {split:'h',metaA:{tipo:'grid',d:6,gi:1,pat:0,nC:1},metaB:{tipo:'grid',d:6,gi:3,pat:0,nC:1}},
+  {split:'h',metaA:{tipo:'grid',d:6,gi:1,pat:0,nC:3},metaB:{tipo:'grid',d:6,gi:3,pat:0,nC:2}},
+  {split:'h',metaA:{tipo:'grid',d:6,gi:3,pat:2,nC:4},metaB:{tipo:'grid',d:6,gi:1,pat:0,nC:3}},
+  {split:'h',metaA:{tipo:'grid',d:6,gi:1,pat:2,nC:6},metaB:{tipo:'grid',d:6,gi:3,pat:2,nC:5}},
+].map((c,i)=>{
+  const vA=halfValue(c.metaA),vB=halfValue(c.metaB);
+  const tot=addFrac(vA.n,vA.d,vB.n,vB.d);
+  return{...c,tipo:'mixed',n:tot.n,d:tot.d,label:`${tot.n}/${tot.d}`,colore:PALETTE[i%PALETTE.length]};
+});
+
+const CARDS=[
+  ...MAZZO_GRID.map((f,i)=>({...f,tipo:'grid',colore:PALETTE[i%PALETTE.length],label:`${f.n}/${f.d}`})),
+  ...MAZZO_X.map((f,i)=>({...f,tipo:'x',colore:PALETTE[(MAZZO_GRID.length+i)%PALETTE.length],label:`${f.n}/${f.d}`})),
+  ...MAZZO_MIXED_DEF,
+];
+
+// GIOCO 0
+let g0flipped=false;
+function g0New(){
+  g0flipped=false;
+  document.getElementById("g0-scene").classList.remove("card-flipped");
+  document.getElementById("g0-btn").style.display="none";
+  const c=CARDS[Math.floor(Math.random()*CARDS.length)];
+  document.getElementById("g0-front").innerHTML=cardSVG(c,236,158);
+  document.getElementById("g0-label").textContent=c.label;
+}
+function g0Flip(){
+  g0flipped=!g0flipped;
+  document.getElementById("g0-scene").classList.toggle("card-flipped",g0flipped);
+  document.getElementById("g0-btn").style.display=g0flipped?"inline-block":"none";
+}
+
+// GIOCO 1
+let g1waiting=false;
+function g1Next(){
+  g1waiting=false;
+  document.getElementById("g1-feedback").textContent="";
+  document.getElementById("g1-feedback").style.color="";
+  document.getElementById("g1-next-btn").style.display="none";
+  const c=CARDS[Math.floor(Math.random()*CARDS.length)];
+  document.getElementById("g1-card").innerHTML=cardSVG(c,216,144);
+  const g=gcd(c.d-c.n,c.d);
+  const corrN=(c.d-c.n)/g,corrD=c.d/g;
+  const opts=[{n:corrN,d:corrD,ok:true}];
+  const usati=new Set([`${corrN}/${corrD}`,`${c.n}/${c.d}`]);
+  const denPool=[2,3,4,5,6,8,9,10,12];
+  let tries=0;
+  while(opts.length<3&&tries<400){
+    tries++;
+    const fd=Math.random()<0.5?c.d:denPool[Math.floor(Math.random()*denPool.length)];
+    const fn=Math.floor(Math.random()*(fd-1))+1;
+    const fg=gcd(fn,fd);
+    const k=`${fn/fg}/${fd/fg}`;
+    if(!usati.has(k)){usati.add(k);opts.push({n:fn/fg,d:fd/fg,ok:false});}
+  }
+  opts.sort(()=>Math.random()-.5);
+  const opDiv=document.getElementById("g1-opzioni");
+  opDiv.innerHTML="";
+  opts.forEach(o=>{
+    const b=document.createElement("button");
+    b.textContent=`${o.n}/${o.d}`;
+    b.style.cssText="padding:10px 20px;font-size:1rem;border-radius:8px;border:1.5px solid #aaa;background:#fff;cursor:pointer";
+    b.onclick=()=>{
+      if(g1waiting)return;
+      if(o.ok){
+        g1waiting=true;
+        document.getElementById("g1-feedback").textContent="Esatto!";
+        document.getElementById("g1-feedback").style.color="#2d7a4f";
+        b.style.background="#d4f0e0";b.style.borderColor="#2d7a4f";
+        document.getElementById("g1-next-btn").style.display="inline-block";
+      } else {
+        document.getElementById("g1-feedback").textContent="Non è quella giusta, riprova.";
+        document.getElementById("g1-feedback").style.color="#b33";
+        b.style.background="#f8d7d7";b.style.borderColor="#b33";
+        setTimeout(()=>{b.style.background="";b.style.borderColor="";document.getElementById("g1-feedback").textContent="";},900);
+      }
+    };
+    opDiv.appendChild(b);
+  });
+}
+
+// GIOCO 2
+let g2waiting=false;
+function g2Next(){
+  g2waiting=false;
+  document.getElementById("g2-feedback").textContent="";
+  document.getElementById("g2-feedback").style.color="";
+  document.getElementById("g2-next-btn").style.display="none";
+  const c=CARDS[Math.floor(Math.random()*CARDS.length)];
+  document.getElementById("g2-card").innerHTML=cardSVG(c,216,144);
+  const g=gcd(c.d-c.n,c.d);
+  const corrN=(c.d-c.n)/g,corrD=c.d/g;
+  const corrCards=CARDS.filter(x=>x.n===corrN&&x.d===corrD);
+  if(corrCards.length===0){g2Next();return;}
+  const corrCard=corrCards[Math.floor(Math.random()*corrCards.length)];
+  const usati=new Set([`${corrN}/${corrD}`,`${c.n}/${c.d}`]);
+  const distractors=[];
+  const shuffled=[...CARDS].sort(()=>Math.random()-.5);
+  for(const x of shuffled){
+    const k=`${x.n}/${x.d}`;
+    if(!usati.has(k)){usati.add(k);distractors.push(x);}
+    if(distractors.length===2)break;
+  }
+  if(distractors.length<2){g2Next();return;}
+  const opts=[{card:corrCard,ok:true},{card:distractors[0],ok:false},{card:distractors[1],ok:false}].sort(()=>Math.random()-.5);
+  const opDiv=document.getElementById("g2-opzioni");
+  opDiv.innerHTML="";
+  opts.forEach(o=>{
+    const wrap=document.createElement("div");
+    wrap.style.cssText="cursor:pointer;border:2px solid #ccc;border-radius:4px;padding:3px 2px 4px;width:150px";
+    wrap.innerHTML=cardSVG(o.card,146,98);
+    wrap.onclick=()=>{
+      if(g2waiting)return;
+      if(o.ok){
+        g2waiting=true;
+        document.getElementById("g2-feedback").textContent="Esatto!";
+        document.getElementById("g2-feedback").style.color="#2d7a4f";
+        wrap.style.borderColor="#2d7a4f";wrap.style.background="#d4f0e0";
+        document.getElementById("g2-next-btn").style.display="inline-block";
+      } else {
+        document.getElementById("g2-feedback").textContent="Non è quella giusta, riprova.";
+        document.getElementById("g2-feedback").style.color="#b33";
+        wrap.style.borderColor="#b33";wrap.style.background="#f8d7d7";
+        setTimeout(()=>{wrap.style.borderColor="#ccc";wrap.style.background="";document.getElementById("g2-feedback").textContent="";},900);
+      }
+    };
+    opDiv.appendChild(wrap);
+  });
+}
+
+// GIOCO 3
+let g3waiting=false,g3selected=[],g3corrPair=[];
+function g3Next(){
+  g3waiting=false;g3selected=[];g3corrPair=[];
+  document.getElementById("g3-feedback").textContent="";
+  document.getElementById("g3-feedback").style.color="";
+  document.getElementById("g3-next-btn").style.display="none";
+  const c=CARDS[Math.floor(Math.random()*CARDS.length)];
+  document.getElementById("g3-card").innerHTML=cardSVG(c,216,144);
+  const g=gcd(c.d-c.n,c.d);
+  const mancaN=(c.d-c.n)/g,mancaD=c.d/g;
+  // Trova coppie che sommano a manca
+  const coppie=[];
+  const usatiPair=new Set();
+  for(let i=0;i<CARDS.length;i++){
+    for(let j=i+1;j<CARDS.length;j++){
+      const a=CARDS[i],b=CARDS[j];
+      if((a.n*b.d+b.n*a.d)*mancaD===mancaN*a.d*b.d){
+        const k=[i,j].sort().join('-');
+        if(!usatiPair.has(k)){usatiPair.add(k);coppie.push([i,j]);}
+      }
+    }
+  }
+  if(coppie.length===0){g3Next();return;}
+  g3corrPair=coppie[Math.floor(Math.random()*coppie.length)];
+  const corrSet=new Set(g3corrPair);
+  const distractors=[];
+  const shuffled=[...CARDS.keys()].sort(()=>Math.random()-.5);
+  for(const idx of shuffled){
+    if(!corrSet.has(idx))distractors.push(idx);
+    if(distractors.length===4)break;
+  }
+  if(distractors.length<4){g3Next();return;}
+  const pool=[...g3corrPair,...distractors].sort(()=>Math.random()-.5);
+  const opDiv=document.getElementById("g3-opzioni");
+  opDiv.innerHTML="";
+  pool.forEach(cardIdx=>{
+    const card=CARDS[cardIdx];
+    const wrap=document.createElement("div");
+    wrap.dataset.idx=cardIdx;
+    wrap.style.cssText="cursor:pointer;border:2px solid #ccc;border-radius:4px;padding:3px 2px 4px;width:150px;transition:border .15s,background .15s";
+    wrap.innerHTML=cardSVG(card,146,98);
+    wrap.onclick=()=>g3Select(wrap,cardIdx);
+    opDiv.appendChild(wrap);
+  });
+}
+function g3Select(wrap,cardIdx){
+  if(g3waiting)return;
+  const isSelected=g3selected.includes(cardIdx);
+  if(isSelected){
+    g3selected=g3selected.filter(i=>i!==cardIdx);
+    wrap.style.borderColor="#ccc";wrap.style.background="";
+  } else {
+    if(g3selected.length>=2)return;
+    g3selected.push(cardIdx);
+    wrap.style.borderColor="#3a6e4e";wrap.style.background="#e8f5ee";
+  }
+  if(g3selected.length===2){
+    const sel=[...g3selected].sort().join('-');
+    const corr=[...g3corrPair].sort().join('-');
+    if(sel===corr){
+      g3waiting=true;
+      document.getElementById("g3-feedback").textContent="Esatto!";
+      document.getElementById("g3-feedback").style.color="#2d7a4f";
+      document.getElementById("g3-next-btn").style.display="inline-block";
+    } else {
+      document.getElementById("g3-feedback").textContent="Non è la coppia giusta, riprova.";
+      document.getElementById("g3-feedback").style.color="#b33";
+      setTimeout(()=>{
+        g3selected=[];
+        document.getElementById("g3-feedback").textContent="";
+        document.querySelectorAll("#g3-opzioni > div").forEach(w=>{w.style.borderColor="#ccc";w.style.background="";});
+      },900);
+    }
+  }
+}
+
+function showSection(id,btn){
+  document.querySelectorAll("section").forEach(s=>s.classList.remove("visible"));
+  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+  document.getElementById("s-"+id).classList.add("visible");
+  btn.classList.add("active");
+  if(id==="g0")g0New();
+  if(id==="g1")g1Next();
+  if(id==="g2")g2Next();
+  if(id==="g3")g3Next();
+}
+
+g0New();
+</script>
+</body>
+</html>
