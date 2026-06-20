@@ -93,7 +93,7 @@ section.visible{display:block}
 </section>
 
 <script>
-const LOGO="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/main/logo.png";
+const LOGO="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png";
 const PALETTE=["#a8d5ba","#b5c9e8","#f0b8b8","#c5b8e8","#f5d6a0","#a8c8e8","#e8c5d0","#b8d8c8","#c8e8d0","#e8b8c8","#b8c8e8","#d0e8b8","#e8d8b8","#b8e8e0","#d8c8f0","#f0d8b8","#c8f0e0","#f0c8d8"];
 
 function bestGrid(d,W,H){
@@ -181,7 +181,7 @@ function buildGalleria(){
     // retro
     const back=document.createElement("div");
     back.className="card-face card-back";
-    back.innerHTML=`<img src="${LOGO}" alt="logo" onerror="this.style.opacity='.4';this.src='';this.alt='⚠ logo'"><span class="frac-back">${c.n}/${c.d}</span>`;
+    back.innerHTML=`<img src="${LOGO}" alt="logo" onerror="this.style.display='none'"><span class="frac-back">${c.n}/${c.d}</span>`;
     card3d.appendChild(front);card3d.appendChild(back);
     scene.appendChild(card3d);
     grid.appendChild(scene);
