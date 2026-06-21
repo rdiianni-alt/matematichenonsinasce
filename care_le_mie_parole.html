@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Care le mie parole</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Courier New', monospace; background: #f5f0e8; min-height: 100vh; }
+
+  @media (max-width: 480px) {
+    #screen-select h1 { font-size: 1.3em; }
+    .listino-btn { width: 90%; font-size: 1em; padding: 14px 16px; }
+    #screen-game { padding: 10px; }
+    .game-title { font-size: 1.1em; }
+    table.listino td { font-size: 0.75em; padding: 4px 4px; }
+    .categoria-section { padding: 10px 12px; gap: 10px; }
+    .cat-btn { font-size: 0.85em; padding: 8px 12px; }
+    #categoria-display { font-size: 1.1em; }
+    .calc-section { padding: 12px; }
+    .calc-section h2 { font-size: 0.95em; }
+    #parola-input { font-size: 1em; padding: 8px 10px; letter-spacing: 1px; }
+    .calc-btn { font-size: 0.85em; padding: 8px 12px; }
+    .lettera-chip { padding: 4px 7px; font-size: 0.85em; }
+    .totale-row { font-size: 1.1em; }
+  }
+
+  #screen-select, #screen-game { display: none; }
+  #screen-select.active, #screen-game.active { display: block; }
+
+  .logo { text-align: center; margin-bottom: 16px; }
+  .logo a { display: inline-block; }
+  .logo img { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; }
+  .logo-nome { font-size: 0.85em; font-style: italic; margin-top: 4px; letter-spacing: 1px; }
+
+  #screen-select { padding: 40px 20px; text-align: center; }
+  #screen-select h1 { font-size: 2em; font-weight: bold; text-decoration: underline; margin-bottom: 40px; letter-spacing: 2px; }
+  .listino-btn {
+    display: block; width: 320px; margin: 16px auto;
+    padding: 18px 24px; font-size: 1.2em; font-family: 'Courier New', monospace;
+    font-weight: bold; border: 3px solid #222; background: #fff;
+    cursor: pointer;
+  }
+  .listino-btn:hover { background: #ffe; }
+
+  #screen-game { padding: 20px; max-width: 900px; margin: 0 auto; }
+
+  .game-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+  .back-btn {
+    padding: 6px 14px; font-family: 'Courier New', monospace; font-size: 0.9em;
+    border: 2px solid #222; background: #fff; cursor: pointer;
+  }
+  .back-btn:hover { background: #eee; }
+  .game-title { font-size: 1.5em; font-weight: bold; text-decoration: underline; letter-spacing: 1px; }
+
+  .tabellone-wrap { margin-bottom: 20px; }
+  .tabellone-wrap h2 { font-size: 1.1em; font-weight: bold; text-decoration: underline; margin-bottom: 10px; letter-spacing: 1px; }
+
+  table.listino { border-collapse: collapse; width: 100%; border: 3px solid #222; }
+  table.listino td { border: 1px solid #888; padding: 6px 10px; text-align: center; font-size: 1em; }
+  table.listino td:nth-child(odd) { font-weight: bold; width: 60px; }
+  table.listino td:nth-child(even) { width: 90px; }
+  table.listino tr td:nth-child(3), table.listino tr td:nth-child(4) { border-left: 3px solid #222; }
+  table.listino tr td:nth-child(5), table.listino tr td:nth-child(6) { border-left: 3px solid #222; }
+
+  /* CATEGORIA */
+  .categoria-section { border: 3px solid #222; background: #fff; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+  .cat-btn {
+    padding: 10px 20px; font-size: 1em; font-family: 'Courier New', monospace;
+    font-weight: bold; border: 2px solid #222; background: #222; color: #fff; cursor: pointer; white-space: nowrap;
+  }
+  .cat-btn:hover { background: #444; }
+  #categoria-display { font-size: 1.4em; font-weight: bold; letter-spacing: 1px; }
+
+  /* CALCOLATORE */
+  .calc-section { border: 3px solid #222; background: #fff; padding: 20px; }
+  .calc-section h2 { font-size: 1.1em; font-weight: bold; text-decoration: underline; margin-bottom: 14px; letter-spacing: 1px; }
+
+  .input-row { display: flex; gap: 12px; align-items: center; margin-bottom: 18px; }
+  #parola-input {
+    flex: 1; padding: 10px 14px; font-size: 1.3em; font-family: 'Courier New', monospace;
+    border: 2px solid #222; text-transform: uppercase; letter-spacing: 3px;
+  }
+  .calc-btn {
+    padding: 10px 20px; font-size: 1em; font-family: 'Courier New', monospace;
+    font-weight: bold; border: 2px solid #222; background: #222; color: #fff; cursor: pointer;
+  }
+  .calc-btn:hover { background: #444; }
+
+  #risultato { display: none; margin-top: 8px; }
+  .dettaglio { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .lettera-chip { border: 2px solid #222; padding: 6px 10px; background: #f5f0e8; font-size: 1em; font-weight: bold; }
+  .lettera-chip span { font-weight: normal; font-size: 0.85em; display: block; text-align: center; }
+  .totale-row { font-size: 1.4em; font-weight: bold; margin-top: 8px; border-top: 2px solid #222; padding-top: 10px; }
+  .errore { color: #a00; font-size: 0.95em; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<div id="screen-select" class="active">
+  <div class="logo">
+    <a href="https://matematichenonsinasce.com/" target="_blank">
+      <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Logo">
+    </a>
+    <div class="logo-nome">Matematiche non si nasce</div>
+  </div>
+  <h1>CARE LE MIE PAROLE</h1>
+  <p style="margin-bottom:20px; font-size:0.95em; max-width:360px; margin-left:auto; margin-right:auto; line-height:1.6;">Ogni lettera ha un costo. Si estrae una categoria, si cerca una parola che vi appartiene e si calcola quanto costa. Vince chi trova la parola più costosa.</p>
+  <p style="margin-bottom:24px; font-size:0.95em;">Scegli un listino:</p>
+  <button class="listino-btn" onclick="apriGioco('listino1')">Listino delle lettere</button>
+  <p style="margin-top:48px; font-size:0.78em; color:#555; max-width:360px; margin-left:auto; margin-right:auto; line-height:1.6;">Versione digitale ispirata al gioco cartaceo <a href="https://www.pianodilavoro.org/2021/07/15/care-le-mie-parole/" target="_blank" style="color:#555;">"Care le mie parole"</a> di Lisa Salvetti e (Emi)Lia Venturato, pubblicato su pianodilavoro.org.</p>
+</div>
+
+<div id="screen-game">
+  <div class="game-header">
+    <button class="back-btn" onclick="tornaAllaScelta()">← Listini</button>
+    <div class="game-title" id="game-title"></div>
+  </div>
+
+  <div class="tabellone-wrap">
+    <h2>LISTINO DELLE LETTERE</h2>
+    <div id="tabellone-container"></div>
+  </div>
+
+  <div class="categoria-section">
+    <button class="cat-btn" onclick="estraiCategoria()">Estrai categoria</button>
+    <div id="categoria-display"></div>
+  </div>
+
+  <div class="calc-section">
+    <h2>QUANTO COSTA LA MIA PAROLA?</h2>
+    <div class="input-row">
+      <input type="text" id="parola-input" placeholder="Scrivi una parola..." oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')calcola()">
+      <button class="calc-btn" onclick="calcola()">Calcola</button>
+    </div>
+    <div id="risultato"></div>
+  </div>
+</div>
+
+<script>
+const LISTINI = {
+  listino1: {
+    nome: "Listino delle lettere",
+    prezzi: {
+      A:0.50, B:1, C:1, D:1.50, E:1, F:1.50, G:1.50, H:3, Z:5,
+      J:5, I:1, L:2, M:1, N:1, O:0.50, P:2, Q:3,
+      R:2, S:1.50, T:2.50, U:1.50, V:3, W:5, Y:5, X:5
+    }
+  }
+};
+
+const CATEGORIE = [
+  "Animali",
+  "Piante",
+  "Nomi propri di persona",
+  "Città italiane",
+  "Cibi",
+  "Oggetti di scuola",
+  "Mestieri",
+  "Colori",
+  "Animali del mare",
+  "Frutti",
+  "Sport",
+  "Strumenti musicali",
+  "Paesi del mondo",
+  "Mezzi di trasporto",
+  "Stagioni e fenomeni atmosferici",
+  "Numeri scritti in lettere",
+  "Nomi di fiumi italiani",
+  "Nomi di montagne",
+  "Giorni della settimana e mesi",
+  "Materiali",
+  "Emozioni",
+  "Aggettivi",
+  "Verbi all'infinito",
+  "Insetti",
+  "Dinosauri"
+];
+
+let listinoCorrente = null;
+let ultimaCategoria = -1;
+
+function apriGioco(id) {
+  listinoCorrente = LISTINI[id];
+  document.getElementById('game-title').textContent = listinoCorrente.nome.toUpperCase();
+  costruisciTabellone(listinoCorrente.prezzi);
+  document.getElementById('screen-select').classList.remove('active');
+  document.getElementById('screen-game').classList.add('active');
+  document.getElementById('parola-input').value = '';
+  document.getElementById('risultato').style.display = 'none';
+  document.getElementById('categoria-display').textContent = '';
+}
+
+function tornaAllaScelta() {
+  document.getElementById('screen-game').classList.remove('active');
+  document.getElementById('screen-select').classList.add('active');
+}
+
+function estraiCategoria() {
+  let idx;
+  do { idx = Math.floor(Math.random() * CATEGORIE.length); } while (idx === ultimaCategoria && CATEGORIE.length > 1);
+  ultimaCategoria = idx;
+  document.getElementById('categoria-display').textContent = CATEGORIE[idx].toUpperCase();
+}
+
+function costruisciTabellone(prezzi) {
+  const voci = Object.entries(prezzi).sort((a,b)=>a[0].localeCompare(b[0]));
+  const colSize = Math.ceil(voci.length / 3);
+  const col1 = voci.slice(0, colSize);
+  const col2 = voci.slice(colSize, colSize*2);
+  const col3 = voci.slice(colSize*2);
+  const rows = Math.max(col1.length, col2.length, col3.length);
+
+  let html = '<table class="listino"><tbody>';
+  for (let i = 0; i < rows; i++) {
+    html += '<tr>';
+    html += col1[i] ? `<td>${col1[i][0]}</td><td>${fmt(col1[i][1])}</td>` : '<td></td><td></td>';
+    html += col2[i] ? `<td>${col2[i][0]}</td><td>${fmt(col2[i][1])}</td>` : '<td></td><td></td>';
+    html += col3[i] ? `<td>${col3[i][0]}</td><td>${fmt(col3[i][1])}</td>` : '<td></td><td></td>';
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  document.getElementById('tabellone-container').innerHTML = html;
+}
+
+function fmt(v) {
+  return v === Math.floor(v) ? v + ' €' : v.toFixed(2).replace('.',',') + ' €';
+}
+
+function calcola() {
+  const input = document.getElementById('parola-input').value.trim().toUpperCase();
+  const div = document.getElementById('risultato');
+  if (!input) { div.style.display='none'; return; }
+
+  const prezzi = listinoCorrente.prezzi;
+  let sconosciute = [];
+  let dettaglio = [];
+  let totale = 0;
+
+  for (const ch of input) {
+    if (ch === ' ') continue;
+    if (!prezzi[ch]) { sconosciute.push(ch); continue; }
+    dettaglio.push({ lettera: ch, costo: prezzi[ch] });
+    totale += prezzi[ch];
+  }
+
+  let html = '<div class="dettaglio">';
+  for (const d of dettaglio) {
+    html += `<div class="lettera-chip">${d.lettera}<span>${fmt(d.costo)}</span></div>`;
+  }
+  html += '</div>';
+
+  if (sconosciute.length > 0) {
+    html += `<div class="errore">Lettera non presente nel listino: ${sconosciute.join(', ')}</div>`;
+  }
+
+  html += `<div class="totale-row">"${input}" costa ${fmt(totale)}</div>`;
+
+  div.innerHTML = html;
+  div.style.display = 'block';
+}
+</script>
+</body>
+</html>
