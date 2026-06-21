@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gioco di sovrapposizione</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:sans-serif;background:#1a1a2e;color:#eee;padding:1.5rem;}
+@media(max-width:480px){
+  body{padding:.75rem;}
+  .canvas-wrap{height:140px;}
+  .canvas-wrap svg{width:130px;height:130px;}
+  .tile{width:68px;height:68px;}
+  .slot{width:46px;height:46px;}
+  h1{font-size:15px;}
+  .logo span{font-size:13px;}
+  .logo img{width:44px;height:44px;}
+  .section-label{font-size:12px;}
+  button{font-size:12px;padding:5px 10px;}
+}
+h1{font-size:26px;font-weight:700;margin-bottom:1.25rem;text-align:center;letter-spacing:1px;}
+.logo{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:1.25rem;text-decoration:none;}
+.logo img{width:60px;height:60px;object-fit:contain;border-radius:50%;}
+.logo span{font-size:15px;font-weight:500;color:#ccc;}
+.top{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;}
+.panel{background:#12122a;border:1px solid #333;border-radius:12px;padding:1rem;}
+.panel-title{font-size:13px;color:#888;margin-bottom:.75rem;text-align:center;}
+.canvas-wrap{display:flex;align-items:center;justify-content:center;height:210px;}
+.tiles-grid{display:flex;gap:.75rem;flex-wrap:wrap;justify-content:center;margin-bottom:1.5rem;}
+.tile{width:100px;height:100px;border:1px solid #444;border-radius:8px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;background:#12122a;transition:transform .1s,border-color .1s;}
+.tile:hover{border-color:#aaa;}
+.tile.disabled{opacity:.35;cursor:default;pointer-events:none;}
+.section-label{font-size:13px;color:#888;text-align:center;margin-bottom:.5rem;}
+.order-row{display:flex;gap:.5rem;align-items:flex-start;justify-content:center;margin-bottom:1.25rem;flex-wrap:wrap;}
+.slot-wrap{display:flex;flex-direction:column;align-items:center;}
+.slot{width:64px;height:64px;border:1px dashed #555;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;background:#0d0d1f;}
+.slot-label{font-size:11px;color:#666;text-align:center;margin-top:4px;}
+.btn-row{display:flex;gap:.75rem;justify-content:center;margin-bottom:1rem;}
+button{font-family:sans-serif;font-size:13px;padding:6px 14px;border-radius:8px;
+  border:1px solid #555;background:transparent;color:#ccc;cursor:pointer;}
+button:hover{background:#1e1e3a;}
+button:active{transform:scale(0.98);}
+#msg{text-align:center;font-size:15px;min-height:22px;}
+#msg.ok{color:#4caf50;}
+#msg.err{color:#e57373;}
+</style>
+</head>
+<body>
+<a href="https://matematichenonsinasce.com/" class="logo" target="_blank">
+  <img src="https://rdiianni-alt.github.io/matematichenonsinasce/logo.png" alt="Logo Matematiche non si nasce">
+  <span>Matematiche non si nasce</span>
+</a>
+<h1 id="titolo">
+  <span style="color:#E24B4A">G</span><span style="color:#378ADD">i</span><span style="color:#4caf50">o</span><span style="color:#EF9F27">c</span><span style="color:#E24B4A">o</span>
+  <span style="color:#378ADD"> d</span><span style="color:#4caf50">i</span>
+  <span style="color:#EF9F27"> s</span><span style="color:#E24B4A">o</span><span style="color:#378ADD">v</span><span style="color:#4caf50">r</span><span style="color:#EF9F27">a</span><span style="color:#E24B4A">p</span><span style="color:#378ADD">p</span><span style="color:#4caf50">o</span><span style="color:#EF9F27">s</span><span style="color:#E24B4A">i</span><span style="color:#378ADD">z</span><span style="color:#4caf50">i</span><span style="color:#EF9F27">o</span><span style="color:#E24B4A">n</span><span style="color:#378ADD">e</span>
+</h1>
+<div class="top">
+  <div class="panel">
+    <div class="panel-title">Modello</div>
+    <div class="canvas-wrap"><svg id="svg-model" width="190" height="190" viewBox="0 0 190 190"></svg></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Composizione</div>
+    <div class="canvas-wrap"><svg id="svg-comp" width="190" height="190" viewBox="0 0 190 190"></svg></div>
+  </div>
+</div>
+<div class="section-label">Tessere — clicca nell'ordine dal basso verso l'alto</div>
+<div class="tiles-grid" id="tiles"></div>
+<div class="section-label">Ordine scelto</div>
+<div class="order-row" id="order-row"></div>
+<div class="btn-row">
+  <button id="btn-undo">Rimuovi ultima</button>
+  <button id="btn-reset">Ricomincia</button>
+  <button id="btn-new">Nuovo modello</button>
+</div>
+<div id="msg"></div>
+
+<script>
+const COLORS = ['#E24B4A','#378ADD','#4caf50','#EF9F27'];
+const NAMES  = ['rosso','blu','verde','arancio'];
+
+const SZ = 190;
+const CX = SZ/2, CY = SZ/2;
+const Q  = 130;
+
+// Pool di forme per il buco — tutte centrate, dimensioni calibrate
+const HOLE_TYPES = [
+  {type:'circle', s:38},
+  {type:'circle', s:28},
+  {type:'square', s:42},
+  {type:'square', s:30},
+  {type:'tri',    s:44},
+  {type:'tri',    s:32},
+];
+
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+function f(n){return n.toFixed(2);}
+
+function holeClipPath(hole, scale, cx, cy){
+  const s = hole.s * scale;
+  if(hole.type==='circle') return {tag:'circle', attrs:{cx:f(cx),cy:f(cy),r:f(s),fill:'black'}};
+  if(hole.type==='square') return {tag:'path', attrs:{d:`M${f(cx-s)},${f(cy-s)} L${f(cx+s)},${f(cy-s)} L${f(cx+s)},${f(cy+s)} L${f(cx-s)},${f(cy+s)} Z`, fill:'black'}};
+  if(hole.type==='tri'){
+    const h=s*Math.sqrt(3)/2;
+    return {tag:'path', attrs:{d:`M${f(cx)},${f(cy-s)} L${f(cx+h)},${f(cy+s*0.5)} L${f(cx-h)},${f(cy+s*0.5)} Z`, fill:'black'}};
+  }
+}
+
+function svgNS(tag,attrs){
+  const el=document.createElementNS('http://www.w3.org/2000/svg',tag);
+  for(const[k,v]of Object.entries(attrs)) el.setAttribute(k,v);
+  return el;
+}
+
+function drawTessera(svg, color, hole, scale, maskId){
+  const cx=CX*scale, cy=CY*scale, q=Q*scale;
+  const defs=svgNS('defs',{});
+  const mask=svgNS('mask',{id:maskId});
+  mask.appendChild(svgNS('rect',{x:f(cx-q/2),y:f(cy-q/2),width:f(q),height:f(q),fill:'white'}));
+  const clip=holeClipPath(hole, scale, cx, cy);
+  mask.appendChild(svgNS(clip.tag, clip.attrs));
+  defs.appendChild(mask);
+  svg.appendChild(defs);
+  svg.appendChild(svgNS('rect',{
+    x:f(cx-q/2),y:f(cy-q/2),width:f(q),height:f(q),
+    fill:color, mask:`url(#${maskId})`
+  }));
+}
+
+function renderStack(svg, order, holes){
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  order.forEach((t,i)=>{
+    drawTessera(svg, COLORS[t], holes[t], 1, `m${t}_${i}_${Date.now()}`);
+  });
+}
+
+function makePreview(t, holes, size=72){
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('width',size); svg.setAttribute('height',size);
+  const scale=size/SZ;
+  drawTessera(svg, COLORS[t], holes[t], scale, `p${t}_${Math.random().toString(36).slice(2)}`);
+  return svg;
+}
+
+function genGame(){
+  const solution = shuffle([0,1,2,3]);
+  // solution[0]=fondo, solution[3]=cima
+  // Per vedere tutti i colori: il buco di ogni tessera deve contenere
+  // il buco della tessera sopra. Quindi dal basso verso l'alto i buchi
+  // devono essere in ordine decrescente di dimensione.
+  // Scegliamo un tipo di forma per ogni posizione nella pila,
+  // con dimensioni decrescenti dal basso verso l'alto.
+  const shapeTypes = shuffle(['circle','square','tri']);
+  // 4 dimensioni decrescenti: grande → piccola
+  const sizes = [16, 28, 40, 52];
+  // Ogni posizione nella pila ha la sua dimensione
+  // La forma può variare ma deve contenere la precedente.
+  // Per semplicità: stessa forma, dimensioni decrescenti.
+  // Scegliamo una forma a caso per ogni tessera (può variare)
+  // ma garantiamo che i buchi siano annidati per dimensione.
+  const typePool = ['circle','square','tri'];
+  const holes = new Array(4);
+  solution.forEach((t, rank) => {
+    // rank 0 = fondo (buco più grande), rank 3 = cima (buco più piccolo)
+    holes[t] = {type: typePool[Math.floor(Math.random()*typePool.length)], s: sizes[rank]};
+  });
+  return {solution, holes};
+}
+
+let game={}, chosen=[];
+
+function newGame(){
+  game=genGame(); chosen=[];
+  renderStack(document.getElementById('svg-model'), game.solution, game.holes);
+  renderStack(document.getElementById('svg-comp'), [], game.holes);
+  renderTiles(); renderOrder(); setMsg('','');
+}
+
+function renderTiles(){
+  const grid=document.getElementById('tiles'); grid.innerHTML='';
+  [0,1,2,3].forEach(i=>{
+    const div=document.createElement('div');
+    div.className='tile'+(chosen.includes(i)?' disabled':'');
+    div.title=NAMES[i];
+    div.appendChild(makePreview(i,game.holes,76));
+    div.addEventListener('click',()=>selectTile(i));
+    grid.appendChild(div);
+  });
+}
+
+function renderOrder(){
+  const row=document.getElementById('order-row'); row.innerHTML='';
+  for(let pos=0;pos<4;pos++){
+    const wrap=document.createElement('div'); wrap.className='slot-wrap';
+    const slot=document.createElement('div'); slot.className='slot';
+    const lbl=document.createElement('div'); lbl.className='slot-label';
+    if(pos<chosen.length){
+      slot.appendChild(makePreview(chosen[pos],game.holes,52));
+      lbl.textContent=NAMES[chosen[pos]];
+    } else lbl.textContent=(pos+1)+'°';
+    wrap.appendChild(slot); wrap.appendChild(lbl); row.appendChild(wrap);
+  }
+}
+
+function selectTile(i){
+  if(chosen.includes(i)) return;
+  chosen.push(i);
+  renderStack(document.getElementById('svg-comp'),chosen,game.holes);
+  renderTiles(); renderOrder();
+  if(chosen.length===4) checkSolution();
+}
+
+function checkSolution(){
+  const ok=chosen.every((v,i)=>v===game.solution[i]);
+  setMsg(ok?'Esatto!':'Ordine non corretto. Riprova!',ok?'ok':'err');
+}
+
+function setMsg(txt,cls){
+  const m=document.getElementById('msg'); m.textContent=txt; m.className=cls;
+}
+
+document.getElementById('btn-undo').addEventListener('click',()=>{
+  if(!chosen.length) return;
+  chosen.pop();
+  renderStack(document.getElementById('svg-comp'),chosen,game.holes);
+  renderTiles(); renderOrder(); setMsg('','');
+});
+document.getElementById('btn-reset').addEventListener('click',()=>{
+  chosen=[];
+  renderStack(document.getElementById('svg-comp'),[],game.holes);
+  renderTiles(); renderOrder(); setMsg('','');
+});
+document.getElementById('btn-new').addEventListener('click',newGame);
+
+newGame();
+</script>
+</body>
+</html>
