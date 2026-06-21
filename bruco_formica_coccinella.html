@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bruco, Formica e Coccinella</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, sans-serif; background: #f5f4f0; color: #1a1a18; padding: 1.5rem; max-width: 680px; margin: 0 auto; }
+.logo { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-bottom: 1.25rem; text-decoration: none; }
+.logo img { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; }
+.logo span { font-size: 15px; font-weight: 500; color: #1a1a18; text-align: center; }
+#problema-box { background: #ebebeb; border: 0.5px solid #ccc; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1rem; font-size: 15px; line-height: 1.7; min-height: 60px; text-transform: uppercase; }
+#problema-box strong { font-weight: 500; }
+#btn-nuovo { margin-bottom: 1.25rem; font-size: 13px; padding: 6px 14px; cursor: pointer; border: 0.5px solid #aaa; border-radius: 8px; background: transparent; }
+#btn-nuovo:hover { background: #e8e8e8; }
+.personaggi { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1rem; }
+.riga-personaggio { display: flex; align-items: flex-start; gap: 10px; background: #fff; border: 0.5px solid #ccc; border-radius: 12px; padding: 10px 14px; min-height: 64px; cursor: pointer; }
+.persona-label { font-size: 22px; line-height: 1; user-select: none; flex-shrink: 0; padding-top: 4px; }
+.persona-nome { font-size: 13px; color: #666; font-weight: 500; flex-shrink: 0; width: 64px; padding-top: 6px; }
+.fagioli-area { display: flex; flex-wrap: nowrap; flex: 1; min-height: 40px; align-items: flex-start; padding-top: 4px; overflow-x: auto; }
+.gruppo-5 { display: flex; gap: 5px; flex-shrink: 0; margin-right: 10px; }
+.rimuovi-btn { font-size: 11px; color: #666; cursor: pointer; align-self: flex-start; padding: 4px 8px; border: 0.5px solid #ccc; border-radius: 8px; flex-shrink: 0; background: transparent; margin-top: 2px; }
+.rimuovi-btn:hover { background: #f0f0f0; }
+.fagiolino { width: 22px; height: 22px; border-radius: 50%; background: #7c5c3a; cursor: pointer; flex-shrink: 0; border: 0.5px solid #5a3e22; user-select: none; transition: transform 0.1s; position: relative; }
+.fagiolino:hover { transform: scale(1.15); }
+.fagiolino::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.22); position: absolute; top: 4px; left: 5px; }
+.contatore { font-size: 12px; color: #888; align-self: flex-start; padding-top: 8px; flex-shrink: 0; min-width: 20px; text-align: right; }
+.istruzioni { font-size: 12px; color: #999; margin-top: 0.5rem; line-height: 1.5; }
+@media (max-width: 480px) {
+  body { padding: 0.75rem; }
+  #problema-box { font-size: 13px; padding: 0.75rem 1rem; }
+  .persona-label { font-size: 18px; }
+  .persona-nome { font-size: 12px; width: 52px; }
+  .fagiolino { width: 18px; height: 18px; }
+  .fagiolino::after { width: 4px; height: 4px; top: 3px; left: 4px; }
+  .gruppo-5 { margin-right: 7px; gap: 4px; }
+  .rimuovi-btn { font-size: 10px; padding: 3px 6px; }
+  .contatore { font-size: 11px; }
+  #btn-nuovo, #btn-risposta, #btn-si, #btn-no { font-size: 12px; padding: 6px 12px; }
+}
+</style>
+</head>
+<body>
+
+<a href="https://matematichenonsinasce.com/" target="_blank" class="logo">
+  <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Logo Matematiche non si nasce">
+  <span>Matematiche non si nasce</span>
+</a>
+
+<div id="problema-box">Caricamento...</div>
+<button id="btn-nuovo">Nuovo problema ↺</button>
+
+<div class="personaggi">
+  <div class="riga-personaggio" id="zona-0">
+    <div class="persona-label">🐛</div>
+    <div class="persona-nome">Bruco</div>
+    <div class="fagioli-area" id="area-0"></div>
+    <div class="contatore" id="cnt-0"></div>
+    <button class="rimuovi-btn" data-idx="0">Rimuovi uno</button>
+  </div>
+  <div class="riga-personaggio" id="zona-1">
+    <div class="persona-label">🐜</div>
+    <div class="persona-nome">Formica</div>
+    <div class="fagioli-area" id="area-1"></div>
+    <div class="contatore" id="cnt-1"></div>
+    <button class="rimuovi-btn" data-idx="1">Rimuovi uno</button>
+  </div>
+  <div class="riga-personaggio" id="zona-2">
+    <div class="persona-label">🐞</div>
+    <div class="persona-nome">Coccinella</div>
+    <div class="fagioli-area" id="area-2"></div>
+    <div class="contatore" id="cnt-2"></div>
+    <button class="rimuovi-btn" data-idx="2">Rimuovi uno</button>
+  </div>
+</div>
+
+<p class="istruzioni">Clicca il riquadro di un personaggio per aggiungere un fagiolo. Clicca un fagiolo per toglierlo. I fagioli sono raggruppati a 5 a 5.</p>
+
+<div id="risposta-area" style="margin-top:1.5rem;">
+  <button id="btn-risposta" style="font-size:14px;padding:8px 18px;cursor:pointer;border:0.5px solid #aaa;border-radius:8px;background:transparent;">Ho trovato la risposta?</button>
+  <div id="sn-box" style="display:none;margin-top:0.75rem;gap:10px;flex-direction:row;">
+    <button id="btn-si" style="font-size:14px;padding:8px 20px;cursor:pointer;border:0.5px solid #aaa;border-radius:8px;background:transparent;">Sì</button>
+    <button id="btn-no" style="font-size:14px;padding:8px 20px;cursor:pointer;border:0.5px solid #aaa;border-radius:8px;background:transparent;">No</button>
+  </div>
+  <div id="feedback-box" style="display:none;margin-top:1rem;font-size:2.5rem;text-align:center;"></div>
+</div>
+
+<div style="margin-top:2rem;text-align:center;padding-bottom:1rem;">
+  <button id="btn-pdf" style="font-size:13px;padding:8px 18px;cursor:pointer;border:none;border-radius:8px;background:#3b6d11;color:#fff;">🐛🐜🐞 Stampa 3 problemi per casa</button>
+</div>
+
+<script>
+function r(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+
+function shuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = r(0, i), t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+var N = ['Bruco', 'Formica', 'Coccinella'];
+function ns() { return shuffle(N); }
+
+function p0() { var n=ns(),a=r(1,7),b=r(1,7),c=r(1,7); if(a+b+c>20)return p0(); return '<strong>'+n[0]+'</strong> ha '+a+' fagioli, <strong>'+n[1]+'</strong> ne ha '+b+' e <strong>'+n[2]+'</strong> ne ha '+c+'. Quanti fagioli hanno in tutto?'; }
+function p1() { var n=ns(),a=r(2,9),b=r(2,9),c=r(2,9); if(a+b+c>20)return p1(); return '<strong>'+n[0]+'</strong> ha '+a+' fagioli, <strong>'+n[1]+'</strong> ne ha '+b+' e <strong>'+n[2]+'</strong> ne ha '+c+'. Chi ne ha di più? Chi ne ha di meno?'; }
+function p2() { var n=ns(),ha=r(3,10),reg=r(1,Math.min(ha-1,5)); return '<strong>'+n[0]+'</strong> ha '+ha+' fagioli e ne regala '+reg+' a <strong>'+n[1]+'</strong>. Quanti ne ha adesso '+n[0]+'? Quanti ne ha '+n[1]+'?'; }
+function p3() { var n=ns(),b=r(2,7),f=r(2,7),d=r(1,4); if(b+f+(f+d)>20)return p3(); return '<strong>'+n[0]+'</strong> ha '+b+' fagioli, <strong>'+n[1]+'</strong> ne ha '+f+'. <strong>'+n[2]+'</strong> ne ha '+d+' in più di <strong>'+n[1]+'</strong>. Quanti fagioli ha <strong>'+n[2]+'</strong>?'; }
+function p4() { var pp=[['Bruco','Formica'],['Bruco','Coccinella'],['Formica','Coccinella']],p=pp[r(0,2)],n1=p[0],n2=p[1],a=r(3,9),b=r(3,9); if(a===b)return p4(); var mn=a<b?n1:n2,mx=a<b?n2:n1; return '<strong>'+n1+'</strong> ha '+a+' fagioli e <strong>'+n2+'</strong> ne ha '+b+'. Quanti fagioli mancano a <strong>'+mn+'</strong> per averne tanti quanti <strong>'+mx+'</strong>?'; }
+function p5() { var n=ns(),a=r(2,8),b=r(2,7),d=r(1,4); if(a+b+(b+d)>20)return p5(); return '<strong>'+n[0]+'</strong> ha '+a+' fagioli, <strong>'+n[1]+'</strong> ne ha '+b+'. <strong>'+n[2]+'</strong> ne ha '+d+' in più di <strong>'+n[1]+'</strong>. Quanti fagioli ha <strong>'+n[2]+'</strong>?'; }
+function p6() { var n=ns(),a=r(2,8),b=r(4,9),d=r(1,3); if(b-d<1)return p6(); return '<strong>'+n[0]+'</strong> ha '+a+' fagioli, <strong>'+n[1]+'</strong> ne ha '+b+'. <strong>'+n[2]+'</strong> ne ha '+d+' in meno di <strong>'+n[1]+'</strong>. Quanti fagioli ha <strong>'+n[2]+'</strong>?'; }
+function p7() { var n=ns(),a=r(2,6),d1=r(1,3),d2=r(1,3); if(a+(a+d1)+(a+d1+d2)>20)return p7(); return '<strong>'+n[0]+'</strong> ha '+a+' fagioli. <strong>'+n[1]+'</strong> ne ha '+d1+' in più di <strong>'+n[0]+'</strong>. <strong>'+n[2]+'</strong> ne ha '+d2+' in più di <strong>'+n[1]+'</strong>. Quanti fagioli ha <strong>'+n[2]+'</strong>?'; }
+function p8() { var n=ns(),a=r(5,9),d1=r(1,2),d2=r(1,2); if(a-(d1+d2)<1)return p8(); return '<strong>'+n[0]+'</strong> ha '+a+' fagioli. <strong>'+n[1]+'</strong> ne ha '+d1+' in meno di <strong>'+n[0]+'</strong>. <strong>'+n[2]+'</strong> ne ha '+d2+' in meno di <strong>'+n[1]+'</strong>. Quanti fagioli ha <strong>'+n[2]+'</strong>?'; }
+function p9() { var n=ns(),a=r(2,8),b=r(2,6),d=r(1,3); if(a+(b+d)+b>20)return p9(); return '<strong>'+n[0]+'</strong> ha '+a+' fagioli, <strong>'+n[2]+'</strong> ne ha '+b+'. <strong>'+n[1]+'</strong> ne ha '+d+' in più di <strong>'+n[2]+'</strong>. Quanti fagioli hanno in tutto?'; }
+function p10() { var n=ns(),a=r(2,8),b=r(4,9),d=r(1,3); if(b-d<1||a+(b-d)+b>20)return p10(); return '<strong>'+n[0]+'</strong> ha '+a+' fagioli, <strong>'+n[2]+'</strong> ne ha '+b+'. <strong>'+n[1]+'</strong> ne ha '+d+' in meno di <strong>'+n[2]+'</strong>. Quanti fagioli hanno in tutto?'; }
+function p11() { var n=ns(),vs=[r(1,8),r(1,8),r(1,8)]; if(vs[0]+vs[1]+vs[2]>20)return p11(); var idx=r(0,2); return '<strong>'+n[0]+'</strong> ha '+vs[0]+' fagioli, <strong>'+n[1]+'</strong> ne ha '+vs[1]+' e <strong>'+n[2]+'</strong> ne ha '+vs[2]+'. I fagioli di <strong>'+n[idx]+'</strong> sono i meno numerosi?'; }
+function p12() { var n=ns(),vs=[r(1,8),r(1,8),r(1,8)]; if(vs[0]+vs[1]+vs[2]>20)return p12(); var idx=r(0,2); return '<strong>'+n[0]+'</strong> ha '+vs[0]+' fagioli, <strong>'+n[1]+'</strong> ne ha '+vs[1]+' e <strong>'+n[2]+'</strong> ne ha '+vs[2]+'. I fagioli di <strong>'+n[idx]+'</strong> sono i più numerosi?'; }
+function p13() { var n=ns(),a=r(1,9),b=r(1,9); if(a===b)return p13(); return '<strong>'+n[0]+'</strong> ha '+a+' fagioli e <strong>'+n[1]+'</strong> ne ha '+b+'. I fagioli di <strong>'+n[0]+'</strong> sono di più o di meno di quelli di <strong>'+n[1]+'</strong>?'; }
+
+var problemi = [p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13];
+
+function aggiorna(i) {
+  var area = document.getElementById('area-'+i);
+  var tutti = Array.prototype.slice.call(area.querySelectorAll('.fagiolino'));
+  area.innerHTML = '';
+  for (var g = 0; g < Math.ceil(tutti.length/5); g++) {
+    var grp = document.createElement('div');
+    grp.className = 'gruppo-5';
+    var sl = tutti.slice(g*5,(g+1)*5);
+    for (var k = 0; k < sl.length; k++) grp.appendChild(sl[k]);
+    area.appendChild(grp);
+  }
+  document.getElementById('cnt-'+i).textContent = tutti.length || '';
+}
+
+function aggiungiFagiolino(idx) {
+  var el = document.createElement('div');
+  el.className = 'fagiolino';
+  el.dataset.idx = String(idx);
+  el.addEventListener('click', function(e) {
+    e.stopPropagation();
+    el.parentNode.removeChild(el);
+    aggiorna(idx);
+  });
+  document.getElementById('area-'+idx).appendChild(el);
+  aggiorna(idx);
+}
+
+function nuovoProblema() {
+  var fn = problemi[r(0, problemi.length-1)];
+  document.getElementById('problema-box').innerHTML = fn();
+  for (var i = 0; i < 3; i++) {
+    document.getElementById('area-'+i).innerHTML = '';
+    document.getElementById('cnt-'+i).textContent = '';
+  }
+  document.getElementById('sn-box').style.display = 'none';
+  document.getElementById('feedback-box').style.display = 'none';
+}
+
+for (var i = 0; i < 3; i++) {
+  (function(idx) {
+    document.getElementById('zona-'+idx).addEventListener('click', function(e) {
+      if (e.target.classList.contains('rimuovi-btn')) {
+        var area = document.getElementById('area-'+idx);
+        var ff = area.querySelectorAll('.fagiolino');
+        if (ff.length) { ff[ff.length-1].parentNode.removeChild(ff[ff.length-1]); aggiorna(idx); }
+        return;
+      }
+      if (e.target.classList.contains('fagiolino')) return;
+      aggiungiFagiolino(idx);
+    });
+  })(i);
+}
+
+document.getElementById('btn-nuovo').addEventListener('click', nuovoProblema);
+
+document.getElementById('btn-risposta').addEventListener('click', function() {
+  var snb = document.getElementById('sn-box');
+  snb.style.display = snb.style.display === 'flex' ? 'none' : 'flex';
+  document.getElementById('feedback-box').style.display = 'none';
+});
+
+document.getElementById('btn-si').addEventListener('click', function() {
+  var fb = document.getElementById('feedback-box');
+  fb.style.display = 'block';
+  fb.innerHTML = '<div style="font-size:3rem;">🏆</div>';
+  document.getElementById('sn-box').style.display = 'none';
+});
+
+document.getElementById('btn-no').addEventListener('click', function() {
+  var fb = document.getElementById('feedback-box');
+  fb.style.display = 'block';
+  fb.innerHTML = '<div style="position:relative;display:inline-block;text-align:center;">'
+    + '<div style="font-size:3rem;">🧠</div>'
+    + '<div style="margin-top:0.5rem;background:#fff;border:0.5px solid #ccc;border-radius:12px;padding:0.6rem 1rem;font-size:13px;color:#444;max-width:260px;">'
+    + 'Pappappero! Avrai pur imparato qualcosa!'
+    + '</div></div>';
+  document.getElementById('sn-box').style.display = 'none';
+});
+
+document.getElementById('btn-pdf').addEventListener('click', function() {
+  var jsPDF = window.jspdf.jsPDF;
+  var doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  var marginL = 20, marginR = 28, marginT = 20;
+  var pageW = 210, pageH = 297;
+  var contentW = pageW - marginL - marginR;
+  var y = marginT;
+
+  function stripHtml(html) { return html.replace(/<[^>]+>/g, '').toUpperCase(); }
+
+  function drawPersonaggi(yStart) {
+    var nomi = ['BRUCO', 'FORMICA', 'COCCINELLA'];
+    var boxH = 14, gap = 3;
+    for (var i = 0; i < 3; i++) {
+      var by = yStart + i * (boxH + gap);
+      doc.setDrawColor(180); doc.setLineWidth(0.3);
+      doc.roundedRect(marginL, by, contentW, boxH, 3, 3, 'S');
+      doc.setFontSize(9); doc.setTextColor(120); doc.setFont('helvetica','normal');
+      doc.text(nomi[i], marginL + 3, by + 9);
+    }
+    return yStart + 3 * (boxH + gap);
+  }
+
+  for (var p = 0; p < 3; p++) {
+    var fn = problemi[r(0, problemi.length-1)];
+    var testo = stripHtml(fn());
+    doc.setFontSize(12); doc.setTextColor(30); doc.setFont('helvetica','bold');
+    var lines = doc.splitTextToSize(testo, contentW);
+    doc.text(lines, marginL, y);
+    y += lines.length * 6 + 4;
+
+    doc.setFontSize(9); doc.setTextColor(120); doc.setFont('helvetica','normal');
+    doc.text('Risposta:', marginL, y);
+    doc.setDrawColor(180); doc.setLineWidth(0.3); doc.setLineDash([1,1.5]);
+    doc.line(marginL + 22, y, pageW - marginR, y);
+    doc.setLineDash([]);
+    y += 7;
+
+    doc.setFont('helvetica','normal');
+    y = drawPersonaggi(y);
+    y += 8;
+
+    if (p < 2) {
+      doc.setDrawColor(210); doc.setLineWidth(0.2);
+      doc.line(marginL, y, pageW - marginR, y);
+      y += 8;
+    }
+  }
+
+  doc.setFontSize(8); doc.setTextColor(180); doc.setFont('helvetica','normal');
+  doc.text('Matematiche non si nasce', pageW - 5, pageH / 2, { angle: 270, align: 'center' });
+
+  doc.save('bruco-formica-coccinella.pdf');
+});
+
+nuovoProblema();
+</script>
+</body>
+</html>
