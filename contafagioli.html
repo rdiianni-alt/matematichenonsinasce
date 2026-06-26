@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Il Contafagioli</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: sans-serif;
+    background: #f5efe6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+  }
+  #logo-bar {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 12px;
+  }
+  #logo-bar img { width: 60px; height: 60px; border-radius: 50%; }
+  #logo-bar a { font-size: 0.8rem; color: #5a3e1b; text-decoration: none; }
+
+  #info-bar {
+    background: #fff8f0;
+    border: 2px solid #c8a97a;
+    border-radius: 10px;
+    padding: 8px 24px;
+    margin-bottom: 14px;
+    font-size: 1.1rem;
+    color: #5a3e1b;
+  }
+  #info-bar b { font-size: 1.3rem; }
+
+  #bicchierini {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 14px;
+    min-height: 90px;
+  }
+  .bicchiere {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .bicchiere-label {
+    font-size: 0.75rem;
+    color: #5a3e1b;
+    font-weight: bold;
+  }
+
+  #tavolo {
+    background: #d4a96a;
+    border-radius: 16px;
+    border: 3px solid #b07d3a;
+    padding: 16px;
+    width: 100%;
+    max-width: 600px;
+    min-height: 200px;
+    position: relative;
+    margin-bottom: 14px;
+  }
+  #tavolo-label {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #5a3e1b;
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+  #fagioli-area {
+    position: relative;
+    width: 100%;
+    height: 180px;
+  }
+  .fagiolo {
+    position: absolute;
+    width: 28px;
+    height: 20px;
+    background: radial-gradient(ellipse at 35% 35%, #c8a060, #7a5c2e);
+    border-radius: 50%;
+    border: 1.5px solid #5a3e1b;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    user-select: none;
+  }
+  .fagiolo:hover { transform: scale(1.15); box-shadow: 0 2px 6px #0004; }
+  .fagiolo.sel-giallo {
+    background: radial-gradient(ellipse at 35% 35%, #ffe066, #c8a030);
+    border-color: #e6a000;
+    box-shadow: 0 0 8px #ffcc00aa;
+  }
+  .fagiolo.sel-arancio {
+    background: radial-gradient(ellipse at 35% 35%, #ffaa33, #c85000);
+    border-color: #c85000;
+    box-shadow: 0 0 8px #ff8800aa;
+  }
+
+  #selezione-bar {
+    font-size: 0.95rem;
+    color: #5a3e1b;
+    margin-bottom: 6px;
+    min-height: 1.4em;
+    text-align: center;
+  }
+
+  #btn-area { display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; justify-content: center; }
+  button {
+    padding: 8px 20px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  #btn-metti {
+    background: #5a8a3a;
+    color: white;
+  }
+  #btn-metti:disabled { background: #aaa; cursor: default; }
+  #btn-nuovo {
+    background: #5a3e1b;
+    color: white;
+  }
+
+  #risultato {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  #risposta-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1rem;
+    color: #5a3e1b;
+  }
+  #input-tot {
+    width: 64px;
+    font-size: 1.2rem;
+    text-align: center;
+    border: 2px solid #c8a97a;
+    border-radius: 8px;
+    padding: 4px;
+  }
+  #btn-verifica {
+    background: #5a8a3a;
+    color: white;
+    padding: 6px 16px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #feedback {
+    font-size: 1.1rem;
+    min-height: 1.4em;
+    text-align: center;
+  }
+  #coppa { font-size: 3rem; display: none; }
+
+  @media (max-width: 480px) {
+    .fagiolo { width: 24px; height: 17px; }
+    #fagioli-area { height: 150px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="logo-bar" style="display:flex; flex-direction:column; align-items:center; gap:6px; margin-bottom:12px;">
+  <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="logo" style="width:60px; height:60px; border-radius:50%;">
+  <a href="https://matematichenonsinasce.com" target="_blank" style="font-size:0.95rem; color:#4a90c4; text-decoration:none; font-weight:bold; letter-spacing:0.02em;">Matematiche non si nasce</a>
+  <div style="font-weight:bold; color:#5a3e1b; font-size:1.2rem; margin-top:6px;">Il Contafagioli</div>
+</div>
+
+<div id="info-bar">
+  Decine: <b id="n-decine">0</b>
+</div>
+
+<div id="bicchierini"></div>
+
+<div id="stima-bar" style="margin-bottom:12px; font-size:1rem; color:#5a3e1b; display:flex; align-items:center; gap:10px;">
+  La mia stima: <input id="input-stima" type="number" min="0" max="199" placeholder="?" style="width:64px; font-size:1.1rem; text-align:center; border:2px solid #c8a97a; border-radius:8px; padding:4px;">
+</div>
+
+<div id="tavolo">
+  <div id="tavolo-label">Tavolo — clicca i fagioli</div>
+  <div id="fagioli-area"></div>
+</div>
+
+<div id="selezione-bar">Selezionati: <b id="n-sel">0</b> / 10</div>
+
+<div id="btn-area">
+  <button id="btn-metti" disabled>Metti nel bicchierino</button>
+  <button id="btn-nuovo">Nuovo giro</button>
+</div>
+
+<div id="risultato">
+  <div id="risposta-row">
+    Quanti fagioli in tutto?
+    <input id="input-tot" type="number" min="0" max="199">
+    <button id="btn-verifica">Verifica</button>
+  </div>
+  <div id="feedback"></div>
+  <div id="coppa">🏆</div>
+</div>
+
+<script>
+  const areaEl = document.getElementById('fagioli-area');
+  const bicchieriniEl = document.getElementById('bicchierini');
+  const nDecinEl = document.getElementById('n-decine');
+  const nSelEl = document.getElementById('n-sel');
+  const btnMetti = document.getElementById('btn-metti');
+  const btnNuovo = document.getElementById('btn-nuovo');
+  const risultatoEl = document.getElementById('risultato');
+
+  let fagioli = [];
+  let decine = 0;
+  let totale = 0;
+
+  function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+  function nuovoGiro() {
+    decine = 0;
+    totale = rnd(11, 99);
+    fagioli = [];
+    areaEl.innerHTML = '';
+    bicchieriniEl.innerHTML = '';
+    risultatoEl.style.display = 'none';
+    btnMetti.disabled = true;
+    nSelEl.textContent = 0;
+    nDecinEl.textContent = 0;
+    document.getElementById('input-stima').value = '';
+    posizionaFagioli(totale);
+  }
+
+  function posizionaFagioli(n) {
+    const W = areaEl.offsetWidth || 560;
+    const H = areaEl.offsetHeight || 180;
+    const fw = 30, fh = 22, margin = 4;
+    const placed = [];
+
+    for (let i = 0; i < n; i++) {
+      let x, y, tries = 0, ok;
+      do {
+        x = rnd(margin, W - fw - margin);
+        y = rnd(margin, H - fh - margin);
+        ok = placed.every(p => Math.abs(p.x - x) > fw - 2 || Math.abs(p.y - y) > fh - 2);
+        tries++;
+      } while (!ok && tries < 200);
+
+      placed.push({x, y});
+      const el = document.createElement('div');
+      el.className = 'fagiolo';
+      el.style.left = x + 'px';
+      el.style.top = y + 'px';
+      el.style.transform = `rotate(${rnd(-30,30)}deg)`;
+      el.addEventListener('click', () => clickFagiolo(i));
+      areaEl.appendChild(el);
+      fagioli.push({el, id: i, selected: false});
+    }
+  }
+
+  function clickFagiolo(id) {
+    const f = fagioli.find(f => f.id === id);
+    if (!f) return;
+    const nSel = fagioli.filter(f => f.selected).length;
+    if (!f.selected && nSel >= 10) return;
+    f.selected = !f.selected;
+    if (!f.selected) {
+      f.el.classList.remove('sel-giallo', 'sel-arancio');
+      f.colore = null;
+    } else {
+      // assegna colore fisso al momento della selezione
+      const nSelNow = fagioli.filter(f => f.selected).length;
+      f.colore = nSelNow <= 5 ? 'sel-giallo' : 'sel-arancio';
+      f.el.classList.add(f.colore);
+    }
+    const sel = fagioli.filter(f => f.selected).length;
+    nSelEl.textContent = sel;
+    btnMetti.disabled = sel !== 10;
+  }
+
+  btnMetti.addEventListener('click', () => {
+    const sel = fagioli.filter(f => f.selected);
+    if (sel.length !== 10) return;
+    sel.forEach(f => { f.el.remove(); });
+    fagioli = fagioli.filter(f => !f.selected);
+    decine++;
+    nDecinEl.textContent = decine;
+    aggiornaBicchierini();
+    btnMetti.disabled = true;
+    nSelEl.textContent = 0;
+
+    if (fagioli.length < 10) {
+      mostraRisultato();
+    }
+  });
+
+  function aggiornaBicchierini() {
+    bicchieriniEl.innerHTML = '';
+    for (let d = 0; d < decine; d++) {
+      const div = document.createElement('div');
+      div.className = 'bicchiere';
+      div.innerHTML = `
+        <div class="bicchiere-label">una decina</div>
+        <svg width="54" height="70" viewBox="0 0 54 70">
+          <polygon points="4,8 50,8 44,64 10,64" fill="white" stroke="#8b6340" stroke-width="2"/>
+          <line x1="4" y1="8" x2="50" y2="8" stroke="#8b6340" stroke-width="2.5"/>
+        </svg>
+      `;
+      bicchieriniEl.appendChild(div);
+    }
+  }
+
+  function mostraRisultato() {
+    risultatoEl.style.display = 'flex';
+    document.getElementById('feedback').textContent = '';
+    document.getElementById('coppa').style.display = 'none';
+    const inp = document.getElementById('input-tot');
+    inp.value = '';
+    inp.focus();
+  }
+
+  document.getElementById('btn-verifica').addEventListener('click', verifica);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && risultatoEl.style.display === 'flex') verifica();
+  });
+
+  function verifica() {
+    const inp = document.getElementById('input-tot');
+    const feedback = document.getElementById('feedback');
+    const coppa = document.getElementById('coppa');
+    const val = parseInt(inp.value);
+    const tot = decine * 10 + fagioli.length;
+    if (val === tot) {
+      feedback.textContent = 'Esatto!';
+      feedback.style.color = '#2a6a0a';
+      coppa.style.display = 'block';
+    } else {
+      feedback.textContent = 'Non è esatto!';
+      feedback.style.color = '#c00';
+      coppa.style.display = 'none';
+      inp.value = '';
+      inp.focus();
+    }
+  }
+
+  btnNuovo.addEventListener('click', nuovoGiro);
+  nuovoGiro();
+</script>
+</body>
+</html>
