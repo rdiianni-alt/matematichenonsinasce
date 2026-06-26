@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ten Frame</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: sans-serif; background: #f5f5f5; display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 20px; }
+
+  .logo { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-bottom: 16px; text-decoration: none; }
+  .logo img { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; }
+  .logo span { font-size: 1rem; color: #333; font-style: italic; }
+
+  h1 { font-size: 1.2rem; color: #333; margin-bottom: 16px; font-weight: normal; }
+
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 16px; }
+  button.ctrl { padding: 8px 16px; border: 2px solid #999; background: #fff; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+  button.ctrl.active { border-color: #1a73e8; background: #e8f0fe; color: #1a73e8; font-weight: bold; }
+  button.ctrl:hover { border-color: #555; }
+
+  .spiegazione { font-size: 0.85rem; color: #555; text-align: center; max-width: 420px; line-height: 1.5; margin-bottom: 16px; min-height: 2.5em; }
+
+  .frames-wrap { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; }
+  .frame { display: grid; grid-template-columns: repeat(5, 52px); grid-template-rows: repeat(2, 52px); gap: 4px; border: 3px solid #333; padding: 6px; border-radius: 4px; background: #fff; }
+  .cell { width: 52px; height: 52px; border: 2px solid #999; border-radius: 4px; background: #fafafa; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .cell::after { content: ''; display: block; width: 38px; height: 38px; border-radius: 50%; background: transparent; transition: background 0.1s; }
+  .cell.filled::after { background: #1a73e8; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+  .cell.readonly { cursor: default; }
+
+  .target { font-size: 2.5rem; font-weight: bold; color: #333; margin-bottom: 16px; min-height: 3rem; text-align: center; }
+
+  .keypad { display: grid; grid-template-columns: repeat(7, 44px); gap: 6px; margin-bottom: 16px; }
+  .key { width: 44px; height: 44px; border: 2px solid #999; background: #fff; border-radius: 6px; font-size: 1rem; cursor: pointer; }
+  .key:hover { background: #e8f0fe; border-color: #1a73e8; }
+  .key.selected { background: #1a73e8; color: #fff; border-color: #1557b0; }
+
+  .feedback { font-size: 1.1rem; min-height: 1.5rem; text-align: center; margin-bottom: 12px; }
+  .feedback.ok { color: #2e7d32; }
+  .feedback.err { color: #c62828; }
+
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  button.action { padding: 10px 20px; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; }
+  button.action.primary { background: #1a73e8; color: #fff; }
+  button.action.secondary { background: #e0e0e0; color: #333; }
+  button.action:hover { opacity: 0.85; }
+
+  .section-label { font-size: 0.8rem; color: #666; text-align: center; margin-bottom: 4px; }
+
+  #gameArea { display: none; width: 100%; display: flex; flex-direction: column; align-items: center; }
+  #gameArea.hidden { display: none !important; }
+
+  @media (max-width: 480px) {
+    .frame { grid-template-columns: repeat(5, 38px); grid-template-rows: repeat(2, 38px); gap: 3px; padding: 4px; }
+    .cell { width: 38px; height: 38px; }
+    .cell::after { width: 28px; height: 28px; }
+    .keypad { grid-template-columns: repeat(7, 36px); gap: 4px; }
+    .key { width: 36px; height: 36px; font-size: 0.85rem; }
+    .target { font-size: 2rem; }
+    .controls { gap: 6px; }
+    button.ctrl { padding: 6px 10px; font-size: 0.8rem; }
+    button.action { padding: 8px 14px; font-size: 0.9rem; }
+  }
+</style>
+</head>
+<body>
+
+<a href="https://matematichenonsinasce.com/" target="_blank" class="logo">
+  <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Logo Matematiche non si nasce">
+  <span>Matematiche non si nasce</span>
+</a>
+<h1>Ten Frame</h1>
+
+<!-- MODALITÀ -->
+<div class="controls">
+  <button class="ctrl" id="btnModeA" onclick="setMode('A')">Numero → Ten Frame</button>
+  <button class="ctrl" id="btnModeB" onclick="setMode('B')">Ten Frame → Numero</button>
+</div>
+
+<!-- FRAME -->
+<div class="controls">
+  <button class="ctrl active" id="btnF1" onclick="setFrames(1)">1 ten frame (1–10)</button>
+  <button class="ctrl" id="btnF2" onclick="setFrames(2)">2 ten frame (1–20)</button>
+</div>
+
+<p class="spiegazione" id="spiegazione"></p>
+
+<!-- AREA DI GIOCO -->
+<div id="gameArea" class="hidden">
+  <div class="target" id="targetDisplay"></div>
+  <div class="frames-wrap" id="framesWrap"></div>
+
+  <div id="keypadWrap" style="display:none">
+    <p class="section-label">Quanti gettoni vedi?</p>
+    <div class="keypad" id="keypad"></div>
+  </div>
+
+  <div class="feedback" id="feedback"></div>
+
+  <div class="actions">
+    <button class="action primary" onclick="conferma()">Conferma</button>
+    <button class="action secondary" onclick="nuovaRonda()">Nuovo numero</button>
+    <button class="action secondary" id="btnReset" style="display:none" onclick="resetCells()">Cancella</button>
+  </div>
+</div>
+
+<script>
+  let mode = null;
+  let nFrames = 1;
+  let target = 0;
+  let userKey = null;
+
+  const TESTI = {
+    A: 'Osserva il numero e posiziona i gettoni nel ten frame cliccando sulle caselle. Puoi metterli dove vuoi. Quando hai finito, premi Conferma.',
+    B: 'Osserva i gettoni nel ten frame e scegli il numero corrispondente dalla tastiera, senza contare — a colpo d\'occhio. Quando hai scelto, premi Conferma.'
+  };
+
+  function setMode(m) {
+    mode = m;
+    document.getElementById('btnModeA').classList.toggle('active', m === 'A');
+    document.getElementById('btnModeB').classList.toggle('active', m === 'B');
+    document.getElementById('spiegazione').textContent = TESTI[m];
+    document.getElementById('gameArea').classList.remove('hidden');
+    nuovaRonda();
+  }
+
+  function setFrames(n) {
+    nFrames = n;
+    document.getElementById('btnF1').classList.toggle('active', n === 1);
+    document.getElementById('btnF2').classList.toggle('active', n === 2);
+    if (mode) nuovaRonda();
+  }
+
+  function buildFrames(readonly) {
+    const wrap = document.getElementById('framesWrap');
+    wrap.innerHTML = '';
+    for (let f = 0; f < nFrames; f++) {
+      const grid = document.createElement('div');
+      grid.className = 'frame';
+      for (let i = 0; i < 10; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell' + (readonly ? ' readonly' : '');
+        cell.dataset.idx = f * 10 + i;
+        if (!readonly) cell.onclick = () => toggleCell(cell);
+        grid.appendChild(cell);
+      }
+      wrap.appendChild(grid);
+    }
+  }
+
+  function toggleCell(cell) {
+    cell.classList.toggle('filled');
+    clearFeedback();
+  }
+
+  function resetCells() {
+    document.querySelectorAll('.cell').forEach(c => c.classList.remove('filled'));
+    clearFeedback();
+  }
+
+  function filledCount() {
+    return document.querySelectorAll('.cell.filled').length;
+  }
+
+  function buildKeypad() {
+    const kp = document.getElementById('keypad');
+    kp.innerHTML = '';
+    const max = nFrames * 10;
+    for (let i = 0; i <= max; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'key';
+      btn.textContent = i;
+      btn.onclick = () => selectKey(i, btn);
+      kp.appendChild(btn);
+    }
+  }
+
+  function selectKey(val, btn) {
+    userKey = val;
+    document.querySelectorAll('.key').forEach(k => k.classList.remove('selected'));
+    btn.classList.add('selected');
+    clearFeedback();
+  }
+
+  function setFeedback(msg, ok) {
+    const el = document.getElementById('feedback');
+    el.textContent = msg;
+    el.className = 'feedback ' + (ok ? 'ok' : 'err');
+  }
+
+  function clearFeedback() {
+    const el = document.getElementById('feedback');
+    el.textContent = '';
+    el.className = 'feedback';
+  }
+
+  function fillFrameForTarget(n) {
+    const cells = [...document.querySelectorAll('.cell')];
+    cells.forEach((c, i) => c.classList.toggle('filled', i < n));
+  }
+
+  function conferma() {
+    if (!mode) return;
+    if (mode === 'A') {
+      const n = filledCount();
+      if (n !== target) {
+        setFeedback(`Hai posizionato ${n} gettoni. Il numero da rappresentare è ${target}.`, false);
+      } else {
+        const cells = [...document.querySelectorAll('.cell')];
+        const inOrdine = cells.every((c, i) => c.classList.contains('filled') === (i < target));
+        if (inOrdine) setFeedback('Esatto!', true);
+        else setFeedback('Il numero di gettoni è giusto, ma devono essere posizionati in ordine da sinistra.', false);
+      }
+    } else {
+      if (userKey === null) { setFeedback('Scegli un numero.', false); return; }
+      if (userKey === target) setFeedback('Esatto!', true);
+      else setFeedback(`No: i gettoni sono ${target}.`, false);
+    }
+  }
+
+  function nuovaRonda() {
+    const max = nFrames * 10;
+    target = Math.floor(Math.random() * max) + 1;
+    clearFeedback();
+    userKey = null;
+
+    if (mode === 'A') {
+      document.getElementById('targetDisplay').textContent = target;
+      document.getElementById('keypadWrap').style.display = 'none';
+      document.getElementById('btnReset').style.display = 'inline-block';
+      buildFrames(false);
+    } else {
+      document.getElementById('targetDisplay').textContent = '';
+      document.getElementById('keypadWrap').style.display = 'block';
+      document.getElementById('btnReset').style.display = 'none';
+      buildFrames(true);
+      fillFrameForTarget(target);
+      buildKeypad();
+    }
+  }
+</script>
+</body>
+</html>
