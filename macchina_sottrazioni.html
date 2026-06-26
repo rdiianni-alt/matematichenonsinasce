@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La macchina delle sottrazioni</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  @media (max-width: 480px) {
+    body { padding: 1rem 0.5rem; gap: 0.9rem; }
+    .pallina { width: 26px; height: 26px; font-size: 9px; }
+    .riga-palline { gap: 3px; }
+    .coperchio { padding: 10px 6px 8px; gap: 6px; }
+    .cartellini { font-size: 18px; gap: 5px; }
+    .cartellino { padding: 3px 8px; min-width: 44px; }
+    .cartellino-risultato input { width: 56px; font-size: 18px; }
+    .operazione-testo { font-size: 24px; }
+    h1 { font-size: 15px; }
+    select, button { font-size: 13px; padding: 5px 10px; }
+    .btn-nuovo { font-size: 13px; padding: 6px 14px; }
+    .logo img { width: 46px; height: 46px; }
+    .logo span { font-size: 12px; }
+  }
+  body {
+    font-family: var(--font-sans, sans-serif);
+    background: var(--surface-0, #f5f5f2);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem 1rem;
+    gap: 1.25rem;
+  }
+  h1 { font-size: 18px; font-weight: 500; color: var(--text-primary, #1a1a18); text-align: center; }
+
+  .controls {
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: center;
+  }
+  .controls label { font-size: 14px; color: var(--text-secondary, #5f5e5a); }
+  select, button {
+    font-family: inherit; font-size: 14px;
+    border: 0.5px solid var(--border-strong, #888);
+    border-radius: var(--radius, 8px);
+    padding: 6px 12px; cursor: pointer;
+    background: var(--surface-2, #fff); color: var(--text-primary, #1a1a18);
+  }
+  button:hover { background: var(--surface-1, #f1efe8); }
+  button:active { transform: scale(0.98); }
+  .btn-nuovo {
+    background: var(--fill-accent, #378add); color: #fff;
+    border-color: transparent; padding: 8px 20px; font-size: 15px;
+  }
+  .btn-nuovo:hover { background: #185fa5; }
+
+  .scatola-wrapper {
+    display: flex; flex-direction: column; align-items: center;
+    width: 100%; max-width: 540px;
+  }
+
+  .coperchio {
+    background: #a8d8ea;
+    border: 3px solid #6bb5cc;
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
+    padding: 14px 14px 10px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    min-height: 80px;
+  }
+  .riga-palline {
+    display: flex; gap: 6px; justify-content: center; flex-wrap: nowrap;
+  }
+
+  .pallina {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ffffff, #e0e0e0);
+    border: 2px solid #bbb;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 500; color: #444;
+    cursor: pointer;
+    transition: transform 0.12s, opacity 0.25s;
+    user-select: none;
+  }
+  .pallina:hover { transform: scale(1.08); border-color: #888; }
+  .pallina.caduta {
+    opacity: 0; transform: scale(0.3) translateY(20px); pointer-events: none;
+  }
+  .pallina.vuota {
+    opacity: 0.12; pointer-events: none;
+  }
+
+  .scatola-corpo {
+    background: #5ba3c9; border: 3px solid #3a7fa8;
+    border-radius: 0 0 12px 12px; width: 100%; height: 54px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .scatola-corpo span { font-size: 13px; color: #d6eef8; letter-spacing: 1px; }
+
+  .cartellini {
+    display: flex; gap: 8px; align-items: center;
+    font-size: 24px; font-weight: 500;
+    flex-wrap: wrap; justify-content: center;
+    margin-top: 6px;
+  }
+  .cartellino {
+    background: var(--surface-2, #fff);
+    border: 2px solid var(--border-strong, #888);
+    border-radius: 6px; padding: 4px 12px;
+    min-width: 56px; text-align: center;
+  }
+  .cartellino.minuendo { color: #185fa5; }
+  .cartellino.sottraendo { color: #639922; }
+  .op-symbol { color: var(--text-secondary, #5f5e5a); }
+
+  .cartellino-risultato {
+    background: var(--surface-2, #fff);
+    border: 2px solid var(--border-strong, #888);
+    border-radius: 6px;
+    min-width: 70px;
+  }
+  .cartellino-risultato input {
+    width: 70px; font-size: 24px; font-weight: 500;
+    font-family: inherit; color: #639922;
+    border: none; background: transparent;
+    text-align: center; padding: 4px 6px;
+    outline: none;
+  }
+
+  .stato { font-size: 14px; color: var(--text-secondary, #5f5e5a); text-align: center; min-height: 20px; }
+  .stato.ok { color: #3b6d11; font-weight: 500; }
+  .stato.errore { color: #a32d2d; }
+
+  .logo { display:flex; flex-direction:column; align-items:center; gap:6px; text-decoration:none; }
+  .logo img { width:60px; height:60px; object-fit:contain; border-radius:50%; }
+  .logo span { font-size:14px; color:var(--text-secondary,#5f5e5a); }
+  .istruzioni {
+    font-size: 13px; color: var(--text-muted, #888);
+    text-align: center; max-width: 420px; line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<a href="https://matematichenonsinasce.com/" class="logo" target="_blank">
+  <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Logo Matematiche non si nasce">
+  <span>Matematiche non si nasce</span>
+</a>
+<h1>La macchina delle sottrazioni</h1>
+
+<div class="controls">
+  <label>Palline:</label>
+  <select id="nPalline">
+    <option value="10">5 + 5 (fino a 100)</option>
+    <option value="20">10 + 10 (fino a 200)</option>
+    <option value="10f">5 + 5 (sempre 100 −)</option>
+    <option value="20f">10 + 10 (sempre 200 −)</option>
+  </select>
+  <button class="btn-nuovo" onclick="nuovaOperazione()">Nuova operazione</button>
+</div>
+
+<div class="scatola-wrapper">
+  <div class="coperchio" id="coperchio"></div>
+  <div class="scatola-corpo"><span>interno della scatola</span></div>
+  <div class="cartellini">
+    <div class="cartellino minuendo" id="c-min">—</div>
+    <div class="op-symbol">−</div>
+    <div class="cartellino sottraendo" id="c-sot">—</div>
+    <div class="op-symbol">=</div>
+    <div class="cartellino-risultato">
+      <input type="number" id="c-ris" placeholder="?" min="0" max="200" />
+    </div>
+    <button onclick="verificaRisultato()" style="font-size:15px; padding: 6px 16px;">Controlla</button>
+  </div>
+</div>
+
+<div class="stato" id="stato">Premi "Nuova operazione" per iniziare.</div>
+
+<div class="istruzioni">
+  Clicca sulle palline per farle cadere nella scatola.<br>
+  Poi scrivi il risultato nel terzo cartellino.
+</div>
+
+<script>
+let stato = { minuendo: 0, sottraendo: 0, risultato: 0, cadute: 0, nMax: 10, avviato: false };
+
+function nuovaOperazione() {
+  const sel = document.getElementById('nPalline').value;
+  const fisso = sel.endsWith('f');
+  const n = parseInt(sel);
+  stato.nMax = n;
+  const maxVal = n * 10;
+
+  const minuendo = fisso ? maxVal : (() => {
+    const multipli = [];
+    for (let i = 10; i <= maxVal; i += 10) multipli.push(i);
+    return multipli[Math.floor(Math.random() * multipli.length)];
+  })();
+  const pallMin = minuendo / 10;
+  const maxSot = pallMin - 1;
+  if (maxSot < 1) { nuovaOperazione(); return; }
+  const sotPall = Math.floor(Math.random() * maxSot) + 1;
+  const sottraendo = sotPall * 10;
+
+  stato.minuendo = minuendo;
+  stato.sottraendo = sottraendo;
+  stato.risultato = minuendo - sottraendo;
+  stato.cadute = 0;
+  stato.avviato = true;
+
+  document.getElementById('c-min').textContent = minuendo;
+  document.getElementById('c-sot').textContent = sottraendo;
+  const inp = document.getElementById('c-ris');
+  inp.value = '';
+  inp.disabled = false;
+
+  costruisciCoperchio(pallMin, n);
+  setStato('Fai cadere le palline nella scatola.');
+}
+
+function costruisciCoperchio(pallAttive, nTotale) {
+  const cop = document.getElementById('coperchio');
+  cop.innerHTML = '';
+  const rigaDim = nTotale / 2;
+
+  for (let riga = 0; riga < 2; riga++) {
+    const div = document.createElement('div');
+    div.className = 'riga-palline';
+    for (let i = 0; i < rigaDim; i++) {
+      const idx = riga * rigaDim + i;
+      const p = document.createElement('div');
+      p.className = 'pallina';
+      if (idx < pallAttive) {
+        p.textContent = '10';
+        p.dataset.idx = idx;
+        p.addEventListener('click', () => buttaPallina(p));
+      } else {
+        p.classList.add('vuota');
+      }
+      div.appendChild(p);
+    }
+    cop.appendChild(div);
+  }
+}
+
+function buttaPallina(el) {
+  if (!stato.avviato) return;
+  if (el.classList.contains('caduta')) return;
+  el.classList.add('caduta');
+  stato.cadute++;
+  setStato('Palline cadute: ' + stato.cadute + ' (−' + (stato.cadute * 10) + ')');
+}
+
+function verificaRisultato() {
+  if (!stato.avviato && stato.minuendo === 0) return;
+  const inp = document.getElementById('c-ris');
+  const val = parseInt(inp.value);
+  if (isNaN(val)) return;
+  if (val === stato.risultato) {
+    stato.avviato = false;
+    inp.disabled = true;
+    setStato('Esatto! ' + stato.minuendo + ' − ' + stato.sottraendo + ' = ' + stato.risultato, 'ok');
+  } else {
+    setStato('Non è corretto, riprova.', 'errore');
+    inp.value = '';
+  }
+}
+
+function setStato(msg, cls) {
+  const el = document.getElementById('stato');
+  el.textContent = msg;
+  el.className = 'stato' + (cls ? ' ' + cls : '');
+}
+</script>
+</body>
+</html>
