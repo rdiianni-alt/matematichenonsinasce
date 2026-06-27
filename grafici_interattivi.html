@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grafici incompleti</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f5f0e8; color: #3a3530; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 16px; }
+  .logo { display: flex; flex-direction: column; align-items: center; gap: 6px; text-decoration: none; margin-bottom: 18px; }
+  .logo img { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; }
+  .logo span { font-size: 14px; color: #5f5e5a; }
+  h1 { font-size: 1.4rem; margin-bottom: 6px; text-align: center; }
+  #score-bar { font-size: 0.95rem; color: #5f5e5a; margin-bottom: 18px; }
+  #card { background: #fff; border-radius: 14px; box-shadow: 0 2px 12px #0001; padding: 24px; width: 100%; max-width: 700px; }
+  #scenario { font-size: 1rem; line-height: 1.6; margin-bottom: 10px; }
+  #hint { font-style: italic; color: #7a6e5a; font-size: 0.93rem; margin-bottom: 18px; }
+  #chart-area { display: flex; justify-content: center; align-items: flex-end; margin-bottom: 22px; min-height: 280px; }
+
+  /* Istogramma */
+  .chart-outer { display: flex; align-items: flex-end; gap: 0; }
+  .y-axis { display: flex; flex-direction: column-reverse; justify-content: space-between; align-items: flex-end; padding-right: 6px; }
+  .y-tick { font-size: 0.75rem; color: #999; line-height: 1; }
+  .bars-area { display: flex; align-items: flex-end; gap: 10px; border-left: 2px solid #ccc; border-bottom: 2px solid #ccc; padding: 0 8px 0 8px; }
+  .bar-col { display: flex; flex-direction: column; align-items: center; }
+  .bar-val { font-size: 0.82rem; font-weight: 600; color: #3a3530; min-height: 18px; text-align: center; }
+  .bar-val.unknown { color: #e8a04a; }
+  .bar { width: 46px; border-radius: 4px 4px 0 0; min-height: 4px; transition: height 0.12s; }
+  .bar.normal { background: #7eb8c9; }
+  .bar.missing { background: #e8a04a; }
+  .bar-xlabel { font-size: 0.78rem; color: #888; margin-top: 4px; text-align: center; }
+  .bar-controls { display: flex; gap: 4px; margin-top: 5px; }
+  .bar-controls-outer { display: flex; justify-content: center; gap: 4px; margin-top: 10px; }
+  .ctrl-btn { width: 30px; height: 30px; border: none; border-radius: 7px; background: #ebe4d8; font-size: 1.1rem; cursor: pointer; color: #3a3530; display: flex; align-items: center; justify-content: center; }
+  .ctrl-btn:hover { background: #d4c9b8; }
+
+  /* Linee */
+  .line-chart-wrap { width: 100%; max-width: 600px; }
+  svg.line-svg { width: 100%; overflow: visible; }
+  .line-input-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 10px; font-size: 0.9rem; color: #e8a04a; font-weight: 600; }
+  .line-controls { display: flex; gap: 10px; align-items: center; }
+  .line-val { font-size: 1.15rem; font-weight: 700; color: #e8a04a; min-width: 34px; text-align: center; }
+
+  /* Torta */
+  .pie-wrap { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; justify-content: center; }
+  .pie-legend { display: flex; flex-direction: column; gap: 8px; font-size: 0.88rem; }
+  .legend-row { display: flex; align-items: center; gap: 8px; }
+  .legend-swatch { width: 16px; height: 16px; border-radius: 3px; flex-shrink: 0; }
+  .pie-controls { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 12px; font-size: 0.9rem; color: #e8a04a; font-weight: 600; }
+
+  #feedback { min-height: 28px; font-size: 1rem; font-weight: 600; text-align: center; margin-bottom: 14px; }
+  #feedback.ok { color: #4caf74; }
+  #feedback.err { color: #c0392b; }
+  #btn-row { display: flex; justify-content: center; gap: 12px; }
+  .btn { padding: 10px 28px; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; font-family: inherit; }
+  .btn-check { background: #7eb8c9; color: #fff; }
+  .btn-check:hover { background: #5fa0b0; }
+  .btn-next { background: #e8a04a; color: #fff; }
+  .btn-next:hover { background: #c98530; }
+</style>
+</head>
+<body>
+
+<a class="logo" href="https://matematichenonsinasce.com/" target="_blank">
+  <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Logo">
+  <span>Matematiche non si nasce</span>
+</a>
+
+<h1>Grafici incompleti</h1>
+<p style="font-size:0.93rem;color:#5f5e5a;text-align:center;max-width:600px;margin-bottom:14px;">In ogni esercizio trovi un grafico con un dato mancante, indicato in arancione. Leggi l'indizio, usa le frecce per inserire il valore che ritieni corretto e poi clicca su <b>Controlla</b>.</p>
+<div id="score-bar">Punteggio: <span id="score">0</span> &nbsp;|&nbsp; Esercizi: <span id="count">0</span></div>
+
+<div id="card">
+  <div id="scenario"></div>
+  <div id="hint"></div>
+  <div id="chart-area"></div>
+  <div id="feedback"></div>
+  <div id="btn-row">
+    <button class="btn btn-check" onclick="checkAnswer()">Controlla</button>
+    <button class="btn btn-next" onclick="nextRound()">Prossimo →</button>
+  </div>
+</div>
+
+<script>
+const PIE_COLORS = ['#7eb8c9','#8bc97e','#c97eb8','#c9c17e','#7e9bc9','#c97e7e'];
+
+const CITTA = [
+  'Roma','Milano','Napoli','Torino','Bologna','Firenze','Venezia','Palermo',
+  'Genova','Bari','Catania','Verona','Trieste','Padova','Parigi','Londra',
+  'Madrid','Berlino','Amsterdam','Lisbona','Vienna','Praga','Barcellona','Atene'
+];
+
+const NOMI = ['Federica','Giulia','Jacopo','Livio','Marco','Sara','Luca','Elena','Matteo','Chiara'];
+
+const THEMES = [
+  { name:'Temperatura media annua (°C)', unit:'°C', xLabel:'anno',
+    xVals:()=>['2013','2014','2015','2016','2017','2018'], min:3, max:14, int:true },
+  { name:'Bambini nati', unit:'', xLabel:'anno',
+    xVals:()=>['2013','2014','2015','2016','2017','2018'], min:3, max:20, int:true },
+  { name:'Libri letti', unit:'', xLabel:'mese',
+    xVals:()=>['set','ott','nov','dic','gen','feb'], min:1, max:12, int:true },
+  { name:'Presenze in palestra', unit:'', xLabel:'giorno',
+    xVals:()=>['lun','mar','mer','gio','ven'], min:5, max:30, int:true },
+  { name:'Ore di sole al giorno', unit:'h', xLabel:'mese',
+    xVals:()=>['gen','feb','mar','apr','mag','giu'], min:2, max:12, int:true },
+  { name:'Piante vendute', unit:'', xLabel:'mese',
+    xVals:()=>['mar','apr','mag','giu','lug','ago'], min:4, max:25, int:true },
+  { name:'Km percorsi in bici', unit:'km', xLabel:'settimana',
+    xVals:()=>['1ª','2ª','3ª','4ª','5ª','6ª'], min:10, max:60, int:true },
+  { name:'Passeggeri in stazione (migliaia)', unit:'k', xLabel:'mese',
+    xVals:()=>['gen','feb','mar','apr','mag','giu'], min:5, max:40, int:true },
+];
+
+const PIE_THEMES = [
+  { name:'come gli alunni arrivano a scuola', cats:['a piedi','in auto','in bici','in bus'] },
+  { name:'sport preferiti nella classe', cats:['calcio','nuoto','pallavolo','basket'] },
+  { name:'tipi di frutta preferiti', cats:['mele','banane','arance','fragole'] },
+  { name:'materie preferite', cats:['matematica','italiano','scienze','storia'] },
+  { name:'animali domestici degli alunni', cats:['cani','gatti','pesci','altri'] },
+];
+
+let state = {};
+let score = 0, totalCount = 0;
+
+function rnd(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+// Indizio che NON rivela il valore corretto
+function buildHint(vals, missingIdx, xVals, unit){
+  const v = vals[missingIdx];
+  const x = xVals[missingIdx];
+  const u = unit || '';
+
+  if(missingIdx > 0 && missingIdx < xVals.length-1){
+    const prev = vals[missingIdx-1];
+    const next = vals[missingIdx+1];
+    const diffPrev = v - prev;
+    const diffNext = next - v;
+    if(diffPrev === 0)
+      return `Nel ${x} il valore era rimasto uguale a quello di ${xVals[missingIdx-1]} (${prev}${u}).`;
+    if(diffPrev > 0)
+      return `Tra ${xVals[missingIdx-1]} e ${x} il valore è salito di ${diffPrev}${u}.`;
+    return `Tra ${xVals[missingIdx-1]} e ${x} il valore è sceso di ${Math.abs(diffPrev)}${u}.`;
+  }
+  if(missingIdx === 0){
+    const next = vals[1];
+    const diff = next - v;
+    if(diff === 0) return `Il valore di ${x} era uguale a quello di ${xVals[1]} (${next}${u}).`;
+    if(diff > 0) return `Tra ${x} e ${xVals[1]} il valore è salito di ${diff}${u}.`;
+    return `Tra ${x} e ${xVals[1]} il valore è sceso di ${Math.abs(diff)}${u}.`;
+  }
+  // ultimo
+  const prev = vals[missingIdx-1];
+  const diff = v - prev;
+  if(diff === 0) return `Il valore di ${x} era rimasto uguale a quello di ${xVals[missingIdx-1]} (${prev}${u}).`;
+  if(diff > 0) return `Tra ${xVals[missingIdx-1]} e ${x} il valore è salito di ${diff}${u}.`;
+  return `Tra ${xVals[missingIdx-1]} e ${x} il valore è sceso di ${Math.abs(diff)}${u}.`;
+}
+
+function buildPieHint(vals, missingIdx, cats, total){
+  const otherSum = total - vals[missingIdx];
+  return `In tutto sono ${total} risposte. Sommando le altre categorie si ottiene ${otherSum}.`;
+}
+
+// Valore iniziale lontano dal corretto
+function wrongStart(correct, min, max){
+  let v;
+  do { v = rnd(min, max); } while(Math.abs(v - correct) < 2);
+  return v;
+}
+
+function genBarRound(){
+  const theme = pick(THEMES);
+  const city = pick(CITTA);
+  const xVals = theme.xVals();
+  const vals = xVals.map(()=>rnd(theme.min, theme.max));
+  const missingIdx = rnd(0, xVals.length-1);
+  const correct = vals[missingIdx];
+  const startVal = wrongStart(correct, theme.min, theme.max);
+  const hint = buildHint(vals, missingIdx, xVals, theme.unit);
+  return {
+    type:'bar', theme, city, xVals, vals, missingIdx,
+    hint,
+    scenario: `<b>${theme.name}</b> a ${city}.<br>La barra arancione nell'istogramma corrisponde al dato mancante: inserisci il valore corretto.`,
+    userVal: startVal
+  };
+}
+
+function genLineRound(){
+  const theme = pick(THEMES);
+  const city = pick(CITTA);
+  const xVals = theme.xVals();
+  const vals = xVals.map(()=>rnd(theme.min, theme.max));
+  const missingIdx = rnd(0, xVals.length-1);
+  const correct = vals[missingIdx];
+  const startVal = wrongStart(correct, theme.min, theme.max);
+  const hint = buildHint(vals, missingIdx, xVals, theme.unit);
+  return {
+    type:'line', theme, city, xVals, vals, missingIdx,
+    hint,
+    scenario: `<b>${theme.name}</b> a ${city}.<br>Il punto arancione nel grafico a linee corrisponde al dato mancante.`,
+    userVal: startVal
+  };
+}
+
+function genPieRound(){
+  const pt = pick(PIE_THEMES);
+  const cats = pt.cats.slice();
+  const total = rnd(20, 35);
+  let rem = total;
+  const vals = [];
+  for(let i=0;i<cats.length-1;i++){
+    const v = rnd(1, rem-(cats.length-1-i));
+    vals.push(v); rem -= v;
+  }
+  vals.push(rem);
+  const missingIdx = rnd(0, cats.length-1);
+  const correct = vals[missingIdx];
+  const startVal = wrongStart(correct, 1, total-cats.length+1);
+  const hint = buildPieHint(vals, missingIdx, cats, total);
+  return {
+    type:'pie', pt, cats, vals, missingIdx, total,
+    hint,
+    scenario: `<b>Indagine su ${pt.name}</b>.<br>Il settore arancione nel grafico a torta rappresenta il dato mancante.`,
+    userVal: startVal
+  };
+}
+
+function genRound(){
+  const t = rnd(0,2);
+  if(t===0) return genBarRound();
+  if(t===1) return genLineRound();
+  return genPieRound();
+}
+
+// ---- RENDER BAR ----
+function renderBar(s){
+  const chartH = 210;
+  const maxV = Math.max(...s.vals, s.theme.max);
+  const tickStep = maxV <= 10 ? 1 : maxV <= 20 ? 2 : 5;
+  const ticks = [];
+  for(let v=0;v<=maxV;v+=tickStep) ticks.push(v);
+
+  const scale = chartH / maxV;
+
+  let html = `<div class="chart-outer">`;
+  // y axis
+  html += `<div class="y-axis" style="height:${chartH}px">`;
+  ticks.forEach(t => {
+    html += `<span class="y-tick">${t}</span>`;
+  });
+  html += `</div>`;
+  // bars
+  html += `<div class="bars-area" style="height:${chartH}px">`;
+  s.vals.forEach((v, i) => {
+    const isMissing = i === s.missingIdx;
+    const displayV = isMissing ? s.userVal : v;
+    const h = Math.max(4, Math.round(displayV * scale));
+    html += `<div class="bar-col">
+      <div class="bar-val ${isMissing?'unknown':''}" id="bv-${i}">${isMissing ? '?' : v}${s.theme.unit}</div>
+      <div style="display:flex;align-items:flex-end;height:${chartH - 24}px">
+        <div class="bar ${isMissing?'missing':'normal'}" id="bar-${i}" style="height:${h}px"></div>
+      </div>
+      <div class="bar-xlabel">${s.xVals[i]}</div>
+    </div>`;
+  });
+  html += `</div></div>`;
+  html += `<div class="bar-controls-outer">
+    <button class="ctrl-btn" onclick="adjustBar(-1)">▼</button>
+    <span style="font-size:1.1rem;color:#e8a04a;font-weight:700;align-self:center;min-width:50px;text-align:center" id="bar-cur-val">${s.userVal}${s.theme.unit}</span>
+    <button class="ctrl-btn" onclick="adjustBar(1)">▲</button>
+  </div>`;
+  document.getElementById('chart-area').innerHTML = html;
+}
+
+function adjustBar(delta){
+  const s = state;
+  const maxV = Math.max(...s.vals, s.theme.max);
+  s.userVal = Math.max(0, Math.min(maxV, s.userVal + delta));
+  clearFeedback();
+  const chartH = 210;
+  const scale = chartH / maxV;
+  const h = Math.max(4, Math.round(s.userVal * scale));
+  const barEl = document.getElementById('bar-' + s.missingIdx);
+  if(barEl) barEl.style.height = h + 'px';
+  const valEl = document.getElementById('bv-' + s.missingIdx);
+  if(valEl) valEl.textContent = '?';
+  const curVal = document.getElementById('bar-cur-val');
+  if(curVal) curVal.textContent = s.userVal + (s.theme.unit||'');
+}
+
+// ---- RENDER LINE ----
+function renderLine(s){
+  const W=540, H=220, PL=44, PR=20, PT=12, PB=30;
+  const iW=W-PL-PR, iH=H-PT-PB;
+  const n=s.xVals.length;
+  const maxV=Math.max(...s.vals, s.theme.max);
+  const minV=0;
+  const xStep=iW/(n-1);
+  const yScale=iH/(maxV-minV);
+  function px(i){ return PL+i*xStep; }
+  function py(v){ return PT+iH-(v-minV)*yScale; }
+
+  let svg=`<svg class="line-svg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  // grid
+  const tickStep = maxV<=10?1:maxV<=20?2:5;
+  for(let v=0;v<=maxV;v+=tickStep){
+    const y=py(v);
+    svg+=`<line x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}" stroke="#e0dbd0" stroke-width="1"/>`;
+    svg+=`<text x="${PL-6}" y="${y+4}" text-anchor="end" font-size="11" fill="#999">${v}</text>`;
+  }
+  svg+=`<line x1="${PL}" y1="${PT}" x2="${PL}" y2="${PT+iH}" stroke="#ccc" stroke-width="2"/>`;
+  svg+=`<line x1="${PL}" y1="${PT+iH}" x2="${W-PR}" y2="${PT+iH}" stroke="#ccc" stroke-width="2"/>`;
+  // x labels
+  s.xVals.forEach((l,i)=>{
+    svg+=`<text x="${px(i)}" y="${H-4}" text-anchor="middle" font-size="11" fill="#888">${l}</text>`;
+  });
+  // polyline using userVal for missing
+  const pts=s.vals.map((v,i)=>({x:px(i),y:py(i===s.missingIdx?s.userVal:v)}));
+  svg+=`<polyline points="${pts.map(p=>`${p.x},${p.y}`).join(' ')}" fill="none" stroke="#7eb8c9" stroke-width="2.5" stroke-linejoin="round"/>`;
+  // dots
+  s.vals.forEach((v,i)=>{
+    if(i===s.missingIdx){
+      svg+=`<circle cx="${pts[i].x}" cy="${pts[i].y}" r="10" fill="#e8a04a" stroke="#fff" stroke-width="2" id="lpt"/>`;
+      svg+=`<text x="${pts[i].x}" y="${pts[i].y-15}" text-anchor="middle" font-size="12" fill="#e8a04a" font-weight="700">?</text>`;
+    } else {
+      svg+=`<circle cx="${pts[i].x}" cy="${pts[i].y}" r="6" fill="#7eb8c9" stroke="#fff" stroke-width="2"/>`;
+      svg+=`<text x="${pts[i].x}" y="${pts[i].y-12}" text-anchor="middle" font-size="11" fill="#5f5e5a">${v}</text>`;
+    }
+  });
+  svg+=`</svg>`;
+
+  document.getElementById('chart-area').innerHTML=`<div class="line-chart-wrap">
+    ${svg}
+    <div class="line-input-wrap">
+      Valore mancante (${s.xVals[s.missingIdx]}):
+      <div class="line-controls">
+        <button class="ctrl-btn" onclick="adjustLine(-1)">▼</button>
+        <span class="line-val" id="lval">${s.userVal}</span>
+        <button class="ctrl-btn" onclick="adjustLine(1)">▲</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function adjustLine(delta){
+  const s=state;
+  const maxV=Math.max(...s.vals, s.theme.max);
+  s.userVal=Math.max(0, Math.min(maxV, s.userVal+delta));
+  clearFeedback();
+  renderLine(s);
+}
+
+// ---- RENDER PIE ----
+function renderPie(s){
+  const total=s.total;
+  const vals=s.vals.map((v,i)=>i===s.missingIdx?s.userVal:v);
+  const displayTotal=vals.reduce((a,b)=>a+b,0);
+  const R=105, cx=120, cy=120;
+  let svg=`<svg class="pie-svg" viewBox="0 0 240 240" width="200" height="200" xmlns="http://www.w3.org/2000/svg">`;
+  let ang=-Math.PI/2;
+  s.cats.forEach((cat,i)=>{
+    const frac=displayTotal>0?vals[i]/displayTotal:1/s.cats.length;
+    const end=ang+frac*2*Math.PI;
+    const x1=cx+R*Math.cos(ang),y1=cy+R*Math.sin(ang);
+    const x2=cx+R*Math.cos(end),y2=cy+R*Math.sin(end);
+    const large=frac>0.5?1:0;
+    const col=i===s.missingIdx?'#e8a04a':PIE_COLORS[i%PIE_COLORS.length];
+    svg+=`<path d="M${cx},${cy} L${x1},${y1} A${R},${R} 0 ${large},1 ${x2},${y2} Z" fill="${col}" stroke="#fff" stroke-width="2"/>`;
+    if(i!==s.missingIdx && frac>0.06){
+      const midA=(ang+end)/2;
+      const lx=cx+(R*0.62)*Math.cos(midA), ly=cy+(R*0.62)*Math.sin(midA);
+      svg+=`<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" font-size="12" fill="#fff" font-weight="600">${vals[i]}</text>`;
+    }
+    ang=end;
+  });
+  svg+=`</svg>`;
+
+  let legend='<div class="pie-legend">';
+  s.cats.forEach((cat,i)=>{
+    const col=i===s.missingIdx?'#e8a04a':PIE_COLORS[i%PIE_COLORS.length];
+    const display=i===s.missingIdx?`<b style="color:#e8a04a">?</b>`:vals[i];
+    legend+=`<div class="legend-row"><div class="legend-swatch" style="background:${col}"></div><span>${cat}: ${display}</span></div>`;
+  });
+  legend+=`<div style="margin-top:8px;font-size:0.82rem;color:#999">Totale: ${total}</div></div>`;
+
+  document.getElementById('chart-area').innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;gap:10px;width:100%">
+    <div class="pie-wrap">${svg}${legend}</div>
+    <div class="pie-controls">
+      Valore per "${s.cats[s.missingIdx]}":
+      <div class="line-controls">
+        <button class="ctrl-btn" onclick="adjustPie(-1)">▼</button>
+        <span class="line-val" id="pval">${s.userVal}</span>
+        <button class="ctrl-btn" onclick="adjustPie(1)">▲</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function adjustPie(delta){
+  const s=state;
+  s.userVal=Math.max(0, Math.min(s.total, s.userVal+delta));
+  clearFeedback();
+  renderPie(s);
+}
+
+function clearFeedback(){
+  const fb=document.getElementById('feedback');
+  fb.textContent=''; fb.className='';
+}
+
+function render(){
+  const s=state;
+  document.getElementById('scenario').innerHTML=s.scenario;
+  document.getElementById('hint').textContent='Indizio: '+s.hint;
+  clearFeedback();
+  if(s.type==='bar') renderBar(s);
+  else if(s.type==='line') renderLine(s);
+  else renderPie(s);
+}
+
+function checkAnswer(){
+  const s=state;
+  const correct=s.vals[s.missingIdx];
+  const fb=document.getElementById('feedback');
+  totalCount++;
+  document.getElementById('count').textContent=totalCount;
+  if(s.userVal===correct){
+    fb.textContent='Esatto!';
+    fb.className='ok';
+    score++;
+    document.getElementById('score').textContent=score;
+    // rivela il valore nella barra
+    if(s.type==='bar'){
+      const valEl=document.getElementById('bv-'+s.missingIdx);
+      if(valEl) valEl.textContent=correct+(s.theme.unit||'');
+    }
+  } else {
+    fb.textContent='Non ancora. Riprova!';
+    fb.className='err';
+  }
+}
+
+function nextRound(){
+  state=genRound();
+  render();
+}
+
+nextRound();
+</script>
+</body>
+</html>
