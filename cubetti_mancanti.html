@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quanti cubetti mancano?</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: Arial, sans-serif;
+    background: #f5f4ef;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 6px;
+  }
+  .header { display: flex; flex-direction: column; align-items: center; margin-bottom: 6px; }
+  .header a { text-decoration: none; display: flex; flex-direction: column; align-items: center; }
+  .logo { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; margin-bottom: 3px; }
+  .blog-name { font-size: 13px; color: #2255aa; font-weight: bold; text-align: center; }
+  h1 { font-size: clamp(14px, 3.8vw, 20px); color: #333; text-align: center; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+  .level-bar { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; justify-content: center; }
+  .level-btn { padding: 5px 13px; border: 2px solid #aaa; border-radius: 20px; background: #fff; font-size: 13px; cursor: pointer; font-family: Arial, sans-serif; color: #555; }
+  .level-btn.active { background: #e8a020; border-color: #c07800; color: #fff; font-weight: bold; }
+  .canvas-wrap { display: flex; justify-content: center; align-items: center; margin-bottom: 8px; width: 100%; }
+  canvas { display: block; max-width: 100%; height: auto; }
+  .question { font-size: clamp(14px, 3.5vw, 17px); text-align: center; color: #333; margin-bottom: 4px; text-transform: uppercase; font-weight: bold; }
+  .hint { font-size: 12px; color: #999; text-align: center; margin-bottom: 8px; }
+  .input-row { display: flex; gap: 8px; justify-content: center; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+  input[type=number] { width: 80px; font-size: 22px; text-align: center; border: 2px solid #aaa; border-radius: 8px; padding: 6px; font-family: Arial, sans-serif; background: #fff; color: #333; }
+  input[type=number]:focus { outline: none; border-color: #e8a020; }
+  .btn { padding: 8px 22px; font-size: 16px; border: none; border-radius: 20px; cursor: pointer; font-family: Arial, sans-serif; font-weight: bold; text-transform: uppercase; }
+  .btn-check { background: #e8a020; color: #fff; }
+  .btn-next  { background: #4a9a4a; color: #fff; }
+  .feedback { font-size: clamp(13px, 3.5vw, 17px); text-align: center; font-weight: bold; min-height: 24px; margin-bottom: 4px; text-transform: uppercase; }
+  .feedback.ok { color: #2a7a2a; }
+  .feedback.no { color: #c03030; }
+  .stats { font-size: 13px; color: #777; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a href="https://matematichenonsinasce.com" target="_self">
+    <img class="logo" id="logoImg" alt="Matematiche non si nasce">
+    <span class="blog-name">Matematiche non si nasce</span>
+  </a>
+</div>
+
+<h1>Quanti cubetti mancano?</h1>
+
+<div class="level-bar">
+  <button class="level-btn active" onclick="setLevel(0)">LIVELLO 1</button>
+  <button class="level-btn"       onclick="setLevel(1)">LIVELLO 2</button>
+  <button class="level-btn"       onclick="setLevel(2)">LIVELLO 3</button>
+  
+</div>
+
+<div class="canvas-wrap">
+  <canvas id="cubeCanvas"></canvas>
+</div>
+
+<p class="question">Quanti cubetti mancano per completare il cubo?</p>
+<p class="hint">IL CUBO INTERO HA 64 CUBETTI (4 × 4 × 4)</p>
+
+<div class="input-row">
+  <input type="number" id="userAnswer" min="0" max="63" placeholder="?">
+  <button class="btn btn-check" id="btnCheck" onclick="checkAnswer()">CONTROLLA</button>
+  <button class="btn btn-next"  id="btnNext"  onclick="nextPuzzle()" style="display:none">PROSSIMO →</button>
+</div>
+
+<div class="feedback" id="feedback"></div>
+<div class="stats"    id="stats"></div>
+
+<script>
+// Logo con fallback
+(function() {
+  const img = document.getElementById('logoImg');
+  const urls = [
+    'https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png',
+    'https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png'
+  ];
+  let idx = 0;
+  img.onerror = function() { idx++; if (idx < urls.length) img.src = urls[idx]; else img.style.display='none'; };
+  img.src = urls[0];
+})();
+
+// ─── LIVELLI ──────────────────────────────────────────────────────────────────
+const LEVELS = [
+  { minRemoved: 4,  maxRemoved: 12 },   // L1: pochi cubetti rimossi
+  { minRemoved: 13, maxRemoved: 24 },   // L2: medio
+  { minRemoved: 25, maxRemoved: 38 },   // L3: molti rimossi
+  
+];
+
+let currentLevel = 0;
+let correctAnswer = 0;
+let score = 0, total = 0;
+let answered = false;
+let currentGrid = null;
+
+// ─── GENERAZIONE PUZZLE ───────────────────────────────────────────────────────
+// CONVENZIONE ASSI:
+// In proiezione isometrica con toScreen(x,y,z):
+//   x aumenta → va verso destra-basso (lato destro del cubo)
+//   z aumenta → va verso sinistra-basso (lato sinistro del cubo)
+//   L'angolo FRONTALE (più vicino allo spettatore, in basso) è (x=3, z=3)
+//   L'angolo POSTERIORE (più lontano, in alto) è (x=0, z=0)
+//
+// Per rendere SEMPRE VISIBILE il taglio, la scala deve partire dall'angolo
+// posteriore (0,0): le colonne vicine all'angolo posteriore sono ALTE,
+// quelle vicine all'angolo frontale (3,3) sono BASSE o assenti.
+// Così lo spettatore vede sempre il "gradino" frontalmente.
+//
+// grid[x][z] = altezza colonna.
+// La forma a scala: height decresce al crescere di min(x,z)
+// cioè le colonne più vicine allo spettatore (x grande, z grande) sono le più basse.
+
+function makeStairGrid(params) {
+  // heights[d] = altezza per le colonne alla "distanza frontale" d
+  // d = 3 - min(x,z): d=0 è l'angolo posteriore (alto), d=3 è l'angolo frontale (basso)
+  // Oppure: usiamo direttamente min(x,z) come indice di profondità
+  // min(x,z)=0 → angolo posteriore → altezza massima
+  // min(x,z)=3 → angolo frontale → altezza minima
+  const { h0, h1, h2, h3 } = params; // altezze per min(x,z) = 0,1,2,3
+  const grid = Array.from({length:4}, () => [0,0,0,0]);
+  for (let x = 0; x < 4; x++)
+    for (let z = 0; z < 4; z++) {
+      const d = Math.min(x, z); // 0=posteriore, 3=frontale
+      const heights = [h0, h1, h2, h3];
+      grid[x][z] = Math.max(0, Math.min(4, heights[d]));
+    }
+  return grid;
+}
+
+function generatePuzzle(level) {
+  const { minRemoved, maxRemoved } = LEVELS[level];
+
+  for (let attempt = 0; attempt < 500; attempt++) {
+    // Genera altezze per i 4 livelli di profondità: h0 ≥ h1 ≥ h2 ≥ h3
+    // h0 (posteriore) = sempre 4
+    // Le altre decrescono verso il frontale
+    const h0 = 4;
+    const h3 = Math.floor(Math.random() * 4);       // 0..3
+    const h2 = h3 + Math.floor(Math.random() * (4 - h3 + 1)); // h3..4
+    const h1 = h2 + Math.floor(Math.random() * (4 - h2 + 1)); // h2..4
+    // Clamp
+    const params = {
+      h0: Math.min(h0, 4),
+      h1: Math.min(h1, 4),
+      h2: Math.min(h2, 4),
+      h3: Math.min(h3, 4),
+    };
+
+    const grid = makeStairGrid(params);
+    const present = grid.reduce((s,col) => s + col.reduce((a,b)=>a+b,0), 0);
+    const removed = 64 - present;
+
+    if (removed >= minRemoved && removed <= maxRemoved && removed > 0)
+      return { grid, removed };
+  }
+
+  // Fallback: scala lineare semplice calibrata sul livello
+  const target = Math.floor((LEVELS[level].minRemoved + LEVELS[level].maxRemoved) / 2);
+  // Trova h3 che dà circa target rimossi
+  // Con h0=4,h1=4,h2=h3_v,h3=0: removed = (4-h3_v)*4 + 4*4... troppo complicato
+  // Usiamo griglia semplice
+  const grid = makeStairGrid({ h0:4, h1:3, h2:2, h3:1 });
+  const present = grid.reduce((s,col)=>s+col.reduce((a,b)=>a+b,0),0);
+  return { grid, removed: 64-present };
+}
+
+// ─── RENDERING ISOMETRICO ─────────────────────────────────────────────────────
+const canvas = document.getElementById('cubeCanvas');
+const ctx = canvas.getContext('2d');
+
+const COS30 = Math.sqrt(3) / 2;
+const SIN30 = 0.5;
+
+// Proiezione: x→destra-basso, z→sinistra-basso, y→su
+function toScreen(x, y, z, S, ox, oy) {
+  return {
+    sx: ox + (x - z) * S * COS30,
+    sy: oy - y * S + (x + z) * S * SIN30
+  };
+}
+
+const C_TOP  = '#a06820';  // arancio scuro — top
+const C_SIDE = '#f0c96a';  // giallo — facce laterali
+const C_EDGE = '#6a3e00';  // bordi
+
+function polygon(pts, fill) {
+  ctx.beginPath();
+  ctx.moveTo(pts[0].sx, pts[0].sy);
+  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].sx, pts[i].sy);
+  ctx.closePath();
+  ctx.fillStyle = fill;
+  ctx.fill();
+  ctx.strokeStyle = C_EDGE;
+  ctx.lineWidth = 1.0;
+  ctx.stroke();
+}
+
+function drawCube(x, y, z, S, ox, oy) {
+  const p = (dx,dy,dz) => toScreen(x+dx, y+dy, z+dz, S, ox, oy);
+  polygon([p(0,1,0), p(1,1,0), p(1,1,1), p(0,1,1)], C_TOP);   // top
+  polygon([p(1,0,0), p(1,1,0), p(1,1,1), p(1,0,1)], C_SIDE);  // lato destro
+  polygon([p(0,0,1), p(1,0,1), p(1,1,1), p(0,1,1)], C_SIDE);  // lato sinistro frontale
+}
+
+function drawScene(grid) {
+  const maxW = Math.min(window.innerWidth - 16, 440);
+
+  // Calcola S dal bounding box reale del cubo 4×4×4 con S=1
+  const S1 = 1;
+  const corners = [[0,0,0],[4,0,0],[0,0,4],[4,0,4],[0,4,0],[4,4,0],[0,4,4],[4,4,4]];
+  const pts1 = corners.map(([x,y,z]) => toScreen(x,y,z,S1,0,0));
+  const minX1 = Math.min(...pts1.map(p=>p.sx));
+  const maxX1 = Math.max(...pts1.map(p=>p.sx));
+  const minY1 = Math.min(...pts1.map(p=>p.sy));
+  const maxY1 = Math.max(...pts1.map(p=>p.sy));
+  const spanW = maxX1 - minX1;
+  const spanH = maxY1 - minY1;
+
+  const PAD = 10;
+  const S = Math.floor(Math.min((maxW - PAD*2) / spanW, (maxW * 0.68 - PAD*2) / spanH));
+
+  const W = Math.ceil(spanW * S) + PAD * 2;
+  const H = Math.ceil(spanH * S) + PAD * 2;
+
+  canvas.width  = W;
+  canvas.height = H;
+  ctx.clearRect(0, 0, W, H);
+
+  const ox = -minX1 * S + PAD;
+  const oy = -minY1 * S + PAD;
+
+  // Painter's algorithm: y crescente, poi (x+z) crescente (più lontano prima)
+  const cubes = [];
+  for (let y = 0; y < 4; y++)
+    for (let x = 0; x < 4; x++)
+      for (let z = 0; z < 4; z++)
+        if (y < grid[x][z]) cubes.push({x,y,z});
+
+  cubes.sort((a,b) => a.y !== b.y ? a.y - b.y : (a.x+a.z) - (b.x+b.z));
+
+  for (const {x,y,z} of cubes) drawCube(x,y,z,S,ox,oy);
+}
+
+function redraw() { if (currentGrid) drawScene(currentGrid); }
+
+// ─── LOGICA GIOCO ─────────────────────────────────────────────────────────────
+function nextPuzzle() {
+  answered = false;
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('userAnswer').value = '';
+  document.getElementById('btnNext').style.display = 'none';
+  document.getElementById('btnCheck').style.display = 'inline-block';
+  document.getElementById('userAnswer').disabled = false;
+
+  const { grid, removed } = generatePuzzle(currentLevel);
+  currentGrid = grid;
+  correctAnswer = removed;
+  redraw();
+  updateStats();
+  document.getElementById('userAnswer').focus();
+}
+
+function checkAnswer() {
+  if (answered) return;
+  const val = parseInt(document.getElementById('userAnswer').value);
+  if (isNaN(val)) {
+    document.getElementById('feedback').textContent = 'INSERISCI UN NUMERO!';
+    document.getElementById('feedback').className = 'feedback no';
+    return;
+  }
+  answered = true;
+  total++;
+  document.getElementById('userAnswer').disabled = true;
+  document.getElementById('btnCheck').style.display = 'none';
+  document.getElementById('btnNext').style.display = 'inline-block';
+
+  if (val === correctAnswer) {
+    score++;
+    document.getElementById('feedback').textContent = '✓ ESATTO! MANCAVANO ' + correctAnswer + ' CUBETTI.';
+    document.getElementById('feedback').className = 'feedback ok';
+  } else {
+    document.getElementById('feedback').textContent = '✗ LA RISPOSTA ERA ' + correctAnswer + ' CUBETTI MANCANTI.';
+    document.getElementById('feedback').className = 'feedback no';
+  }
+  updateStats();
+}
+
+function updateStats() {
+  if (total > 0)
+    document.getElementById('stats').textContent = 'RISPOSTE CORRETTE: ' + score + ' SU ' + total;
+}
+
+function setLevel(lvl) {
+  currentLevel = lvl;
+  document.querySelectorAll('.level-btn').forEach((b,i) => b.classList.toggle('active', i===lvl));
+  score = 0; total = 0;
+  updateStats();
+  nextPuzzle();
+}
+
+document.getElementById('userAnswer').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { if (!answered) checkAnswer(); else nextPuzzle(); }
+});
+
+window.addEventListener('resize', redraw);
+nextPuzzle();
+</script>
+</body>
+</html>
