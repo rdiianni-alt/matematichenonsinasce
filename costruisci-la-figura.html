@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Costruisci la Figura – Matematiche non si nasce</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #f0f0f0;
+    color: #222;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 14px 10px;
+  }
+
+  /* ── Header / Logo ── */
+  .header {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .header a {
+    text-decoration: none;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .header img {
+    width: 60px; height: 60px;
+    object-fit: contain;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    transition: transform 0.2s;
+  }
+  .header img:hover { transform: scale(1.07); }
+  .header .blog-nome {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #e65100;
+    letter-spacing: 0.3px;
+  }
+
+  h1 {
+    font-size: clamp(1rem, 4vw, 1.5rem);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #222;
+    margin-bottom: 4px;
+    text-align: center;
+  }
+
+  .subtitle {
+    font-size: clamp(0.67rem, 2.2vw, 0.82rem);
+    color: #555;
+    margin-bottom: 10px;
+    text-align: center;
+    max-width: 500px;
+    line-height: 1.5;
+  }
+
+  /* ── Canvas wrap: scales down on small screens ── */
+  .canvas-outer {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .canvas-wrap {
+    width: min(600px, 96vw);
+    /* On very small screens the canvas itself scales via CSS transform */
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    border-radius: 8px;
+    border: 2px solid #bbb;
+    background: #fff;
+    cursor: crosshair;
+    touch-action: none;
+  }
+
+  /* On screens narrower than 480px, scale the whole game area down */
+  @media (max-width: 480px) {
+    .canvas-wrap {
+      width: 96vw;
+    }
+    h1 { font-size: clamp(0.9rem, 5vw, 1.1rem); }
+    .subtitle { font-size: clamp(0.62rem, 3vw, 0.75rem); }
+    .header img { width: 48px; height: 48px; }
+    .header .blog-nome { font-size: 0.8rem; }
+  }
+
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: min(600px, 96vw);
+  }
+
+  button {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 7px;
+    font-size: clamp(0.78rem, 2.5vw, 0.95rem);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.2s;
+  }
+  button:active { transform: scale(0.96); }
+  button:disabled { opacity: 0.3; cursor: default; }
+
+  #btnBlocca { background: #d32f2f; color: #fff; flex: 1; min-width: 120px; }
+  #btnReset  { background: #2e7d52; color: #fff; flex: 1; min-width: 120px; }
+
+  .info-box {
+    margin-top: 10px;
+    width: min(600px, 96vw);
+    background: #fff;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: clamp(0.68rem, 2.2vw, 0.83rem);
+    line-height: 1.7;
+    color: #555;
+    border: 1px solid #ddd;
+  }
+</style>
+</head>
+<body>
+
+<!-- Logo + Blog name -->
+<div class="header">
+  <a href="https://matematichenonsinasce.com/" target="_blank" rel="noopener">
+    <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/6dd9418ea03c71e7feffa097f3242a843854b0f3/logo.png"
+         alt="Logo Matematiche non si nasce">
+    <span class="blog-nome">Matematiche non si nasce</span>
+  </a>
+</div>
+
+<h1>🔷 Costruisci la Figura</h1>
+<p class="subtitle">Sposta le linee e i vertici per costruire figure geometriche</p>
+
+<div class="canvas-outer">
+  <div class="canvas-wrap">
+    <canvas id="c"></canvas>
+  </div>
+</div>
+
+<div class="controls">
+  <button id="btnBlocca">🔒 BLOCCA</button>
+  <button id="btnReset">🔄 RICOMINCIA</button>
+</div>
+
+<div class="info-box" id="infoBox">
+  <strong>Come giocare:</strong><br>
+  • Trascina le <strong>linee orizzontali</strong> su/giù — la fascia gialla mostra lo spazio tra loro<br>
+  • Trascina i <strong>pallini blu</strong> ai vertici dei segmenti per inclinare i lati<br>
+  • Premi <strong>BLOCCA</strong> per colorare la figura di rosso (il giallo scompare)
+</div>
+
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+// Fixed logical resolution
+const W = 600, H = 400;
+canvas.width = W;
+canvas.height = H;
+
+let lineTop = 100, lineBot = 300;
+let seg = [
+  { tx: 150, bx: 150 },
+  { tx: 450, bx: 450 }
+];
+
+let locked = false;
+let filled = false;
+let drag = null;
+
+const btnBlocca = document.getElementById('btnBlocca');
+const btnReset  = document.getElementById('btnReset');
+const infoBox   = document.getElementById('infoBox');
+
+
+// ── Main draw ──
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  const tL = lineTop, bL = lineBot;
+
+  // Yellow band (only when not filled)
+  if (!filled) {
+    ctx.fillStyle = '#FFE500';
+    ctx.fillRect(0, tL, W, bL - tL);
+  }
+
+  // Filled quadrilateral
+  if (filled) {
+    ctx.beginPath();
+    ctx.moveTo(seg[0].tx, tL);
+    ctx.lineTo(seg[1].tx, tL);
+    ctx.lineTo(seg[1].bx, bL);
+    ctx.lineTo(seg[0].bx, bL);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(200, 30, 30, 0.85)';
+    ctx.fill();
+    ctx.strokeStyle = '#8b0000';
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([]);
+    ctx.stroke();
+  }
+
+  // Horizontal lines
+  ctx.strokeStyle = '#111';
+  ctx.lineWidth = 2.5;
+  ctx.setLineDash([]);
+
+  ctx.beginPath(); ctx.moveTo(0, tL); ctx.lineTo(W, tL); ctx.stroke();
+
+  ctx.beginPath(); ctx.moveTo(0, bL); ctx.lineTo(W, bL); ctx.stroke();
+
+  if (!locked) {
+    drawLineHandle(W / 2, tL);
+    drawLineHandle(W / 2, bL);
+  }
+
+  // Lateral segments
+  for (let i = 0; i < 2; i++) {
+    ctx.strokeStyle = '#111';
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(seg[i].tx, tL);
+    ctx.lineTo(seg[i].bx, bL);
+    ctx.stroke();
+    if (!locked) {
+      drawSegHandle(seg[i].tx, tL);
+      drawSegHandle(seg[i].bx, bL);
+    }
+  }
+}
+
+function drawLineHandle(x, y) {
+  ctx.beginPath();
+  ctx.arc(x, y, 11, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(140,100,0,0.13)';
+  ctx.fill();
+  ctx.strokeStyle = '#8a6500';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.fillStyle = '#6b4f00';
+  ctx.font = 'bold 13px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('↕', x, y);
+}
+
+function drawSegHandle(x, y) {
+  ctx.beginPath();
+  ctx.arc(x, y, 10, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(21,101,192,0.13)';
+  ctx.fill();
+  ctx.strokeStyle = '#1565c0';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.fillStyle = '#1565c0';
+  ctx.font = 'bold 12px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('↔', x, y);
+}
+
+// ── Input ──
+function toCanvas(clientX, clientY) {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: (clientX - rect.left) * (W / rect.width),
+    y: (clientY - rect.top)  * (H / rect.height)
+  };
+}
+
+function hitLine(cy, lineY) { return Math.abs(cy - lineY) < 20; }
+function hitPt(cx, cy, px, py) { return Math.hypot(cx - px, cy - py) < 18; }
+
+function startDrag(clientX, clientY) {
+  if (locked) return;
+  const { x, y } = toCanvas(clientX, clientY);
+  const tL = lineTop, bL = lineBot;
+
+  for (let i = 0; i < 2; i++) {
+    if (hitPt(x, y, seg[i].tx, tL)) { drag = { type: 'seg', i, h: 't', sx: x, ox: seg[i].tx }; return; }
+    if (hitPt(x, y, seg[i].bx, bL)) { drag = { type: 'seg', i, h: 'b', sx: x, ox: seg[i].bx }; return; }
+  }
+  if (hitLine(y, tL)) { drag = { type: 'lt', sy: y, oy: lineTop }; return; }
+  if (hitLine(y, bL)) { drag = { type: 'lb', sy: y, oy: lineBot }; return; }
+}
+
+function moveDrag(clientX, clientY) {
+  if (!drag) return;
+  const { x, y } = toCanvas(clientX, clientY);
+  const MIN = 40;
+
+  if (drag.type === 'lt') {
+    lineTop = Math.max(30, Math.min(lineBot - MIN, drag.oy + (y - drag.sy)));
+  } else if (drag.type === 'lb') {
+    lineBot = Math.min(H - 30, Math.max(lineTop + MIN, drag.oy + (y - drag.sy)));
+  } else if (drag.type === 'seg') {
+    const nx = Math.max(6, Math.min(W - 6, drag.ox + (x - drag.sx)));
+    if (drag.h === 't') seg[drag.i].tx = nx;
+    else seg[drag.i].bx = nx;
+  }
+  draw();
+}
+
+function endDrag() { drag = null; }
+
+canvas.addEventListener('mousedown', e => startDrag(e.clientX, e.clientY));
+window.addEventListener('mousemove', e => { if (drag) { e.preventDefault(); moveDrag(e.clientX, e.clientY); } });
+window.addEventListener('mouseup', endDrag);
+
+canvas.addEventListener('touchstart', e => { e.preventDefault(); startDrag(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
+window.addEventListener('touchmove', e => { if (drag) { e.preventDefault(); moveDrag(e.touches[0].clientX, e.touches[0].clientY); } }, { passive: false });
+window.addEventListener('touchend', endDrag);
+
+btnBlocca.addEventListener('click', () => {
+  if (locked) return;
+  locked = true;
+  filled = true;
+  btnBlocca.disabled = true;
+  draw();
+  infoBox.innerHTML = '<strong>Figura bloccata!</strong> Premi <strong>RICOMINCIA</strong> per costruire una nuova figura.';
+});
+
+btnReset.addEventListener('click', () => {
+  locked = false;
+  filled = false;
+  lineTop = 100; lineBot = 300;
+  seg = [ { tx: 150, bx: 150 }, { tx: 450, bx: 450 } ];
+  btnBlocca.disabled = false;
+  infoBox.innerHTML = '<strong>Come giocare:</strong><br>• Trascina le <strong>linee orizzontali</strong> su/giù — la fascia gialla mostra lo spazio tra loro<br>• Trascina i <strong>pallini blu</strong> ai vertici dei segmenti per inclinare i lati<br>• Premi <strong>BLOCCA</strong> per colorare la figura di rosso (il giallo scompare)';
+  draw();
+});
+
+draw();
+</script>
+</body>
+</html>
