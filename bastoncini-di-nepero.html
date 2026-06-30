@@ -19,23 +19,16 @@
   *{box-sizing:border-box;}
   html, body{
     margin:0;
-    overflow-x:hidden;
   }
   body{
     font-family:'Segoe UI', Verdana, Arial, sans-serif;
     background:#f4f1ea;
     color:#2e2c28;
-  }
-  #viewport{
-    width:100%;
-    overflow:hidden;
-    position:relative;
+    padding:24px 16px 60px;
   }
   .wrap{
-    width:1100px;
+    max-width:1100px;
     margin:0 auto;
-    padding:24px 16px 60px;
-    transform-origin:top center;
   }
 
   /* --- logo standard --- */
@@ -159,13 +152,22 @@
   }
 
   /* --- workspace --- */
+  .workspace-viewport{
+    width:100%;
+    overflow:hidden;
+    position:relative;
+  }
   .workspace-frame{
     background:var(--paper);
     border:2px dashed #d8d0bb;
     border-radius:14px;
     overflow:auto;
     height:560px;
-    position:relative;
+    width:900px;
+    position:absolute;
+    top:0;
+    left:0;
+    transform-origin:top left;
   }
   .workspace{
     position:relative;
@@ -226,9 +228,12 @@
   .stick-header.ref{
     background:linear-gradient(180deg,#e3ded0,var(--ref-bg));
     border-color:#cfc8b4;
-    font-size:0.75em;
-    color:#7a7156;
-    font-weight:700;
+  }
+  .stick-header.ref .ref-logo{
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    object-fit:contain;
   }
   .stick-row{
     position:relative;
@@ -279,8 +284,7 @@
 </style>
 </head>
 <body>
-<div id="viewport">
-<div class="wrap" id="stage">
+<div class="wrap">
 
   <a class="logo" href="https://matematichenonsinasce.com" target="_blank">
     <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Matematiche non si nasce">
@@ -305,22 +309,26 @@
   <div class="toolbar">
     <button id="clear-row">Spegni evidenziazione</button>
     <button class="secondario" id="clear-all">Pulisci tutto</button>
+    <button id="download-pdf">Scarica PDF da stampare</button>
   </div>
 
-  <div class="workspace-frame">
-    <div class="workspace" id="workspace"></div>
+  <div class="workspace-viewport" id="workspaceViewport">
+    <div class="workspace-frame" id="workspaceFrame">
+      <div class="workspace" id="workspace"></div>
+    </div>
   </div>
 
   <footer>Strumento didattico ispirato ai bastoncini di Nepero &middot; matematichenonsinasce.com</footer>
 </div>
-</div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 (function(){
   const workspace = document.getElementById('workspace');
-  const frame = document.querySelector('.workspace-frame');
-  const viewport = document.getElementById('viewport');
-  const stage = document.getElementById('stage');
+  const workspaceViewport = document.getElementById('workspaceViewport');
+  const workspaceFrame = document.getElementById('workspaceFrame');
+
+  const LOGO_URL = 'https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png';
 
   const STICK_W = 66;
   const HEADER_H = 56;
@@ -355,7 +363,15 @@
 
     const header = document.createElement('div');
     header.className = 'stick-header' + (digit === 'ref' ? ' ref' : '');
-    header.textContent = digit === 'ref' ? 'rif.' : digit;
+    if(digit === 'ref'){
+      const logoImg = document.createElement('img');
+      logoImg.src = LOGO_URL;
+      logoImg.alt = 'Matematiche non si nasce';
+      logoImg.className = 'ref-logo';
+      header.appendChild(logoImg);
+    } else {
+      header.textContent = digit;
+    }
     stick.appendChild(header);
 
     for(let r=1; r<=9; r++){
@@ -499,21 +515,127 @@
     document.querySelectorAll('.stick-row').forEach(r=>r.classList.remove('row-highlight'));
   });
 
-  // --- adatta automaticamente il gioco a schermi di qualsiasi larghezza ---
-  function fitToScreen(){
-    const designWidth = 1100; // larghezza "naturale" del gioco (vedi .wrap)
-    const sidePadding = 12;
-    const available = window.innerWidth - sidePadding;
-    let scale = available / designWidth;
-    if(scale > 1) scale = 1;
-    stage.style.transform = 'scale(' + scale + ')';
-    const scaledHeight = stage.getBoundingClientRect().height;
-    viewport.style.height = scaledHeight + 'px';
+  // --- genera il PDF con tutti i bastoncini da ritagliare e plastificare ---
+  function loadImageAsDataURL(url){
+    return new Promise((resolve)=>{
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = ()=>{
+        try{
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          resolve(canvas.toDataURL('image/png'));
+        }catch(err){
+          resolve(null);
+        }
+      };
+      img.onerror = ()=> resolve(null);
+      img.src = url;
+    });
   }
 
-  window.addEventListener('resize', fitToScreen);
-  window.addEventListener('orientationchange', fitToScreen);
-  fitToScreen();
+  async function generaPdf(){
+    const btn = document.getElementById('download-pdf');
+    const testoOriginale = btn.textContent;
+    btn.textContent = 'Preparazione in corso...';
+    btn.disabled = true;
+
+    const logoDataUrl = await loadImageAsDataURL(LOGO_URL);
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit:'mm', format:'a4' });
+
+    const stickW = 17;
+    const headerH = 17;
+    const rowH = 16;
+    const startX = 12;
+    const startY = 28;
+    const digits = ['ref','0','1','2','3','4','5','6','7','8','9'];
+
+    doc.setFontSize(14);
+    doc.setTextColor(225,6,0);
+    doc.text('I bastoncini di Nepero', 105, 14, { align:'center' });
+    doc.setFontSize(9);
+    doc.setTextColor(95,94,90);
+    doc.text('matematichenonsinasce.com — ritaglia lungo i bordi e plastifica', 105, 20, { align:'center' });
+
+    digits.forEach((d, i)=>{
+      const x = startX + i*stickW;
+
+      // intestazione
+      doc.setDrawColor(150,180,200);
+      doc.setFillColor(d === 'ref' ? 241 : 207, d === 'ref' ? 239 : 230, d === 'ref' ? 233 : 242);
+      doc.rect(x, startY, stickW, headerH, 'FD');
+
+      if(d === 'ref' && logoDataUrl){
+        const logoSize = 11;
+        doc.addImage(logoDataUrl, 'PNG', x + (stickW-logoSize)/2, startY + (headerH-logoSize)/2, logoSize, logoSize);
+      } else if(d !== 'ref'){
+        doc.setFontSize(13);
+        doc.setTextColor(22,70,95);
+        doc.text(String(d), x + stickW/2, startY + headerH/2 + 2.5, { align:'center' });
+      }
+
+      // righe da 1 a 9
+      for(let r=1; r<=9; r++){
+        const y = startY + headerH + (r-1)*rowH;
+
+        if(d === 'ref'){
+          doc.setDrawColor(220,213,193);
+          doc.setFillColor(241,239,233);
+          doc.rect(x, y, stickW, rowH, 'FD');
+          doc.setFontSize(11);
+          doc.setTextColor(91,84,64);
+          doc.text(String(r), x + stickW/2, y + rowH/2 + 2, { align:'center' });
+        } else {
+          const product = Number(d) * r;
+          const tens = Math.floor(product/10);
+          const units = product % 10;
+
+          doc.setDrawColor(207,198,160);
+          // triangolo decine (giallo)
+          doc.setFillColor(251,226,122);
+          doc.triangle(x, y, x+stickW, y, x, y+rowH, 'F');
+          // triangolo unità (bianco)
+          doc.setFillColor(255,255,255);
+          doc.triangle(x+stickW, y, x+stickW, y+rowH, x, y+rowH, 'F');
+          // bordo cella (senza linea diagonale marcata)
+          doc.rect(x, y, stickW, rowH, 'D');
+
+          doc.setFontSize(9.5);
+          doc.setTextColor(58,47,18);
+          doc.text(String(tens), x + 3, y + 5);
+          doc.text(String(units), x + stickW - 3, y + rowH - 2.5, { align:'right' });
+        }
+      }
+    });
+
+    doc.save('bastoncini-di-nepero.pdf');
+    btn.textContent = testoOriginale;
+    btn.disabled = false;
+  }
+
+  document.getElementById('download-pdf').addEventListener('click', generaPdf);
+
+  // --- adatta automaticamente SOLO lo spazio di lavoro alla larghezza disponibile ---
+  function fitWorkspace(){
+    const designWidth = 900; // larghezza "naturale" dello spazio di lavoro
+    const containerWidth = workspaceViewport.clientWidth;
+    let scale = containerWidth / designWidth;
+    if(scale > 1) scale = 1;
+    const scaledWidth = designWidth * scale;
+    const leftOffset = (containerWidth - scaledWidth) / 2;
+    workspaceFrame.style.transform = 'scale(' + scale + ')';
+    workspaceFrame.style.left = leftOffset + 'px';
+    const scaledHeight = workspaceFrame.getBoundingClientRect().height;
+    workspaceViewport.style.height = scaledHeight + 'px';
+  }
+
+  window.addEventListener('resize', fitWorkspace);
+  window.addEventListener('orientationchange', fitWorkspace);
+  fitWorkspace();
 
 })();
 </script>
