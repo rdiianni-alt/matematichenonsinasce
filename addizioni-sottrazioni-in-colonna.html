@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Addizioni e Sottrazioni in Colonna</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f5f4ef;
+    margin: 0;
+    padding: clamp(10px, 3vw, 24px);
+    color: #333;
+  }
+  .container { max-width: 880px; margin: 0 auto; }
+
+  .brand { display: flex; justify-content: center; margin-bottom: 6px; }
+  .brand a {
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .logo { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; }
+  .brandname { color: #3a6ea5; font-size: 14px; margin-top: 4px; text-align: center; }
+
+  h1 {
+    text-align: center;
+    color: #b5567f;
+    font-size: clamp(20px, 5vw, 30px);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 6px 0 18px;
+  }
+
+  .card {
+    background: #ffffff;
+    border: 2px solid #ddd8cc;
+    padding: clamp(14px, 3vw, 24px);
+    margin-bottom: 16px;
+  }
+
+  .nascosto { display: none !important; }
+
+  .sezione-titolo {
+    text-transform: uppercase;
+    font-weight: bold;
+    color: #555;
+    font-size: clamp(13px, 3vw, 15px);
+    margin: 4px 0 10px;
+    text-align: center;
+  }
+  .riga-bottoni { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+
+  .btn {
+    font-family: Arial, Helvetica, sans-serif;
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: 12px 18px;
+    border: 2px solid #c9a86a;
+    background: #ead9b8;
+    color: #5a4a2a;
+    cursor: pointer;
+    border-radius: 0;
+    font-size: clamp(13px, 2.6vw, 15px);
+    letter-spacing: 0.3px;
+  }
+  .btn:hover { background: #e0c890; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn.selezionato { background: #c9a86a; color: #fff; }
+
+  .btn-reset { background: #ddc4c0; border-color: #b58f87; color: #5a3a34; }
+  .btn-reset:hover { background: #d2b3ad; }
+
+  .btn-op { padding: 14px 22px; font-size: clamp(14px, 3vw, 16px); min-width: 150px; }
+  .btn-crea { display: block; margin: 16px auto 0; padding: 14px 30px; font-size: clamp(15px, 3vw, 17px);
+    background: #9bbf8f; border-color: #6f9c63; color: #25431f; }
+  .btn-crea:hover { background: #89b27d; }
+
+  .riga-numeri {
+    display: flex;
+    justify-content: center;
+    gap: clamp(10px, 4vw, 22px);
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 16px 0 4px;
+  }
+  .input-blocco-numero { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .input-blocco-numero label { font-size: clamp(11px, 2.4vw, 13px); text-transform: uppercase; color: #666; font-weight: bold; }
+  .input-numero {
+    width: clamp(80px, 22vw, 110px);
+    height: clamp(44px, 11vw, 54px);
+    text-align: center;
+    font-size: clamp(18px, 4vw, 22px);
+    border: 2px solid #999;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  .simbolo-op { font-size: clamp(22px, 5vw, 30px); font-weight: bold; color: #888; margin-top: 18px; }
+
+  .errore-input {
+    text-align: center;
+    color: #a33b3b;
+    font-weight: bold;
+    font-size: clamp(12px, 2.6vw, 14px);
+    margin-top: 12px;
+    min-height: 18px;
+  }
+
+  /* GIOCO */
+  .riga-top-gioco { display: flex; justify-content: flex-end; margin-bottom: 4px; }
+  .problema {
+    text-align: center;
+    font-size: clamp(22px, 6vw, 34px);
+    font-weight: bold;
+    color: #444;
+  }
+  .istruzioni {
+    background: #f0ece0;
+    border: 2px solid #ddd8cc;
+    padding: 10px 14px;
+    font-size: clamp(12px, 2.6vw, 14px);
+    margin: 10px 0;
+    color: #4a4a4a;
+  }
+
+  .controlli-sub {
+    display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center;
+    margin: 10px 0;
+  }
+
+  .colonne {
+    display: flex;
+    flex-direction: row;
+    gap: clamp(4px, 1.5vw, 10px);
+    justify-content: center;
+    margin: 18px 0 10px;
+  }
+  .colonna {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 4px 12px;
+    min-height: 200px;
+  }
+  .colonna-h { background: #8fbf86; }
+  .colonna-d { background: #b3d6a8; }
+  .colonna-u { background: #d9ecd2; }
+
+  .colonna-titolo {
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #2f4a2a;
+    font-size: clamp(11px, 2.4vw, 14px);
+    text-align: center;
+    line-height: 1.3;
+  }
+  .colonna-abbr { font-size: clamp(10px, 2vw, 12px); opacity: 0.8; }
+
+  .gettoni {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: center;
+    align-content: flex-start;
+    min-height: 130px;
+    width: 100%;
+    padding: 6px 2px;
+  }
+  .gettone {
+    width: clamp(24px, 7vw, 36px);
+    height: clamp(24px, 7vw, 36px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(8px, 2.2vw, 11px);
+    font-weight: bold;
+    color: #fff;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: opacity 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .gettone-a1, .gettone-minuendo { background: #d9b23c; }
+  .gettone-a2 { background: #5f8fb4; }
+  .gettone-riporto { background: #c9824a; }
+
+  .gettone.selezionato {
+    outline: 3px solid #ffffff;
+    outline-offset: -5px;
+    filter: brightness(1.2);
+  }
+
+  .colonna-info {
+    font-size: clamp(10px, 2.2vw, 12px);
+    color: #2f4a2a;
+    text-align: center;
+    margin-top: 6px;
+    font-weight: bold;
+    min-height: 16px;
+  }
+
+  .legenda { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin: 8px 0 4px; font-size: clamp(11px, 2.4vw, 13px); }
+  .legenda span { display: inline-flex; align-items: center; gap: 6px; }
+  .pallino { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+
+  .hint {
+    text-align: center;
+    color: #a35b2c;
+    font-size: clamp(11px, 2.4vw, 13px);
+    min-height: 18px;
+    margin: 4px 0;
+  }
+
+  .input-riga {
+    display: flex;
+    justify-content: center;
+    gap: clamp(6px, 3vw, 14px);
+    margin: 16px 0 8px;
+    flex-wrap: wrap;
+  }
+  .input-blocco { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .input-blocco label { font-size: clamp(10px, 2.2vw, 12px); text-transform: uppercase; color: #666; font-weight: bold; }
+  .input-cifra {
+    width: clamp(40px, 12vw, 54px);
+    height: clamp(40px, 12vw, 54px);
+    text-align: center;
+    font-size: clamp(18px, 4vw, 22px);
+    border: 2px solid #999;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  .azioni-finali { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+
+  .feedback {
+    text-align: center;
+    font-weight: bold;
+    padding: 10px;
+    margin: 10px 0;
+    font-size: clamp(14px, 3vw, 17px);
+    min-height: 20px;
+  }
+  .feedback.corretto { color: #2e7d32; }
+  .feedback.errato { color: #a33b3b; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="brand">
+    <a href="https://matematichenonsinasce.com" target="_self">
+      <img class="logo" src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png"
+           onerror="this.onerror=null; this.src='https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png';">
+      <div class="brandname">Matematiche non si nasce</div>
+    </a>
+  </div>
+
+  <h1>Addizioni e Sottrazioni in Colonna</h1>
+
+  <!-- IMPOSTAZIONE ESERCIZIO -->
+  <div class="card" id="schermo-impostazione">
+    <div class="sezione-titolo">Scegli l'operazione</div>
+    <div class="riga-bottoni">
+      <button class="btn btn-op selezionato" id="btnOpAdd" onclick="selezionaOperazione('add')">Addizione</button>
+      <button class="btn btn-op" id="btnOpSub" onclick="selezionaOperazione('sub')">Sottrazione</button>
+    </div>
+
+    <div class="riga-numeri">
+      <div class="input-blocco-numero">
+        <label>Primo numero</label>
+        <input type="text" inputmode="numeric" maxlength="3" class="input-numero" id="inputNum1">
+      </div>
+      <div class="simbolo-op" id="simboloOp">+</div>
+      <div class="input-blocco-numero">
+        <label>Secondo numero</label>
+        <input type="text" inputmode="numeric" maxlength="3" class="input-numero" id="inputNum2">
+      </div>
+    </div>
+
+    <button class="btn btn-crea" onclick="creaEsercizio()">Crea esercizio</button>
+    <div class="errore-input" id="erroreInput"></div>
+  </div>
+
+  <!-- SCHERMATA GIOCO -->
+  <div id="schermo-gioco" class="card nascosto">
+
+    <div class="riga-top-gioco">
+      <button class="btn btn-reset" onclick="ricominciaDaCapo()">Ricomincia da capo</button>
+    </div>
+
+    <div class="problema" id="problemaTesto"></div>
+
+    <div class="legenda" id="legenda"></div>
+
+    <div class="istruzioni" id="istruzioni"></div>
+
+    <div class="controlli-sub" id="controlliAzione">
+      <button class="btn" id="btnModoScomponi" onclick="impostaModalitaAzione('scomponi')">Scomponi</button>
+      <button class="btn" id="btnModoComponi" onclick="impostaModalitaAzione('componi')">Componi</button>
+      <button class="btn" id="btnModoTogli" onclick="impostaModalitaAzione('togli')">Togli</button>
+    </div>
+
+    <div class="colonne">
+      <div class="colonna colonna-h" id="colonna-h">
+        <div class="colonna-titolo">CENTINAIA<br><span class="colonna-abbr">h</span></div>
+        <div class="gettoni" id="gettoni-h"></div>
+        <div class="colonna-info" id="info-h"></div>
+      </div>
+      <div class="colonna colonna-d" id="colonna-d">
+        <div class="colonna-titolo">DECINE<br><span class="colonna-abbr">da</span></div>
+        <div class="gettoni" id="gettoni-d"></div>
+        <div class="colonna-info" id="info-d"></div>
+      </div>
+      <div class="colonna colonna-u" id="colonna-u">
+        <div class="colonna-titolo">UNITÀ<br><span class="colonna-abbr">u</span></div>
+        <div class="gettoni" id="gettoni-u"></div>
+        <div class="colonna-info" id="info-u"></div>
+      </div>
+    </div>
+
+    <div class="hint" id="hintTesto"></div>
+
+    <div class="input-riga">
+      <div class="input-blocco">
+        <label>h</label>
+        <input type="text" inputmode="numeric" maxlength="1" class="input-cifra" id="inputH">
+      </div>
+      <div class="input-blocco">
+        <label>da</label>
+        <input type="text" inputmode="numeric" maxlength="1" class="input-cifra" id="inputD">
+      </div>
+      <div class="input-blocco">
+        <label>u</label>
+        <input type="text" inputmode="numeric" maxlength="1" class="input-cifra" id="inputU">
+      </div>
+    </div>
+
+    <div class="azioni-finali">
+      <button class="btn" id="btnControlla" onclick="controlla()">Controlla</button>
+      <button class="btn" onclick="ricominciaEsercizio()">Ricomincia esercizio</button>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+</div>
+
+<script>
+var nextTokenId = 1;
+
+var state = {
+  operazione: 'add',
+  num1: 0,
+  num2: 0,
+  colonne: { h: [], d: [], u: [] },
+  modalitaAzione: null,
+  targetSottrazione: { h: 0, d: 0, u: 0 },
+  tolti: { h: 0, d: 0, u: 0 }
+};
+
+/* ---------- SCELTA OPERAZIONE ---------- */
+
+function selezionaOperazione(op) {
+  state.operazione = op;
+  document.getElementById('btnOpAdd').classList.toggle('selezionato', op === 'add');
+  document.getElementById('btnOpSub').classList.toggle('selezionato', op === 'sub');
+  document.getElementById('simboloOp').textContent = (op === 'add') ? '+' : '−';
+  document.getElementById('erroreInput').textContent = '';
+}
+
+/* ---------- CREAZIONE ESERCIZIO CON NUMERI INSERITI ---------- */
+
+function ottieniCifre(n) {
+  var s = String(n);
+  while (s.length < 3) { s = '0' + s; }
+  return { h: parseInt(s.charAt(0), 10), d: parseInt(s.charAt(1), 10), u: parseInt(s.charAt(2), 10) };
+}
+
+function creaEsercizio() {
+  var erroreEl = document.getElementById('erroreInput');
+  erroreEl.textContent = '';
+
+  var v1 = document.getElementById('inputNum1').value.trim();
+  var v2 = document.getElementById('inputNum2').value.trim();
+
+  if (v1 === '' || v2 === '') {
+    erroreEl.textContent = 'Attenzione: inserisci entrambi i numeri.';
+    return;
+  }
+
+  var n1 = parseInt(v1, 10);
+  var n2 = parseInt(v2, 10);
+
+  if (isNaN(n1) || isNaN(n2) || n1 < 0 || n2 < 0) {
+    erroreEl.textContent = 'Attenzione: inserisci solo numeri positivi.';
+    return;
+  }
+  if (n1 > 999 || n2 > 999) {
+    erroreEl.textContent = 'Attenzione: ogni numero deve avere al massimo 3 cifre (non superare 999).';
+    return;
+  }
+
+  if (state.operazione === 'add') {
+    if (n1 + n2 > 999) {
+      erroreEl.textContent = 'Attenzione: la somma supera 999, è troppo grande per le tre colonne a disposizione.';
+      return;
+    }
+  } else {
+    if (n2 > n1) {
+      erroreEl.textContent = 'Attenzione: il secondo numero è più grande del primo, il risultato sarebbe negativo.';
+      return;
+    }
+  }
+
+  state.num1 = n1;
+  state.num2 = n2;
+  document.getElementById('schermo-gioco').classList.remove('nascosto');
+
+  var legenda = document.getElementById('legenda');
+  var btnTogli = document.getElementById('btnModoTogli');
+  state.modalitaAzione = null;
+  if (state.operazione === 'add') {
+    legenda.innerHTML =
+      '<span><span class="pallino" style="background:#d9b23c;"></span>Primo numero</span>' +
+      '<span><span class="pallino" style="background:#5f8fb4;"></span>Secondo numero</span>' +
+      '<span><span class="pallino" style="background:#c9824a;"></span>Gruppo nuovo</span>';
+    btnTogli.classList.add('nascosto');
+    document.getElementById('problemaTesto').textContent = state.num1 + ' + ' + state.num2;
+    impostaAddizione();
+  } else {
+    legenda.innerHTML = '<span><span class="pallino" style="background:#d9b23c;"></span>Gettoni del numero di partenza</span>';
+    btnTogli.classList.remove('nascosto');
+    document.getElementById('problemaTesto').textContent = state.num1 + ' − ' + state.num2;
+    impostaSottrazione();
+  }
+
+  impostaModalitaAzione(null);
+  aggiornaIstruzioni();
+
+  document.getElementById('inputH').value = '';
+  document.getElementById('inputD').value = '';
+  document.getElementById('inputU').value = '';
+  document.getElementById('feedback').innerHTML = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('hintTesto').innerHTML = '';
+
+  renderColonne();
+  aggiornaStato();
+
+  document.getElementById('schermo-gioco').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function creaGettone(colore, valore) {
+  return { id: nextTokenId++, colore: colore, valore: valore, selezionato: false };
+}
+
+function pushGettoni(col, conta, colore, valore) {
+  var i;
+  for (i = 0; i < conta; i++) {
+    state.colonne[col].push(creaGettone(colore, valore));
+  }
+}
+
+function impostaAddizione() {
+  var d1 = ottieniCifre(state.num1);
+  var d2 = ottieniCifre(state.num2);
+  state.colonne = { h: [], d: [], u: [] };
+  pushGettoni('h', d1.h, 'a1', 100);
+  pushGettoni('d', d1.d, 'a1', 10);
+  pushGettoni('u', d1.u, 'a1', 1);
+  pushGettoni('h', d2.h, 'a2', 100);
+  pushGettoni('d', d2.d, 'a2', 10);
+  pushGettoni('u', d2.u, 'a2', 1);
+}
+
+function impostaSottrazione() {
+  var d1 = ottieniCifre(state.num1);
+  var d2 = ottieniCifre(state.num2);
+  state.colonne = { h: [], d: [], u: [] };
+  pushGettoni('h', d1.h, 'minuendo', 100);
+  pushGettoni('d', d1.d, 'minuendo', 10);
+  pushGettoni('u', d1.u, 'minuendo', 1);
+  state.targetSottrazione = { h: d2.h, d: d2.d, u: d2.u };
+  state.tolti = { h: 0, d: 0, u: 0 };
+}
+
+function ricominciaEsercizio() {
+  state.modalitaAzione = null;
+  if (state.operazione === 'add') {
+    impostaAddizione();
+  } else {
+    impostaSottrazione();
+  }
+  impostaModalitaAzione(null);
+  document.getElementById('inputH').value = '';
+  document.getElementById('inputD').value = '';
+  document.getElementById('inputU').value = '';
+  document.getElementById('feedback').innerHTML = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('hintTesto').innerHTML = '';
+  aggiornaIstruzioni();
+  renderColonne();
+  aggiornaStato();
+}
+
+function ricominciaDaCapo() {
+  document.getElementById('schermo-gioco').classList.add('nascosto');
+  document.getElementById('inputNum1').value = '';
+  document.getElementById('inputNum2').value = '';
+  document.getElementById('erroreInput').textContent = '';
+  state = {
+    operazione: 'add',
+    num1: 0,
+    num2: 0,
+    colonne: { h: [], d: [], u: [] },
+    modalitaAzione: null,
+    targetSottrazione: { h: 0, d: 0, u: 0 },
+    tolti: { h: 0, d: 0, u: 0 }
+  };
+  selezionaOperazione('add');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ---------- ISTRUZIONI DINAMICHE ---------- */
+
+function aggiornaIstruzioni() {
+  var testo;
+  if (state.operazione === 'add') {
+    if (!state.modalitaAzione) {
+      testo = 'Scegli una modalità: Componi (per riunire dieci gettoni in uno della colonna a sinistra) oppure Scomponi (per trasformare un gettone in dieci gettoni della colonna a destra).';
+    } else if (state.modalitaAzione === 'componi') {
+      testo = 'Modalità Componi: clicca, uno alla volta, su dieci gettoni della stessa colonna: si accenderanno e poi si trasformeranno in un gettone nuovo nella colonna a sinistra. Se accendi un gettone per sbaglio, cliccalo di nuovo per spegnerlo.';
+    } else {
+      testo = 'Modalità Scomponi: clicca su UN gettone delle decine o delle centinaia. Si trasformerà in dieci gettoni della colonna a destra.';
+    }
+  } else {
+    if (!state.modalitaAzione) {
+      testo = 'Scegli una modalità: Scomponi (per trasformare un gettone in dieci), Componi (per riunire dieci gettoni in uno, anche per correggere una scomposizione sbagliata) oppure Togli (per eliminare i gettoni).';
+    } else if (state.modalitaAzione === 'scomponi') {
+      testo = 'Modalità Scomponi: clicca su UN gettone delle decine o delle centinaia. Si trasformerà in dieci gettoni della colonna a destra.';
+    } else if (state.modalitaAzione === 'componi') {
+      testo = 'Modalità Componi: clicca, uno alla volta, su dieci gettoni della stessa colonna: si accenderanno e poi si trasformeranno in un gettone della colonna a sinistra. Usa questa modalità se hai scomposto per sbaglio e vuoi tornare indietro.';
+    } else {
+      testo = 'Modalità Togli: clicca sui gettoni per eliminarli, seguendo il secondo numero scritto in alto. Se in una colonna non ci sono abbastanza gettoni, passa prima a Scomponi.';
+    }
+  }
+  document.getElementById('istruzioni').innerHTML = testo;
+}
+
+/* ---------- RENDER ---------- */
+
+function renderColonne() {
+  var colonneKeys = ['h', 'd', 'u'];
+  var i, j, col, html, gettone, classe;
+  for (i = 0; i < colonneKeys.length; i++) {
+    col = colonneKeys[i];
+    html = '';
+    for (j = 0; j < state.colonne[col].length; j++) {
+      gettone = state.colonne[col][j];
+      classe = 'gettone gettone-' + gettone.colore + (gettone.selezionato ? ' selezionato' : '');
+      html += '<div class="' + classe + '" onclick="gestisciClickGettone(\'' + col + '\', ' + gettone.id + ')">' + gettone.valore + '</div>';
+    }
+    document.getElementById('gettoni-' + col).innerHTML = html;
+  }
+
+  aggiornaInfoColonne();
+}
+
+function aggiornaInfoColonne() {
+  var colonneKeys = ['h', 'd', 'u'];
+  var i, col, testo, selezionati;
+  for (i = 0; i < colonneKeys.length; i++) {
+    col = colonneKeys[i];
+    if (state.modalitaAzione === 'componi') {
+      selezionati = contaSelezionati(col);
+      testo = 'accesi: ' + selezionati + '/10';
+    } else {
+      testo = '';
+    }
+    document.getElementById('info-' + col).textContent = testo;
+  }
+}
+
+function contaSelezionati(col) {
+  var arr = state.colonne[col];
+  var n = 0, i;
+  for (i = 0; i < arr.length; i++) { if (arr[i].selezionato) { n++; } }
+  return n;
+}
+
+/* ---------- INTERAZIONE GETTONI ---------- */
+
+function mostraSuggerimento(testo) {
+  document.getElementById('hintTesto').textContent = testo;
+  setTimeout(function () {
+    document.getElementById('hintTesto').textContent = '';
+  }, 2200);
+}
+
+function trovaGettone(col, id) {
+  var arr = state.colonne[col];
+  var i;
+  for (i = 0; i < arr.length; i++) {
+    if (arr[i].id === id) { return arr[i]; }
+  }
+  return null;
+}
+
+function gestisciClickGettone(col, id) {
+  if (!state.modalitaAzione) {
+    mostraSuggerimento('Scegli prima una modalità: Componi o Scomponi.');
+    return;
+  }
+  if (state.modalitaAzione === 'componi') {
+    gestisciClickComponi(col, id);
+  } else if (state.modalitaAzione === 'scomponi') {
+    gestisciClickScomponi(col, id);
+  } else {
+    gestisciClickTogli(col, id);
+  }
+}
+
+function gestisciClickComponi(col, id) {
+  if (col === 'h') {
+    mostraSuggerimento('Le centinaia non si possono raggruppare oltre.');
+    return;
+  }
+  var token = trovaGettone(col, id);
+  if (!token) { return; }
+  token.selezionato = !token.selezionato;
+
+  var arr = state.colonne[col];
+  var selezionati = [];
+  var i;
+  for (i = 0; i < arr.length; i++) {
+    if (arr[i].selezionato) { selezionati.push(arr[i]); }
+  }
+
+  if (selezionati.length >= 10) {
+    var daRimuovere = selezionati.slice(0, 10);
+    var idsDaRimuovere = [];
+    for (i = 0; i < daRimuovere.length; i++) { idsDaRimuovere.push(daRimuovere[i].id); }
+
+    var nuovoArr = [];
+    for (i = 0; i < arr.length; i++) {
+      if (idsDaRimuovere.indexOf(arr[i].id) === -1) { nuovoArr.push(arr[i]); }
+    }
+    state.colonne[col] = nuovoArr;
+
+    var colSuperiore = (col === 'u') ? 'd' : 'h';
+    var valoreSuperiore = (col === 'u') ? 10 : 100;
+    state.colonne[colSuperiore].push(creaGettone('riporto', valoreSuperiore));
+  }
+
+  renderColonne();
+  aggiornaStato();
+}
+
+function gestisciClickScomponi(col, id) {
+  if (col === 'u') {
+    mostraSuggerimento('Le unità non si possono scomporre ulteriormente.');
+    return;
+  }
+  var arr = state.colonne[col];
+  var index = -1, i, coloreOrigine = 'minuendo';
+  for (i = 0; i < arr.length; i++) {
+    if (arr[i].id === id) { index = i; coloreOrigine = arr[i].colore; break; }
+  }
+  if (index === -1) { return; }
+  arr.splice(index, 1);
+
+  var colInferiore = (col === 'h') ? 'd' : 'u';
+  var valoreInferiore = (col === 'h') ? 10 : 1;
+  var k;
+  for (k = 0; k < 10; k++) {
+    state.colonne[colInferiore].push(creaGettone(coloreOrigine, valoreInferiore));
+  }
+
+  renderColonne();
+  aggiornaStato();
+}
+
+function gestisciClickTogli(col, id) {
+  if (state.tolti[col] >= state.targetSottrazione[col]) {
+    mostraSuggerimento('In questa colonna hai già tolto il numero giusto di gettoni.');
+    return;
+  }
+  var arr = state.colonne[col];
+  var index = -1, i;
+  for (i = 0; i < arr.length; i++) {
+    if (arr[i].id === id) { index = i; break; }
+  }
+  if (index === -1) { return; }
+  arr.splice(index, 1);
+  state.tolti[col]++;
+
+  renderColonne();
+  aggiornaStato();
+}
+
+function impostaModalitaAzione(modo) {
+  state.modalitaAzione = modo;
+  document.getElementById('btnModoScomponi').classList.toggle('selezionato', modo === 'scomponi');
+  document.getElementById('btnModoComponi').classList.toggle('selezionato', modo === 'componi');
+  document.getElementById('btnModoTogli').classList.toggle('selezionato', modo === 'togli');
+  aggiornaIstruzioni();
+  renderColonne();
+}
+
+/* ---------- STATO / ABILITAZIONE CONTROLLO ---------- */
+
+function aggiornaStato() {
+  var pronto = true;
+
+  if (state.colonne.h.length >= 10 || state.colonne.d.length >= 10 || state.colonne.u.length >= 10) {
+    pronto = false;
+  }
+
+  if (state.operazione === 'sub') {
+    if (state.tolti.h !== state.targetSottrazione.h || state.tolti.d !== state.targetSottrazione.d || state.tolti.u !== state.targetSottrazione.u) {
+      pronto = false;
+    }
+  }
+
+  document.getElementById('btnControlla').disabled = !pronto;
+}
+
+/* ---------- CONTROLLO RISULTATO ---------- */
+
+function controlla() {
+  var risultatoCorretto;
+  if (state.operazione === 'add') {
+    risultatoCorretto = state.num1 + state.num2;
+  } else {
+    risultatoCorretto = state.num1 - state.num2;
+  }
+  var cifreCorrette = ottieniCifre(risultatoCorretto);
+
+  var inH = parseInt(document.getElementById('inputH').value, 10);
+  var inD = parseInt(document.getElementById('inputD').value, 10);
+  var inU = parseInt(document.getElementById('inputU').value, 10);
+  if (isNaN(inH)) inH = 0;
+  if (isNaN(inD)) inD = 0;
+  if (isNaN(inU)) inU = 0;
+
+  var corretto = (inH === cifreCorrette.h && inD === cifreCorrette.d && inU === cifreCorrette.u &&
+    state.colonne.h.length === cifreCorrette.h && state.colonne.d.length === cifreCorrette.d && state.colonne.u.length === cifreCorrette.u);
+
+  var feedbackEl = document.getElementById('feedback');
+  if (corretto) {
+    feedbackEl.className = 'feedback corretto';
+    feedbackEl.textContent = 'Esatto! Il risultato è ' + risultatoCorretto + '.';
+  } else {
+    feedbackEl.className = 'feedback errato';
+    feedbackEl.textContent = 'Non è corretto. Il risultato esatto è ' + risultatoCorretto + ' (h ' + cifreCorrette.h + ', da ' + cifreCorrette.d + ', u ' + cifreCorrette.u + '). Osserva i gettoni rimasti in ogni colonna.';
+  }
+}
+</script>
+</body>
+</html>
