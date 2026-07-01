@@ -15,25 +15,6 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #dff0fb; f
 #logo-wrap img { width: 5vmin; height: 5vmin; min-width: 28px; min-height: 28px; max-width: 44px; max-height: 44px; object-fit: contain; border-radius: 50%; }
 #logo-wrap span { font-size: clamp(0.5rem, 1.2vmin, 0.7rem); font-weight: 600; color: #1a5276; text-align: center; white-space: nowrap; }
 
-#lavagnetta {
-  position: fixed; top: 1vh; left: 1vw;
-  z-index: 3000; background: rgba(255,255,255,0.55); border-radius: 10px;
-  border: 2px solid rgba(52,152,219,0.25);
-  padding: clamp(4px,1vmin,8px) clamp(6px,1.5vmin,12px);
-  max-width: min(340px, 28vw); min-width: 120px;
-  font-family: 'Courier New', monospace; font-size: clamp(0.65rem, 1.5vmin, 0.85rem);
-  color: #1a5276; line-height: 1.7;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  display: none;
-  max-height: 60vh; overflow-y: auto;
-  pointer-events: none;
-  backdrop-filter: blur(2px);
-}
-#lavagnetta .riga { display: block; }
-#lavagnetta .riga.corrente { color: #1a5276; font-weight: 600; }
-#lavagnetta .riga.storico { color: #aaa; }
-#lavagnetta .riga.sottrazione { color: #c0392b; font-weight: 600; }
-
 #schermata {
   position: fixed; inset: 0; z-index: 2000;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2vh;
@@ -95,7 +76,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #dff0fb; f
 
 #barra {
   position: fixed; bottom: 1.5vh; left: 50%; transform: translateX(-50%);
-  z-index: 1000; display: none; gap: clamp(4px, 1vw, 10px); align-items: center; flex-wrap: wrap; justify-content: center;
+  z-index: 1000; display: none; gap: clamp(4px,1vw,10px); align-items: center; flex-wrap: wrap; justify-content: center;
   width: 90vw;
 }
 .btn-ui {
@@ -119,8 +100,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #dff0fb; f
   font-weight: 700; color: #1a5276; user-select: none; cursor: pointer;
   border: 3px solid rgba(100,180,255,0.7);
   background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.75), rgba(135,206,250,0.45));
-  transition: box-shadow 0.15s;
-  z-index: 100;
+  transition: box-shadow 0.15s; z-index: 100;
 }
 .bolla.over { box-shadow: 0 0 24px 8px rgba(52,219,100,0.75); border-color: rgba(52,219,100,0.9); }
 .bolla.in-tubo-preview { box-shadow: 0 0 20px 6px rgba(231,76,60,0.6); border-color: rgba(231,76,60,0.8); }
@@ -137,17 +117,16 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #dff0fb; f
 
 #info-overlay {
   display: none; position: fixed; inset: 0; z-index: 5000;
-  background: rgba(26,82,118,0.35);
-  align-items: center; justify-content: center;
+  background: rgba(26,82,118,0.35); align-items: center; justify-content: center;
 }
 #info-box {
-  background: white; border-radius: 16px; max-width: min(480px, 90vw); width: 90%;
-  max-height: 80vh; overflow-y: auto; padding: clamp(16px,3vmin,24px) clamp(16px,3vmin,28px); position: relative;
-  color: #1a5276; line-height: 1.55;
+  background: white; border-radius: 16px; max-width: min(480px,90vw); width: 90%;
+  max-height: 80vh; overflow-y: auto; padding: clamp(16px,3vmin,24px) clamp(16px,3vmin,28px);
+  position: relative; color: #1a5276; line-height: 1.55;
 }
-#info-box h2 { font-size: clamp(1rem, 3vmin, 1.3rem); margin-bottom: 10px; }
-#info-box h3 { font-size: clamp(0.85rem, 2vmin, 1rem); margin: 14px 0 4px; color: #2980b9; }
-#info-box p { font-size: clamp(0.75rem, 1.8vmin, 0.9rem); margin-bottom: 4px; }
+#info-box h2 { font-size: clamp(1rem,3vmin,1.3rem); margin-bottom: 10px; }
+#info-box h3 { font-size: clamp(0.85rem,2vmin,1rem); margin: 14px 0 4px; color: #2980b9; }
+#info-box p { font-size: clamp(0.75rem,1.8vmin,0.9rem); margin-bottom: 4px; }
 #info-chiudi {
   position: absolute; top: 10px; right: 10px; width: 28px; height: 28px;
   border-radius: 50%; border: 2px solid #3498db; background: white; color: #1a5276;
@@ -163,8 +142,6 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #dff0fb; f
   <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="Logo" />
   <span>Matematiche non si nasce</span>
 </a>
-
-<div id="lavagnetta"></div>
 
 <div id="schermata">
   <h1>🫧 Gioco delle Bolle</h1>
@@ -189,10 +166,10 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #dff0fb; f
 <div id="barra">
   <button class="btn-modo attivo" id="modo-scomponi">✂️ Scomponi</button>
   <button class="btn-modo" id="modo-unisci">🔗 Unisci</button>
+  <button class="btn-modo" id="modo-sposta">✋ Sposta</button>
   <button class="btn-modo" id="modo-tubo">🧪 Tubo</button>
   <button class="btn-ui" id="btn-ricomincia">↺</button>
   <button class="btn-ui" id="btn-menu">☰</button>
-  <button class="btn-ui" id="btn-home">🏠</button>
   <button class="btn-ui" id="btn-info">ℹ️</button>
 </div>
 
@@ -205,12 +182,12 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #dff0fb; f
     <p>Tocca una bolla: se il numero ha unità (es. 72), si divide in decine e unità (70+2). Se è una decina tonda (es. 70), si stacca una decina (10+60). Se è ≤10, si stacca un'unità (1+resto).</p>
     <h3>Unisci 🔗</h3>
     <p>Tocca una bolla per selezionarla (pulsa), poi toccane un'altra: si fondono nella loro somma. Puoi anche trascinarle una sull'altra.</p>
+    <h3>Sposta ✋</h3>
+    <p>Trascina le bolle liberamente. Se ne sovrapponi due, si fondono. Il tap non fa nulla.</p>
     <h3>Tubo 🧪</h3>
     <p>Tocca una bolla per toglierla dalla scena. Il tubo tiene il conto. Clicca una bolla nel tubo per riportarla in campo. Con svuota si azzera tutto.</p>
-    <h3>La lavagnetta</h3>
-    <p>In alto a sinistra appare l'espressione matematica corrispondente a quello che stai facendo, riga dopo riga.</p>
     <h3>Sulla LIM</h3>
-    <p>Usa i tre pulsanti in basso per scegliere la modalità: non è necessario trascinare.</p>
+    <p>Usa i quattro pulsanti in basso per scegliere la modalità: non è necessario trascinare.</p>
   </div>
 </div>
 
@@ -222,33 +199,22 @@ const tuboWrap = document.getElementById('tubo-wrap');
 const tuboEl = document.getElementById('tubo');
 const tuboTotale = document.getElementById('tubo-totale');
 const flashEl = document.getElementById('flash');
-const lavagnetta = document.getElementById('lavagnetta');
 
 let bolle = [], numeriScelti = [], tuboContenuto = [];
 let modo = 'scomponi', selezionata = null;
 let drag = null, offX = 0, offY = 0, dragMoved = false;
-let storicoLav = [];
 
 function bollaSize() {
   const base = Math.min(window.innerWidth, window.innerHeight);
   return { grande: Math.round(base * 0.14), piccola: Math.round(base * 0.10) };
 }
-
-function taglia(val) {
-  const s = bollaSize();
-  return val > 10 ? s.grande : s.piccola;
-}
-
-function fontSize(s) {
-  return Math.max(0.7, s / 52) + 'rem';
-}
+function taglia(val) { const s = bollaSize(); return val > 10 ? s.grande : s.piccola; }
 
 function scomponiValori(v) {
   if (v <= 1) return null;
   if (v <= 10) return [1, v - 1];
-  const unita = v % 10;
-  const decine = v - unita;
-  if (unita !== 0) return [decine, unita];
+  const u = v % 10, d = v - u;
+  if (u !== 0) return [d, u];
   return [10, v - 10];
 }
 
@@ -257,7 +223,7 @@ function crea(val, x, y) {
   const el = document.createElement('div');
   el.className = 'bolla';
   el.textContent = val;
-  el.style.cssText = `width:${s}px;height:${s}px;left:${x}px;top:${y}px;font-size:${fontSize(s)}`;
+  el.style.cssText = `width:${s}px;height:${s}px;left:${x}px;top:${y}px;font-size:${Math.max(0.7,s/52)}rem`;
   arena.appendChild(el);
   const obj = { el, val, x, y, size: s };
   bolle.push(obj);
@@ -278,8 +244,7 @@ function bindBolla(b) {
 
 arena.addEventListener('pointermove', e => {
   if (!drag) return;
-  const dx = e.clientX - offX - drag.x, dy = e.clientY - offY - drag.y;
-  if (Math.hypot(dx,dy) > 10) dragMoved = true;
+  if (Math.hypot(e.clientX-offX-drag.x, e.clientY-offY-drag.y) > 10) dragMoved = true;
   drag.x = e.clientX - offX; drag.y = e.clientY - offY;
   drag.el.style.left = drag.x+'px'; drag.el.style.top = drag.y+'px';
   const suTubo = sopraTubo(drag);
@@ -296,7 +261,7 @@ arena.addEventListener('pointerup', () => {
     if (sopraTubo(drag)) mettiInTubo(drag);
     else {
       const target = bolle.find(b => b!==drag && overlap(drag,b));
-      if (target) fondi(drag, target);
+      if (target) { deseleziona(); fondi(drag, target); }
       else drag.el.style.zIndex = '';
     }
   } else {
@@ -309,12 +274,10 @@ arena.addEventListener('pointerup', () => {
 
 function sopraTubo(b) {
   const r = tuboWrap.getBoundingClientRect();
-  return (b.x+b.size/2) > r.left && (b.y+b.size/2) > r.top && (b.y+b.size/2) < r.bottom;
+  return (b.x+b.size/2)>r.left && (b.y+b.size/2)>r.top && (b.y+b.size/2)<r.bottom;
 }
-
 function overlap(a,b) {
-  const ax=a.x+a.size/2, ay=a.y+a.size/2, bx=b.x+b.size/2, by=b.y+b.size/2;
-  return Math.hypot(ax-bx,ay-by) < (a.size/2+b.size/2)*0.6;
+  return Math.hypot(a.x+a.size/2-b.x-b.size/2, a.y+a.size/2-b.y-b.size/2) < (a.size/2+b.size/2)*0.6;
 }
 
 function gestisciClick(b) {
@@ -324,8 +287,8 @@ function gestisciClick(b) {
     else if (selezionata===b) deseleziona();
     else fondi(selezionata, b);
   } else if (modo==='tubo') mettiInTubo(b);
+  // sposta: tap non fa nulla
 }
-
 function deseleziona() {
   if (selezionata) { selezionata.el.classList.remove('selezionata'); selezionata=null; }
 }
@@ -333,129 +296,76 @@ function deseleziona() {
 function scomponi(b) {
   const parti = scomponiValori(b.val);
   if (!parti) return;
-  const [v1, v2] = parti;
+  const [v1,v2] = parti;
   const cx=b.x+b.size/2, cy=b.y+b.size/2;
-  archiviaCorrente();
   rimuovi(b);
-  const ang=Math.random()*Math.PI*2;
-  const dist = Math.min(window.innerWidth, window.innerHeight) * 0.12;
-  const s1=taglia(v1), s2=taglia(v2);
-  const b1=crea(v1, clampX(cx+Math.cos(ang)*dist-s1/2,s1), clampY(cy+Math.sin(ang)*dist-s1/2,s1));
-  const b2=crea(v2, clampX(cx-Math.cos(ang)*dist-s2/2,s2), clampY(cy-Math.sin(ang)*dist-s2/2,s2));
+  const s1=taglia(v1), s2=taglia(v2), gap=8;
+  const totH=s1+gap+s2;
+  const b1=crea(v1, clampX(cx-s1/2,s1), clampY(cy-totH/2,s1));
+  const b2=crea(v2, clampX(cx-s2/2,s2), clampY(cy-totH/2+s1+gap,s2));
   pulsa(b1.el); pulsa(b2.el);
-  aggiornalav();
 }
 
-function fondi(a, b) {
-  archiviaCorrente();
+function fondi(a,b) {
   const nv=a.val+b.val, nx=(a.x+b.x)/2, ny=(a.y+b.y)/2;
   deseleziona(); rimuovi(a); rimuovi(b);
-  flash(() => { apparizione(crea(nv,nx,ny).el); aggiornalav(); });
-}
-
-function archiviaCorrente() {
-  if (bolle.length <= 1) return;
-  const espr = bolle.map(b=>b.val).join(' + ');
-  storicoLav.push({ testo: espr + ' =', classe: 'storico' });
+  flash(()=>{ apparizione(crea(nv,nx,ny).el); });
 }
 
 function flash(cb) {
   flashEl.style.opacity='0.85';
   setTimeout(()=>{ flashEl.style.opacity='0'; cb(); }, 90);
 }
-
 function apparizione(el) {
   el.style.transform='scale(0)'; el.style.transition='transform 0.35s cubic-bezier(0.175,0.885,0.32,1.275)';
   setTimeout(()=>{ el.style.transform='scale(1)'; }, 20);
 }
-
 function pulsa(el) {
   el.style.transform='scale(1.3)'; el.style.transition='transform 0.2s';
   setTimeout(()=>{ el.style.transform='scale(1)'; }, 220);
 }
 
 function mettiInTubo(b) {
-  const val = b.val;
-  tuboContenuto.push(val);
-  rimuovi(b); aggiornatubo();
-  storicoLav = [{ testo: 'Hai tolto ' + val + ' →', classe: 'sottrazione' }];
-  aggiornalav();
+  tuboContenuto.push(b.val); rimuovi(b); aggiornatubo();
 }
-
 function riportaDalTubo(idx) {
-  if (idx < 0 || idx >= tuboContenuto.length) return;
-  const val = tuboContenuto.splice(idx, 1)[0];
-  const s = taglia(val);
-  const tuboW = tuboWrap.getBoundingClientRect().width;
-  const x=20+Math.random()*(window.innerWidth-tuboW-s-20);
-  const y=barraTop()-s-20 > 80 ? 80+Math.random()*(barraTop()-s-100) : 80;
+  if (idx<0||idx>=tuboContenuto.length) return;
+  const val=tuboContenuto.splice(idx,1)[0], s=taglia(val);
+  const tw=tuboWrap.getBoundingClientRect().width;
+  const x=20+Math.random()*(window.innerWidth-tw-s-20);
+  const y=barraTop()-s-20>80 ? 80+Math.random()*(barraTop()-s-100) : 80;
   apparizione(crea(val,x,y).el); aggiornatubo();
-  storicoLav=[{ testo: 'Hai reinserito ' + val + ' →', classe: 'storico' }];
-  aggiornalav();
 }
-
-function barraTop() {
-  return window.innerHeight - document.getElementById('barra').offsetHeight - 30;
-}
-
-function aggiornalav() {
-  const espr = bolle.map(b=>b.val).join(' + ');
-  lavagnetta.innerHTML = '';
-  storicoLav.forEach(r => {
-    const span = document.createElement('span');
-    span.className = 'riga ' + r.classe;
-    span.textContent = r.testo;
-    lavagnetta.appendChild(span);
-  });
-  if (bolle.length > 0) {
-    const span = document.createElement('span');
-    span.className = 'riga corrente';
-    span.textContent = bolle.length === 1 ? espr : espr + ' =';
-    lavagnetta.appendChild(span);
-  }
-  lavagnetta.scrollTop = lavagnetta.scrollHeight;
-}
-
 function aggiornatubo() {
-  tuboTotale.textContent = tuboContenuto.reduce((a,v)=>a+v,0);
+  tuboTotale.textContent=tuboContenuto.reduce((a,v)=>a+v,0);
   tuboEl.innerHTML='';
-  const start = Math.max(0, tuboContenuto.length - 8);
-  tuboContenuto.slice(start).forEach((v, i) => {
+  const start=Math.max(0,tuboContenuto.length-8);
+  tuboContenuto.slice(start).forEach((v,i)=>{
     const d=document.createElement('div');
     d.className='bolla-tubo'; d.textContent=v;
-    d.addEventListener('click', () => riportaDalTubo(start + i));
+    d.addEventListener('click',()=>riportaDalTubo(start+i));
     tuboEl.appendChild(d);
   });
 }
 
-function tuboLarghezza() {
-  return tuboWrap.getBoundingClientRect().width || Math.min(88, window.innerWidth * 0.08);
-}
-
-function clampX(v,s) { return Math.max(8, Math.min(v, window.innerWidth - s - tuboLarghezza() - 8)); }
-function clampY(v,s) {
-  const bottom = barraTop() - 8;
-  return Math.max(window.innerHeight * 0.1, Math.min(v, bottom - s));
-}
+function barraTop() { return window.innerHeight-document.getElementById('barra').offsetHeight-30; }
+function tuboLarghezza() { return tuboWrap.getBoundingClientRect().width||Math.min(88,window.innerWidth*0.08); }
+function clampX(v,s) { return Math.max(8,Math.min(v,window.innerWidth-s-tuboLarghezza()-8)); }
+function clampY(v,s) { return Math.max(window.innerHeight*0.1,Math.min(v,barraTop()-s-8)); }
 function rimuovi(b) { bolle=bolle.filter(x=>x!==b); b.el.remove(); }
 
 function posiziona(numeri) {
   bolle.forEach(b=>b.el.remove()); bolle=[]; deseleziona();
-  storicoLav=[];
-  const tuboW = tuboLarghezza();
-  const W = window.innerWidth - tuboW - 16;
-  const topMargin = window.innerHeight * 0.1;
-  const bottomMargin = barraTop() - 8;
-  numeri.forEach(v => {
+  const tw=tuboLarghezza(), W=window.innerWidth-tw-16;
+  const topM=window.innerHeight*0.1, botM=barraTop()-8;
+  numeri.forEach(v=>{
     const s=taglia(v); let x,y,ok=false,tries=0;
-    while(!ok && tries++<400) {
-      x=8+Math.random()*(W-s-8);
-      y=topMargin+Math.random()*(bottomMargin-topMargin-s);
+    while(!ok&&tries++<400){
+      x=8+Math.random()*(W-s-8); y=topM+Math.random()*(botM-topM-s);
       ok=bolle.every(b=>Math.hypot(x+s/2-b.x-b.size/2,y+s/2-b.y-b.size/2)>(s/2+b.size/2)+12);
     }
     crea(v,x,y);
   });
-  aggiornalav();
 }
 
 function setModo(m) {
@@ -467,7 +377,6 @@ function setModo(m) {
 function mostraMenu() {
   schermata.style.display='flex'; arena.style.display='none';
   barra.style.display='none'; tuboWrap.style.display='none';
-  lavagnetta.style.display='none';
   bolle.forEach(b=>b.el.remove()); bolle=[];
   document.getElementById('campo-numeri').value='';
 }
@@ -475,37 +384,28 @@ function mostraMenu() {
 function avvia(numeri) {
   schermata.style.display='none'; arena.style.display='block';
   barra.style.display='flex'; tuboWrap.style.display='flex';
-  lavagnetta.style.display='block';
   tuboContenuto=[]; aggiornatubo(); setModo('scomponi');
-  requestAnimationFrame(() => posiziona(numeri));
+  requestAnimationFrame(()=>posiziona(numeri));
 }
 
 document.getElementById('btn-vai').addEventListener('click',()=>{
   const nums=document.getElementById('campo-numeri').value
     .split(/[\s,]+/).map(Number).filter(n=>!isNaN(n)&&n>0);
-  if(nums.length<1){alert('Inserisci almeno un numero!');return;}
+  if(!nums.length){alert('Inserisci almeno un numero!');return;}
   numeriScelti=nums; avvia(nums);
 });
 document.getElementById('campo-numeri').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('btn-vai').click(); });
-document.getElementById('btn-ricomincia').addEventListener('click',()=>mostraMenu());
-document.getElementById('btn-menu').addEventListener('click',()=>mostraMenu());
+document.getElementById('btn-ricomincia').addEventListener('click',mostraMenu);
+document.getElementById('btn-menu').addEventListener('click',mostraMenu);
 document.getElementById('modo-scomponi').addEventListener('click',()=>setModo('scomponi'));
 document.getElementById('modo-unisci').addEventListener('click',()=>setModo('unisci'));
+document.getElementById('modo-sposta').addEventListener('click',()=>setModo('sposta'));
 document.getElementById('modo-tubo').addEventListener('click',()=>setModo('tubo'));
-document.getElementById('btn-riporta').addEventListener('click',()=>{
-  if(!tuboContenuto.length) return;
-  riportaDalTubo(tuboContenuto.length-1);
-});
+document.getElementById('btn-riporta').addEventListener('click',()=>{ if(tuboContenuto.length) riportaDalTubo(tuboContenuto.length-1); });
 document.getElementById('btn-svuota').addEventListener('click',()=>{ tuboContenuto=[]; aggiornatubo(); });
-document.getElementById('btn-home').addEventListener('click',()=>{
-  window.location.href='https://rdiianni-alt.github.io/matematichenonsinasce/';
-});
-document.getElementById('btn-info').addEventListener('click',()=>{
-  document.getElementById('info-overlay').style.display='flex';
-});
-document.getElementById('info-chiudi').addEventListener('click',()=>{
-  document.getElementById('info-overlay').style.display='none';
-});
+document.getElementById('btn-info').addEventListener('click',()=>{ document.getElementById('info-overlay').style.display='flex'; });
+document.getElementById('info-chiudi').addEventListener('click',()=>{ document.getElementById('info-overlay').style.display='none'; });
+window.addEventListener('resize',()=>{ if(arena.style.display!=='none'&&bolle.length>0) posiziona(bolle.map(b=>b.val)); });
 </script>
 </body>
 </html>
