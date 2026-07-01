@@ -5,326 +5,396 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Il Bruco Mangianumeri</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    background: #f5f4ef;
-    min-height: 100vh;
-    padding: 10px;
-  }
-  header {
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
-    text-align: center;
-    padding: 8px 16px; background: #fff;
-    border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    margin-bottom: 12px;
-  }
-  .logo a { display: block; }
-  .logo img { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; }
-  .blog-title { font-size: 14px; color: #555; font-style: italic; text-align: center; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: Arial, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  background: #f5f4ef;
+  min-height: 100vh;
+  padding: 10px;
+}
+header {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  text-align: center;
+  padding: 8px 16px; background: #fff;
+  border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 12px;
+}
+.logo a { display: block; }
+.logo img { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; }
+.blog-title { font-size: 14px; color: #555; font-style: italic; }
+h1 { text-align: center; color: #2e7d32; font-size: 26px; margin-bottom: 10px; }
 
-  h1 { text-align: center; color: #2e7d32; font-size: 26px; margin-bottom: 10px; }
+#schermata-livello {
+  display: flex; flex-direction: column; align-items: center; gap: 20px;
+  margin: 30px auto; max-width: 400px;
+}
+#schermata-livello h2 { color: #2e7d32; font-size: 20px; text-align: center; }
+.btn-livello {
+  width: 100%; padding: 18px; font-size: 20px; font-family: Arial, sans-serif;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  background: #fff; border: 3px solid #66bb6a; border-radius: 16px;
+  color: #1b5e20; cursor: pointer; font-weight: bold;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1); transition: background 0.2s;
+}
+.btn-livello:hover { background: #e8f5e9; }
 
-  .speech-area { text-align: center; margin: 10px 0; min-height: 60px; }
-  .bubble {
-    display: inline-block; background: #fff9c4;
-    border: 3px solid #f9a825; border-radius: 20px;
-    padding: 10px 24px; font-size: 22px; color: #e65100;
-    font-weight: bold; position: relative;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-  }
-  .bubble::after {
-    content: ''; position: absolute;
-    bottom: -18px; left: 50%; transform: translateX(-50%);
-    border: 9px solid transparent; border-top-color: #f9a825;
-  }
-  .sub-hint { margin-top: 22px; font-size: 15px; color: #555; font-style: italic; }
+#gioco { display: none; }
 
-  .numbers-area {
-    display: flex; justify-content: center;
-    flex-wrap: wrap; gap: 14px; margin: 18px 0 10px;
-  }
-  .num-card {
-    background: #fff; border: 3px solid #66bb6a;
-    border-radius: 16px; padding: 12px 18px;
-    font-size: 34px; font-weight: bold; color: #1b5e20;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
-    display: flex; gap: 2px;
-  }
-  .digit {
-    padding: 4px 6px; border-radius: 8px;
-    transition: all 0.2s; cursor: default; user-select: none;
-  }
-  .digit.clickable {
-    cursor: pointer; border: 2px dashed #43a047;
-    animation: pulse 0.7s ease-in-out infinite alternate;
-  }
-  .digit.clickable:hover { background: #c8e6c9; transform: scale(1.15); }
-  @keyframes pulse {
-    from { transform: scale(1); }
-    to { transform: scale(1.12); box-shadow: 0 0 8px #66bb6a; }
-  }
-  .digit.eaten {
-    color: transparent; background: #a5d6a7;
-    cursor: default; animation: none;
-    position: relative; border: none;
-  }
-  .digit.eaten::after {
-    content: '😋'; position: absolute;
-    left: 50%; top: 50%; transform: translate(-50%, -50%);
-    font-size: 20px;
-  }
-  .digit.wrong-click { background: #ffcdd2; animation: shake 0.3s; }
-  @keyframes shake {
-    0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)}
-  }
+.speech-area { text-align: center; margin: 10px 0; min-height: 60px; }
+.bubble {
+  display: inline-block; background: #fff9c4;
+  border: 3px solid #f9a825; border-radius: 20px;
+  padding: 10px 24px; font-size: 22px; color: #e65100;
+  font-weight: bold; position: relative;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.bubble::after {
+  content: ''; position: absolute;
+  bottom: -18px; left: 50%; transform: translateX(-50%);
+  border: 9px solid transparent; border-top-color: #f9a825;
+}
+.sub-hint { margin-top: 22px; font-size: 15px; color: #555; font-style: italic; min-height: 22px; }
 
-  .controls { text-align: center; margin: 12px 0; }
-  .btn {
-    background: #c8c6b8; color: #3a3a36; border: none;
-    border-radius: 30px; padding: 12px 28px; font-size: 18px;
-    font-family: inherit; cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    transition: transform 0.1s, background 0.2s; margin: 6px;
-  }
-  .btn:hover { background: #a8a698; transform: scale(1.05); }
-  .btn.red { background: #b0aea3; }
-  .btn.red:hover { background: #8e8c82; }
-  .btn.blue { background: #d8d6ce; }
-  .btn.blue:hover { background: #b8b6ae; }
+.numbers-area {
+  display: flex; justify-content: center;
+  flex-wrap: wrap; gap: 14px; margin: 18px 0 10px;
+  align-items: flex-start; min-height: 120px;
+}
+.num-card {
+  background: #fff; border: 3px solid #66bb6a;
+  border-radius: 16px; padding: 12px 18px;
+  font-size: 34px; font-weight: bold; color: #1b5e20;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+  display: flex; gap: 2px;
+}
+.digit { padding: 4px 6px; border-radius: 8px; transition: all 0.2s; cursor: default; user-select: none; }
+.digit.clickable { cursor: pointer; border: 2px dashed #43a047; animation: pulse 0.7s ease-in-out infinite alternate; }
+.digit.clickable:hover { background: #c8e6c9; transform: scale(1.15); }
+@keyframes pulse { from{transform:scale(1);} to{transform:scale(1.12);box-shadow:0 0 8px #66bb6a;} }
+.digit.eaten { color: transparent; background: #a5d6a7; cursor: default; animation: none; position: relative; border: none; }
+.digit.eaten::after { content: '😋'; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); font-size: 20px; }
+.digit.wrong-click { background: #ffcdd2; animation: shake 0.3s; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
 
-  .final-area { text-align: center; margin: 14px 0; }
-  .final-area label { font-size: 20px; color: #4a148c; font-weight: bold; }
-  .final-input {
-    font-size: 22px; padding: 8px 14px;
-    border: 3px solid #7b1fa2; border-radius: 12px;
-    width: 100px; text-align: center;
-    font-family: inherit; margin: 0 10px;
-  }
-  .result-msg { font-size: 22px; font-weight: bold; margin-top: 10px; min-height: 34px; }
-  .correct { color: #2e7d32; }
-  .wrong { color: #c62828; }
+.controls { text-align: center; margin: 12px 0; }
+.btn {
+  background: #c8c6b8; color: #3a3a36; border: none;
+  border-radius: 30px; padding: 12px 28px; font-size: 18px;
+  font-family: Arial, sans-serif; text-transform: uppercase;
+  cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  transition: transform 0.1s, background 0.2s; margin: 6px;
+}
+.btn:hover { background: #a8a698; transform: scale(1.05); }
+.btn.scuro { background: #a8a698; }
+.btn.scuro:hover { background: #8e8c82; }
 
-  .step-log {
-    max-width: 440px; margin: 10px auto;
-    background: rgba(255,255,255,0.7);
-    border-radius: 12px; padding: 10px 16px;
-    font-size: 15px; color: #333;
-  }
-  .step-log ul { padding-left: 20px; }
-  .step-log li { margin: 3px 0; }
+.final-area { text-align: center; margin: 14px 0; }
+.final-area label { font-size: 20px; color: #4a148c; font-weight: bold; }
+.final-input {
+  font-size: 22px; padding: 8px 14px;
+  border: 3px solid #7b1fa2; border-radius: 12px;
+  width: 120px; text-align: center;
+  font-family: Arial, sans-serif; margin: 0 10px; text-transform: uppercase;
+}
+.result-msg { font-size: 22px; font-weight: bold; margin-top: 10px; min-height: 34px; }
+.correct { color: #2e7d32; }
+.wrong { color: #c62828; }
+
+.step-log { max-width: 440px; margin: 10px auto; background: rgba(255,255,255,0.7); border-radius: 12px; padding: 10px 16px; font-size: 15px; color: #333; }
+.step-log ul { padding-left: 20px; }
+.step-log li { margin: 3px 0; }
+
+@media print {
+  body { background: white; }
+  header, h1, #schermata-livello, #gioco { display: none !important; }
+  #foglio-stampa { display: block !important; }
+}
+#foglio-stampa { display: none; }
+#titolo-stampa {
+  display: none;
+  font-family: Arial, sans-serif; font-size: 22px; font-weight: bold;
+  text-align: center; margin-bottom: 12px; text-transform: uppercase;
+}
+@media print { #titolo-stampa { display: block !important; } }
+.riga-stampa {
+  display: flex; align-items: center; gap: 12px; padding: 10px 0;
+  border-bottom: 2px dashed #aaa;
+}
+.riga-stampa:last-child { border-bottom: none; }
+.bruco-stampa { font-size: 36px; flex-shrink: 0; }
+.numeri-stampa {
+  display: flex; gap: 20px; font-weight: bold; color: #1b5e20;
+  font-family: Arial, sans-serif; text-transform: uppercase; flex-shrink: 0;
+}
+.logo-stampa { flex-shrink: 0; margin-left: 10px; }
+.logo-stampa img { width: 38px; height: 38px; object-fit: contain; border-radius: 50%; vertical-align: middle; }
+.risultato-stampa {
+  font-size: 22px; font-family: Arial, sans-serif; color: #333;
+  margin-left: 12px; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.05em;
+}
 </style>
 </head>
 <body>
 
 <header>
   <div class="logo">
-    <a href="https://matematichenonsinasce.com/" >
-      <img src="logo.png" alt="Logo" onerror="this.style.display='none'">
+    <a href="https://matematichenonsinasce.com/" target="_blank">
+      <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Logo"
+           onerror="this.src='https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png'">
     </a>
   </div>
-  <div class="blog-title" style="flex:1; text-align:center;">Matematiche non si nasce</div>
+  <div class="blog-title">Matematiche non si nasce</div>
 </header>
 
-<h1>🐛 Il Bruco Mangianumeri</h1>
+<h1>🐛 IL BRUCO MANGIANUMERI</h1>
 
-<div class="speech-area">
-  <div class="bubble" id="bubble">Ciao! Premi "Nuova partita" per giocare! 🎉</div>
-  <div class="sub-hint" id="subHint"></div>
+<div id="schermata-livello">
+  <h2>Scegli il livello:</h2>
+  <button class="btn-livello" onclick="avvia(2)">🐛 NUMERI A DUE CIFRE</button>
+  <button class="btn-livello" onclick="avvia(3)">🐛🐛 NUMERI A TRE CIFRE</button>
 </div>
 
-<div class="numbers-area" id="numbersArea"></div>
-
-<div class="step-log" id="stepLog" style="display:none">
-  <strong>Cosa ha mangiato il bruco:</strong>
-  <ul id="stepList"></ul>
+<div id="gioco">
+  <div class="speech-area">
+    <div class="bubble" id="bubble">COMINCIAMO! 🐛</div>
+    <div class="sub-hint" id="subHint"></div>
+  </div>
+  <div class="numbers-area" id="numbersArea"></div>
+  <div class="step-log" id="stepLog" style="display:none">
+    <strong>Cosa ha mangiato il bruco:</strong>
+    <ul id="stepList"></ul>
+  </div>
+  <div class="final-area" id="finalArea" style="display:none">
+    <label>Quanto rimane? </label>
+    <input type="number" class="final-input" id="finalInput" placeholder="?">
+    <button class="btn scuro" onclick="checkAnswer()">CONTROLLA ✅</button>
+    <div class="result-msg" id="resultMsg"></div>
+  </div>
+  <div class="controls">
+    <button class="btn scuro" onclick="newGame()">NUOVA PARTITA 🔄</button>
+    <button class="btn" onclick="stampaSoglio()">🖨️ STAMPA SCHEDE</button>
+    <button class="btn" onclick="tornaScelta()">↩ CAMBIA LIVELLO</button>
+  </div>
 </div>
 
-<div class="final-area" id="finalArea" style="display:none">
-  <label>Quanto rimane? </label>
-  <input type="number" class="final-input" id="finalInput" placeholder="?">
-  <button class="btn blue" onclick="checkAnswer()">Controlla ✅</button>
-  <div class="result-msg" id="resultMsg"></div>
-</div>
-
-<div class="controls">
-  <button class="btn red" onclick="newGame()">Nuova partita 🔄</button>
+<div id="foglio-stampa">
+  <div id="titolo-stampa">🐛 IL BRUCO MANGIANUMERI</div>
 </div>
 
 <script>
-// Converti numero in parola italiana
-const unita = ['','uno','due','tre','quattro','cinque','sei','sette','otto','nove',
-                'dieci','undici','dodici','tredici','quattordici','quindici',
-                'sedici','diciassette','diciotto','diciannove'];
-const decine = ['','','venti','trenta','quaranta','cinquanta','sessanta','settanta','ottanta','novanta'];
+var cifre = 2;
+var game = null, stepIdx = 0, logLines = [], waitingClick = false;
+
+var unita = ['','uno','due','tre','quattro','cinque','sei','sette','otto','nove','dieci','undici','dodici','tredici','quattordici','quindici','sedici','diciassette','diciotto','diciannove'];
+var decine = ['','','venti','trenta','quaranta','cinquanta','sessanta','settanta','ottanta','novanta'];
+var centinaia = ['','cento','duecento','trecento','quattrocento','cinquecento','seicento','settecento','ottocento','novecento'];
 
 function toWords(n) {
   if (n === 0) return 'zero';
   if (n < 20) return unita[n];
-  const d = Math.floor(n / 10), u = n % 10;
-  let base = decine[d];
-  if (u === 1 || u === 8) base = base.slice(0,-1); // venti+uno → ventuno, venti+otto → ventotto
-  return u === 0 ? base : base + unita[u];
+  if (n < 100) {
+    var d = Math.floor(n/10), u = n%10;
+    var base = decine[d];
+    if (u===1||u===8) base = base.slice(0,-1);
+    return u===0 ? base : base+unita[u];
+  }
+  var c = Math.floor(n/100), resto = n%100;
+  var baseC = c===1 ? 'cento' : centinaia[c];
+  if (resto===0) return baseC;
+  return baseC + toWords(resto);
 }
 
-// Genera una partita casuale
-function generateGame() {
-  let nums = [];
-  let attempts = 0;
+function buildBites(nums) {
+  var allBites = [];
+  nums.forEach(function(n, ni) {
+    var s = String(n);
+    for (var di=0; di<s.length; di++) {
+      var place = s.length-1-di;
+      var val = parseInt(s[di]) * Math.pow(10, place);
+      allBites.push({val:val, numIdx:ni, digitPos:di});
+    }
+  });
+  var skipIdx = Math.floor(Math.random()*allBites.length);
+  var bites = allBites.filter(function(_,i){ return i!==skipIdx; });
+  for (var i=bites.length-1; i>0; i--) {
+    var j = Math.floor(Math.random()*(i+1));
+    var tmp=bites[i]; bites[i]=bites[j]; bites[j]=tmp;
+  }
+  return {nums:nums, steps:bites};
+}
+
+function generateGame2() {
+  var nums = [], attempts = 0;
   while (true) {
     attempts++;
     nums = [];
     while (nums.length < 5) {
-      const n = Math.floor(Math.random() * 89) + 11;
-      const d0 = Math.floor(n / 10), d1 = n % 10;
-      if (d1 === 0) continue; // evita multipli di 10
-      if (d0 === d1) continue; // evita 11,22,33... (cifre uguali, banali)
-      if (!nums.includes(n)) nums.push(n);
+      var n = Math.floor(Math.random()*89)+11;
+      var d0 = Math.floor(n/10), d1 = n%10;
+      if (d1===0) continue;
+      if (d0===d1) continue;
+      if (nums.indexOf(n)<0) nums.push(n);
     }
-    // Verifica che almeno 2 cifre appaiano sia come unità che come decina
-    const asUnits  = new Set(nums.map(n => n % 10));
-    const asTens   = new Set(nums.map(n => Math.floor(n / 10)));
-    const overlap  = [...asUnits].filter(d => asTens.has(d));
-    if (overlap.length >= 2) break; // almeno 2 cifre ambigue → gioco interessante
-    if (attempts > 200) break; // fallback di sicurezza
+    var asUnits = nums.map(function(n){ return n%10; });
+    var asTens  = nums.map(function(n){ return Math.floor(n/10); });
+    var overlap = asUnits.filter(function(d){ return asTens.indexOf(d)>=0; });
+    if (overlap.length>=2) break;
+    if (attempts>200) break;
   }
-
-  // Costruisci tutti i morsi possibili: per ogni numero, decina e unità
-  const allBites = [];
-  nums.forEach((n, ni) => {
-    allBites.push({ val: Math.floor(n / 10) * 10, numIdx: ni, digitPos: 0 });
-    allBites.push({ val: n % 10,                  numIdx: ni, digitPos: 1 });
-  });
-
-  // Scegli una cifra a caso da NON mangiare (deve valere > 0, già garantito)
-  const skipIdx = Math.floor(Math.random() * allBites.length);
-  const bites = allBites.filter((_, i) => i !== skipIdx);
-
-  // Fisher-Yates shuffle
-  for (let i = bites.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [bites[i], bites[j]] = [bites[j], bites[i]];
-  }
-
-  return { nums, steps: bites };
+  return buildBites(nums);
 }
 
-let game = null, stepIdx = 0, logLines = [], waitingClick = false;
+function generateGame3() {
+  var nums = [], attempts = 0;
+  while (true) {
+    attempts++;
+    nums = [];
+    while (nums.length < 5) {
+      var n = Math.floor(Math.random()*900)+100;
+      var d0 = Math.floor(n/100);
+      var d1 = Math.floor((n%100)/10);
+      var d2 = n%10;
+      if (d1===0||d2===0) continue;
+      if (d0===d1&&d1===d2) continue;
+      if (nums.indexOf(n)<0) nums.push(n);
+    }
+    var cents = nums.map(function(n){ return Math.floor(n/100); });
+    var tens  = nums.map(function(n){ return Math.floor((n%100)/10); });
+    var ones  = nums.map(function(n){ return n%10; });
+    var ambig = cents.filter(function(d){ return tens.indexOf(d)>=0||ones.indexOf(d)>=0; });
+    if (ambig.length>=2) break;
+    if (attempts>300) break;
+  }
+  return buildBites(nums);
+}
+
+function avvia(nc) {
+  cifre = nc;
+  document.getElementById('schermata-livello').style.display = 'none';
+  document.getElementById('gioco').style.display = 'block';
+  newGame();
+}
+
+function tornaScelta() {
+  document.getElementById('gioco').style.display = 'none';
+  document.getElementById('schermata-livello').style.display = 'flex';
+}
 
 function newGame() {
-  game = generateGame();
-  stepIdx = 0; logLines = []; waitingClick = false;
-  document.getElementById('finalArea').style.display = 'none';
-  document.getElementById('resultMsg').textContent = '';
-  document.getElementById('stepLog').style.display = 'none';
-  document.getElementById('stepList').innerHTML = '';
-  document.getElementById('finalInput').value = '';
-  document.getElementById('subHint').textContent = '';
+  game = cifre===2 ? generateGame2() : generateGame3();
+  stepIdx=0; logLines=[]; waitingClick=false;
+  document.getElementById('finalArea').style.display='none';
+  document.getElementById('resultMsg').textContent='';
+  document.getElementById('stepLog').style.display='none';
+  document.getElementById('stepList').innerHTML='';
+  document.getElementById('finalInput').value='';
+  document.getElementById('subHint').textContent='';
   renderNumbers();
-  setBubble('Cominciamo! 🐛');
+  setBubble('COMINCIAMO! 🐛');
   setTimeout(showCurrentStep, 700);
 }
 
 function renderNumbers() {
-  const area = document.getElementById('numbersArea');
+  var area = document.getElementById('numbersArea');
   area.innerHTML = '';
-  game.nums.forEach((n, ni) => {
-    const digits = String(n).split('');
-    const card = document.createElement('div');
+  var row1 = document.createElement('div');
+  row1.style.cssText = 'display:flex;justify-content:center;gap:14px;width:100%;';
+  var row2 = document.createElement('div');
+  row2.style.cssText = 'display:flex;justify-content:center;gap:14px;width:100%;margin-top:14px;';
+  game.nums.forEach(function(n, ni) {
+    var digits = String(n).split('');
+    var card = document.createElement('div');
     card.className = 'num-card';
-    digits.forEach((d, di) => {
-      const span = document.createElement('span');
+    card.id = 'card-'+ni;
+    digits.forEach(function(d, di) {
+      var span = document.createElement('span');
       span.className = 'digit';
-      span.id = `d-${ni}-${di}`;
+      span.id = 'd-'+ni+'-'+di;
       span.textContent = d;
-      span.onclick = () => onDigitClick(ni, di);
+      span.onclick = function(){ onDigitClick(ni, di); };
       card.appendChild(span);
     });
-    area.appendChild(card);
+    (ni<3 ? row1 : row2).appendChild(card);
   });
+  area.appendChild(row1);
+  area.appendChild(row2);
 }
 
-function setBubble(txt) { document.getElementById('bubble').textContent = txt; }
-function setHint(txt) { document.getElementById('subHint').textContent = txt; }
+function setBubble(txt){ document.getElementById('bubble').textContent = txt; }
+function setHint(txt){ document.getElementById('subHint').textContent = txt; }
 
 function showCurrentStep() {
-  if (!game || stepIdx >= game.steps.length) return;
-  const s = game.steps[stepIdx];
-  const word = toWords(s.val);
-  setBubble(`MANGIO ${word}!`);
+  if (!game||stepIdx>=game.steps.length) return;
+  var s = game.steps[stepIdx];
+  setBubble('MANGIO '+toWords(s.val)+'!');
   setHint('TOCCA LA CIFRA GIUSTA 👆');
   makeAllClickable();
   waitingClick = true;
 }
 
 function makeAllClickable() {
-  game.nums.forEach((n, ni) => {
-    String(n).split('').forEach((d, di) => {
-      const el = document.getElementById(`d-${ni}-${di}`);
-      if (el && !el.classList.contains('eaten')) el.classList.add('clickable');
+  game.nums.forEach(function(n, ni) {
+    String(n).split('').forEach(function(d, di) {
+      var el = document.getElementById('d-'+ni+'-'+di);
+      if (el&&!el.classList.contains('eaten')) el.classList.add('clickable');
     });
   });
 }
 
 function clearClickable() {
-  document.querySelectorAll('.digit.clickable').forEach(el => el.classList.remove('clickable'));
+  document.querySelectorAll('.digit.clickable').forEach(function(el){ el.classList.remove('clickable'); });
 }
 
 function onDigitClick(ni, di) {
   if (!waitingClick) return;
-  const s = game.steps[stepIdx];
-  const el = document.getElementById(`d-${ni}-${di}`);
-  if (!el || el.classList.contains('eaten')) return;
-
-  const digits = String(game.nums[ni]).split('');
-  const place = digits.length - 1 - di;
-  const digitVal = parseInt(digits[di]) * Math.pow(10, place);
-
-  if (digitVal === s.val) {
+  var s = game.steps[stepIdx];
+  var el = document.getElementById('d-'+ni+'-'+di);
+  if (!el||el.classList.contains('eaten')) return;
+  var digits = String(game.nums[ni]).split('');
+  var place = digits.length-1-di;
+  var digitVal = parseInt(digits[di])*Math.pow(10, place);
+  if (digitVal===s.val) {
     waitingClick = false;
     clearClickable();
     el.classList.add('eaten');
-    logLines.push(`Ho mangiato il <strong>${digits[di]}</strong> (vale ${toWords(s.val)}) dal numero <strong>${game.nums[ni]}</strong>`);
+    logLines.push('Ho mangiato il <strong>'+digits[di]+'</strong> (vale '+toWords(s.val)+') dal numero <strong>'+game.nums[ni]+'</strong>');
     stepIdx++;
     setHint('');
-    if (stepIdx >= game.steps.length) {
-      setBubble('Ho mangiato tutto! 🎉');
-      showLog();
-      showFinal();
+    if (stepIdx>=game.steps.length) {
+      setBubble('HO MANGIATO TUTTO! 🎉');
+      showLog(); showFinal();
     } else {
       setBubble('ESATTO! 🌟');
       setTimeout(showCurrentStep, 900);
     }
   } else {
     el.classList.add('wrong-click');
-    const word = toWords(s.val);
-    setBubble(`Ops! Quella cifra non vale ${word}! Riprova 🤔`);
-    setTimeout(() => {
+    var word = toWords(s.val);
+    setBubble('OPS! QUELLA CIFRA NON VALE '+word+'! RIPROVA 🤔');
+    setTimeout(function(){
       el.classList.remove('wrong-click');
-      setBubble(`Mangio ${word}! Tocca la cifra giusta! 👆`);
+      setBubble('MANGIO '+word+'!');
     }, 900);
   }
 }
 
 function showLog() {
-  document.getElementById('stepList').innerHTML = logLines.map(l => `<li>${l}</li>`).join('');
+  document.getElementById('stepList').innerHTML = logLines.map(function(l){ return '<li>'+l+'</li>'; }).join('');
   document.getElementById('stepLog').style.display = 'block';
 }
 
-function showFinal() {
-  document.getElementById('finalArea').style.display = 'block';
-}
+function showFinal() { document.getElementById('finalArea').style.display = 'block'; }
 
 function calcResiduo() {
-  let tot = 0;
-  game.nums.forEach((n, ni) => {
-    String(n).split('').forEach((d, di) => {
-      const el = document.getElementById(`d-${ni}-${di}`);
-      if (el && !el.classList.contains('eaten')) {
-        const place = String(n).length - 1 - di;
-        tot += parseInt(d) * Math.pow(10, place);
+  var tot = 0;
+  game.nums.forEach(function(n, ni) {
+    String(n).split('').forEach(function(d, di) {
+      var el = document.getElementById('d-'+ni+'-'+di);
+      if (el&&!el.classList.contains('eaten')) {
+        var place = String(n).length-1-di;
+        tot += parseInt(d)*Math.pow(10, place);
       }
     });
   });
@@ -332,17 +402,79 @@ function calcResiduo() {
 }
 
 function checkAnswer() {
-  const val = parseInt(document.getElementById('finalInput').value);
-  const correct = calcResiduo();
-  const msg = document.getElementById('resultMsg');
-  if (isNaN(val)) { msg.textContent = 'Inserisci un numero! 🔢'; msg.className = 'result-msg wrong'; return; }
-  if (val === correct) {
-    msg.innerHTML = '🎉 Esatto! Rimane <strong>' + correct + '</strong>';
+  var val = parseInt(document.getElementById('finalInput').value);
+  var correct = calcResiduo();
+  var msg = document.getElementById('resultMsg');
+  if (isNaN(val)) { msg.textContent='INSERISCI UN NUMERO! 🔢'; msg.className='result-msg wrong'; return; }
+  if (val===correct) {
+    msg.innerHTML = '🎉 ESATTO! RIMANE <strong>'+correct+'</strong>';
     msg.className = 'result-msg correct';
   } else {
-    msg.innerHTML = '❌ Quasi! Rimane <strong>' + correct + '</strong>. Riprova!';
+    msg.innerHTML = '❌ QUASI! RIMANE <strong>'+correct+'</strong>. RIPROVA!';
     msg.className = 'result-msg wrong';
   }
+}
+
+function stampaSoglio() {
+  var logoSrc = 'https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png';
+  var fsNumeri = cifre===3 ? '36px' : '40px';
+  var nRighe = Math.floor((1122-40) / 96);
+
+  var foglio = document.getElementById('foglio-stampa');
+  // rimuovi le righe precedenti ma tieni il titolo
+  var titolo = document.getElementById('titolo-stampa');
+  foglio.innerHTML = '';
+  foglio.appendChild(titolo);
+  foglio.style.display = 'block';
+
+  for (var r=0; r<nRighe; r++) {
+    var g = cifre===2 ? generateGame2() : generateGame3();
+
+    var riga = document.createElement('div');
+    riga.className = 'riga-stampa';
+
+    var bruco = document.createElement('div');
+    bruco.className = 'bruco-stampa';
+    bruco.textContent = '🐛';
+    riga.appendChild(bruco);
+
+    var numDiv = document.createElement('div');
+    numDiv.className = 'numeri-stampa';
+    numDiv.style.fontSize = fsNumeri;
+    g.nums.forEach(function(n) {
+      var sp = document.createElement('span');
+      sp.textContent = String(n);
+      numDiv.appendChild(sp);
+    });
+    riga.appendChild(numDiv);
+
+    var logoDiv = document.createElement('div');
+    logoDiv.className = 'logo-stampa';
+    var img = document.createElement('img');
+    img.src = logoSrc;
+    img.alt = 'Logo';
+    logoDiv.appendChild(img);
+    riga.appendChild(logoDiv);
+
+    var risultato = document.createElement('div');
+    risultato.className = 'risultato-stampa';
+    risultato.textContent = 'RISULTATO: ___________';
+    riga.appendChild(risultato);
+
+    foglio.appendChild(riga);
+  }
+
+  setTimeout(function() {
+    window.print();
+    setTimeout(function() {
+      foglio.innerHTML = '';
+      foglio.style.display = 'none';
+      var t = document.createElement('div');
+      t.id = 'titolo-stampa';
+      t.textContent = '🐛 IL BRUCO MANGIANUMERI';
+      foglio.appendChild(t);
+    }, 1000);
+  }, 400);
 }
 </script>
 </body>
