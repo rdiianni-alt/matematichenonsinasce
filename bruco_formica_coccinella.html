@@ -201,57 +201,116 @@ document.getElementById('btn-no').addEventListener('click', function() {
   document.getElementById('sn-box').style.display = 'none';
 });
 
-document.getElementById('btn-pdf').addEventListener('click', function() {
+var GAME_TITLE = 'Bruco, Formica e Coccinella';
+var BLOG_NAME = 'Matematiche non si nasce';
+var BLOG_URL = 'matematichenonsinasce.com';
+var LOGO_URL = 'https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png';
+
+function loadImageAsDataURL(url) {
+  return new Promise(function(resolve, reject) {
+    var img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = function() {
+      try {
+        var canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
+        canvas.getContext('2d').drawImage(img, 0, 0);
+        resolve(canvas.toDataURL('image/png'));
+      } catch (e) { reject(e); }
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
+document.getElementById('btn-pdf').addEventListener('click', async function() {
   var jsPDF = window.jspdf.jsPDF;
   var doc = new jsPDF({ unit: 'mm', format: 'a4' });
-  var marginL = 20, marginR = 28, marginT = 20;
   var pageW = 210, pageH = 297;
+  var marginL = 15, marginR = 15, marginBottom = 15;
   var contentW = pageW - marginL - marginR;
-  var y = marginT;
+  var sideStripW = 12;
+  var innerPad = 5;
+  var textW = contentW - innerPad * 2 - sideStripW;
+
+  var logoData = null;
+  try { logoData = await loadImageAsDataURL(LOGO_URL); } catch (e) {}
 
   function stripHtml(html) { return html.replace(/<[^>]+>/g, '').toUpperCase(); }
 
-  function drawPersonaggi(yStart) {
+  function drawHeader() {
+    var hy = 14;
+    if (logoData) doc.addImage(logoData, 'PNG', marginL, hy - 5, 11, 11);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(30);
+    doc.text(BLOG_NAME, marginL + (logoData ? 15 : 0), hy);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(150);
+    doc.text(BLOG_URL, marginL + (logoData ? 15 : 0), hy + 4.5);
+    hy += 9;
+    doc.setDrawColor(200); doc.setLineWidth(0.3);
+    doc.line(marginL, hy, pageW - marginR, hy);
+    return hy + 8;
+  }
+
+  function drawPersonaggi(x, yStart, w) {
     var nomi = ['BRUCO', 'FORMICA', 'COCCINELLA'];
-    var boxH = 14, gap = 3;
+    var boxH = 10.5, gap = 2.5;
     for (var i = 0; i < 3; i++) {
       var by = yStart + i * (boxH + gap);
       doc.setDrawColor(180); doc.setLineWidth(0.3);
-      doc.roundedRect(marginL, by, contentW, boxH, 3, 3, 'S');
-      doc.setFontSize(9); doc.setTextColor(120); doc.setFont('helvetica','normal');
-      doc.text(nomi[i], marginL + 3, by + 9);
+      doc.roundedRect(x, by, w, boxH, 2.5, 2.5, 'S');
+      doc.setFontSize(8); doc.setTextColor(120); doc.setFont('helvetica', 'normal');
+      doc.text(nomi[i], x + 3, by + 7);
     }
-    return yStart + 3 * (boxH + gap);
+    return 3 * boxH + 2 * gap;
   }
+
+  var y = drawHeader();
 
   for (var p = 0; p < 3; p++) {
-    var fn = problemi[r(0, problemi.length-1)];
+    var fn = problemi[r(0, problemi.length - 1)];
     var testo = stripHtml(fn());
-    doc.setFontSize(12); doc.setTextColor(30); doc.setFont('helvetica','bold');
-    var lines = doc.splitTextToSize(testo, contentW);
-    doc.text(lines, marginL, y);
-    y += lines.length * 6 + 4;
+    doc.setFontSize(11); doc.setFont('helvetica', 'bold');
+    var lines = doc.splitTextToSize(testo, textW);
+    var lineH = 5;
+    var textBlockH = lines.length * lineH;
+    var personaggiH = 3 * 10.5 + 2 * 2.5;
+    var boxH = innerPad + textBlockH + 5 + 5 + 6 + personaggiH + innerPad;
 
-    doc.setFontSize(9); doc.setTextColor(120); doc.setFont('helvetica','normal');
-    doc.text('Risposta:', marginL, y);
-    doc.setDrawColor(180); doc.setLineWidth(0.3); doc.setLineDash([1,1.5]);
-    doc.line(marginL + 22, y, pageW - marginR, y);
-    doc.setLineDash([]);
-    y += 7;
-
-    doc.setFont('helvetica','normal');
-    y = drawPersonaggi(y);
-    y += 8;
-
-    if (p < 2) {
-      doc.setDrawColor(210); doc.setLineWidth(0.2);
-      doc.line(marginL, y, pageW - marginR, y);
-      y += 8;
+    if (y + boxH > pageH - marginBottom) {
+      doc.addPage();
+      y = 18;
     }
-  }
 
-  doc.setFontSize(8); doc.setTextColor(180); doc.setFont('helvetica','normal');
-  doc.text('Matematiche non si nasce', pageW - 5, pageH / 2, { angle: 270, align: 'center' });
+    var boxTop = y;
+    doc.setDrawColor(150); doc.setLineWidth(0.4);
+    doc.roundedRect(marginL, boxTop, contentW, boxH, 3, 3, 'S');
+
+    var innerX = marginL + innerPad;
+    var textY = boxTop + innerPad + lineH * 0.7;
+    doc.setFontSize(11); doc.setTextColor(25); doc.setFont('helvetica', 'bold');
+    doc.text(lines, innerX, textY);
+
+    var afterTextY = boxTop + innerPad + textBlockH + 5;
+    doc.setFontSize(8); doc.setTextColor(130); doc.setFont('helvetica', 'normal');
+    doc.text('Risposta:', innerX, afterTextY);
+    doc.setDrawColor(190); doc.setLineWidth(0.3); doc.setLineDash([1, 1.3]);
+    doc.line(innerX + 18, afterTextY, marginL + contentW - innerPad - sideStripW, afterTextY);
+    doc.setLineDash([]);
+
+    var persY = afterTextY + 6;
+    drawPersonaggi(innerX, persY, contentW - innerPad * 2 - sideStripW);
+
+    if (logoData) {
+      var logoSize = 9;
+      doc.addImage(logoData, 'PNG', marginL + contentW - innerPad - logoSize, boxTop + 3, logoSize, logoSize);
+    }
+
+    doc.setDrawColor(210); doc.setLineWidth(0.2); doc.setLineDash([2, 1.5]);
+    doc.roundedRect(marginL - 2, boxTop - 2, contentW + 4, boxH + 4, 3, 3, 'S');
+    doc.setLineDash([]);
+
+    y = boxTop + boxH + 10;
+  }
 
   doc.save('bruco-formica-coccinella.pdf');
 });
