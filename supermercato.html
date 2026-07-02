@@ -188,9 +188,6 @@
     <button class="nuovo-btn" onclick="nuovoRound()">🔄 Nuova spesa</button>
     <button class="pdf-btn" onclick="generaPDF()">📄 Genera una scheda</button>
   </div>
-  <div class="btn-row">
-    <button class="nuovo-btn" style="background:#999;" onclick="window.location.href='https://rdiianni-alt.github.io/matematichenonsinasce/'">🏠 Torna alla pagina iniziale</button>
-  </div>
 </div>
 
 <script>
@@ -320,17 +317,36 @@ function mostraScontrino(resto){
 }
 
 // ---- GENERA PDF ----
-function generaPDF(){
+function loadImageAsDataURL(url){
+  return fetch(url)
+    .then(r=>r.blob())
+    .then(blob=>new Promise((resolve,reject)=>{
+      const reader=new FileReader();
+      reader.onloadend=()=>resolve(reader.result);
+      reader.onerror=reject;
+      reader.readAsDataURL(blob);
+    }));
+}
+
+async function generaPDF(){
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit:'mm', format:'a4' });
   const livNomi = ['Prezzi interi','Con i ,50','Con i centesimi'];
   const W=210, M=20, CW=W-M*2;
-  let y=18;
+  let y=10;
 
   // Genera articoli
   let n=[3,5,7][Math.floor(Math.random()*3)];
   let articoli=[...PRODOTTI].sort(()=>Math.random()-0.5).slice(0,n);
   articoli.forEach(a=>a.prezzoScheda=prezzoRandom());
+
+  // Logo in cima, accanto al titolo
+  const logoSize = 14;
+  try {
+    const logoData = await loadImageAsDataURL('https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png');
+    doc.addImage(logoData, 'PNG', (W-logoSize)/2, y, logoSize, logoSize);
+  } catch(e) { console.error('Logo non caricato', e); }
+  y += logoSize + 4;
 
   // Intestazione
   doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(30,100,30);
@@ -399,10 +415,11 @@ function generaPDF(){
   doc.text('IL MIO SCONTRINO', W/2, y, {align:'center'}); y+=10;
 
   doc.setFontSize(12); doc.setFont('helvetica','normal'); doc.setTextColor(0);
+  const rowH = n>=7 ? 7 : 9;
   articoli.forEach(a=>{
     doc.text(a.n, M+10, y);
     doc.text('€ '+fmt(a.prezzoScheda), M+110, y);
-    y+=9;
+    y+=rowH;
   });
   y+=4;
   doc.setDrawColor(150); doc.setLineWidth(0.3); doc.line(M+10, y, M+120, y); y+=7;
@@ -415,9 +432,9 @@ function generaPDF(){
   doc.text('RESTO', M+10, y);
   doc.setTextColor(0); doc.text('€', M+90, y); doc.line(M+96, y, M+120, y);
 
-  // Footer
+  // Footer testuale fisso in fondo — nessun salto pagina, il logo è già in alto
   doc.setFontSize(7); doc.setFont('helvetica','italic'); doc.setTextColor(180);
-  doc.text('Matematiche non si nasce', W/2, 289, {align:'center'});
+  doc.text('Matematiche non si nasce', W/2, 292, {align:'center'});
 
   doc.save('spesa-supermercato-livello'+livello+'.pdf');
 }
