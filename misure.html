@@ -64,6 +64,28 @@
   .btn-inizia:hover { background: #4e4229; }
   .btn-inizia:disabled { background: #bbb; cursor: default; }
 
+  .btn-stampa {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; padding: 13px; margin-top: 10px;
+    background: #fff; color: #6b5c3e; border: 2px solid #6b5c3e; border-radius: 8px;
+    font-size: 1rem; font-family: 'Georgia', serif; cursor: pointer;
+    transition: background .18s, color .18s; letter-spacing: .03em;
+  }
+  .btn-stampa:hover { background: #f3ede1; }
+  .btn-stampa:disabled { background: #f3f2ef; color: #bbb; border-color: #ccc; cursor: default; }
+
+  .opzioni-stampa {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: .82rem; color: #7a7060; margin-top: 14px;
+  }
+  .opzioni-stampa input {
+    width: 52px; padding: 5px 6px; border: 1px solid #d0cbc0; border-radius: 5px;
+    font-family: 'Georgia', serif; text-align: center; background: #fafaf7; color: #2c2a26;
+  }
+
+  /* FOGLIO STAMPA */
+  #foglio-stampa { display: none; }
+
   /* GIOCO */
   #schermata-gioco { width: 100%; max-width: 640px; display: none; }
 
@@ -118,6 +140,30 @@
 
   .punteggio { text-align: right; font-size: .85rem; color: #7a7060; margin-bottom: 10px; }
   .punteggio strong { color: #3a3835; }
+
+  /* ── FOGLIO DA STAMPARE ── */
+  .foglio-intestazione { text-align: center; margin-bottom: 24px; }
+  .foglio-intestazione h2 { font-size: 1.3rem; font-weight: normal; margin-bottom: 4px; }
+  .foglio-intestazione .foglio-sotto { font-size: .85rem; color: #5f5e5a; }
+  .foglio-dati { display: flex; justify-content: space-between; font-size: .9rem; margin: 18px 0 22px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+  .foglio-lista { list-style: none; }
+  .foglio-lista li { margin-bottom: 22px; font-size: 1rem; line-height: 1.5; }
+  .foglio-lista .num { font-weight: bold; margin-right: 6px; }
+  .foglio-lista .cat { display: block; font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: #9b7e3e; margin-bottom: 3px; }
+  .foglio-lista .risp-linea { display: inline-block; border-bottom: 1px solid #999; width: 140px; height: 1em; margin-left: 6px; vertical-align: bottom; }
+  .foglio-piede { margin-top: 40px; text-align: center; }
+  .foglio-piede img { width: 44px; height: 44px; object-fit: contain; border-radius: 50%; }
+  .foglio-piede span { display: block; font-size: 12px; color: #5f5e5a; margin-top: 4px; }
+
+  @media print {
+    body * { visibility: hidden; }
+    #foglio-stampa, #foglio-stampa * { visibility: visible; }
+    #foglio-stampa {
+      display: block !important;
+      position: absolute; top: 0; left: 0; width: 100%;
+      background: #fff; padding: 20px 30px;
+    }
+  }
 </style>
 </head>
 <body>
@@ -137,30 +183,48 @@
     <div class="card-scelta" data-tipo="lunghezza" onclick="toggleScelta(this)">
       <div class="icona">📏</div>
       <div class="nome">Lunghezza</div>
-      <div class="unita">km · hm · dam · m<br>dm · cm · mm</div>
     </div>
     <div class="card-scelta" data-tipo="massa" onclick="toggleScelta(this)">
       <div class="icona">⚖️</div>
       <div class="nome">Massa e peso</div>
-      <div class="unita">kg · hg · dag · g<br>dg · cg · mg</div>
     </div>
     <div class="card-scelta" data-tipo="capacita" onclick="toggleScelta(this)">
       <div class="icona">🧴</div>
       <div class="nome">Capacità</div>
-      <div class="unita">hl · dal · l<br>dl · cl · ml</div>
     </div>
     <div class="card-scelta" data-tipo="tempo" onclick="toggleScelta(this)">
       <div class="icona">🕐</div>
       <div class="nome">Tempo</div>
-      <div class="unita">anni · mesi · settimane<br>giorni · ore · min · s</div>
     </div>
     <div class="card-scelta" data-tipo="superficie" onclick="toggleScelta(this)">
       <div class="icona">⬛</div>
       <div class="nome">Superficie</div>
-      <div class="unita">km² · hm² · dam² · m²<br>dm² · cm² · mm²</div>
     </div>
   </div>
   <button class="btn-inizia" id="btn-inizia" onclick="inizia()" disabled>Inizia</button>
+  <button class="btn-stampa" id="btn-stampa" onclick="generaFoglioStampa()" disabled>🖨️ Stampa scheda problemi</button>
+  <div class="opzioni-stampa">
+    <label for="numero-stampa">Numero di problemi:</label>
+    <input type="number" id="numero-stampa" value="15" min="5" max="40">
+  </div>
+</div>
+
+<!-- FOGLIO STAMPABILE -->
+<div id="foglio-stampa">
+  <div class="foglio-intestazione">
+    <h2>Le Unità di Misura</h2>
+    <div class="foglio-sotto" id="foglio-argomenti"></div>
+  </div>
+  <div class="foglio-dati">
+    <span>Nome: _____________________________</span>
+  </div>
+  <ol class="foglio-lista" id="foglio-lista"></ol>
+  <div class="foglio-piede">
+    <a href="https://matematichenonsinasce.com/" target="_blank">
+      <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Logo">
+    </a>
+    <span>Matematiche non si nasce.</span>
+  </div>
 </div>
 
 <!-- GIOCO -->
@@ -300,6 +364,14 @@ const SCALE = {
   superficie: { ico:'⬛', testo:'km² – hm² – dam² – m² – dm² – cm² – mm²' },
 };
 
+const NOME_TIPO = {
+  lunghezza: 'Lunghezza',
+  massa: 'Massa e peso',
+  capacita: 'Capacità',
+  tempo: 'Tempo',
+  superficie: 'Superficie',
+};
+
 /* ══════════════════════════════════════
    STATE
 ══════════════════════════════════════ */
@@ -317,6 +389,7 @@ function toggleScelta(el) {
   el.classList.toggle('selezionata');
   tipiSelezionati = [...document.querySelectorAll('.card-scelta.selezionata')].map(c=>c.dataset.tipo);
   document.getElementById('btn-inizia').disabled = tipiSelezionati.length === 0;
+  document.getElementById('btn-stampa').disabled = tipiSelezionati.length === 0;
 }
 
 function inizia() {
@@ -329,6 +402,42 @@ function inizia() {
   document.getElementById('schermata-gioco').style.display = 'block';
   costruisciRemind();
   prossimaDomanda();
+}
+
+/* ══════════════════════════════════════
+   FOGLIO STAMPABILE
+══════════════════════════════════════ */
+function generaFoglioStampa() {
+  if (tipiSelezionati.length === 0) return;
+
+  let pool = [];
+  tipiSelezionati.forEach(t => BANCHE[t].forEach(fn => pool.push(fn)));
+
+  // mescola il pool (Fisher-Yates)
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+
+  const richieste = Math.min(40, Math.max(5, parseInt(document.getElementById('numero-stampa').value) || 15));
+  const domande = [];
+  for (let i = 0; i < richieste; i++) {
+    const fn = pool[i % pool.length];
+    domande.push(fn());
+  }
+
+  document.getElementById('foglio-argomenti').textContent =
+    'Scheda di esercizi — ' + tipiSelezionati.map(t => NOME_TIPO[t]).join(', ');
+
+  const lista = document.getElementById('foglio-lista');
+  lista.innerHTML = '';
+  domande.forEach((d, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = `${d.testo}<span class="risp-linea"></span>`;
+    lista.appendChild(li);
+  });
+
+  window.print();
 }
 
 /* ══════════════════════════════════════
