@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Piramide dei Numeri</title>
+<title>Le piramidi dei numeri</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -22,195 +22,205 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
     margin-bottom: 10px;
   }
-
-  .logo img {
-    width: 60px; height: 60px;
-    object-fit: contain;
-    border-radius: 50%;
-  }
-
-  .site-title {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #4a90b8;
-    text-align: center;
-  }
-
-  .blog-title {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #3a2e1e;
-    text-align: center;
-  }
-
-  .footer-intro {
-    max-width: 420px;
-    text-align: center;
-    font-size: 0.88rem;
-    color: #5a4a30;
-    line-height: 1.6;
-    margin-top: 18px;
-  }
-
-  .intro {
-    max-width: 480px;
-    text-align: center;
-    font-size: 0.92rem;
-    color: #5a4a30;
-    line-height: 1.6;
-    margin-bottom: 18px;
-  }
+  .logo img { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; }
+  .site-title { font-size: 0.95rem; font-weight: 600; color: #4a90b8; text-align: center; }
+  .page-title { font-size: 1.2rem; font-weight: 700; color: #3a2e1e; text-align: center; }
 
   .controls {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-bottom: 20px;
-    align-items: center;
+    display: flex; gap: 8px; flex-wrap: wrap;
+    justify-content: center; margin-bottom: 20px; align-items: center;
   }
-
   .level-btn {
-    padding: 7px 16px;
-    border-radius: 20px;
-    border: 1.5px solid #c4a882;
-    background: #fdf8f0;
-    color: #7a5c2e;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
+    padding: 7px 16px; border-radius: 20px;
+    border: 1.5px solid #c4a882; background: #fdf8f0;
+    color: #7a5c2e; font-size: 0.9rem; font-weight: 600; cursor: pointer;
     transition: background 0.2s, color 0.2s;
   }
-
-  .level-btn:hover, .level-btn.active {
-    background: #c4a882;
-    color: #fff;
-  }
-
+  .level-btn:hover, .level-btn.active { background: #c4a882; color: #fff; }
   .action-btn {
-    padding: 7px 18px;
-    border-radius: 20px;
-    border: 1.5px solid #a07850;
-    background: #a07850;
-    color: #fff;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
+    padding: 7px 18px; border-radius: 20px;
+    border: 1.5px solid #a07850; background: #a07850;
+    color: #fff; font-size: 0.9rem; font-weight: 600; cursor: pointer;
     transition: background 0.2s;
   }
   .action-btn:hover { background: #7a5c2e; border-color: #7a5c2e; }
+  .sep { color: #c4a882; font-size: 1rem; align-self: center; }
 
+  /* GAME PYRAMID */
   .pyramid-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    margin-bottom: 20px;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 3px; margin-bottom: 20px; width: 100%;
   }
-
-  .row {
-    display: flex;
-    gap: 3px;
-    justify-content: center;
-  }
-
-  .pyramid-wrap {
-    width: 100%;
-  }
-
+  .row { display: flex; gap: 3px; justify-content: center; }
   .brick {
-    width: clamp(38px, 12vw, 58px);
-    height: clamp(30px, 9vw, 42px);
-    border: 1.5px solid #c4a882;
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: clamp(0.7rem, 3vw, 1rem);
-    font-weight: 600;
-    background: #fff;
-    color: #3a2e1e;
+    width: clamp(38px,12vw,58px); height: clamp(30px,9vw,42px);
+    border: 1.5px solid #c4a882; border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(0.7rem,3vw,1rem); font-weight: 600;
+    background: #fff; color: #3a2e1e;
   }
-
-  .brick.given {
-    background: #f5eedd;
-    color: #5a3e1e;
-  }
-
+  .brick.given { background: #f5eedd; color: #5a3e1e; }
   .brick input {
-    width: 100%; height: 100%;
-    border: none;
-    outline: none;
-    text-align: center;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #3a2e1e;
-    background: transparent;
+    width: 100%; height: 100%; border: none; outline: none;
+    text-align: center; font-size: clamp(0.7rem,3vw,1rem);
+    font-weight: 600; color: #3a2e1e; background: transparent;
   }
-
   .brick.correct { background: #eaf4e8; border-color: #8ab88a; }
   .brick.wrong   { background: #faeaea; border-color: #c49090; }
 
   .result-box {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #7a5c2e;
-    text-align: center;
-    margin-bottom: 14px;
+    font-size: 1rem; font-weight: 600; color: #7a5c2e;
+    text-align: center; margin-bottom: 14px; display: none;
+  }
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .footer-intro {
+    max-width: 420px; text-align: center; font-size: 0.88rem;
+    color: #5a4a30; line-height: 1.6; margin-top: 18px;
+  }
+
+  /* PRINT STYLES */
+  @media print {
+    body, html { background: white; padding: 0; margin: 0; }
+    .no-print { display: none !important; }
+    #print-sheet { display: block !important; }
+    @page { size: A4 portrait; margin: 12mm 10mm; }
+  }
+
+  #print-sheet {
     display: none;
-    min-height: 1.5em;
+    width: 100%; max-width: 700px;
+    font-family: 'Segoe UI', sans-serif;
   }
 
-  .btn-row {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
+  .print-header {
+    text-align: center; margin-bottom: 10px;
+  }
+  .print-header h1 {
+    font-size: 1.3rem; font-weight: 700; color: #3a2e1e; margin-bottom: 2px;
+  }
+  .print-level {
+    font-size: 0.82rem; color: #7a5c2e; margin-bottom: 8px;
   }
 
-  /* separator */
-  .sep { color: #c4a882; font-size: 1rem; align-self: center; }
+  .print-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px 12px;
+    margin-bottom: 18px;
+  }
+
+  .print-pyramid {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 2px;
+  }
+  .print-row { display: flex; gap: 2px; justify-content: center; }
+  .print-brick {
+    width: 38px; height: 30px;
+    border: 1.5px solid #555;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.82rem; font-weight: 600; color: #222;
+    background: white;
+  }
+  .print-brick.print-given { background: #f0e8d8; }
+  .print-brick.print-empty { background: white; }
+
+  .print-footer {
+    border-top: 1px solid #c4a882;
+    padding-top: 8px;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .print-footer img { width: 36px; height: 36px; border-radius: 50%; object-fit: contain; }
+  .print-footer span { font-size: 0.85rem; font-weight: 600; color: #4a90b8; }
+  .print-num { font-size: 0.75rem; color: #888; font-weight: 600; }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">
-    <a href="https://matematichenonsinasce.com/" target="_blank">
-      <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="logo">
-    </a>
+<!-- SCHERMATA GIOCO -->
+<div class="no-print" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+
+  <header>
+    <div class="logo">
+      <a href="https://matematichenonsinasce.com/">
+        <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="logo">
+      </a>
+    </div>
+    <div class="site-title">Matematiche non si nasce</div>
+    <div class="page-title">Le piramidi dei numeri</div>
+  </header>
+
+  <div class="controls">
+    <button class="level-btn active" id="btn-small" onclick="setMode('small')">𓂀 Livello 1</button>
+    <button class="level-btn" id="btn-big" onclick="setMode('big')">𓂀𓂀 Livello 2</button>
+    <button class="level-btn" id="btn-decimal" onclick="setMode('decimal')">𓂀𓂀𓂀 Livello 3</button>
+    <span class="sep">|</span>
+    <button class="action-btn" onclick="newGame()">↺ Nuova</button>
+    <button class="action-btn" onclick="stampaPDF()">🖨 Stampa scheda</button>
   </div>
-  <div class="site-title">Le piramidi dei numeri</div>
-</header>
 
+  <div class="pyramid-wrap" id="pyramid"></div>
 
+  <div class="result-box" id="resultBox"></div>
 
-<div class="controls">
-  <button class="level-btn active" id="btn-small" onclick="setMode('small')">𓂀 Livello 1</button>
-  <button class="level-btn" id="btn-big" onclick="setMode('big')">𓂀𓂀 Livello 2</button>
-  <button class="level-btn" id="btn-decimal" onclick="setMode('decimal')">𓂀𓂀𓂀 Livello 3</button>
-  <span class="sep">|</span>
-  <button class="action-btn" onclick="newGame()">↺ Nuova</button>
+  <div class="btn-row">
+    <button class="action-btn" onclick="checkAnswers()">Verifica</button>
+    <button class="action-btn" onclick="newGame()">Ricomincia</button>
+  </div>
+
+  <div class="footer-intro">
+    Un gioco ispirato al Progetto ArAl: completa i mattoni vuoti sapendo che ogni mattone è sempre la somma dei due sotto di lui. Scegli il livello e premi <em>Nuova</em> per iniziare!
+  </div>
+
 </div>
 
-<div class="pyramid-wrap" id="pyramid"></div>
-
-<div class="result-box" id="resultBox"></div>
-
-<div class="footer-intro">
-  Un gioco ispirato al Progetto ArAl: completa i mattoni vuoti sapendo che ogni mattone è sempre la somma dei due sotto di lui. Scegli il livello e premi <em>Nuova</em> per iniziare!
-</div>
-
-<div class="btn-row">
-  <button class="action-btn" onclick="checkAnswers()">Verifica</button>
-  <button class="action-btn" onclick="newGame()">Ricomincia</button>
+<!-- SCHEDA STAMPA -->
+<div id="print-sheet">
+  <div class="print-header">
+    <h1>Le piramidi dei numeri</h1>
+    <div class="print-level" id="print-level-label"></div>
+  </div>
+  <div class="print-grid" id="print-grid"></div>
+  <div class="print-footer">
+    <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="logo">
+    <span>Matematiche non si nasce</span>
+  </div>
 </div>
 
 <script>
   let values = [], hidden = [], mode = 'small';
+
+  function round2(n) { return Math.round(n * 100) / 100; }
+
+  function generatePyramid(m) {
+    let base = [];
+    if (m === 'small') {
+      for (let i = 0; i < 4; i++) base.push(Math.floor(Math.random() * 6));
+    } else if (m === 'big') {
+      for (let i = 0; i < 4; i++) base.push(Math.floor(Math.random() * 15));
+    } else {
+      for (let i = 0; i < 4; i++) base.push(Math.round(Math.random() * 100) / 10);
+    }
+    let vals = [base];
+    for (let r = 1; r <= 3; r++) {
+      let prev = vals[r-1], row = [];
+      for (let c = 0; c < prev.length - 1; c++) row.push(round2(prev[c] + prev[c+1]));
+      vals.push(row);
+    }
+    return vals;
+  }
+
+  function pickHidden(vals, count) {
+    let all = [];
+    for (let r = 0; r < 4; r++)
+      for (let c = 0; c < vals[r].length; c++) all.push([r,c]);
+    all.sort(() => Math.random() - 0.5);
+    let h = vals.map(row => row.map(() => false));
+    all.slice(0, count).forEach(([r,c]) => h[r][c] = true);
+    return h;
+  }
 
   function setMode(m) {
     mode = m;
@@ -219,34 +229,10 @@
     newGame();
   }
 
-  function round2(n) { return Math.round(n * 100) / 100; }
-
   function newGame() {
     document.getElementById('resultBox').style.display = 'none';
-    let base = [];
-    if (mode === 'small') {
-      for (let i = 0; i < 4; i++) base.push(Math.floor(Math.random() * 6));
-    } else if (mode === 'big') {
-      for (let i = 0; i < 4; i++) base.push(Math.floor(Math.random() * 15));
-    } else {
-      for (let i = 0; i < 4; i++) base.push(Math.round(Math.random() * 100) / 10);
-    }
-
-    values = [base];
-    for (let r = 1; r <= 3; r++) {
-      let prev = values[r-1], row = [];
-      for (let c = 0; c < prev.length - 1; c++) row.push(round2(prev[c] + prev[c+1]));
-      values.push(row);
-    }
-
-    let all = [];
-    for (let r = 0; r < 4; r++)
-      for (let c = 0; c < values[r].length; c++) all.push([r,c]);
-    all.sort(() => Math.random() - 0.5);
-    let toHide = all.slice(0, 5);
-    hidden = values.map(row => row.map(() => false));
-    toHide.forEach(([r,c]) => hidden[r][c] = true);
-
+    values = generatePyramid(mode);
+    hidden = pickHidden(values, 5);
     renderPyramid();
   }
 
@@ -294,8 +280,42 @@
     const box = document.getElementById('resultBox');
     box.style.display = 'block';
     box.textContent = correct === total
-      ? `🎉 Perfetto! Tutti i ${total} mattoni giusti!`
+      ? `Esatto! Tutti i ${total} mattoni giusti!`
       : `Hai trovato ${correct} su ${total} mattoni. Riprova!`;
+  }
+
+  function renderPrintPyramid(vals, hid) {
+    const wrap = document.createElement('div');
+    wrap.className = 'print-pyramid';
+    for (let r = 3; r >= 0; r--) {
+      const row = document.createElement('div');
+      row.className = 'print-row';
+      for (let c = 0; c < vals[r].length; c++) {
+        const b = document.createElement('div');
+        b.className = 'print-brick ' + (hid[r][c] ? 'print-empty' : 'print-given');
+        b.textContent = hid[r][c] ? '' : vals[r][c];
+        row.appendChild(b);
+      }
+      wrap.appendChild(row);
+    }
+    return wrap;
+  }
+
+  function stampaPDF() {
+    const grid = document.getElementById('print-grid');
+    grid.innerHTML = '';
+    const labels = { small: 'Livello 1 — numeri entro il 20', big: 'Livello 2 — numeri entro il 100', decimal: 'Livello 3 — numeri decimali' };
+    document.getElementById('print-level-label').textContent = labels[mode];
+    for (let i = 0; i < 9; i++) {
+      const v = generatePyramid(mode);
+      const h = pickHidden(v, 5);
+      grid.appendChild(renderPrintPyramid(v, h));
+    }
+    document.getElementById('print-sheet').style.display = 'block';
+    setTimeout(() => {
+      window.print();
+      document.getElementById('print-sheet').style.display = 'none';
+    }, 300);
   }
 
   newGame();
