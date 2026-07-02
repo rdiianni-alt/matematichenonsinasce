@@ -71,7 +71,10 @@ button.danger:hover{background:#FCEBEB}
     <h1>Percorso sul 100</h1>
     <p class="sub">Ascolta le istruzioni, clicca le caselle del percorso, poi controlla!</p>
   </div>
-  <button onclick="stampaGriglie()" style="flex-shrink:0;margin-left:10px;font-size:11px;padding:5px 10px">🖨 Stampa griglie</button>
+  <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;margin-left:10px">
+    <button onclick="stampaGriglie()" style="font-size:11px;padding:5px 10px">🖨 Stampa griglie</button>
+    <button onclick="stampaSchedaPercorso()" style="font-size:11px;padding:5px 10px">🖨 Stampa scheda percorso</button>
+  </div>
 </div>
 
 <div class="grid" id="grid"></div>
@@ -254,26 +257,75 @@ function stampaGriglie(){
     +"body{margin:0;padding:0;font-family:system-ui,sans-serif;width:297mm;height:210mm;overflow:hidden}"
     +".outer{width:297mm;height:210mm;display:flex;flex-direction:column;align-items:center;justify-content:center}"
     +".inner{width:280mm;height:198mm;transform-origin:top left}"
-    +"h2{text-align:center;font-size:9pt;font-weight:600;margin-bottom:3mm}"
-    +".pagina{display:grid;grid-template-columns:repeat(3,88mm);grid-template-rows:repeat(2,88mm);gap:3mm}"
-    +".griglia-wrap{width:88mm;height:88mm}"
-    +".griglia-wrap p{font-size:5pt;color:#aaa;margin-bottom:1mm;text-align:center}"
-    +".griglia{display:grid;grid-template-columns:repeat(10,1fr);gap:0.5px;width:88mm;height:81mm}"
-    +".cella{border:0.5px solid #bbb;font-size:5pt;font-weight:600;"
+    +".stampa-logo{display:flex;flex-direction:column;align-items:center;margin-bottom:1mm}"
+    +".stampa-logo img{width:8mm;height:8mm;border-radius:50%;object-fit:contain;margin-bottom:1mm}"
+    +".stampa-logo span{font-size:6pt;font-weight:600;color:#555}"
+    +"h2{text-align:center;font-size:8pt;font-weight:600;margin-bottom:2mm}"
+    +".pagina{display:grid;grid-template-columns:repeat(3,78mm);grid-template-rows:repeat(2,78mm);gap:2mm}"
+    +".griglia-wrap{width:78mm;height:78mm}"
+    +".griglia{display:grid;grid-template-columns:repeat(10,1fr);gap:0.5px;width:78mm;height:77mm}"
+    +".cella{border:0.5px solid #bbb;font-size:4.5pt;font-weight:600;"
     +"display:flex;align-items:center;justify-content:center;background:#fff;color:#333}";
   var griglie="";
   for(var g=0;g<6;g++){
     var celle="";
     for(var n=1;n<=100;n++) celle+='<div class="cella">'+n+'</div>';
-    griglie+='<div class="griglia-wrap"><p>Percorso sul 100 — griglia '+(g+1)+'</p>'
+    griglie+='<div class="griglia-wrap">'
       +'<div class="griglia">'+celle+'</div></div>';
   }
   var html='<!DOCTYPE html><html><head><meta charset="UTF-8">'
     +'<style>'+css+'</style></head>'
     +'<body><div class="outer"><div class="inner">'
+    +'<div class="stampa-logo"><img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png"><span>Matematiche non si nasce</span></div>'
     +'<h2>Percorso sul 100 — griglie da stampare</h2>'
     +'<div class="pagina">'+griglie+'</div>'
     +'</div></div></body></html>';
+  var w=window.open("","_blank");
+  w.document.write(html);
+  w.document.close();
+  w.onload=function(){w.print();};
+}
+
+function stampaSchedaPercorso(){
+  var p=CLEAN_PATHS[Math.floor(Math.random()*CLEAN_PATHS.length)];
+  var celle="";
+  for(var n=1;n<=100;n++) celle+='<div class="cella">'+n+'</div>';
+  var mosseHtml=p.moves.map(function(m){
+    return '<span class="mv '+(m>0?"pos":"neg")+'">'+(m>0?"+":"")+m+'</span>';
+  }).join("");
+  var css="@page{size:A4 portrait;margin:0}"
+    +"*{box-sizing:border-box}"
+    +"body{margin:0;padding:0;font-family:system-ui,sans-serif;width:210mm;height:297mm;overflow:hidden}"
+    +".outer{width:210mm;height:297mm;display:flex;flex-direction:column;align-items:center;padding-top:10mm}"
+    +".stampa-logo{display:flex;flex-direction:column;align-items:center;margin-bottom:4mm}"
+    +".stampa-logo img{width:14mm;height:14mm;border-radius:50%;object-fit:contain;margin-bottom:1.5mm}"
+    +".stampa-logo span{font-size:8pt;font-weight:600;color:#555}"
+    +"h2{text-align:center;font-size:13pt;font-weight:600;margin-bottom:6mm}"
+    +".nome-riga{width:170mm;display:flex;justify-content:space-between;font-size:10pt;margin-bottom:6mm}"
+    +".nome-riga span{border-bottom:0.5px solid #999;display:inline-block;min-width:60mm}"
+    +".istruzioni{width:170mm;font-size:10.5pt;line-height:1.5;margin-bottom:5mm;color:#333}"
+    +".dati{width:170mm;display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6mm}"
+    +".dati .partenza{font-size:11pt;font-weight:600;color:#333}"
+    +".dati .partenza b{display:inline-block;border:2px solid #D85A30;color:#D85A30;border-radius:6px;padding:2px 10px;margin-left:4px;font-size:13pt}"
+    +".mv{display:inline-block;font-size:11pt;font-weight:700;padding:3px 9px;border-radius:6px;margin-right:4px}"
+    +".mv.pos{background:#EAF3DE;color:#3B6D11}"
+    +".mv.neg{background:#FAECE7;color:#993C1D}"
+    +".griglia{display:grid;grid-template-columns:repeat(10,1fr);gap:1px;width:170mm;height:170mm;margin-bottom:6mm}"
+    +".cella{border:0.5px solid #bbb;font-size:8pt;font-weight:600;"
+    +"display:flex;align-items:center;justify-content:center;background:#fff;color:#333}"
+    +".arrivo{width:170mm;font-size:11pt;display:flex;align-items:center;gap:6px}"
+    +".arrivo span{border-bottom:1px solid #999;display:inline-block;min-width:40mm;height:14pt}";
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8">'
+    +'<style>'+css+'</style></head>'
+    +'<body><div class="outer">'
+    +'<div class="stampa-logo"><img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png"><span>Matematiche non si nasce</span></div>'
+    +'<h2>Percorso sul 100 — scheda</h2>'
+    +'<div class="nome-riga"><span>Nome: <span></span></span><span>Data: <span></span></span></div>'
+    +'<div class="istruzioni">Parti dal numero cerchiato e segui il percorso, una mossa alla volta. Colora o segna le caselle che attraversi, poi scrivi il numero a cui sei arrivato.</div>'
+    +'<div class="dati"><span class="partenza">Partenza: <b>'+p.start+'</b></span>'+mosseHtml+'</div>'
+    +'<div class="griglia">'+celle+'</div>'
+    +'<div class="arrivo">Sono arrivato al numero: <span></span></div>'
+    +'</div></body></html>';
   var w=window.open("","_blank");
   w.document.write(html);
   w.document.close();
