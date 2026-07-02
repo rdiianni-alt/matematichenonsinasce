@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Awalé — Gioco delle Decine</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Lato', sans-serif;
+  background: #f5efe6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 16px;
+  color: #4a3728;
+  user-select: none;
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 800px;
+  margin-bottom: 14px;
+  gap: 8px;
+}
+.top-bar a { display:flex; align-items:center; gap:8px; text-decoration:none; flex-shrink:0; }
+.top-bar img { width:44px; height:44px; object-fit:contain; border-radius:50%; }
+.site-name { font-family:'Lato',sans-serif; font-size:12px; color:#7a5c3a; letter-spacing:0.5px; }
+
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(18px,3.5vw,26px);
+  font-weight: 600;
+  color: #5c3d1e;
+  letter-spacing: 1px;
+  text-align: center;
+  flex: 1;
+}
+
+.btn-nuova {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid #b8906a;
+  background: #fff8f0;
+  color: #7a5c3a;
+  font-family: 'Lato', sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.btn-nuova:hover { background: #f0e0cc; }
+
+/* BOARD */
+.board-wrap {
+  background: #ede0cc;
+  border-radius: 28px;
+  padding: 16px 12px;
+  box-shadow: 0 2px 12px rgba(120,80,40,0.10);
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: stretch;
+  width: 100%;
+  max-width: 800px;
+}
+
+.granaio-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  width: clamp(58px, 10vw, 82px);
+}
+.granaio {
+  width: 100%;
+  min-height: clamp(120px, 22vw, 200px);
+  background: #fff8f0;
+  border-radius: 14px;
+  border: 1.5px solid #c8a882;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px;
+  gap: 4px;
+}
+.granaio .g-label {
+  font-family: 'Lato', sans-serif;
+  font-size: clamp(8px,1.2vw,10px);
+  letter-spacing: 1px;
+  color: #a08060;
+  text-transform: uppercase;
+  text-align: center;
+}
+.granaio .totale {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(20px,3.5vw,30px);
+  font-weight: 600;
+}
+.granaio.azzurro .totale { color: #3a7aaa; }
+.granaio.verde .totale   { color: #3a8a4a; }
+.granaio .dettaglio { font-size: clamp(8px,1.2vw,10px); color: #a08060; text-align:center; line-height:1.5; }
+.col-label-ext {
+  font-family: 'Lato', sans-serif;
+  font-size: clamp(9px,1.3vw,11px);
+  letter-spacing: 1px;
+  color: #8a6a4a;
+  text-align: center;
+  font-weight: 400;
+}
+
+.freccia-col {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 clamp(16px, 3vw, 26px);
+}
+.freccia-col svg { width:100%; height:100%; }
+
+.colonna {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(5px, 1vw, 9px);
+  flex: 0 0 auto;
+}
+
+/* CIOTOLA */
+.ciotola-wrap {
+  cursor: default;
+  position: relative;
+  width: clamp(58px, 10.5vw, 92px);
+  height: clamp(58px, 10.5vw, 92px);
+  border-radius: 50%;
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.ciotola-wrap.selezionabile { cursor: pointer; }
+.ciotola-wrap.selezionabile:hover { transform: scale(1.07); }
+.ciotola-wrap.selezionata { transform: scale(1.10); box-shadow: 0 0 0 3px #c4902a, 0 0 12px #c4902a66; }
+.ciotola-wrap.decina-pronta { animation: pulsaCiotola 0.7s ease-in-out infinite alternate; }
+@keyframes pulsaCiotola {
+  from { box-shadow: 0 0 0 2px #c4902a66; }
+  to   { box-shadow: 0 0 0 4px #c4902a, 0 0 16px #c4902a88; }
+}
+
+/* CENTRO */
+.centro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  flex: 1;
+  min-width: 0;
+}
+.turno {
+  font-family: 'Lato', sans-serif;
+  font-size: clamp(11px, 1.8vw, 14px);
+  font-weight: 400;
+  padding: 7px 10px;
+  border-radius: 14px;
+  text-align: center;
+  line-height: 1.6;
+  width: 100%;
+  letter-spacing: 0.3px;
+}
+.turno.azzurro { background: #ddeef8; color: #2a5a8a; border: 1.5px solid #7ab0d8; }
+.turno.verde   { background: #dcf0e0; color: #2a6a3a; border: 1.5px solid #7abf8a; }
+.turno.fine    { background: #fdf0dc; color: #8a5a1a; border: 1.5px solid #d4a050; }
+.msg {
+  font-family: 'Lato', sans-serif;
+  font-size: clamp(10px,1.6vw,12px);
+  color: #7a5c3a;
+  text-align: center;
+  line-height: 1.5;
+  min-height: 30px;
+}
+
+.btn-azione {
+  padding: 8px 8px;
+  border-radius: 20px;
+  border: 1.5px solid;
+  font-family: 'Lato', sans-serif;
+  font-size: clamp(10px,1.6vw,12px);
+  font-weight: 400;
+  cursor: pointer;
+  width: 100%;
+  transition: opacity 0.1s, background 0.1s;
+}
+.btn-azione:disabled { opacity: 0.35; cursor: default; }
+.btn-semina { border-color: #b8906a; background: #fff8f0; color: #7a5c3a; }
+.btn-semina:not(:disabled):hover { background: #f0e0cc; }
+.btn-granaio-az { border-color: #7ab0d8; background: #ddeef8; color: #2a5a8a; display:none; }
+.btn-granaio-vd { border-color: #7abf8a; background: #dcf0e0; color: #2a6a3a; display:none; }
+.btn-granaio-az.visibile, .btn-granaio-vd.visibile {
+  display: block;
+  animation: pulsaBtn 0.7s ease-in-out infinite alternate;
+}
+@keyframes pulsaBtn {
+  from { box-shadow: 0 0 3px #c4902a44; }
+  to   { box-shadow: 0 0 10px #c4902aaa; }
+}
+
+/* REGOLE */
+.regole {
+  max-width: 800px; width: 100%;
+  margin-top: 20px;
+  padding: 18px 22px;
+  background: #ede0cc;
+  border-radius: 20px;
+  color: #6a4e32;
+  font-family: 'Lato', sans-serif;
+  font-size: clamp(11px,1.8vw,13px);
+  line-height: 1.9;
+}
+.regole .titolo {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(13px,2vw,16px);
+  font-weight: 600;
+  color: #5c3d1e;
+  margin-bottom: 10px;
+}
+.regole p { margin-bottom: 8px; }
+.regole strong { color: #5c3d1e; font-weight: 400; }
+
+@media (max-width: 480px) {
+  .board-wrap { flex-direction: column; align-items: center; padding: 12px 10px; }
+  .freccia-col { display: none; }
+  .granaio-col { flex-direction: row; width: 100%; justify-content: center; gap: 10px; }
+  .granaio { min-height: 60px; flex-direction: row; gap: 8px; padding: 6px 12px; width: auto; flex: 1; max-width: 160px; }
+  .colonna { flex-direction: row; gap: 6px; flex-wrap: wrap; justify-content: center; }
+  .ciotola-wrap { width: clamp(48px,16vw,70px); height: clamp(48px,16vw,70px); }
+  .top-bar .site-name { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:10px;">
+  <a href="https://matematichenonsinasce.com/" target="_blank" style="display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;">
+    <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="logo" style="width:54px;height:54px;object-fit:contain;border-radius:50%;">
+    <span class="site-name">Matematiche non si nasce</span>
+  </a>
+  <h1>Awalé — il gioco delle decine</h1>
+</div>
+<div style="width:100%;max-width:800px;display:flex;justify-content:flex-end;margin-bottom:8px;">
+  <button class="btn-nuova" onclick="nuovaPartita()">↺ Nuova partita</button>
+</div>
+
+<div class="board-wrap">
+
+  <div class="granaio-col">
+    <div class="col-label-ext">Azzurro</div>
+    <div class="granaio azzurro">
+      <span class="g-label">Granaio</span>
+      <span class="totale" id="tot-az">0</span>
+      <div class="dettaglio" id="det-az"></div>
+    </div>
+  </div>
+
+  <div class="freccia-col">
+    <svg viewBox="0 0 28 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arr-az" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 Z" fill="#7ab0d8"/>
+        </marker>
+      </defs>
+      <path d="M14,20 C14,20 14,440 14,460" stroke="#7ab0d8" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arr-az)" opacity="0.7"/>
+    </svg>
+  </div>
+
+  <div class="colonna" id="ciotole-az"></div>
+
+  <div class="centro">
+    <div class="turno verde" id="turno-display">Turno di<br>Verde</div>
+    <div class="msg" id="msg"></div>
+    <button class="btn-azione btn-semina" id="btn-conferma" disabled onclick="conferma()">▶ Semina</button>
+    <button class="btn-azione btn-granaio-az" id="btn-granaio-az" onclick="raccogliDecina()">Nel granaio ↗</button>
+    <button class="btn-azione btn-granaio-vd" id="btn-granaio-vd" onclick="raccogliDecina()">Nel granaio ↗</button>
+  </div>
+
+  <div class="colonna" id="ciotole-vd"></div>
+
+  <div class="freccia-col">
+    <svg viewBox="0 0 28 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arr-vd" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 Z" fill="#7abf8a"/>
+        </marker>
+      </defs>
+      <path d="M14,460 C14,460 14,40 14,20" stroke="#7abf8a" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arr-vd)" opacity="0.7"/>
+    </svg>
+  </div>
+
+  <div class="granaio-col">
+    <div class="col-label-ext">Verde</div>
+    <div class="granaio verde">
+      <span class="g-label">Granaio</span>
+      <span class="totale" id="tot-vd">0</span>
+      <div class="dettaglio" id="det-vd"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="regole">
+  <div class="titolo">Come si gioca</div>
+  <p>Il gioco si ispira liberamente alla tradizione africana degli <a href="https://it.wikipedia.org/wiki/Mancala" target="_blank" style="color:#5c3d1e;">Awalé</a>. Si gioca in due: ogni giocatore ha 5 ciotole con 5 palline ciascuna.</p>
+  <p><strong>Il turno.</strong> A ogni turno il giocatore sceglie una delle proprie ciotole e distribuisce tutte le palline che contiene, una per ciotola, in senso antiorario a partire dalla ciotola successiva a quella scelta.</p>
+  <p><strong>La decina.</strong> Se dopo la distribuzione la ciotola in cui cade l'ultima pallina contiene esattamente 10 palline, chi ha seminato raccoglie quella decina nel proprio granaio — anche se la ciotola è dell'avversario.</p>
+  <p><strong>Fine partita.</strong> Il gioco finisce quando un giocatore svuota tutte le proprie ciotole. A quel punto raccoglie nel suo granaio anche tutto ciò che resta nelle ciotole dell'avversario.</p>
+  <p><strong>Vince</strong> chi ha raccolto più palline in totale nel granaio.</p>
+</div>
+
+<script>
+const CERCHIO = [9,8,7,6,5,0,1,2,3,4];
+let stato=[], turno='verde', selezionata=null, animazione=false;
+let attesaRaccolta=null, decineInAttesa=[], granai={verde:0,azzurro:0}, finePartitaInArrivo=false;
+
+function getSize() {
+  const w = window.innerWidth;
+  if (w <= 480) return Math.max(48, Math.min(70, w*0.16));
+  return Math.max(58, Math.min(92, w*0.105));
+}
+
+function makeCiotolaSVG(n, colore, isSel, isDecina) {
+  const S = getSize();
+  const cx = S/2, cy = S/2, r = S/2 - 2;
+  const fillCiotola = colore==='azzurra' ? '#cce4f5' : '#ccedd4';
+  const strokeCiotola = (isSel||isDecina) ? '#c4902a' : (colore==='azzurra' ? '#7ab0d8' : '#7abf8a');
+  const sw = (isSel||isDecina) ? 3 : 1.5;
+
+  // Palline: griglia 3×3, pallina marrone
+  // Disposte centrate nella ciotola
+  const pallR = S * 0.085;
+  const cols = 3, rows = 3;
+  const gridW = cols * pallR*2 + (cols-1)*pallR*0.5;
+  const gridH = rows * pallR*2 + (rows-1)*pallR*0.5;
+  const startX = cx - gridW/2 + pallR;
+  const startY = cy - gridH/2 + pallR;
+  const stepX = pallR*2 + pallR*0.5;
+  const stepY = pallR*2 + pallR*0.5;
+
+  const visibili = Math.min(n, 9);
+  let palline = '';
+  for (let k=0; k<visibili; k++) {
+    const col2 = k % cols;
+    const row2 = Math.floor(k / cols);
+    const px = startX + col2*stepX;
+    const py = startY + row2*stepY;
+    palline += `<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="${pallR.toFixed(1)}" fill="#8B5E3C" opacity="0.88"/>`;
+  }
+
+  const extra = n>9 ? `<text x="${cx}" y="${S-3}" text-anchor="middle" font-size="${S*0.13}" fill="#7a5c3a">+${n-9}</text>` : '';
+  const numLabel = `<text x="${cx}" y="${S*0.14}" text-anchor="middle" font-size="${S*0.17}" font-family="Lato,sans-serif" fill="${colore==='azzurra'?'#2a5a8a':'#2a6a3a'}">${n}</text>`;
+
+  return `<svg width="${S}" height="${S}" viewBox="0 0 ${S} ${S}" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="${cx}" cy="${cy}" r="${r}" fill="${fillCiotola}" stroke="${strokeCiotola}" stroke-width="${sw}"/>
+  ${palline}${extra}${numLabel}
+</svg>`;
+}
+
+function nuovaPartita() {
+  stato=Array(10).fill(5); turno='verde'; selezionata=null;
+  animazione=false; attesaRaccolta=null; decineInAttesa=[];
+  finePartitaInArrivo=false; granai={verde:0,azzurro:0};
+  aggiornaGranaio('verde'); aggiornaGranaio('azzurro');
+  document.getElementById('btn-conferma').disabled=true;
+  nascondiGranaio(); setMsg(''); render(); aggiornaTurno();
+}
+
+function ordineAntiorario(start) {
+  const idx=CERCHIO.indexOf(start), seq=[];
+  for (let i=1;i<10;i++) seq.push(CERCHIO[(idx+i)%10]);
+  return seq;
+}
+
+function render() {
+  const contAz=document.getElementById('ciotole-az');
+  const contVd=document.getElementById('ciotole-vd');
+  contAz.innerHTML=''; contVd.innerHTML='';
+  for (let i=0;i<5;i++) contAz.appendChild(makeCiotolaEl(i,'azzurra'));
+  for (let i=5;i<10;i++) contVd.appendChild(makeCiotolaEl(i,'verde'));
+}
+
+function makeCiotolaEl(idx, colore) {
+  const S=getSize();
+  const div=document.createElement('div');
+  div.className='ciotola-wrap';
+  div.style.width=S+'px'; div.style.height=S+'px';
+  const mia=(turno==='verde'&&idx>=5)||(turno==='azzurro'&&idx<5);
+  const hasSemi=stato[idx]>0;
+  const isDecina=attesaRaccolta===idx;
+  const isSel=selezionata===idx;
+  if (isDecina) div.classList.add('decina-pronta');
+  else if (!animazione&&attesaRaccolta===null&&mia&&hasSemi) {
+    div.classList.add('selezionabile');
+    div.onclick=()=>seleziona(idx);
+  }
+  if (isSel) div.classList.add('selezionata');
+  div.innerHTML=makeCiotolaSVG(stato[idx],colore,isSel,isDecina);
+  return div;
+}
+
+function seleziona(idx) {
+  if (animazione||attesaRaccolta!==null) return;
+  selezionata=idx;
+  const btn=document.getElementById('btn-conferma');
+  btn.disabled=false; btn.style.pointerEvents='auto'; btn.style.opacity='1';
+  setMsg(`${stato[idx]} palline da distribuire`);
+  render();
+}
+
+function conferma() {
+  if (selezionata===null||animazione) return;
+  const start=selezionata, quanti=stato[start];
+  if (quanti===0) return;
+  animazione=true;
+  document.getElementById('btn-conferma').disabled=true;
+  selezionata=null; stato[start]=0;
+  const seq=ordineAntiorario(start).slice(0,quanti);
+  let i=0;
+  function step() {
+    if (i>=seq.length) {
+      animazione=false;
+      decineInAttesa=[...new Set(seq.filter(idx=>stato[idx]===10))];
+      const mieLato=turno==='verde'?[5,6,7,8,9]:[0,1,2,3,4];
+      if (mieLato.every(idx=>stato[idx]===0)) finePartitaInArrivo=true;
+      prossimaDecina(); return;
+    }
+    stato[seq[i]]++; render(); i++;
+    setTimeout(step,180);
+  }
+  render(); setTimeout(step,100);
+}
+
+function prossimaDecina() {
+  if (decineInAttesa.length>0) {
+    attesaRaccolta=decineInAttesa[0]; mostraGranaio(turno);
+    const n=decineInAttesa.length;
+    setMsg(`Decina formata! Mettila nel granaio.${n>1?` (ancora ${n-1})`:''}`);
+    render(); return;
+  }
+  if (finePartitaInArrivo) { concludiPartita(); return; }
+  setMsg('');
+  turno=turno==='verde'?'azzurro':'verde';
+  aggiornaTurno(); render();
+}
+
+function concludiPartita() {
+  finePartitaInArrivo=false;
+  const avv=turno==='verde'?[0,1,2,3,4]:[5,6,7,8,9];
+  let bottino=0;
+  avv.forEach(idx=>{bottino+=stato[idx];stato[idx]=0;});
+  granai[turno]+=bottino; aggiornaGranaio(turno);
+  render(); aggiornaTurno(true);
+  const vd=granai.verde, az=granai.azzurro;
+  if (vd>az) setMsg(`Vince Verde con ${vd} palline contro ${az}!`);
+  else if (az>vd) setMsg(`Vince Azzurro con ${az} palline contro ${vd}!`);
+  else setMsg(`Pareggio! Entrambi ${vd} palline.`);
+}
+
+function raccogliDecina() {
+  if (attesaRaccolta===null) return;
+  granai[turno]+=10; stato[attesaRaccolta]=0;
+  aggiornaGranaio(turno); attesaRaccolta=null;
+  decineInAttesa.shift(); nascondiGranaio(); prossimaDecina();
+}
+
+function aggiornaGranaio(chi) {
+  const id=chi==='verde'?'vd':'az', tot=granai[chi];
+  document.getElementById('tot-'+id).textContent=tot;
+  const dec=Math.floor(tot/10), uni=tot%10;
+  let det='';
+  if (dec>0) det+=`${dec*10}`;
+  if (uni>0) det+=(dec>0?` + ${uni}`:`${uni}`);
+  document.getElementById('det-'+id).textContent=det||'';
+}
+
+function mostraGranaio(chi) {
+  nascondiGranaio();
+  const id='btn-granaio-'+(chi==='verde'?'vd':'az');
+  const btn=document.getElementById(id);
+  btn.style.display='block'; btn.classList.add('visibile');
+}
+
+function nascondiGranaio() {
+  ['az','vd'].forEach(id=>{
+    const btn=document.getElementById('btn-granaio-'+id);
+    btn.classList.remove('visibile'); btn.style.display='none';
+  });
+}
+
+function aggiornaTurno(fine=false) {
+  const el=document.getElementById('turno-display');
+  if (fine) { el.className='turno fine'; el.textContent='Partita terminata!'; }
+  else { el.className='turno '+turno; el.innerHTML=`Turno di<br>${turno==='verde'?'Verde':'Azzurro'}`; }
+}
+
+function setMsg(t) { document.getElementById('msg').textContent=t; }
+
+window.addEventListener('resize', render);
+nuovaPartita();
+</script>
+</body>
+</html>
