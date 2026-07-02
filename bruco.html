@@ -118,21 +118,38 @@ h1 { text-align: center; color: #2e7d32; font-size: 26px; margin-bottom: 10px; }
   text-align: center; margin-bottom: 12px; text-transform: uppercase;
 }
 @media print { #titolo-stampa { display: block !important; } }
-.riga-stampa {
-  display: flex; align-items: center; gap: 12px; padding: 10px 0;
+.scheda-stampa {
+  border: 2px solid #66bb6a; border-radius: 14px;
+  padding: 14px 20px; margin-bottom: 22px;
+  page-break-inside: avoid; break-inside: avoid;
+}
+.scheda-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 14px; padding-bottom: 8px; margin-bottom: 8px;
   border-bottom: 2px dashed #aaa;
 }
-.riga-stampa:last-child { border-bottom: none; }
-.bruco-stampa { font-size: 36px; flex-shrink: 0; }
+.scheda-bruco { font-size: 32px; flex-shrink: 0; }
 .numeri-stampa {
-  display: flex; gap: 20px; font-weight: bold; color: #1b5e20;
-  font-family: Arial, sans-serif; text-transform: uppercase; flex-shrink: 0;
+  display: flex; gap: 18px; font-weight: bold; color: #1b5e20;
+  font-family: Arial, sans-serif; text-transform: uppercase; flex-wrap: wrap;
+  justify-content: center; flex: 1;
 }
-.logo-stampa { flex-shrink: 0; margin-left: 10px; }
-.logo-stampa img { width: 38px; height: 38px; object-fit: contain; border-radius: 50%; vertical-align: middle; }
-.risultato-stampa {
-  font-size: 22px; font-family: Arial, sans-serif; color: #333;
-  margin-left: 12px; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.05em;
+.logo-stampa { flex-shrink: 0; }
+.logo-stampa img { width: 34px; height: 34px; object-fit: contain; border-radius: 50%; vertical-align: middle; }
+.istruzioni-stampa {
+  columns: 2; column-gap: 26px; font-size: 13.5px; color: #333;
+  margin: 8px 0 10px 18px; font-family: Arial, sans-serif;
+  text-transform: none; letter-spacing: normal;
+}
+.istruzioni-stampa li { break-inside: avoid; margin-bottom: 5px; line-height: 1.3; }
+.istruzioni-stampa b { text-transform: uppercase; color: #2e7d32; }
+.finale-stampa {
+  font-size: 15px; font-family: Arial, sans-serif; color: #4a148c;
+  font-weight: bold; margin-top: 6px; text-transform: uppercase;
+  letter-spacing: 0.03em; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.finale-stampa .linea-risposta {
+  display: inline-block; border-bottom: 2px solid #333; width: 150px; height: 20px;
 }
 </style>
 </head>
@@ -417,26 +434,29 @@ function checkAnswer() {
 
 function stampaSoglio() {
   var logoSrc = 'https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png';
-  var fsNumeri = cifre===3 ? '36px' : '40px';
-  var nRighe = Math.floor((1122-40) / 96);
+  var fsNumeri = cifre===3 ? '26px' : '28px';
+  var nSchede = cifre===2 ? 8 : 6;
 
   var foglio = document.getElementById('foglio-stampa');
-  // rimuovi le righe precedenti ma tieni il titolo
   var titolo = document.getElementById('titolo-stampa');
   foglio.innerHTML = '';
   foglio.appendChild(titolo);
   foglio.style.display = 'block';
 
-  for (var r=0; r<nRighe; r++) {
+  for (var r=0; r<nSchede; r++) {
     var g = cifre===2 ? generateGame2() : generateGame3();
 
-    var riga = document.createElement('div');
-    riga.className = 'riga-stampa';
+    var scheda = document.createElement('div');
+    scheda.className = 'scheda-stampa';
+
+    // intestazione: bruco, numeri, logo
+    var header = document.createElement('div');
+    header.className = 'scheda-header';
 
     var bruco = document.createElement('div');
-    bruco.className = 'bruco-stampa';
+    bruco.className = 'scheda-bruco';
     bruco.textContent = '🐛';
-    riga.appendChild(bruco);
+    header.appendChild(bruco);
 
     var numDiv = document.createElement('div');
     numDiv.className = 'numeri-stampa';
@@ -446,7 +466,7 @@ function stampaSoglio() {
       sp.textContent = String(n);
       numDiv.appendChild(sp);
     });
-    riga.appendChild(numDiv);
+    header.appendChild(numDiv);
 
     var logoDiv = document.createElement('div');
     logoDiv.className = 'logo-stampa';
@@ -454,14 +474,27 @@ function stampaSoglio() {
     img.src = logoSrc;
     img.alt = 'Logo';
     logoDiv.appendChild(img);
-    riga.appendChild(logoDiv);
+    header.appendChild(logoDiv);
 
-    var risultato = document.createElement('div');
-    risultato.className = 'risultato-stampa';
-    risultato.textContent = 'RISULTATO: ___________';
-    riga.appendChild(risultato);
+    scheda.appendChild(header);
 
-    foglio.appendChild(riga);
+    // istruzioni passo-passo, come se si giocasse davvero
+    var ol = document.createElement('ol');
+    ol.className = 'istruzioni-stampa';
+    g.steps.forEach(function(s) {
+      var li = document.createElement('li');
+      li.innerHTML = 'Il bruco mangia <b>'+toWords(s.val)+'</b>.';
+      ol.appendChild(li);
+    });
+    scheda.appendChild(ol);
+
+    // riga finale, senza indicare il risultato
+    var finale = document.createElement('div');
+    finale.className = 'finale-stampa';
+    finale.innerHTML = 'Alla fine resta una sola cifra: quale numero rimane? <span class="linea-risposta"></span>';
+    scheda.appendChild(finale);
+
+    foglio.appendChild(scheda);
   }
 
   setTimeout(function() {
