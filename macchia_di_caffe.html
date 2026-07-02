@@ -192,6 +192,64 @@
   }
   .btn-next:hover { background: #7a4f2a; }
   .btn-reset { font-size: 0.8rem; color: #aaa; background: none; border: none; cursor: pointer; text-decoration: underline; margin-top: 4px; }
+
+  /* ── STAMPA SCHEDA PDF ── */
+  .btn-print {
+    width: 100%; padding: 12px; background: white; color: #5d3a1a;
+    border: 2px solid #5d3a1a; border-radius: 12px; font-size: 1.05rem; font-family: Georgia, serif;
+    cursor: pointer; margin-top: 10px; letter-spacing: 1px; transition: background 0.2s;
+  }
+  .btn-print:hover { background: #f0e0c8; }
+
+  .print-sheet { display: none; }
+
+  .ps-title {
+    text-align: center; font-size: 1.8rem; color: #5d3a1a;
+    letter-spacing: 1px; margin-bottom: 22px;
+  }
+  .ps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px 12px;
+    margin-bottom: 30px;
+  }
+  .ps-grid.ps-grid-vert { grid-template-columns: repeat(2, 1fr); }
+  .ps-cell {
+    border: 1px solid #ddd; border-radius: 8px;
+    padding: 10px 6px 14px;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .ps-num { align-self: flex-start; font-weight: bold; color: #5d3a1a; font-size: 0.85rem; }
+  .ps-op-inline { display: flex; align-items: center; justify-content: center; gap: 4px; }
+  .ps-sign { font-size: 1.6rem; font-weight: bold; color: #444; margin: 0 4px; }
+  .ps-footer {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    border-top: 1px solid #e8d5b0; padding-top: 14px;
+  }
+  .ps-footer img { width: 44px; height: 44px; object-fit: contain; border-radius: 50%; }
+  .ps-footer .logo-text { font-size: 12px; font-style: italic; color: #5d3a1a; letter-spacing: 1px; }
+  .ps-footer .logo-text span { color: #5d3a1a; }
+
+  /* Formato verticale (1000, 10000, decimali): tutto più compatto per stare in una pagina */
+  .ps-grid-vert { gap: 12px 8px; }
+  .ps-grid-vert .ps-cell { padding: 6px 4px 8px; gap: 3px; }
+  .ps-grid-vert .op-vertical { gap: 2px; padding: 4px 0; }
+  .ps-grid-vert .op-vert-row { gap: 3px; }
+  .ps-grid-vert .op-vert-label { font-size: 1.15rem; width: 22px; }
+  .ps-grid-vert .op-vert-line { height: 2px; }
+  .ps-grid-vert .digit-cell {
+    width: 32px; height: 40px; font-size: 1.3rem; border-width: 2px; border-radius: 3px;
+  }
+  .ps-grid-vert .digit-cell.dot-cell { width: 9px; font-size: 1.1rem; }
+  .ps-grid-vert .stain-wrap { width: 32px; height: 40px; }
+  .ps-grid-vert .stain-svg { width: 46px; height: 48px; }
+
+  @media print {
+    @page { margin: 14mm; }
+    body * { visibility: hidden; }
+    #printSheet, #printSheet * { visibility: visible; }
+    #printSheet { display: block !important; position: absolute; top: 0; left: 0; width: 100%; }
+  }
 </style>
 </head>
 <body>
@@ -227,7 +285,10 @@
     </div>
   </div>
   <button class="btn-start" onclick="startGame()">▶ Inizia il gioco</button>
+  <button class="btn-print" onclick="printWorksheet()">🖨️ Stampa scheda esercizi (PDF)</button>
 </div>
+
+<div class="print-sheet" id="printSheet"></div>
 
 <div class="game-area" id="gameArea">
   <div class="score-row">
@@ -404,6 +465,14 @@ function boxWidth(tokens) {
   return w;
 }
 
+/* Larghezza in px di un num-box nella scheda stampata (celle più piccole) */
+function boxWidthPrint(tokens) {
+  let w = 0;
+  tokens.forEach(t => { w += t.type === 'dot' ? 9 : 32; });
+  w += Math.max(0, tokens.length - 1) * 2; // gap
+  return w;
+}
+
 function nextRound() {
   answered = false;
   document.getElementById('feedback').textContent = '';
@@ -548,6 +617,117 @@ function checkAnswer() {
 function updateScore() {
   document.getElementById('scoreOk').textContent = scoreOk;
   document.getElementById('scoreErr').textContent = scoreErr;
+}
+
+function printWorksheet() {
+  const container = document.getElementById('printSheet');
+  container.innerHTML = '';
+
+  const title = document.createElement('h1');
+  title.className = 'ps-title';
+  title.textContent = '☕ La Macchia di Caffè';
+  container.appendChild(title);
+
+  const isDecimal = (level === 'dec');
+  const useVertical = (level === '1000' || level === '10000' || level === 'dec');
+
+  const grid = document.createElement('div');
+  grid.className = 'ps-grid' + (useVertical ? ' ps-grid-vert' : '');
+
+  const NUM_EXERCISES = useVertical ? 8 : 15;
+
+  for (let i = 0; i < NUM_EXERCISES; i++) {
+    const { a, b, result, operation } = generateProblem();
+    let tokA = numToTokens(a, isDecimal);
+    let tokB = numToTokens(b, isDecimal);
+    let tokR = numToTokens(result, isDecimal);
+    if (isDecimal) [tokA, tokB, tokR] = normalizeDecimalTokens(tokA, tokB, tokR);
+
+    const positions = [];
+    tokA.forEach((t, idx) => { if (t.type === 'digit') positions.push({ num: 'a', idx }); });
+    tokB.forEach((t, idx) => { if (t.type === 'digit') positions.push({ num: 'b', idx }); });
+    tokR.forEach((t, idx) => { if (t.type === 'digit') positions.push({ num: 'r', idx }); });
+    const chosen = positions[rand(0, positions.length - 1)];
+
+    const cell = document.createElement('div');
+    cell.className = 'ps-cell';
+
+    const num = document.createElement('div');
+    num.className = 'ps-num';
+    num.textContent = (i + 1) + '.';
+    cell.appendChild(num);
+
+    if (!useVertical) {
+      const row = document.createElement('div');
+      row.className = 'ps-op-inline';
+      row.appendChild(buildNumBox(tokA, chosen.num === 'a' ? chosen.idx : null));
+      const opSign = document.createElement('div');
+      opSign.className = 'ps-sign';
+      opSign.textContent = operation;
+      row.appendChild(opSign);
+      row.appendChild(buildNumBox(tokB, chosen.num === 'b' ? chosen.idx : null));
+      const eq = document.createElement('div');
+      eq.className = 'ps-sign';
+      eq.textContent = '=';
+      row.appendChild(eq);
+      row.appendChild(buildNumBox(tokR, chosen.num === 'r' ? chosen.idx : null));
+      cell.appendChild(row);
+    } else {
+      const wrap = document.createElement('div');
+      wrap.className = 'op-vertical';
+
+      const wA = boxWidthPrint(tokA), wB = boxWidthPrint(tokB), wR = boxWidthPrint(tokR);
+      const LABEL_W = 22 + 3;
+      const lineW = Math.max(wA, wB, wR) + LABEL_W;
+
+      const rowA = document.createElement('div');
+      rowA.className = 'op-vert-row';
+      const lblA = document.createElement('div');
+      lblA.className = 'op-vert-label';
+      lblA.textContent = '';
+      rowA.appendChild(lblA);
+      rowA.appendChild(buildNumBox(tokA, chosen.num === 'a' ? chosen.idx : null));
+      wrap.appendChild(rowA);
+
+      const rowB = document.createElement('div');
+      rowB.className = 'op-vert-row';
+      const lblB = document.createElement('div');
+      lblB.className = 'op-vert-label';
+      lblB.textContent = operation;
+      rowB.appendChild(lblB);
+      rowB.appendChild(buildNumBox(tokB, chosen.num === 'b' ? chosen.idx : null));
+      wrap.appendChild(rowB);
+
+      const line = document.createElement('div');
+      line.className = 'op-vert-line';
+      line.style.width = lineW + 'px';
+      wrap.appendChild(line);
+
+      const rowR = document.createElement('div');
+      rowR.className = 'op-vert-row';
+      const lblR = document.createElement('div');
+      lblR.className = 'op-vert-label';
+      lblR.textContent = '';
+      rowR.appendChild(lblR);
+      rowR.appendChild(buildNumBox(tokR, chosen.num === 'r' ? chosen.idx : null));
+      wrap.appendChild(rowR);
+
+      cell.appendChild(wrap);
+    }
+
+    grid.appendChild(cell);
+  }
+  container.appendChild(grid);
+
+  const footer = document.createElement('div');
+  footer.className = 'ps-footer';
+  footer.innerHTML = `
+    <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Matematiche non si nasce">
+    <div class="logo-text">Matematiche <span>non</span> si nasce</div>
+  `;
+  container.appendChild(footer);
+
+  window.print();
 }
 </script>
 </body>
