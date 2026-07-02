@@ -209,17 +209,16 @@
   }
   .ps-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 22px 12px;
     margin-bottom: 30px;
   }
   .ps-grid.ps-grid-vert { grid-template-columns: repeat(2, 1fr); }
   .ps-cell {
-    border: 1px solid #ddd; border-radius: 8px;
+    border: 2px solid #c8a97e; border-radius: 8px;
     padding: 10px 6px 14px;
     display: flex; flex-direction: column; align-items: center; gap: 6px;
   }
-  .ps-num { align-self: flex-start; font-weight: bold; color: #5d3a1a; font-size: 0.85rem; }
   .ps-op-inline { display: flex; align-items: center; justify-content: center; gap: 4px; }
   .ps-sign { font-size: 1.6rem; font-weight: bold; color: #444; margin: 0 4px; }
   .ps-footer {
@@ -634,7 +633,7 @@ function printWorksheet() {
   const grid = document.createElement('div');
   grid.className = 'ps-grid' + (useVertical ? ' ps-grid-vert' : '');
 
-  const NUM_EXERCISES = useVertical ? 8 : 15;
+  const NUM_EXERCISES = useVertical ? 10 : 16;
 
   for (let i = 0; i < NUM_EXERCISES; i++) {
     const { a, b, result, operation } = generateProblem();
@@ -651,11 +650,6 @@ function printWorksheet() {
 
     const cell = document.createElement('div');
     cell.className = 'ps-cell';
-
-    const num = document.createElement('div');
-    num.className = 'ps-num';
-    num.textContent = (i + 1) + '.';
-    cell.appendChild(num);
 
     if (!useVertical) {
       const row = document.createElement('div');
