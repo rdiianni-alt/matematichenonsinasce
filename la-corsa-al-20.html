@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Corsa al 20</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; min-height: 100%; background: #eaf6fb; font-family: Arial, sans-serif; }
+body { display: flex; flex-direction: column; align-items: center; }
+
+#logo-wrap {
+  margin-top: 1.5vh; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  cursor: pointer; text-decoration: none;
+}
+#logo-wrap img { width: 5vmin; height: 5vmin; min-width: 30px; min-height: 30px; max-width: 46px; max-height: 46px; object-fit: contain; border-radius: 50%; }
+#logo-wrap span { font-size: clamp(0.5rem, 1.2vmin, 0.7rem); font-weight: 600; color: #1a5276; text-align: center; white-space: nowrap; }
+
+/* ---------- SCHERMATA INIZIALE ---------- */
+#schermata {
+  width: 100%; max-width: 560px; padding: 3vh 5vw 5vh;
+  display: flex; flex-direction: column; align-items: center; gap: 1.6vh;
+}
+#schermata h1 { font-size: clamp(1.3rem, 4vmin, 2.1rem); color: #1a5276; text-align: center; }
+.sottotitolo { font-size: clamp(0.75rem, 1.8vmin, 0.95rem); color: #4a6f8a; text-align: center; max-width: 460px; line-height: 1.4; }
+
+.campo-giocatore {
+  width: 100%; display: flex; align-items: center; gap: 10px;
+  background: white; border-radius: 999px; padding: 6px 8px 6px 6px;
+  border: 3px solid #ccc;
+}
+.pallino-etichetta {
+  width: clamp(30px,7vmin,40px); height: clamp(30px,7vmin,40px); border-radius: 50%;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 700; font-size: clamp(0.8rem,2vmin,1rem);
+}
+.campo-giocatore input {
+  flex: 1; border: none; outline: none; background: transparent;
+  font-size: clamp(0.85rem, 2.2vmin, 1.05rem); color: #1a5276; padding: 8px 4px;
+}
+
+#btn-vai {
+  margin-top: 1vh; padding: clamp(10px,1.8vmin,13px) clamp(28px,5vmin,40px);
+  border-radius: 999px; border: none; background: #1a5276; color: white;
+  font-size: clamp(0.9rem, 2.2vmin, 1.1rem); font-weight: 700; cursor: pointer;
+}
+#btn-vai:hover { background: #123a58; }
+
+.separatore { width: 80%; height: 1px; background: #cddce5; margin: 1vh 0; }
+
+#zona-stampa-menu { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+#zona-stampa-menu label { font-size: clamp(0.75rem, 1.7vmin, 0.9rem); color: #4a6f8a; }
+.riga-stampa { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; }
+#num-griglie {
+  width: 60px; text-align: center; padding: 6px; border-radius: 8px; border: 2px solid #bcd4e2;
+  font-size: 0.95rem; color: #1a5276;
+}
+#btn-stampa {
+  padding: clamp(8px,1.5vmin,11px) clamp(18px,3vmin,26px);
+  border-radius: 999px; border: 2px solid #1a5276; background: white; color: #1a5276;
+  font-size: clamp(0.8rem, 1.9vmin, 0.95rem); font-weight: 600; cursor: pointer;
+}
+#btn-stampa:hover { background: #eaf4fb; }
+
+/* ---------- ARENA DI GIOCO ---------- */
+#arena { display: none; width: 100%; max-width: 900px; flex-direction: column; align-items: center; padding: 2vh 4vw 4vh; gap: 2vh; }
+
+#banner-turno {
+  width: 100%; max-width: 620px; padding: clamp(10px,2vmin,16px) clamp(14px,3vmin,22px);
+  border-radius: 18px; color: white; text-align: center;
+  font-size: clamp(1rem, 2.6vmin, 1.35rem); font-weight: 700;
+  transition: background 0.2s;
+}
+
+#cella-partenza {
+  position: relative; width: 100%; max-width: 620px; min-height: clamp(40px, 8vmin, 56px);
+  background: white; border: 2px dashed #bcd4e2; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  font-size: clamp(0.65rem, 1.6vmin, 0.8rem); font-weight: 700; color: #7a97ab;
+  margin-bottom: clamp(4px,1vmin,8px);
+}
+
+#tabellone {
+  display: grid; grid-template-columns: repeat(10, 1fr); gap: clamp(3px,0.8vmin,7px);
+  width: 100%; max-width: 620px;
+}
+.cella {
+  position: relative; aspect-ratio: 1; background: white; border: 2px solid #bcd4e2; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: clamp(0.75rem, 2.4vmin, 1.15rem); font-weight: 700; color: #7a97ab;
+  overflow: visible;
+}
+
+.pallino {
+  position: absolute; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 700; box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+}
+.pallino.storico {
+  width: 34%; height: 34%; left: 33%; top: 33%; font-size: 0.55em; opacity: 0.85;
+}
+.pallino.attuale {
+  width: 74%; height: 74%; left: 13%; top: 13%; font-size: 0.8em;
+  animation: pulsaPedina 0.9s ease-in-out infinite;
+  z-index: 10;
+}
+@keyframes pulsaPedina { 0%,100%{ transform: scale(1); } 50%{ transform: scale(1.1); } }
+
+#controlli {
+  display: flex; gap: clamp(10px,2.5vw,20px); align-items: center; flex-wrap: wrap; justify-content: center;
+}
+.btn-mossa {
+  padding: clamp(12px,2.5vmin,18px) clamp(26px,5vmin,40px);
+  border-radius: 999px; border: none; color: white; cursor: pointer;
+  font-size: clamp(1rem, 2.8vmin, 1.4rem); font-weight: 700;
+}
+.btn-mossa:disabled { opacity: 0.35; cursor: default; }
+
+#barra-bassa { display: flex; gap: clamp(6px,1.5vw,14px); flex-wrap: wrap; justify-content: center; }
+.btn-ui {
+  padding: clamp(6px,1.2vmin,10px) clamp(14px,2.5vmin,20px);
+  font-size: clamp(0.75rem, 1.8vmin, 0.95rem); font-weight: 600;
+  background: white; border: 2px solid #1a5276; color: #1a5276;
+  border-radius: 999px; cursor: pointer;
+}
+.btn-ui:hover { background: #eaf4fb; }
+
+/* ---------- OVERLAY INFO / VITTORIA ---------- */
+.overlay {
+  display: none; position: fixed; inset: 0; z-index: 5000;
+  background: rgba(26,82,118,0.4); align-items: center; justify-content: center; padding: 4vw;
+}
+.box-overlay {
+  background: white; border-radius: 18px; max-width: min(480px,90vw); width: 100%;
+  max-height: 84vh; overflow-y: auto; padding: clamp(20px,3.5vmin,30px);
+  position: relative; color: #1a5276; line-height: 1.55; text-align: center;
+}
+.box-overlay h2 { font-size: clamp(1.1rem,3.2vmin,1.5rem); margin-bottom: 12px; }
+.box-overlay h3 { font-size: clamp(0.85rem,2vmin,1rem); margin: 14px 0 4px; color: #2980b9; text-align: left; }
+.box-overlay p { font-size: clamp(0.78rem,1.8vmin,0.92rem); margin-bottom: 6px; text-align: left; }
+.btn-chiudi-overlay {
+  position: absolute; top: 10px; right: 10px; width: 30px; height: 30px;
+  border-radius: 50%; border: 2px solid #1a5276; background: white; color: #1a5276;
+  font-size: 0.95rem; cursor: pointer;
+}
+.emoji-vittoria { font-size: clamp(2.4rem, 8vmin, 3.6rem); margin-bottom: 6px; }
+.righe-vittoria { display: flex; gap: 10px; justify-content: center; margin-top: 1.6vh; flex-wrap: wrap; }
+
+/* ---------- FOGLIO DI STAMPA (nascosto a schermo) ---------- */
+#foglio-stampa { display: none; }
+@media print {
+  body > *:not(#foglio-stampa) { display: none !important; }
+  #foglio-stampa { display: block !important; }
+  body, #foglio-stampa { background: white !important; }
+  @page { size: landscape; margin: 10mm; }
+}
+.striscia-stampa {
+  border: 2px dashed #999; border-radius: 6px; padding: 8px 12px 10px; margin-bottom: 12px;
+  page-break-inside: avoid;
+}
+.striscia-intestazione { display: flex; align-items: center; gap: 22px; margin-bottom: 6px; }
+.titolo-striscia { font-size: 0.95rem; font-weight: 700; color: #1a5276; white-space: nowrap; }
+.blocco-regole { display: flex; align-items: center; gap: 10px; }
+.logo-striscia { width: 34px; height: 34px; border-radius: 50%; object-fit: contain; flex-shrink: 0; }
+.regole-striscia { font-size: 0.6rem; font-weight: 300; color: #555; line-height: 1.25; max-width: 460px; }
+.riga-numeri { display: flex; }
+.cella-stampa {
+  flex: 1; min-height: 30px; border: 1px solid #444; display: flex; align-items: center; justify-content: center;
+  font-size: 0.78rem; font-weight: 700;
+}
+.riga-numeri .cella-stampa:not(:last-child) { border-right: none; }
+</style>
+</head>
+<body>
+
+<a id="logo-wrap" href="https://matematichenonsinasce.com" target="_self">
+  <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Logo" />
+  <span>Matematiche non si nasce</span>
+</a>
+
+<!-- SCHERMATA INIZIALE -->
+<div id="schermata">
+  <h1>🏁 La Corsa al 20</h1>
+  <p class="sottotitolo">In due, a turno, scegliete di far avanzare la pedina di "1" o di "2" rispetto a dove si trova. Vince chi la fa arrivare esattamente al 20.</p>
+
+  <div class="campo-giocatore">
+    <div class="pallino-etichetta" style="background:#3498db;">1</div>
+    <input id="nome-p1" type="text" placeholder="Nome giocatore 1" />
+  </div>
+  <div class="campo-giocatore">
+    <div class="pallino-etichetta" style="background:#e67e22;">2</div>
+    <input id="nome-p2" type="text" placeholder="Nome giocatore 2" />
+  </div>
+
+  <button id="btn-vai">Inizia ▶</button>
+
+  <div class="separatore"></div>
+
+  <div id="zona-stampa-menu">
+    <label>Per giocare anche senza schermo:</label>
+    <div class="riga-stampa">
+      <span style="font-size:0.85rem;color:#4a6f8a;">Griglie da stampare:</span>
+      <input id="num-griglie" type="number" min="1" max="12" value="6" />
+      <button id="btn-stampa">🖨️ Stampa</button>
+    </div>
+  </div>
+</div>
+
+<!-- ARENA DI GIOCO -->
+<div id="arena">
+  <div id="banner-turno"></div>
+
+  <div id="cella-partenza">VIA!</div>
+  <div id="tabellone"></div>
+
+  <div id="controlli">
+    <button class="btn-mossa" id="btn-piu1">+1</button>
+    <button class="btn-mossa" id="btn-piu2">+2</button>
+  </div>
+
+  <div id="barra-bassa">
+    <button class="btn-ui" id="btn-ricomincia">↺ Ricomincia</button>
+    <button class="btn-ui" id="btn-menu">☰ Menu</button>
+    <button class="btn-ui" id="btn-info">ℹ️ Regole</button>
+  </div>
+</div>
+
+<!-- OVERLAY INFO -->
+<div class="overlay" id="info-overlay">
+  <div class="box-overlay">
+    <button class="btn-chiudi-overlay" id="info-chiudi">✕</button>
+    <h2>🏁 Come si gioca</h2>
+    <p>Si gioca in due, a turno. C'è una sola pedina, che parte da "VIA!", prima del numero 1.</p>
+    <h3>Il turno</h3>
+    <p>Quando tocca a un giocatore, sceglie se far avanzare la pedina di "+1" o di "+2" rispetto a dove si trova in quel momento. La pedina non torna mai indietro.</p>
+    <h3>La vittoria</h3>
+    <p>Vince chi riesce a far arrivare la pedina esattamente sul numero 20. Se una mossa supererebbe il 20, resta bloccata.</p>
+    <h3>Il tracciato colorato</h3>
+    <p>Ogni volta che un giocatore muove la pedina, il numero raggiunto resta segnato con il suo colore, così si vede tutta la storia della partita.</p>
+  </div>
+</div>
+
+<!-- OVERLAY VITTORIA -->
+<div class="overlay" id="vittoria-overlay">
+  <div class="box-overlay">
+    <div class="emoji-vittoria">🎉</div>
+    <h2 id="testo-vittoria">Ha vinto!</h2>
+    <div class="righe-vittoria">
+      <button class="btn-ui" id="btn-rivincita">↺ Rivincita</button>
+      <button class="btn-ui" id="btn-vittoria-menu">☰ Menu</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOGLIO DI STAMPA -->
+<div id="foglio-stampa">
+  <div id="contenitore-griglie"></div>
+</div>
+
+<script>
+var players = [
+  { nome: 'Giocatore 1', colore: '#3498db' },
+  { nome: 'Giocatore 2', colore: '#e67e22' }
+];
+var turno = 0;
+var posizione = 0;
+var partitaFinita = false;
+
+var tabellone = document.getElementById('tabellone');
+var cellaPartenza = document.getElementById('cella-partenza');
+var banner = document.getElementById('banner-turno');
+var celle = [];
+
+function creaTabellone() {
+  tabellone.innerHTML = '';
+  celle = [];
+  for (var n = 1; n <= 20; n++) {
+    var c = document.createElement('div');
+    c.className = 'cella';
+    c.textContent = n;
+    tabellone.appendChild(c);
+    celle.push(c);
+  }
+}
+
+function aggiornaBanner() {
+  var p = players[turno];
+  banner.style.background = p.colore;
+  banner.textContent = (posizione === 0 ? 'Si comincia! Tocca a ' : 'Tocca a ') + p.nome;
+}
+
+function aggiornaBottoni() {
+  document.getElementById('btn-piu1').disabled = partitaFinita || (posizione + 1 > 20);
+  document.getElementById('btn-piu2').disabled = partitaFinita || (posizione + 2 > 20);
+  document.getElementById('btn-piu1').style.background = players[turno].colore;
+  document.getElementById('btn-piu2').style.background = players[turno].colore;
+}
+
+function segnaCella(pos, colore, iniziale) {
+  var cella = celle[pos - 1];
+  // l'eventuale pedina "attuale" precedente diventa un segno storico più piccolo
+  var vecchiaAttuale = tabellone.querySelector('.pallino.attuale');
+  if (vecchiaAttuale) {
+    vecchiaAttuale.classList.remove('attuale');
+    vecchiaAttuale.classList.add('storico');
+  }
+  var pallino = document.createElement('div');
+  pallino.className = 'pallino attuale';
+  pallino.style.background = colore;
+  pallino.textContent = iniziale;
+  cella.appendChild(pallino);
+}
+
+function muovi(passo) {
+  if (partitaFinita) return;
+  var nuovaPos = posizione + passo;
+  if (nuovaPos > 20) return;
+  posizione = nuovaPos;
+  var p = players[turno];
+  segnaCella(posizione, p.colore, p.nome.charAt(0).toUpperCase());
+
+  if (posizione === 20) {
+    partitaFinita = true;
+    mostraVittoria(p);
+    return;
+  }
+  turno = 1 - turno;
+  aggiornaBanner();
+  aggiornaBottoni();
+}
+
+function mostraVittoria(p) {
+  document.getElementById('testo-vittoria').textContent = 'Ha vinto ' + p.nome + '!';
+  document.getElementById('vittoria-overlay').style.display = 'flex';
+  aggiornaBottoni();
+}
+
+function nuovaPartita() {
+  posizione = 0;
+  turno = 0;
+  partitaFinita = false;
+  document.getElementById('vittoria-overlay').style.display = 'none';
+  creaTabellone();
+  aggiornaBanner();
+  aggiornaBottoni();
+}
+
+function avvia() {
+  var n1 = document.getElementById('nome-p1').value.trim();
+  var n2 = document.getElementById('nome-p2').value.trim();
+  players[0].nome = n1 || 'Giocatore 1';
+  players[1].nome = n2 || 'Giocatore 2';
+  document.getElementById('schermata').style.display = 'none';
+  document.getElementById('arena').style.display = 'flex';
+  nuovaPartita();
+}
+
+function tornaAlMenu() {
+  document.getElementById('arena').style.display = 'none';
+  document.getElementById('vittoria-overlay').style.display = 'none';
+  document.getElementById('schermata').style.display = 'flex';
+}
+
+document.getElementById('btn-vai').addEventListener('click', avvia);
+document.getElementById('btn-piu1').addEventListener('click', function () { muovi(1); });
+document.getElementById('btn-piu2').addEventListener('click', function () { muovi(2); });
+document.getElementById('btn-ricomincia').addEventListener('click', function () { nuovaPartita(); });
+document.getElementById('btn-menu').addEventListener('click', tornaAlMenu);
+document.getElementById('btn-info').addEventListener('click', function () {
+  document.getElementById('info-overlay').style.display = 'flex';
+});
+document.getElementById('info-chiudi').addEventListener('click', function () {
+  document.getElementById('info-overlay').style.display = 'none';
+});
+document.getElementById('btn-rivincita').addEventListener('click', function () { nuovaPartita(); });
+document.getElementById('btn-vittoria-menu').addEventListener('click', tornaAlMenu);
+
+// ---------- STAMPA GRIGLIE ----------
+function generaGriglieStampa(quante) {
+  var contenitore = document.getElementById('contenitore-griglie');
+  contenitore.innerHTML = '';
+  for (var i = 0; i < quante; i++) {
+    var striscia = document.createElement('div');
+    striscia.className = 'striscia-stampa';
+
+    var intestazione = document.createElement('div');
+    intestazione.className = 'striscia-intestazione';
+    intestazione.innerHTML =
+      '<span class="titolo-striscia">🏁 La Corsa al 20</span>' +
+      '<div class="blocco-regole">' +
+        '<img class="logo-striscia" src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Logo" />' +
+        '<p class="regole-striscia">In due, a turno: fai avanzare la pedina di 1 o di 2 rispetto a dove si trova. La pedina non torna mai indietro. Vince chi la fa arrivare esattamente al 20.</p>' +
+      '</div>';
+    striscia.appendChild(intestazione);
+
+    var riga = document.createElement('div');
+    riga.className = 'riga-numeri';
+    for (var n = 1; n <= 20; n++) {
+      var cella = document.createElement('div');
+      cella.className = 'cella-stampa';
+      cella.textContent = n;
+      riga.appendChild(cella);
+    }
+    striscia.appendChild(riga);
+    contenitore.appendChild(striscia);
+  }
+}
+
+document.getElementById('btn-stampa').addEventListener('click', function () {
+  var input = document.getElementById('num-griglie');
+  var quante = parseInt(input.value, 10);
+  if (isNaN(quante) || quante < 1) quante = 1;
+  if (quante > 12) quante = 12;
+  generaGriglieStampa(quante);
+  window.print();
+});
+</script>
+</body>
+</html>
