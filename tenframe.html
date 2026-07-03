@@ -50,6 +50,47 @@
   #gameArea { display: none; width: 100%; display: flex; flex-direction: column; align-items: center; }
   #gameArea.hidden { display: none !important; }
 
+  /* Pulsante e modale stampa */
+  button.ctrl.stampa { border-color: #2e7d32; color: #2e7d32; }
+  button.ctrl.stampa:hover { background: #e8f5e9; }
+
+  .print-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+  .print-modal-overlay.hidden { display: none; }
+  .print-modal { background: #fff; padding: 24px; border-radius: 10px; display: flex; flex-direction: column; gap: 12px; max-width: 320px; width: 100%; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.25); }
+  .print-modal p { font-size: 0.95rem; color: #333; margin-bottom: 4px; }
+  .print-modal button.action { width: 100%; }
+
+  /* Area di stampa: invisibile a schermo, visibile solo in stampa */
+  #printArea { display: none; }
+
+  @media print {
+    body > *:not(#printArea) { display: none !important; }
+    #printArea { display: block !important; }
+  }
+
+  .print-header { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-bottom: 14px; }
+  .print-header img { width: 50px; height: 50px; object-fit: contain; border-radius: 50%; }
+  .print-header .print-brand { font-size: 0.85rem; color: #333; font-style: italic; }
+  .print-header h2 { font-size: 1.1rem; font-weight: normal; color: #333; margin-top: 4px; }
+  .print-nome { font-size: 0.95rem; color: #333; margin-bottom: 18px; display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; }
+
+  .print-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+
+  .print-item { border: 1px solid #999; border-radius: 6px; padding: 10px; display: flex; align-items: center; gap: 10px; break-inside: avoid; page-break-inside: avoid; }
+  .print-frames { display: flex; gap: 6px; }
+  .print-frame { display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(2, 1fr); gap: 2px; border: 2px solid #333; padding: 3px; border-radius: 3px; background: #fff; }
+  .print-cell { border: 1px solid #999; border-radius: 2px; display: flex; align-items: center; justify-content: center; }
+  .print-cell::after { content: ''; display: block; border-radius: 50%; background: transparent; }
+  .print-cell.filled::after { background: #333; }
+
+  #printArea.mode1 .print-cell { width: 16px; height: 16px; }
+  #printArea.mode1 .print-cell::after { width: 11px; height: 11px; }
+  #printArea.mode2 .print-cell { width: 12px; height: 12px; }
+  #printArea.mode2 .print-cell::after { width: 8px; height: 8px; }
+
+  .print-answer { font-size: 1rem; color: #333; white-space: nowrap; }
+  .print-answer .linea { display: inline-block; min-width: 34px; border-bottom: 1px solid #333; margin-left: 4px; }
+
   @media (max-width: 480px) {
     .frame { grid-template-columns: repeat(5, 38px); grid-template-rows: repeat(2, 38px); gap: 3px; padding: 4px; }
     .cell { width: 38px; height: 38px; }
@@ -83,7 +124,24 @@
   <button class="ctrl" id="btnF2" onclick="setFrames(2)">2 ten frame (1–20)</button>
 </div>
 
+<div class="controls">
+  <button class="ctrl stampa" onclick="apriSceltaStampa()">🖨️ Stampa scheda</button>
+</div>
+
 <p class="spiegazione" id="spiegazione"></p>
+
+<!-- MODALE SCELTA STAMPA -->
+<div class="print-modal-overlay hidden" id="printModalOverlay">
+  <div class="print-modal">
+    <p>Quanti ten frame vuoi stampare per ogni numero?</p>
+    <button class="action primary" onclick="generaScheda(1)">1 ten frame (numeri 1–10)</button>
+    <button class="action primary" onclick="generaScheda(2)">2 ten frame (numeri 1–20)</button>
+    <button class="action secondary" onclick="chiudiSceltaStampa()">Annulla</button>
+  </div>
+</div>
+
+<!-- AREA STAMPA (invisibile a schermo) -->
+<div id="printArea"></div>
 
 <!-- AREA DI GIOCO -->
 <div id="gameArea" class="hidden">
@@ -237,6 +295,74 @@
       fillFrameForTarget(target);
       buildKeypad();
     }
+  }
+
+  /* ===== STAMPA SCHEDA ===== */
+
+  function apriSceltaStampa() {
+    document.getElementById('printModalOverlay').classList.remove('hidden');
+  }
+
+  function chiudiSceltaStampa() {
+    document.getElementById('printModalOverlay').classList.add('hidden');
+  }
+
+  function buildPrintFrames(n, framesCount) {
+    let html = '<div class="print-frames">';
+    for (let f = 0; f < framesCount; f++) {
+      html += '<div class="print-frame">';
+      for (let i = 0; i < 10; i++) {
+        const idx = f * 10 + i;
+        html += `<div class="print-cell ${idx < n ? 'filled' : ''}"></div>`;
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function generaScheda(framesCount) {
+    chiudiSceltaStampa();
+    const max = framesCount * 10;
+    const printArea = document.getElementById('printArea');
+    printArea.className = framesCount === 1 ? 'mode1' : 'mode2';
+
+    const numeri = shuffle(Array.from({ length: max }, (_, i) => i + 1));
+
+    let html = `
+      <div class="print-header">
+        <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Logo Matematiche non si nasce">
+        <span class="print-brand">Matematiche non si nasce</span>
+        <h2>Ten Frame — Scrivi il numero (1–${max})</h2>
+      </div>
+      <div class="print-nome">
+        <span>Nome: ______________________</span>
+        <span>Data: __________</span>
+      </div>
+      <div class="print-grid">
+    `;
+
+    numeri.forEach(n => {
+      html += `
+        <div class="print-item">
+          ${buildPrintFrames(n, framesCount)}
+          <div class="print-answer">= <span class="linea"></span></div>
+        </div>
+      `;
+    });
+
+    html += '</div>';
+    printArea.innerHTML = html;
+
+    window.print();
   }
 </script>
 </body>
