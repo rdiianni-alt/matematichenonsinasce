@@ -37,6 +37,36 @@
   .feedback.ok { color: #2a7a2a; }
   .feedback.no { color: #c03030; }
   .stats { font-size: 13px; color: #777; text-align: center; }
+  .print-row { display: flex; justify-content: center; margin-bottom: 8px; }
+  .btn-print { background: #4a6fa5; color: #fff; }
+
+  #printArea { display: none; }
+
+  @media print {
+    body.printing > *:not(#printArea) { display: none !important; }
+    body.printing #printArea {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5mm;
+    }
+    @page { size: A4; margin: 12mm; }
+    .print-card {
+      border: 2px solid #333;
+      border-radius: 4px;
+      padding: 3mm;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+    .print-logo-row { display: flex; flex-direction: column; align-items: center; gap: 1px; margin-bottom: 2mm; width: 100%; }
+    .print-logo { width: 18px; height: 18px; border-radius: 50%; object-fit: contain; }
+    .print-logo-row span { font-size: 6px; color: #2255aa; font-weight: bold; text-align: center; }
+    .print-cube-img { width: 100%; max-width: 40mm; height: auto; margin-bottom: 2mm; }
+    .print-question { font-size: 9px; font-weight: bold; text-align: center; text-transform: uppercase; color: #333; margin-bottom: 1.5mm; line-height: 1.2; }
+    .print-hint { font-size: 6.5px; color: #888; text-align: center; }
+  }
 </style>
 </head>
 <body>
@@ -55,6 +85,10 @@
   <button class="level-btn"       onclick="setLevel(1)">LIVELLO 2</button>
   <button class="level-btn"       onclick="setLevel(2)">LIVELLO 3</button>
   
+</div>
+
+<div class="print-row">
+  <button class="btn btn-print" id="btnPrint" onclick="stampaPDF()">STAMPA PDF (6 CUBETTI - LIVELLO ATTUALE)</button>
 </div>
 
 <div class="canvas-wrap">
@@ -190,23 +224,23 @@ const C_TOP  = '#a06820';  // arancio scuro — top
 const C_SIDE = '#f0c96a';  // giallo — facce laterali
 const C_EDGE = '#6a3e00';  // bordi
 
-function polygon(pts, fill) {
-  ctx.beginPath();
-  ctx.moveTo(pts[0].sx, pts[0].sy);
-  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].sx, pts[i].sy);
-  ctx.closePath();
-  ctx.fillStyle = fill;
-  ctx.fill();
-  ctx.strokeStyle = C_EDGE;
-  ctx.lineWidth = 1.0;
-  ctx.stroke();
+function polygon(targetCtx, pts, fill) {
+  targetCtx.beginPath();
+  targetCtx.moveTo(pts[0].sx, pts[0].sy);
+  for (let i = 1; i < pts.length; i++) targetCtx.lineTo(pts[i].sx, pts[i].sy);
+  targetCtx.closePath();
+  targetCtx.fillStyle = fill;
+  targetCtx.fill();
+  targetCtx.strokeStyle = C_EDGE;
+  targetCtx.lineWidth = 1.0;
+  targetCtx.stroke();
 }
 
-function drawCube(x, y, z, S, ox, oy) {
+function drawCube(targetCtx, x, y, z, S, ox, oy) {
   const p = (dx,dy,dz) => toScreen(x+dx, y+dy, z+dz, S, ox, oy);
-  polygon([p(0,1,0), p(1,1,0), p(1,1,1), p(0,1,1)], C_TOP);   // top
-  polygon([p(1,0,0), p(1,1,0), p(1,1,1), p(1,0,1)], C_SIDE);  // lato destro
-  polygon([p(0,0,1), p(1,0,1), p(1,1,1), p(0,1,1)], C_SIDE);  // lato sinistro frontale
+  polygon(targetCtx, [p(0,1,0), p(1,1,0), p(1,1,1), p(0,1,1)], C_TOP);   // top
+  polygon(targetCtx, [p(1,0,0), p(1,1,0), p(1,1,1), p(1,0,1)], C_SIDE);  // lato destro
+  polygon(targetCtx, [p(0,0,1), p(1,0,1), p(1,1,1), p(0,1,1)], C_SIDE);  // lato sinistro frontale
 }
 
 function drawScene(grid) {
@@ -245,10 +279,127 @@ function drawScene(grid) {
 
   cubes.sort((a,b) => a.y !== b.y ? a.y - b.y : (a.x+a.z) - (b.x+b.z));
 
-  for (const {x,y,z} of cubes) drawCube(x,y,z,S,ox,oy);
+  for (const {x,y,z} of cubes) drawCube(ctx, x,y,z,S,ox,oy);
 }
 
 function redraw() { if (currentGrid) drawScene(currentGrid); }
+
+// ─── RENDER CUBETTO SU CANVAS SEPARATO (per la stampa PDF) ───────────────────
+function renderGridToDataURL(grid, targetSize) {
+  targetSize = targetSize || 320;
+  const tmp = document.createElement('canvas');
+  const tctx = tmp.getContext('2d');
+
+  const S1 = 1;
+  const corners = [[0,0,0],[4,0,0],[0,0,4],[4,0,4],[0,4,0],[4,4,0],[0,4,4],[4,4,4]];
+  const pts1 = corners.map(([x,y,z]) => toScreen(x,y,z,S1,0,0));
+  const minX1 = Math.min(...pts1.map(p=>p.sx));
+  const maxX1 = Math.max(...pts1.map(p=>p.sx));
+  const minY1 = Math.min(...pts1.map(p=>p.sy));
+  const maxY1 = Math.max(...pts1.map(p=>p.sy));
+  const spanW = maxX1 - minX1;
+  const spanH = maxY1 - minY1;
+
+  const PAD = 8;
+  const S = Math.floor(Math.min((targetSize - PAD*2) / spanW, (targetSize*0.8 - PAD*2) / spanH));
+
+  const W = Math.ceil(spanW * S) + PAD * 2;
+  const H = Math.ceil(spanH * S) + PAD * 2;
+  tmp.width = W;
+  tmp.height = H;
+
+  const ox = -minX1 * S + PAD;
+  const oy = -minY1 * S + PAD;
+
+  const cubes = [];
+  for (let y = 0; y < 4; y++)
+    for (let x = 0; x < 4; x++)
+      for (let z = 0; z < 4; z++)
+        if (y < grid[x][z]) cubes.push({x,y,z});
+  cubes.sort((a,b) => a.y !== b.y ? a.y - b.y : (a.x+a.z) - (b.x+b.z));
+
+  for (const {x,y,z} of cubes) drawCube(tctx, x,y,z,S,ox,oy);
+
+  return tmp.toDataURL('image/png');
+}
+
+// ─── STAMPA PDF (6 schede del livello attivo, senza soluzioni) ───────────────
+function stampaPDF() {
+  const N = 6;
+  const puzzles = [];
+  const usati = new Set();
+  for (let i = 0; i < N; i++) {
+    let puzzle, tentativi = 0, chiave;
+    do {
+      puzzle = generatePuzzle(currentLevel);
+      chiave = JSON.stringify(puzzle.grid);
+      tentativi++;
+    } while (usati.has(chiave) && tentativi < 200);
+    usati.add(chiave);
+    puzzles.push(puzzle);
+  }
+
+  const printArea = document.createElement('div');
+  printArea.id = 'printArea';
+
+  const logoSrc = document.getElementById('logoImg').src;
+  const imgLoadPromises = [];
+
+  puzzles.forEach(({ grid }) => {
+    const card = document.createElement('div');
+    card.className = 'print-card';
+
+    const logoRow = document.createElement('div');
+    logoRow.className = 'print-logo-row';
+    const logoImg = document.createElement('img');
+    logoImg.className = 'print-logo';
+    logoImg.src = logoSrc;
+    imgLoadPromises.push(new Promise(res => { logoImg.onload = res; logoImg.onerror = res; }));
+    const logoText = document.createElement('span');
+    logoText.textContent = 'Matematiche non si nasce';
+    logoRow.appendChild(logoImg);
+    logoRow.appendChild(logoText);
+    card.appendChild(logoRow);
+
+    const img = document.createElement('img');
+    img.className = 'print-cube-img';
+    imgLoadPromises.push(new Promise(res => { img.onload = res; img.onerror = res; }));
+    img.src = renderGridToDataURL(grid);
+    card.appendChild(img);
+
+    const q = document.createElement('p');
+    q.className = 'print-question';
+    q.textContent = 'Quanti cubetti mancano per completare il cubo?';
+    card.appendChild(q);
+
+    const hint = document.createElement('p');
+    hint.className = 'print-hint';
+    hint.textContent = 'IL CUBO INTERO HA 64 CUBETTI (4 × 4 × 4)';
+    card.appendChild(hint);
+
+    printArea.appendChild(card);
+  });
+
+  document.body.appendChild(printArea);
+  document.body.classList.add('printing');
+
+  window.onafterprint = function () {
+    document.body.classList.remove('printing');
+    printArea.remove();
+    window.onafterprint = null;
+  };
+
+  // Aspetta che tutte le immagini (logo + cubetti) siano effettivamente
+  // caricate/decodificate prima di aprire la finestra di stampa, altrimenti
+  // il browser può stampare i riquadri delle immagini ancora vuoti.
+  Promise.all(imgLoadPromises).then(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.print();
+      });
+    });
+  });
+}
 
 // ─── LOGICA GIOCO ─────────────────────────────────────────────────────────────
 function nextPuzzle() {
