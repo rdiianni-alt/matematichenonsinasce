@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Matematiche non si nasce</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Segoe UI',sans-serif;background:#f0f4ff;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:16px;}
@@ -42,6 +43,20 @@ header a{display:flex;flex-direction:column;align-items:center;gap:6px;text-deco
 .btn.secondary:hover{background:#888;}
 .score{margin-top:16px;font-size:0.9rem;color:#888;}
 .score span{font-weight:700;color:#2c3e7a;}
+
+/* PDF SECTION */
+.pdf-section{margin-top:20px;}
+.pdf-open-btn{background:#27ae60;}
+.pdf-open-btn:hover{background:#219150;}
+
+.pdf-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:1000;padding:16px;}
+.pdf-modal{background:white;border-radius:14px;padding:26px 22px;max-width:360px;width:100%;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,0.25);}
+.pdf-modal h3{color:#2c3e7a;margin-bottom:8px;font-size:1.2rem;}
+.pdf-modal p{color:#666;font-size:0.9rem;margin-bottom:18px;}
+.pdf-modal label{display:block;font-size:0.9rem;color:#2c3e7a;font-weight:600;margin-bottom:20px;}
+.pdf-modal input[type=number]{width:80px;margin-left:8px;padding:6px;border:2px solid #2c3e7a;border-radius:6px;font-size:1rem;text-align:center;}
+.pdf-modal-btns{display:flex;gap:10px;justify-content:center;}
+.pdf-note{font-size:0.78rem;color:#999;margin-top:14px;}
 </style>
 </head>
 <body>
@@ -67,6 +82,25 @@ header a{display:flex;flex-direction:column;align-items:center;gap:6px;text-deco
     <button class="btn secondary" onclick="newNumber()">Nuovo numero</button>
   </div>
   <div class="score">Corretti: <span id="correct">0</span> &nbsp;|&nbsp; Tentativi: <span id="attempts">0</span></div>
+</div>
+
+<div class="pdf-section">
+  <button class="btn pdf-open-btn" onclick="openPdfModal()">Crea scheda stampabile (PDF)</button>
+</div>
+
+<div class="pdf-overlay" id="pdfOverlay">
+  <div class="pdf-modal">
+    <h3>Scheda stampabile</h3>
+    <p>Numero in cifre &rarr; spazio per scriverlo in lettere</p>
+    <label>Quanti numeri vuoi inserire?
+      <input type="number" id="pdfCount" min="1" max="80" value="20">
+    </label>
+    <div class="pdf-modal-btns">
+      <button class="btn" onclick="generatePDF()">Genera PDF</button>
+      <button class="btn secondary" onclick="closePdfModal()">Annulla</button>
+    </div>
+    <div class="pdf-note">I numeri vengono estratti a caso da 1 a 100, senza ripetizioni fino a 100 numeri.</div>
+  </div>
 </div>
 
 <script>
@@ -205,6 +239,136 @@ function checkAnswer(){
 }
 
 newNumber();
+
+/* ===== SCHEDA STAMPABILE PDF ===== */
+
+const LOGO_URL = "https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png";
+
+function openPdfModal(){
+  document.getElementById('pdfOverlay').style.display='flex';
+}
+function closePdfModal(){
+  document.getElementById('pdfOverlay').style.display='none';
+}
+
+function pickRandomNumbers(count){
+  const pool=[];
+  for(let i=1;i<=100;i++) pool.push(i);
+  for(let i=pool.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [pool[i],pool[j]]=[pool[j],pool[i]];
+  }
+  if(count<=100) return pool.slice(0,count);
+  const result=[];
+  for(let i=0;i<count;i++) result.push(pool[i%100]);
+  return result;
+}
+
+async function loadLogoBase64(url){
+  try{
+    const response=await fetch(url);
+    if(!response.ok) return null;
+    const blob=await response.blob();
+    return await new Promise((res,rej)=>{
+      const reader=new FileReader();
+      reader.onloadend=()=>res(reader.result);
+      reader.onerror=()=>rej(null);
+      reader.readAsDataURL(blob);
+    });
+  }catch(e){
+    return null;
+  }
+}
+
+async function generatePDF(){
+  const countInput=parseInt(document.getElementById('pdfCount').value);
+  const count=(isNaN(countInput)||countInput<1) ? 20 : countInput;
+  const numbers=pickRandomNumbers(count);
+
+  const { jsPDF }=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'a4'});
+
+  const pageWidth=210, pageHeight=297;
+  const marginLeft=20, marginRight=20, marginTop=20, marginBottom=20;
+  const rowHeight=15;
+  let y=marginTop;
+
+  // dimensioni fisse: riquadro cifra, freccia, riquadri lettera
+  const digitBoxW=16, digitBoxH=11;
+  const arrowGap=3, arrowW=8, afterArrowGap=4;
+  const lettersStartX=marginLeft+digitBoxW+arrowGap+arrowW+afterArrowGap;
+  const availableForLetters=pageWidth-marginRight-lettersStartX;
+  const maxWordLen=16; // parola più lunga tra 1 e 100: CINQUANTAQUATTRO
+  const letterGap=1;
+  const letterBoxW=(availableForLetters-(maxWordLen-1)*letterGap)/maxWordLen;
+  const letterBoxH=11;
+
+  const logoData=await loadLogoBase64(LOGO_URL);
+
+  function drawHeader(){
+    if(logoData){
+      try{
+        doc.addImage(logoData,'PNG',pageWidth/2-9,y-6,18,18);
+        y+=15;
+      }catch(e){/* se l'immagine non si carica, si prosegue senza */}
+    }
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(16);
+    doc.setTextColor(44,62,122);
+    doc.text('Scrivo il numero in lettere', pageWidth/2, y, {align:'center'});
+    y+=7;
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(10);
+    doc.setTextColor(95,94,90);
+    doc.text('Matematiche non si nasce', pageWidth/2, y, {align:'center'});
+    y+=6;
+    doc.setDrawColor(44,62,122);
+    doc.setLineWidth(0.5);
+    doc.line(marginLeft, y, pageWidth-marginRight, y);
+    y+=10;
+  }
+
+  function drawArrow(xStart){
+    const yMid=y-3;
+    doc.setDrawColor(44,62,122);
+    doc.setFillColor(44,62,122);
+    doc.setLineWidth(0.6);
+    doc.line(xStart, yMid, xStart+arrowW-2.5, yMid);
+    doc.triangle(xStart+arrowW-2.5, yMid-1.6, xStart+arrowW-2.5, yMid+1.6, xStart+arrowW, yMid, 'F');
+  }
+
+  drawHeader();
+
+  numbers.forEach(num=>{
+    if(y+rowHeight>pageHeight-marginBottom){
+      doc.addPage();
+      y=marginTop;
+      drawHeader();
+    }
+    doc.setDrawColor(44,62,122);
+    doc.setLineWidth(0.4);
+    doc.roundedRect(marginLeft, y-8, digitBoxW, digitBoxH, 1.5, 1.5);
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(13);
+    doc.setTextColor(44,62,122);
+    doc.text(String(num), marginLeft+digitBoxW/2, y, {align:'center'});
+
+    drawArrow(marginLeft+digitBoxW+arrowGap);
+
+    const parola=numeri[num];
+    doc.setDrawColor(150,150,150);
+    doc.setLineWidth(0.35);
+    for(let i=0;i<parola.length;i++){
+      const bx=lettersStartX+i*(letterBoxW+letterGap);
+      doc.rect(bx, y-8, letterBoxW, letterBoxH);
+    }
+
+    y+=rowHeight;
+  });
+
+  doc.save('scrivo-il-numero-schede.pdf');
+  closePdfModal();
+}
 </script>
 </body>
 </html>
