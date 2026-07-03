@@ -49,6 +49,7 @@ section.visible{display:flex;flex-direction:column;align-items:center;text-align
   <button onclick="showSection('g1',this)">Quale frazione?</button>
   <button onclick="showSection('g2',this)">Quale carta?</button>
   <button onclick="showSection('g3',this)">Quali carte?</button>
+  <button onclick="showSection('g4',this)">Stampa carte</button>
 </nav>
 
 <section id="s-g0" class="visible">
@@ -97,6 +98,21 @@ section.visible{display:flex;flex-direction:column;align-items:center;text-align
   </div>
 </section>
 
+<section id="s-g4">
+  <p style="color:#555;font-size:.9rem;margin:0 0 1rem;max-width:420px">Genera un PDF con carte scelte a caso nel mazzo, tutte diverse tra loro, colorate e pronte da stampare e ritagliare per un lavoro in classe.</p>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;margin-bottom:1.2rem">
+    <label for="pdf-n-carte" style="font-size:0.9rem;color:#444">Numero di carte:</label>
+    <select id="pdf-n-carte" style="padding:6px 10px;border-radius:6px;border:1.5px solid #bbb;font-size:0.9rem">
+      <option value="6">6</option>
+      <option value="8" selected>8</option>
+      <option value="12">12</option>
+    </select>
+  </div>
+  <button id="pdf-genera-btn" onclick="generaPDFCarte()" style="padding:10px 28px;border-radius:8px;border:1.5px solid #3a6e4e;background:#3a6e4e;color:#fff;cursor:pointer;font-size:0.9rem">Genera PDF</button>
+  <div id="pdf-status" style="min-height:1.6rem;font-size:0.85rem;color:#555;margin-top:0.8rem"></div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 const LOGO="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png";
 const PALETTE=["#a8d5ba","#b5c9e8","#f0b8b8","#c5b8e8","#f5d6a0","#a8c8e8","#e8c5d0","#b8d8c8","#c8e8d0","#e8b8c8","#b8c8e8","#d0e8b8","#e8d8b8","#b8e8e0","#d8c8f0","#f0d8b8","#c8f0e0","#f0c8d8"];
@@ -258,6 +274,121 @@ const CARDS=[
   ...MAZZO_X.map((f,i)=>({...f,tipo:'x',colore:PALETTE[(MAZZO_GRID.length+i)%PALETTE.length],label:`${f.n}/${f.d}`})),
   ...MAZZO_MIXED_DEF,
 ];
+
+// STAMPA CARTE (PDF)
+async function getLogoCircleDataURL(size=200){
+  if(window._logoCircleCache) return window._logoCircleCache;
+  const resp=await fetch(LOGO);
+  const blob=await resp.blob();
+  const rawDataUrl=await new Promise((res,rej)=>{
+    const reader=new FileReader();
+    reader.onload=()=>res(reader.result);
+    reader.onerror=rej;
+    reader.readAsDataURL(blob);
+  });
+  const img=new Image();
+  await new Promise((res,rej)=>{img.onload=res;img.onerror=rej;img.src=rawDataUrl;});
+  const canvas=document.createElement('canvas');
+  canvas.width=size;canvas.height=size;
+  const ctx=canvas.getContext('2d');
+  ctx.beginPath();
+  ctx.arc(size/2,size/2,size/2,0,Math.PI*2);
+  ctx.closePath();
+  ctx.clip();
+  ctx.fillStyle='#fff';
+  ctx.fillRect(0,0,size,size);
+  const scale=Math.min(size/img.width,size/img.height);
+  const iw=img.width*scale,ih=img.height*scale;
+  ctx.drawImage(img,(size-iw)/2,(size-ih)/2,iw,ih);
+  const out=canvas.toDataURL('image/png');
+  window._logoCircleCache=out;
+  return out;
+}
+function svgConDimensioni(svg,w,h){
+  return svg.replace('<svg ', `<svg width="${w}" height="${h}" `);
+}
+function cardImageDataURL(c,w,h){
+  return new Promise((resolve,reject)=>{
+    const svg=svgConDimensioni(cardSVG(c,w,h),w,h);
+    const img=new Image();
+    img.onload=()=>{
+      const scale=3;
+      const canvas=document.createElement('canvas');
+      canvas.width=w*scale;canvas.height=h*scale;
+      const ctx=canvas.getContext('2d');
+      ctx.scale(scale,scale);
+      ctx.drawImage(img,0,0,w,h);
+      resolve(canvas.toDataURL('image/png'));
+    };
+    img.onerror=reject;
+    img.src='data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(svg)));
+  });
+}
+async function generaPDFCarte(){
+  const n=parseInt(document.getElementById('pdf-n-carte').value,10);
+  const btn=document.getElementById('pdf-genera-btn');
+  const status=document.getElementById('pdf-status');
+  btn.disabled=true;btn.textContent='Generazione...';status.textContent='';
+  try{
+    const totale=Math.min(n,CARDS.length);
+    const indiciMescolati=[...CARDS.keys()].sort(()=>Math.random()-.5).slice(0,totale);
+    const scelte=indiciMescolati.map(i=>CARDS[i]);
+
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF({unit:'mm',format:'a4',orientation:'portrait'});
+    const pageW=210,pageH=297,margin=14;
+    const logoSize=16,logoY=margin,titleY=logoY+logoSize+6,linkY=titleY+5;
+    const headerH=(linkY+6)-margin;
+    const cols=totale<=6?2:(totale<=8?2:3);
+    const rows=Math.ceil(totale/cols);
+    const gapX=6,gapY=8,ratio=3/2;
+    const usableW=pageW-margin*2-gapX*(cols-1);
+    const usableH=pageH-margin*2-headerH-gapY*(rows-1);
+    let cardW=usableW/cols,cardH=cardW/ratio;
+    if(cardH*rows>usableH){cardH=usableH/rows;cardW=cardH*ratio;}
+    const gridW=cardW*cols+gapX*(cols-1);
+    const startX=(pageW-gridW)/2,startY=margin+headerH;
+
+    let logoData=null;
+    try{ logoData=await getLogoCircleDataURL(); }catch(e){ console.warn('logo non caricato',e); }
+    if(logoData) doc.addImage(logoData,'PNG',pageW/2-logoSize/2,logoY,logoSize,logoSize);
+    doc.setFontSize(14);doc.setTextColor(60);
+    doc.text('Carte delle frazioni',pageW/2,titleY,{align:'center'});
+    doc.setFontSize(9);doc.setTextColor(58,110,78);
+    doc.textWithLink('matematichenonsinasce.com',pageW/2,linkY,{align:'center',url:'https://matematichenonsinasce.com/'});
+    doc.setTextColor(0);
+
+    for(let idx=0;idx<scelte.length;idx++){
+      const r=Math.floor(idx/cols),c=idx%cols;
+      const x=startX+c*(cardW+gapX),y=startY+r*(cardH+gapY);
+      const dataUrl=await cardImageDataURL(scelte[idx],300,200);
+      doc.addImage(dataUrl,'PNG',x,y,cardW,cardH);
+      doc.setDrawColor(170);
+      doc.setLineDashPattern([1.2,1],0);
+      doc.rect(x,y,cardW,cardH);
+      doc.setLineDashPattern([],0);
+    }
+
+    doc.addPage();
+    doc.setFontSize(13);doc.setTextColor(60);
+    doc.text('Soluzioni (uso insegnante)',margin,margin);
+    doc.setFontSize(10);doc.setTextColor(0);
+    let ty=margin+10;
+    scelte.forEach((c,i)=>{
+      if(ty>pageH-margin){doc.addPage();ty=margin+6;}
+      doc.text(`Carta ${i+1}: ${c.label}`,margin,ty);
+      ty+=6.5;
+    });
+
+    doc.save(`carte-frazioni-${totale}.pdf`);
+    status.textContent=`PDF generato con ${totale} carte.`;
+  }catch(e){
+    status.textContent='Errore nella generazione del PDF. Riprova.';
+    console.error(e);
+  }finally{
+    btn.disabled=false;btn.textContent='Genera PDF';
+  }
+}
 
 // GIOCO 0
 let g0flipped=false;
