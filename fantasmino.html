@@ -158,6 +158,70 @@ body { font-family: 'Segoe UI', sans-serif; background: #f7f3ff; min-height: 100
   background: #e8e0ff; color: #4a2ea0; font-weight: 700;
   border-radius: 6px; padding: 2px 7px; font-size: 12px;
 }
+
+.btn-stampa { background: #fff3e0; border-color: #ffb84d; color: #a05a00; }
+.btn-stampa:hover { background: #ffe6c0; }
+
+/* ---- MODALE STAMPA ---- */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(45,26,110,0.45);
+  align-items: center; justify-content: center; z-index: 100; padding: 16px;
+}
+.modal-overlay.show { display: flex; }
+.modal-box {
+  background: #fff; border-radius: 18px; padding: 24px 22px;
+  max-width: 360px; width: 100%; box-shadow: 0 8px 30px #2d1a6e33;
+}
+.modal-box h3 { font-size: 17px; color: #2d1a6e; margin-bottom: 6px; text-align: center; }
+.modal-box p { font-size: 13px; color: #666; text-align: center; margin-bottom: 18px; }
+.slider-row { margin-bottom: 20px; }
+.slider-row label { display: flex; justify-content: space-between; font-size: 14px; font-weight: 700; color: #5a3dbf; margin-bottom: 8px; }
+.slider-row input[type=range] { width: 100%; accent-color: #7c5cbf; }
+.modal-azioni { display: flex; gap: 10px; }
+.modal-azioni button { flex: 1; }
+.btn-annulla { background: #fff; border: 2px solid #d4c8f5; color: #5a3dbf; }
+.btn-annulla:hover { background: #f0ebff; }
+.btn-conferma { background: #7c5cbf; color: #fff; border: 2px solid #7c5cbf; }
+.btn-conferma:hover { background: #5a3dbf; }
+
+/* ---- SCHEDA STAMPABILE ---- */
+.foglio-stampa { display: none; background: #fff; }
+
+@media print {
+  html, body { background: #fff !important; }
+  body * { visibility: hidden; }
+  .foglio-stampa, .foglio-stampa * { visibility: visible; }
+  .foglio-stampa { display: block; position: absolute; top: 0; left: 0; width: 100%; background: #fff; }
+  .no-print { display: none !important; }
+  @page { size: A4; margin: 14mm; }
+}
+
+.foglio-header {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  border-bottom: 2px solid #7c5cbf; padding-bottom: 10px; margin-bottom: 8px;
+}
+.foglio-logo { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.foglio-logo img { width: 39px; height: 39px; border-radius: 50%; object-fit: contain; }
+.foglio-logo span { font-size: 11px; font-weight: 600; color: #5a3dbf; }
+.foglio-titolo { font-size: 23px; font-weight: 800; color: #2d1a6e; margin-top: 9px; }
+.foglio-sottotitolo { font-size: 11px; color: #888; margin-top: 2px; }
+
+.foglio-nome {
+  font-size: 12px; color: #444; margin: 9px 0 14px; display: flex; gap: 30px;
+}
+.foglio-nome span { border-bottom: 1px solid #999; flex: 1; padding-bottom: 2px; }
+
+.foglio-griglia {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 9mm 9mm;
+}
+.foglio-card {
+  border: 2px solid #b3a0ee; border-radius: 13px;
+  padding: 17px 10px; text-align: center;
+}
+.foglio-num { font-size: 11px; color: #aaa; text-align: left; margin-bottom: 6px; }
+.foglio-eq { font-size: 27px; font-weight: 700; color: #2d1a6e; display: flex; align-items: center; justify-content: center; gap: 11px; }
+.foglio-eq .op { color: #7c5cbf; }
+.foglio-eq .ghost { font-size: 30px; }
 </style>
 </head>
 <body>
@@ -223,11 +287,47 @@ body { font-family: 'Segoe UI', sans-serif; background: #f7f3ff; min-height: 100
     <button class="btn-azione btn-nuova" onclick="nuovaCarta()">🃏 Nuova carta</button>
   </div>
 
+  <div class="azioni" style="margin-top:2px;">
+    <button class="btn-azione btn-stampa" onclick="apriPannelloStampa()">🖨️ Stampa scheda per il quaderno</button>
+  </div>
+
   <div class="strade-wrap" id="strade-wrap" style="display:none">
     <h3>Le mie strade trovate 🌟</h3>
     <div id="strade-list"></div>
   </div>
 
+</div>
+
+<!-- MODALE STAMPA -->
+<div class="modal-overlay no-print" id="modal-overlay">
+  <div class="modal-box">
+    <h3>🖨️ Scheda per il quaderno</h3>
+    <p>Genera una pagina A4 con tanti fantasmini da risolvere sul quaderno, senza risultato.</p>
+    <div class="slider-row">
+      <label>Quanti fantasmini? <span id="slider-val">8</span></label>
+      <input type="range" id="slider-count" min="4" max="12" step="2" value="8" oninput="document.getElementById('slider-val').textContent=this.value">
+    </div>
+    <div class="modal-azioni">
+      <button class="btn-azione btn-annulla" onclick="chiudiPannelloStampa()">Annulla</button>
+      <button class="btn-azione btn-conferma" onclick="generaEStampa()">Genera e stampa</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCHEDA STAMPABILE -->
+<div class="foglio-stampa" id="foglio-stampa">
+  <div class="foglio-header">
+    <div class="foglio-logo">
+      <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="Logo blog">
+      <span>Matematiche non si nasce</span>
+    </div>
+    <div class="foglio-titolo">👻 Numeri Fantasmino</div>
+    <div class="foglio-sottotitolo" id="foglio-sottotitolo"></div>
+  </div>
+  <div class="foglio-nome">
+    Nome: <span>&nbsp;</span> Data: <span>&nbsp;</span>
+  </div>
+  <div class="foglio-griglia" id="foglio-griglia"></div>
 </div>
 
 <script>
@@ -481,6 +581,65 @@ function salvaStrada(){
 function nuovaCarta(){
   document.getElementById('add-panel').style.display = '';
   init();
+}
+
+// ---- STAMPA SCHEDA PER IL QUADERNO ----
+const NOMI_DIFF = { interi: 'Numeri interi', decimi: 'Decimi', centesimi: 'Centesimi' };
+
+function apriPannelloStampa(){
+  document.getElementById('modal-overlay').classList.add('show');
+}
+
+function chiudiPannelloStampa(){
+  document.getElementById('modal-overlay').classList.remove('show');
+}
+
+function generaEquazioniStampa(n){
+  const [aMin, aMax] = cfg.rangeA;
+  const [fMin, fMax] = cfg.rangeFant;
+  const eqs = [];
+  const viste = new Set();
+  let tentativi = 0;
+  while(eqs.length < n && tentativi < n * 60){
+    tentativi++;
+    let a = rndDec(aMin, aMax, cfg.step);
+    let f = rndDec(fMin, fMax, cfg.step);
+    let b = r(a + f);
+    if(b > cfg.max){ b = cfg.max; f = r(b - a); }
+    if(f <= 0) continue;
+    const chiave = a + '_' + b;
+    if(viste.has(chiave)) continue;
+    viste.add(chiave);
+    eqs.push({a, b});
+  }
+  return eqs;
+}
+
+function generaEStampa(){
+  const n = parseInt(document.getElementById('slider-count').value, 10);
+  const eqs = generaEquazioniStampa(n);
+
+  document.getElementById('foglio-sottotitolo').textContent = NOMI_DIFF[diff];
+
+  const griglia = document.getElementById('foglio-griglia');
+  griglia.innerHTML = '';
+  eqs.forEach((eq, i) => {
+    const card = document.createElement('div');
+    card.className = 'foglio-card';
+    card.innerHTML = `
+      <div class="foglio-num">${i + 1}</div>
+      <div class="foglio-eq">
+        <span>${fmt(eq.a)}</span>
+        <span class="op">+</span>
+        <span class="ghost">👻</span>
+        <span class="op">=</span>
+        <span>${fmt(eq.b)}</span>
+      </div>`;
+    griglia.appendChild(card);
+  });
+
+  chiudiPannelloStampa();
+  setTimeout(() => window.print(), 100);
 }
 
 // avvio
