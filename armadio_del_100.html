@@ -51,6 +51,39 @@
   .feedback { font-size: 22px; font-weight: 700; min-height: 32px; text-align: center; }
   .feedback.ok { color: #2E7D32; }
   .feedback.no { color: #E24B4A; }
+
+  /* --- Stampa scheda PDF --- */
+  #printModalOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+  #printModalOverlay.active { display: flex; }
+  .print-modal { background: #fff; border-radius: 12px; padding: 26px 28px; width: 280px; display: flex; flex-direction: column; gap: 14px; align-items: center; }
+  .print-modal h3 { font-size: 16px; color: #222; font-weight: 600; text-align: center; }
+  .print-modal input { font-size: 22px; text-align: center; width: 90px; padding: 6px; border: 2px solid #bbb; border-radius: 8px; }
+  .print-modal-buttons { display: flex; gap: 10px; }
+
+  #printSheet { display: none; }
+
+  @media print {
+    body > *:not(#printSheet) { display: none !important; }
+    #printSheet { display: block !important; }
+    .print-page { page-break-after: always; }
+    .print-page:last-child { page-break-after: auto; }
+    @page { size: A4 landscape; margin: 10mm; }
+  }
+
+  .print-page { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: 5mm; width: 277mm; height: 190mm; background: #fff; }
+  .print-tile { border: 1px dashed #ccc; border-radius: 4px; padding: 3mm; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 2.5mm; background: #fff; overflow: hidden; }
+  .p-logo { display: flex; flex-direction: column; align-items: center; gap: 1px; text-decoration: none; }
+  .p-logo img { width: 20px; height: 20px; border-radius: 50%; object-fit: contain; }
+  .p-logo span { font-size: 7px; color: #777; }
+  .p-question { font-size: 11px; font-weight: 600; color: #222; text-align: center; }
+  .print-grid { display: flex; flex-direction: column; gap: 1.5px; }
+  .print-row { display: flex; gap: 1.5px; align-items: center; justify-content: center; }
+  .print-row-gap { height: 5px; }
+  .print-col-gap { width: 5px; }
+  .print-ball { width: 18px; height: 18px; border-radius: 50%; border: 1.2px solid #bbb; background: #fff; }
+  .print-ball.on { background: #E24B4A; border-color: #A32D2D; }
+  .print-ball.single { background: #E24B4A; border-color: #A32D2D; }
+  .print-answer-line { margin-top: 1.5mm; border-bottom: 1px solid #999; width: 55%; height: 12px; }
 </style>
 </head>
 <body>
@@ -104,6 +137,7 @@
     <div class="num-box" id="contaNum">?</div>
     <div class="hint" id="contaHint"></div>
     <button class="btn primary" id="contaRevBtn" onclick="revealConta()">Mostra risposta</button>
+    <button class="btn" onclick="openPrintModal()">🖨️ Stampa scheda</button>
   </div>
 </div>
 
@@ -115,6 +149,7 @@
     <button class="btn" onclick="newTrova()">🎲 Nuovo numero</button>
     <div class="question" id="trovaQuestion">—</div>
     <div class="feedback" id="trovaFeedback"></div>
+    <button class="btn" onclick="openPrintModal()">🖨️ Stampa scheda</button>
   </div>
 </div>
 
@@ -132,13 +167,28 @@
     <div class="num-box" id="indovinaNum"></div>
     <div class="hint" id="indovinaHint"></div>
     <button class="btn primary" id="indovinaRevBtn" onclick="revealIndovina()">Controlla!</button>
+    <button class="btn" onclick="openPrintModal()">🖨️ Stampa scheda</button>
   </div>
 </div>
+
+<div id="printModalOverlay">
+  <div class="print-modal">
+    <h3>Quanti esercizi vuoi stampare?</h3>
+    <input type="number" id="printCount" value="6" min="1" max="100">
+    <div class="print-modal-buttons">
+      <button class="btn" onclick="closePrintModal()">Annulla</button>
+      <button class="btn primary" onclick="confirmPrint()">Genera PDF</button>
+    </div>
+  </div>
+</div>
+<div id="printSheet"></div>
 
 <script>
   var contaCurrent = 0;
   var trovaCurrent = 0;
   var indovinaCurrent = 0;
+  var activeGame = null;
+  var LOGO_URL = 'https://raw.githubusercontent.com/rdiianni-alt/archivio_privato/988498e303d047e2e04caa80073d184ee4d392c7/logo.png';
 
   function buildGrid(gridId, prefix) {
     var grid = document.getElementById(gridId);
@@ -178,6 +228,7 @@
     document.getElementById('contaScreen').classList.remove('active');
     document.getElementById('trovaScreen').classList.remove('active');
     document.getElementById('indovinaScreen').classList.remove('active');
+    activeGame = g;
     if (g === 'conta') {
       document.getElementById('contaScreen').classList.add('active');
       buildGrid('contaGrid', 'c');
@@ -323,6 +374,95 @@
     else txt = dec + (dec === 1 ? ' decina' : ' decine') + ' + ' + uni + ' unità';
     document.getElementById('indovinaHint').textContent = txt;
     document.getElementById('indovinaRevBtn').style.display = 'none';
+  }
+
+  /* --- Stampa scheda PDF --- */
+
+  function openPrintModal() {
+    document.getElementById('printCount').value = 6;
+    document.getElementById('printModalOverlay').classList.add('active');
+  }
+
+  function closePrintModal() {
+    document.getElementById('printModalOverlay').classList.remove('active');
+  }
+
+  function shuffledNumbers(max) {
+    var arr = [];
+    for (var i = 1; i <= max; i++) arr.push(i);
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+    }
+    return arr;
+  }
+
+  function makeGridHTML(classFor) {
+    var html = '';
+    for (var r = 0; r < 10; r++) {
+      if (r === 5) html += '<div class="print-row-gap"></div>';
+      html += '<div class="print-row">';
+      for (var c = 0; c < 10; c++) {
+        if (c === 5) html += '<div class="print-col-gap"></div>';
+        var idx = r * 10 + c;
+        var extra = classFor(idx);
+        html += '<div class="print-ball' + (extra ? ' ' + extra : '') + '"></div>';
+      }
+      html += '</div>';
+    }
+    return html;
+  }
+
+  function buildPrintTile(gameType, num) {
+    var logoHtml = '<div class="p-logo"><img src="' + LOGO_URL + '" alt="Matematiche non si nasce"><span>Matematiche non si nasce</span></div>';
+    var gridHtml = '', questionHtml = '', answerHtml = '';
+
+    if (gameType === 'conta') {
+      gridHtml = makeGridHTML(function (i) { return i < num ? 'on' : ''; });
+      questionHtml = 'Quante palline colorate?';
+      answerHtml = '<div class="print-answer-line"></div>';
+    } else if (gameType === 'trova') {
+      gridHtml = makeGridHTML(function () { return ''; });
+      questionHtml = 'Colora la pallina numero ' + num;
+    } else if (gameType === 'indovina') {
+      gridHtml = makeGridHTML(function (i) { return i === num - 1 ? 'single' : ''; });
+      questionHtml = 'Che numero è?';
+      answerHtml = '<div class="print-answer-line"></div>';
+    }
+
+    return '<div class="print-tile">' + logoHtml +
+      '<div class="p-question">' + questionHtml + '</div>' +
+      '<div class="print-grid">' + gridHtml + '</div>' +
+      answerHtml + '</div>';
+  }
+
+  function generatePrintSheet(gameType, count) {
+    var numbers = shuffledNumbers(100).slice(0, count);
+    var sheet = document.getElementById('printSheet');
+    var out = '';
+    for (var i = 0; i < numbers.length; i += 6) {
+      var pageNums = numbers.slice(i, i + 6);
+      out += '<div class="print-page">';
+      for (var j = 0; j < 6; j++) {
+        if (j < pageNums.length) {
+          out += buildPrintTile(gameType, pageNums[j]);
+        } else {
+          out += '<div class="print-tile" style="visibility:hidden;"></div>';
+        }
+      }
+      out += '</div>';
+    }
+    sheet.innerHTML = out;
+  }
+
+  function confirmPrint() {
+    if (!activeGame) return;
+    var n = parseInt(document.getElementById('printCount').value, 10);
+    if (!n || n < 1) n = 1;
+    if (n > 100) n = 100;
+    generatePrintSheet(activeGame, n);
+    closePrintModal();
+    setTimeout(function () { window.print(); }, 150);
   }
 </script>
 </body>
