@@ -24,6 +24,24 @@ canvas{border-radius:16px;cursor:pointer;border:2px solid #c8b89a;width:100%;max
 .feedback.ok{color:#2e7a50}
 .feedback.no{color:#c03030}
 .score{margin-top:8px;font-size:0.9rem;color:#7a6040;font-variant:small-caps}
+.print-controls{display:flex;align-items:center;gap:10px;margin-top:18px;margin-bottom:22px;background:#e8dfc8;padding:10px 18px;border-radius:12px;border:1px solid #c8b89a}
+.print-controls label{font-size:14px;color:#5a4020;font-variant:small-caps}
+.print-controls input{width:60px;padding:4px 8px;border-radius:6px;border:1px solid #c8b89a;font-size:14px;text-align:center;background:#fffdf7;color:#3a2e1e;font-family:Georgia,serif;font-variant:small-caps}
+.print-controls button{padding:6px 16px;border-radius:8px;border:1px solid #7a5c2e;background:#c8a850;color:#3a2200;font-weight:bold;cursor:pointer;font-size:14px;font-family:Georgia,serif;font-variant:small-caps}
+.print-controls button:hover{background:#d8ba60}
+#printSheet{display:none}
+@media print{
+  @page{size:A4;margin:8mm}
+  html,body{background:#fff!important}
+  body>*:not(#printSheet){display:none!important}
+  #printSheet{display:block!important;background:#fff!important}
+  .print-card{page-break-inside:avoid;break-inside:avoid;border:1px solid #c8b89a;border-radius:10px;padding:8px;box-sizing:border-box;background:#fff!important;margin-bottom:16px;width:100%;display:block}
+  .print-card-header{display:flex;align-items:center;gap:6px;margin-bottom:3px}
+  .print-logo{width:26px;height:26px;object-fit:contain;border-radius:50%}
+  .print-title{font-family:Georgia,serif;font-variant:small-caps;font-size:0.78rem;color:#7a5c2e;font-weight:bold}
+  .print-total{font-family:Georgia,serif;font-variant:small-caps;font-size:0.68rem;color:#4a3820;margin-bottom:3px}
+  .print-grid{column-count:2;column-gap:22px;background:#fff!important}
+}
 </style>
 </head>
 <body>
@@ -35,11 +53,21 @@ canvas{border-radius:16px;cursor:pointer;border:2px solid #c8b89a;width:100%;max
   </a>
 </div>
 
-<h1>🎲 Scatolina Delle Palline</h1>
+<h1>🎲 Scatolina Gialla</h1>
 <div class="controls">
   <label>Palline (1–20):</label>
   <input type="number" id="numInput" min="1" max="20" value="20">
   <button onclick="nuovaPartita()">Nuova Partita</button>
+</div>
+<div class="print-controls">
+  <label>Scatoline da stampare:</label>
+  <input type="number" id="numCards" min="1" max="20" value="8">
+  <label>Totale palline:</label>
+  <select id="printTotal">
+    <option value="10">10</option>
+    <option value="20" selected>20</option>
+  </select>
+  <button onclick="generaScheda()">🖨️ Stampa Scheda PDF</button>
 </div>
 <canvas id="c" width="520" height="240"></canvas>
 <div id="counts"></div>
@@ -55,6 +83,8 @@ canvas{border-radius:16px;cursor:pointer;border:2px solid #c8b89a;width:100%;max
   <strong style="font-size:1.05rem;color:#7a5c2e">Regole Del Gioco</strong><br><br>
   Scuoti la scatolina, apri uno sportello e conta le palline visibili. Quante sono rimaste nell'altro lato? Un modo semplice per scoprire le decomposizioni del numero: gli amici del 10, del 20, o di qualsiasi numero scelto.
 </div>
+
+<div id="printSheet" class="print-grid"></div>
 
 <script>
 const canvas = document.getElementById('c');
@@ -203,6 +233,96 @@ function controlla(){
 }
 
 function aggiornaPunteggio(){document.getElementById('score').textContent=`Risposte Corrette: ${correct} / ${total}`;}
+
+function ballRadiusForTotal(total){
+  return total>14?6:total>8?8:10;
+}
+
+function packBalls(x1,x2,y1,y2,count,ballR){
+  const list=[];
+  for(let i=0;i<count;i++) list.push({x:rand(x1+ballR,x2-ballR),y:rand(y1+ballR,y2-ballR)});
+  for(let iter=0;iter<150;iter++){
+    for(let b of list){
+      b.x=Math.max(x1+ballR,Math.min(x2-ballR,b.x));
+      b.y=Math.max(y1+ballR,Math.min(y2-ballR,b.y));
+    }
+    for(let i=0;i<list.length;i++)
+      for(let j=i+1;j<list.length;j++){
+        const a=list[i],b=list[j],dx=b.x-a.x,dy=b.y-a.y,d=Math.sqrt(dx*dx+dy*dy);
+        if(d<ballR*2+1&&d>0){const push=(ballR*2+1-d)/2,nx=dx/d,ny=dy/d;a.x-=nx*push;a.y-=ny*push;b.x+=nx*push;b.y+=ny*push;}
+      }
+  }
+  return list;
+}
+
+function drawLidGeneric(ctx,side,BX,BY,BOX_W,BOX_H,DIVIDER){
+  ctx.save();ctx.beginPath();
+  if(side==='L'){
+    ctx.moveTo(BX+10,BY+2);ctx.lineTo(DIVIDER-2,BY+2);ctx.lineTo(DIVIDER-2,BY+BOX_H-2);ctx.lineTo(BX+10,BY+BOX_H-2);
+    ctx.arcTo(BX+2,BY+BOX_H-2,BX+2,BY+BOX_H-10,10);ctx.lineTo(BX+2,BY+10);ctx.arcTo(BX+2,BY+2,BX+10,BY+2,10);
+  } else {
+    ctx.moveTo(DIVIDER+2,BY+2);ctx.lineTo(BX+BOX_W-10,BY+2);ctx.arcTo(BX+BOX_W-2,BY+2,BX+BOX_W-2,BY+10,10);
+    ctx.lineTo(BX+BOX_W-2,BY+BOX_H-10);ctx.arcTo(BX+BOX_W-2,BY+BOX_H-2,BX+BOX_W-10,BY+BOX_H-2,10);ctx.lineTo(DIVIDER+2,BY+BOX_H-2);
+  }
+  ctx.closePath();ctx.fillStyle=BOX_COLOR;ctx.fill();ctx.strokeStyle=BOX_DARK;ctx.lineWidth=2;ctx.stroke();
+  const hx=side==='L'?DIVIDER-16:DIVIDER+16;
+  ctx.beginPath();ctx.arc(hx,BY+BOX_H/2,5,0,Math.PI*2);ctx.fillStyle=BOX_DARK;ctx.fill();
+  ctx.restore();
+}
+
+function drawPrintScene(canvasEl,visible,openSide,ballR){
+  const ctx=canvasEl.getContext('2d');
+  const W=canvasEl.width,H=canvasEl.height;
+  const BOX_W=W-16,BOX_H=H-16,BX=8,BY=8,DIVIDER=BX+BOX_W/2;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle=ROOM_L_COLOR;roundRect(ctx,BX+3,BY+3,BOX_W/2-6,BOX_H-6,8);ctx.fill();
+  ctx.fillStyle=ROOM_R_COLOR;roundRect(ctx,DIVIDER+3,BY+3,BOX_W/2-6,BOX_H-6,8);ctx.fill();
+  const x1=openSide==='L'?BX+ballR+4:DIVIDER+ballR+4;
+  const x2=openSide==='L'?DIVIDER-ballR-4:BX+BOX_W-ballR-4;
+  const y1=BY+ballR+4,y2=BY+BOX_H-ballR-4;
+  const list=packBalls(x1,x2,y1,y2,visible,ballR);
+  for(const b of list){
+    ctx.beginPath();ctx.arc(b.x,b.y,ballR,0,Math.PI*2);ctx.fillStyle=BALL_COLOR;ctx.fill();
+    ctx.beginPath();ctx.arc(b.x-ballR*.3,b.y-ballR*.3,ballR*.28,0,Math.PI*2);ctx.fillStyle=BALL_SHINE;ctx.fill();
+  }
+  ctx.strokeStyle=BOX_DARK;ctx.lineWidth=4;roundRect(ctx,BX,BY,BOX_W,BOX_H,10);ctx.stroke();
+  ctx.strokeStyle=BOX_COLOR;ctx.lineWidth=2;roundRect(ctx,BX,BY,BOX_W,BOX_H,10);ctx.stroke();
+  ctx.strokeStyle=BOX_DARK;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(DIVIDER,BY+6);ctx.lineTo(DIVIDER,BY+BOX_H-6);ctx.stroke();
+  ctx.strokeStyle=BOX_COLOR;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(DIVIDER,BY+6);ctx.lineTo(DIVIDER,BY+BOX_H-6);ctx.stroke();
+  const closedSide=openSide==='L'?'R':'L';
+  drawLidGeneric(ctx,closedSide,BX,BY,BOX_W,BOX_H,DIVIDER);
+}
+
+function shuffledRange(total){
+  const arr=[];
+  for(let i=0;i<=total;i++) arr.push(i);
+  for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}
+  return arr;
+}
+
+function generaScheda(){
+  let n=parseInt(document.getElementById('numCards').value);
+  if(isNaN(n)||n<1)n=1;if(n>20)n=20;
+  const printTotal=parseInt(document.getElementById('printTotal').value)||20;
+  const ballR=ballRadiusForTotal(printTotal);
+  const sheet=document.getElementById('printSheet');
+  sheet.innerHTML='';
+  let pool=shuffledRange(printTotal),poolIdx=0;
+  for(let i=0;i<n;i++){
+    if(poolIdx>=pool.length){pool=shuffledRange(printTotal);poolIdx=0;}
+    const visible=pool[poolIdx++];
+    const openSide=Math.random()<0.5?'L':'R';
+    const card=document.createElement('div');
+    card.className='print-card';
+    card.innerHTML=`<div class="print-card-header"><img class="print-logo" src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="logo"><span class="print-title">🎲 Scatolina Gialla</span></div><div class="print-total">In tutto ci sono ${printTotal} palline</div>`;
+    const cvs=document.createElement('canvas');
+    cvs.width=260;cvs.height=105;cvs.style.width='100%';cvs.style.height='auto';
+    card.appendChild(cvs);
+    sheet.appendChild(card);
+    drawPrintScene(cvs,visible,openSide,ballR);
+  }
+  setTimeout(()=>window.print(),100);
+}
 
 const btn=document.createElement('button');
 btn.textContent='🌋 Scuoti!';
