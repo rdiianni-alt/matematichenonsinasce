@@ -36,6 +36,50 @@ h1{font-size:19px;color:#333;margin-bottom:2px;text-align:center}
 .next-btn{display:block;margin:0 auto 8px;padding:10px 32px;font-size:15px;font-weight:600;border-radius:10px;border:none;background:#e8306a;color:#fff;cursor:pointer}
 .next-btn:hover{background:#c0275a}
 .hint{font-size:12px;color:#bbb;text-align:center;margin-top:4px}
+
+/* --- Pulsante e pannello scheda PDF --- */
+.pdf-btn{display:block;margin:14px auto 0;padding:9px 26px;font-size:14px;font-weight:600;border-radius:10px;border:2px solid #e10600;background:#fff;color:#e10600;cursor:pointer}
+.pdf-btn:hover{background:#fdecea}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);align-items:center;justify-content:center;z-index:100;padding:16px}
+.modal-overlay.open{display:flex}
+.modal-box{background:#fff;border-radius:14px;padding:22px 24px;max-width:360px;width:100%;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.modal-box h2{font-size:17px;color:#333;margin-bottom:14px;text-align:center}
+.modal-section{margin-bottom:16px}
+.modal-section p{font-size:13px;color:#555;margin-bottom:8px;font-weight:600}
+.opt-row{display:flex;gap:8px;flex-wrap:wrap}
+.opt-btn{flex:1;min-width:60px;padding:8px 4px;font-size:13px;font-weight:600;border-radius:8px;border:2px solid #ddd;background:#fafafa;color:#555;cursor:pointer;text-align:center}
+.opt-btn.sel{border-color:#e10600;background:#fdecea;color:#e10600}
+.modal-actions{display:flex;gap:10px;margin-top:6px}
+.modal-actions button{flex:1;padding:10px;font-size:14px;font-weight:600;border-radius:10px;border:none;cursor:pointer}
+.modal-cancel{background:#eee;color:#555}
+.modal-generate{background:#e10600;color:#fff}
+.modal-generate:hover{background:#c00500}
+
+/* --- Scheda stampabile (invisibile a schermo, visibile solo in stampa) --- */
+#printSheet{display:none;background:#fff}
+@media print{
+  html,body{background:#fff!important}
+  body *{visibility:hidden}
+  #printSheet, #printSheet *{visibility:visible}
+  #printSheet{display:block;position:absolute;top:0;left:0;width:100%;background:#fff}
+  .modal-overlay{display:none!important}
+}
+.ps-header{display:flex;flex-direction:column;align-items:center;margin-bottom:6px;text-decoration:none}
+.ps-header img{width:52px;height:52px;object-fit:contain;border-radius:50%}
+.ps-blog{font-size:12px;color:#555;margin-top:4px;font-style:italic}
+.ps-blog b{color:#e10600}
+.ps-title{font-size:19px;color:#222;text-align:center;margin-bottom:2px;font-weight:700}
+.ps-sub{font-size:12px;color:#888;text-align:center;margin-bottom:14px}
+.ps-name{margin:0 0 16px;font-size:13px;color:#333;text-align:right}
+.ps-name span{display:inline-block;width:180px;border-bottom:1px solid #999;margin-left:6px}
+.ps-grid{column-count:2;column-gap:26px;column-rule:2px solid #333}
+.ps-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 4px;border-bottom:1px dotted #ccc;break-inside:avoid}
+.ps-num{font-size:20px;font-weight:700;color:#222;min-width:52px;text-align:center}
+.ps-box{width:34px;height:34px;border:1.5px solid #999;border-radius:6px}
+.ps-footer{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:22px;padding-top:10px;border-top:1px solid #eee}
+.ps-footer img{width:46px;height:46px;object-fit:contain}
+.ps-footer .ps-copy{font-size:11px;color:#888;text-align:left}
+.ps-footer .ps-copy a{color:#e10600;text-decoration:none}
 </style>
 </head>
 <body>
@@ -72,6 +116,52 @@ h1{font-size:19px;color:#333;margin-bottom:2px;text-align:center}
 
 <button class="next-btn" id="next-btn" style="display:none" onclick="newRound()">Carta successiva ▶</button>
 <p class="hint">Scegli &lt; &nbsp;=&nbsp; o &gt; tra le due carte</p>
+
+<button class="pdf-btn" onclick="openPrintModal()">📄 Crea scheda da stampare</button>
+
+<!-- Pannello impostazioni scheda -->
+<div class="modal-overlay" id="printModal">
+  <div class="modal-box">
+    <h2>Scheda maggiore, minore o uguale</h2>
+    <div class="modal-section">
+      <p>I numeri arrivano fino a:</p>
+      <div class="opt-row" id="rangeRow">
+        <button class="opt-btn" data-val="10" onclick="selectOpt('range',10,this)">10</button>
+        <button class="opt-btn" data-val="20" onclick="selectOpt('range',20,this)">20</button>
+        <button class="opt-btn sel" data-val="100" onclick="selectOpt('range',100,this)">100</button>
+        <button class="opt-btn" data-val="1000" onclick="selectOpt('range',1000,this)">1000</button>
+      </div>
+    </div>
+    <div class="modal-section">
+      <p>Quanti confronti nella scheda:</p>
+      <div class="opt-row" id="qtyRow">
+        <button class="opt-btn" data-val="12" onclick="selectOpt('qty',12,this)">12</button>
+        <button class="opt-btn sel" data-val="20" onclick="selectOpt('qty',20,this)">20</button>
+        <button class="opt-btn" data-val="30" onclick="selectOpt('qty',30,this)">30</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closePrintModal()">Annulla</button>
+      <button class="modal-generate" onclick="generateWorksheet()">Genera e stampa</button>
+    </div>
+  </div>
+</div>
+
+<!-- Scheda stampabile: visibile solo quando si stampa -->
+<div id="printSheet">
+  <a class="ps-header" href="https://matematichenonsinasce.com/">
+    <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Logo"/>
+    <div class="ps-blog">Matematiche <b>non</b> si nasce</div>
+  </a>
+  <div class="ps-title">Maggiore, Minore o Uguale?</div>
+  <div class="ps-sub" id="psSub">Scrivi il segno giusto tra i due numeri: &lt; &nbsp; &gt; &nbsp; =</div>
+  <p class="ps-name">Nome: <span></span></p>
+  <div class="ps-grid" id="psGrid"></div>
+  <div class="ps-footer">
+    <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/2d32cfaa2c99450c4618d5be18ebaa51cf53544b/logoconkalimba.png" alt=""/>
+    <div class="ps-copy">© Rita Di Ianni · idee e materiali per la scuola primaria</div>
+  </div>
+</div>
 
 <script>
 /* Pip positions in a 130×182 card.
@@ -165,6 +255,60 @@ function choose(type){
 }
 
 newRound();
+
+/* ===================== Scheda da stampare ===================== */
+let psRange=100, psQty=20;
+
+function openPrintModal(){document.getElementById('printModal').classList.add('open');}
+function closePrintModal(){document.getElementById('printModal').classList.remove('open');}
+
+function selectOpt(kind,val,btn){
+  const rowId = kind==='range' ? 'rangeRow' : 'qtyRow';
+  document.querySelectorAll('#'+rowId+' .opt-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  if(kind==='range') psRange=val; else psQty=val;
+}
+
+function randInt(max){return Math.floor(Math.random()*max)+1;}
+
+function generatePairs(range,qty){
+  const pairs=[];
+  const seen=new Set();
+  let guard=0;
+  while(pairs.length<qty && guard<qty*30){
+    guard++;
+    let a=randInt(range), b;
+    // circa 1 confronto su 5 con numeri uguali
+    if(Math.random()<0.2){
+      b=a;
+    } else {
+      b=randInt(range);
+      if(a===b){ // evita uguaglianze non volute oltre la quota prevista
+        b = b===range ? b-1 : b+1;
+      }
+    }
+    const key=a+'_'+b;
+    if(seen.has(key))continue;
+    seen.add(key);
+    pairs.push([a,b]);
+  }
+  return pairs;
+}
+
+function generateWorksheet(){
+  const pairs=generatePairs(psRange,psQty);
+  const grid=document.getElementById('psGrid');
+  grid.innerHTML=pairs.map(([a,b])=>`
+    <div class="ps-row">
+      <span class="ps-num">${a}</span>
+      <span class="ps-box"></span>
+      <span class="ps-num">${b}</span>
+    </div>`).join('');
+  document.getElementById('psSub').textContent=
+    `Scrivi il segno giusto tra i due numeri (< > =) — numeri fino a ${psRange}`;
+  closePrintModal();
+  setTimeout(()=>window.print(),150);
+}
 </script>
 </body>
 </html>
