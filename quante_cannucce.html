@@ -78,6 +78,48 @@
   .feedback.err { color: #b02020; }
   .score { font-size: 13px; color: #999; }
 
+  .print-controls { display: flex; align-items: center; gap: 10px; margin-top: 16px; font-size: 13px; color: #666; }
+  .print-controls label { display: flex; align-items: center; gap: 6px; }
+  .print-controls input[type=number] {
+    width: 54px; height: 30px; font-size: 14px; text-align: center;
+    border: 1.5px solid #ccc; border-radius: 6px; -moz-appearance: textfield;
+  }
+  .btn-print {
+    background: #333; color: #fff; border: none; border-radius: 10px;
+    padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .btn-print:hover { background: #111; }
+
+  #print-sheet { display: none; }
+
+  @media print {
+    body * { visibility: hidden; }
+    #print-sheet, #print-sheet * { visibility: visible; }
+    #print-sheet {
+      display: block !important; position: absolute; left: 0; top: 0; width: 100%;
+      background: #fff;
+    }
+    body { background: #fff; }
+    @page { size: A4; margin: 12mm; }
+  }
+
+  .print-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .print-box {
+    border: 1.5px solid #999; border-radius: 8px; padding: 8px 10px 10px;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    break-inside: avoid; page-break-inside: avoid;
+  }
+  .print-logo { width: 32px; height: 32px; border-radius: 50%; object-fit: contain; }
+  .print-content-row { display: flex; flex-direction: row; align-items: flex-end; gap: 6px; }
+  .print-col { display: flex; flex-direction: column; align-items: center; }
+  .print-col-label {
+    font-family: 'Georgia', serif; font-style: italic; font-size: 13px;
+    border-bottom: 1.5px solid #444; width: 100%; text-align: center;
+    padding-bottom: 2px; margin-bottom: 4px;
+  }
+  .print-col-content { display: flex; flex-direction: row; align-items: flex-end; gap: 2px; min-height: 46px; }
+  .print-line { font-size: 12.5px; color: #333; margin-top: 6px; }
+
   @media (max-width: 480px) {
     body { padding: 10px 6px; }
     a.logo-wrap img { width: 48px; height: 48px; }
@@ -125,6 +167,13 @@
   <div class="feedback" id="feedback"></div>
   <div class="score" id="score">Punti: 0 / 0</div>
 </div>
+
+<div class="print-controls">
+  <label>Numero riquadri: <input type="number" id="print-count" value="12" min="4" max="30"></label>
+  <button class="btn-print" onclick="generaPDF()">Stampa scheda</button>
+</div>
+
+<div id="print-sheet"></div>
 
 <script>
 const H=90, HW=22, BW=10, UW=3;
@@ -253,6 +302,104 @@ document.getElementById('answer').addEventListener('keydown', e=>{
   if(document.getElementById('btn-next').style.display==='inline-block') nextRound();
   else checkAnswer();
 });
+
+const LOGO_SRC = 'https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png';
+
+function drawHundredAt(parent,h){
+  const w=22;
+  const cv=makeCanvas(w,h); const ctx=cv.getContext('2d');
+  ctx.fillStyle='#111'; ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle='rgba(255,255,255,0.18)'; ctx.lineWidth=0.8;
+  for(let i=1;i<10;i++){ const y=Math.round(h/10*i); ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+  ctx.strokeStyle='#2e7d32'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(w,h); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(w,0); ctx.lineTo(0,h); ctx.stroke();
+  parent.appendChild(cv);
+}
+function drawBundleAt(parent,h){
+  const w=10;
+  const cv=makeCanvas(w,h); const ctx=cv.getContext('2d');
+  ctx.fillStyle='#111'; ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle='#c8860a'; ctx.lineWidth=1.3;
+  const by=Math.round(h*0.58);
+  ctx.beginPath(); ctx.moveTo(0,by); ctx.lineTo(w,by); ctx.stroke();
+  parent.appendChild(cv);
+}
+function drawLooseAt(parent,h){
+  const w=3;
+  const cv=makeCanvas(w+2,h); const ctx=cv.getContext('2d');
+  ctx.fillStyle='#111'; ctx.fillRect(1,0,w,h);
+  parent.appendChild(cv);
+}
+function fillAreaAt(area,count,drawFn,h,spacerW){
+  for(let i=0;i<count;i++){
+    if(i===5){ const s=document.createElement('div'); s.style.cssText='width:'+spacerW+'px;height:1px;flex-shrink:0;'; area.appendChild(s); }
+    drawFn(area,h);
+  }
+}
+
+function buildPrintBox(h,t,u){
+  const box=document.createElement('div'); box.className='print-box';
+
+  const logo=document.createElement('img'); logo.className='print-logo'; logo.src=LOGO_SRC;
+  box.appendChild(logo);
+
+  const row=document.createElement('div'); row.className='print-content-row';
+  const miniH=46;
+
+  if(useHundreds){
+    const colH=document.createElement('div'); colH.className='print-col';
+    const lblH=document.createElement('div'); lblH.className='print-col-label'; lblH.textContent='h';
+    const contH=document.createElement('div'); contH.className='print-col-content';
+    fillAreaAt(contH,h,drawHundredAt,miniH,6);
+    colH.appendChild(lblH); colH.appendChild(contH); row.appendChild(colH);
+  }
+
+  const colT=document.createElement('div'); colT.className='print-col';
+  const lblT=document.createElement('div'); lblT.className='print-col-label'; lblT.textContent='da';
+  const contT=document.createElement('div'); contT.className='print-col-content';
+  fillAreaAt(contT,t,drawBundleAt,miniH,6);
+  colT.appendChild(lblT); colT.appendChild(contT); row.appendChild(colT);
+
+  const colU=document.createElement('div'); colU.className='print-col';
+  const lblU=document.createElement('div'); lblU.className='print-col-label'; lblU.textContent='u';
+  const contU=document.createElement('div'); contU.className='print-col-content';
+  fillAreaAt(contU,u,drawLooseAt,miniH,4);
+  colU.appendChild(lblU); colU.appendChild(contU); row.appendChild(colU);
+
+  box.appendChild(row);
+
+  const line=document.createElement('div'); line.className='print-line';
+  line.textContent='Quante cannucce? ____________';
+  box.appendChild(line);
+
+  return box;
+}
+
+function generaPDF(){
+  const n=parseInt(document.getElementById('print-count').value)||12;
+  const sheet=document.getElementById('print-sheet');
+  sheet.innerHTML='';
+  const grid=document.createElement('div'); grid.className='print-grid';
+
+  const maxCombinazioni = useHundreds ? 10*10*10 : 10*10;
+  const usati = new Set();
+
+  for(let i=0;i<n;i++){
+    let h,t,u,chiave,tentativi=0;
+    do{
+      h=useHundreds?rnd(0,9):0; t=rnd(0,9); u=rnd(0,9);
+      if(h===0 && t===0 && u===0) u=rnd(1,9);
+      chiave=h+'-'+t+'-'+u;
+      tentativi++;
+    } while(usati.has(chiave) && usati.size<maxCombinazioni && tentativi<200);
+    usati.add(chiave);
+    grid.appendChild(buildPrintBox(h,t,u));
+  }
+
+  sheet.appendChild(grid);
+  setTimeout(()=>window.print(), 150);
+}
 
 generateRound();
 </script>
