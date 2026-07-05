@@ -84,6 +84,30 @@ h1{text-align:center;font-size:clamp(22px,4.5vw,34px);font-weight:700;margin-bot
 .logo-area a{text-decoration:none;display:inline-flex;flex-direction:column;align-items:center;gap:6px}
 .logo-area img{width:60px;height:60px;object-fit:contain;border-radius:50%}
 .logo-area span{font-size:clamp(13px,2.6vw,16px);font-weight:600;color:#00b894;letter-spacing:0.3px}
+
+.print-setup{background:#fff;border-radius:16px;padding:clamp(16px,3vw,28px);max-width:480px;margin:0 auto 16px;box-shadow:0 6px 20px rgba(0,0,0,0.08)}
+.print-setup label{font-size:clamp(13px,2.5vw,16px);color:#555;display:block;margin-bottom:6px;font-weight:600}
+.print-setup input{width:100%;padding:10px;border:2px solid #dfe6e9;border-radius:10px;font-size:clamp(14px,2.5vw,16px);margin-bottom:10px}
+.print-setup input:focus{outline:none;border-color:#00b894}
+.print-setup button{background:#636e72;color:#fff;border:none;border-radius:10px;padding:13px 20px;font-size:clamp(14px,2.8vw,17px);cursor:pointer;width:100%;font-weight:700;transition:background .2s}
+.print-setup button:hover{background:#4b5254}
+
+#printBoardsContainer{display:none}
+@media print{
+  @page{size:A4;margin:8mm}
+  body{background:#fff !important;padding:0}
+  body *{visibility:hidden}
+  #printBoardsContainer,#printBoardsContainer *{visibility:visible}
+  #printBoardsContainer{display:block !important;position:absolute;top:0;left:0;width:100%;margin:0;padding:0}
+  .print-page{display:flex;flex-direction:column;width:100%;gap:4mm;page-break-after:always;break-after:page}
+  .print-page:last-child{page-break-after:auto;break-after:auto}
+  .print-board{height:41mm;flex-shrink:0;width:100%;box-sizing:border-box;border:2.5px solid #000;border-radius:8px;padding:2mm 6mm;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2mm;overflow:hidden;page-break-inside:avoid;break-inside:avoid}
+  .print-board-header{display:flex;align-items:center;justify-content:center;gap:6px;flex-shrink:0}
+  .print-logo{width:20px;height:20px;border-radius:50%;object-fit:contain}
+  .print-title{font-size:13px;font-weight:800;color:#000;letter-spacing:0.3px}
+  .print-numbers{height:25mm;flex-shrink:0;display:flex;gap:2mm;justify-content:center;width:100%}
+  .print-num-box{flex:1;height:100%;border:2px solid #000;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#000}
+}
 </style>
 </head>
 <body>
@@ -117,6 +141,12 @@ h1{text-align:center;font-size:clamp(22px,4.5vw,34px);font-weight:700;margin-bot
   <p class="rules">
     <strong>Come si gioca:</strong> i numeri da 1 a 9 sono tutti aperti. Si lanciano i dadi e si chiudono numeri (uno o due alla volta) la cui somma corrisponde al risultato. Chi chiude tutti i numeri vince. Chi non ha più mosse calcola il punteggio sommando i numeri rimasti — vince chi ha il punteggio più basso.
   </p>
+</div>
+
+<div class="print-setup">
+  <label>Numero di tabelloni da stampare</label>
+  <input type="number" id="numBoards" min="1" max="60" value="6">
+  <button onclick="printBoards()">🖨️ Stampa i tabelloni di gioco</button>
 </div>
 
 <div class="topbar" id="topbar" style="display:none">
@@ -157,6 +187,9 @@ h1{text-align:center;font-size:clamp(22px,4.5vw,34px);font-weight:700;margin-bot
 </div>
 
 </div>
+
+<div id="printBoardsContainer"></div>
+
 <script>
 const faces=['⚀','⚁','⚂','⚃','⚄','⚅'];
 let players=[], states=[], active=[], currentIdx=0, rolled=false, selected=[], diceSum=0, diceVals=[];
@@ -513,6 +546,30 @@ function setMsg(text,type){
   const el=document.getElementById('msg');
   el.textContent=text;
   el.className='msg'+(type?' '+type:'');
+}
+
+function printBoards(){
+  let n=parseInt(document.getElementById('numBoards').value);
+  if(isNaN(n)||n<1) n=1;
+  if(n>60) n=60;
+  const logoSrc='https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png';
+  let boardHtml='';
+  for(let k=1;k<=9;k++) boardHtml+=`<div class="print-num-box">${k}</div>`;
+  const singleBoard=`<div class="print-board">
+      <div class="print-board-header">
+        <img class="print-logo" src="${logoSrc}" alt="logo">
+        <div class="print-title">Shut the box!</div>
+      </div>
+      <div class="print-numbers">${boardHtml}</div>
+    </div>`;
+  const perPage=6;
+  let html='';
+  for(let i=0;i<n;i+=perPage){
+    const count=Math.min(perPage,n-i);
+    html+=`<div class="print-page">${singleBoard.repeat(count)}</div>`;
+  }
+  document.getElementById('printBoardsContainer').innerHTML=html;
+  window.print();
 }
 </script>
 </body>
