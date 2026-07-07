@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>La Gara dei Numeri - Matematiche non si nasce</title>
+<style>
+  :root{
+    --cream:#FFF8EC;
+    --paper:#FFFFFF;
+    --ink:#2b2b2b;
+    --ink-soft:#5f5e5a;
+    --brand:#e10600;
+    --brand-dark:#a80500;
+    --team1:#e10600;
+    --team1-soft:#ffe1de;
+    --team2:#146b63;
+    --team2-soft:#dcf3ef;
+    --track:#f2e2c2;
+    --track-line:#d9b877;
+    --ok:#1f9d55;
+    --bad:#d63b2f;
+    --shadow: 0 10px 24px rgba(43,43,43,.10);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 10% 5%, #fff2d9 0%, transparent 45%),
+      radial-gradient(circle at 95% 15%, #e8f5f1 0%, transparent 40%),
+      var(--cream);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    min-height:100vh;
+    padding:18px 14px 40px;
+  }
+  .wrap{max-width:900px;margin:0 auto;}
+
+  /* logo standard blog */
+  .logo{ display:flex; flex-direction:column; align-items:center; gap:6px; text-decoration:none; margin-bottom:14px;}
+  .logo img{ width:60px; height:60px; object-fit:contain; border-radius:50%; box-shadow:var(--shadow);}
+  .logo span{ font-size:14px; color:var(--ink-soft); font-weight:600; letter-spacing:.2px;}
+
+  .gametitle{
+    text-align:center;
+    font-size:clamp(26px,5vw,40px);
+    font-weight:800;
+    letter-spacing:-.5px;
+    margin:2px 0 2px;
+    color:var(--ink);
+  }
+  .gametitle b{color:var(--brand);}
+  .subtitle{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:15px;
+    margin-bottom:22px;
+  }
+  .subtitle a{ color:var(--brand); font-weight:700; text-decoration:none; }
+  .subtitle a:hover{ text-decoration:underline; }
+
+  .warning{
+    text-align:center;
+    color:var(--bad);
+    font-weight:800;
+    font-size:14px;
+    background:#fdecea;
+    border:2px solid var(--bad);
+    border-radius:12px;
+    padding:10px 14px;
+    margin:-4px 0 18px;
+  }
+  .fairness-note{
+    color:var(--ink-soft);
+    font-size:13px;
+    font-weight:600;
+    margin-bottom:18px;
+  }
+
+  .card{
+    background:var(--paper);
+    border-radius:22px;
+    box-shadow:var(--shadow);
+    padding:26px;
+    margin-bottom:18px;
+  }
+
+  /* ---------- SETUP ---------- */
+  .team-setup{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    margin-bottom:18px;
+  }
+  @media (max-width:560px){ .team-setup{grid-template-columns:1fr;} }
+  .team-box{
+    border-radius:18px;
+    padding:16px;
+    border:3px solid transparent;
+  }
+  .team-box.t1{ background:var(--team1-soft); border-color:var(--team1);}
+  .team-box.t2{ background:var(--team2-soft); border-color:var(--team2);}
+  .team-box label{
+    display:block; font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.6px; margin-bottom:6px; color:var(--ink-soft);
+  }
+  .team-box input[type=text]{
+    width:100%; padding:10px 12px; border-radius:12px; border:2px solid #ddd; font-size:16px; font-weight:600; margin-bottom:12px; font-family:inherit;
+  }
+  .emoji-row{ display:flex; flex-wrap:wrap; gap:8px; }
+  .emoji-btn{
+    font-size:24px; background:#fff; border:2px solid #ddd; border-radius:12px; width:46px; height:46px;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; transition:.15s;
+  }
+  .emoji-btn.selected.t1{ border-color:var(--team1); background:var(--team1-soft); transform:scale(1.08);}
+  .emoji-btn.selected.t2{ border-color:var(--team2); background:var(--team2-soft); transform:scale(1.08);}
+
+  .count-row{ display:flex; gap:12px; justify-content:center; margin:6px 0 22px; }
+  .count-btn{
+    flex:1; max-width:180px; padding:14px; border-radius:16px; border:3px solid #ddd; background:#fff;
+    font-size:18px; font-weight:800; cursor:pointer; text-align:center; color:var(--ink-soft);
+  }
+  .count-btn small{ display:block; font-weight:500; font-size:12px; margin-top:2px;}
+  .count-btn.selected{ border-color:var(--brand); color:var(--brand); background:#fff3f2;}
+
+  .start-btn{
+    display:block; width:100%; padding:18px; border:none; border-radius:16px; background:var(--brand); color:#fff;
+    font-size:19px; font-weight:800; letter-spacing:.3px; cursor:pointer; box-shadow:0 8px 18px rgba(225,6,0,.28);
+  }
+  .start-btn:active{ transform:translateY(1px); }
+  .start-btn:disabled{ background:#ccc; box-shadow:none; cursor:not-allowed; }
+
+  /* ---------- GAME: TRACK ---------- */
+  .track-card{ padding:20px 22px 14px; }
+  .lane-label{
+    display:flex; align-items:center; gap:8px; font-weight:800; font-size:14px; margin-bottom:6px;
+  }
+  .lane-label .dot{ width:12px; height:12px; border-radius:50%; }
+  .lane-label .score{ margin-left:auto; font-weight:700; color:var(--ink-soft); font-size:13px;}
+  .lane{
+    position:relative;
+    height:46px;
+    background:repeating-linear-gradient(90deg, var(--track), var(--track) 9.5%, var(--track-line) 9.5%, var(--track-line) 10%);
+    border-radius:14px;
+    margin-bottom:18px;
+    border:2px solid #e9d6a8;
+  }
+  .flag{
+    position:absolute; right:-4px; top:50%; transform:translateY(-50%); font-size:26px;
+  }
+  .token{
+    position:absolute; top:50%; transform:translate(-50%,-50%); font-size:28px;
+    transition:left .55s cubic-bezier(.34,1.56,.64,1);
+    filter:drop-shadow(0 3px 3px rgba(0,0,0,.25));
+  }
+  .checkpoint{
+    position:absolute; bottom:2px; font-size:9px; color:#8a6d33; font-weight:700; transform:translateX(-50%);
+  }
+
+  /* ---------- QUESTION ---------- */
+  .turn-banner{
+    display:flex; align-items:center; gap:10px; justify-content:center;
+    padding:10px 16px; border-radius:14px; font-weight:800; font-size:15px; margin-bottom:14px;
+  }
+  .turn-banner.t1{ background:var(--team1-soft); color:var(--brand-dark); }
+  .turn-banner.t2{ background:var(--team2-soft); color:var(--team2); }
+  .qmeta{ text-align:center; font-size:12px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--ink-soft); margin-bottom:4px;}
+  .qprompt{ text-align:center; font-size:19px; font-weight:700; margin:4px 0 18px; line-height:1.4;}
+
+  .visual{ display:flex; justify-content:center; margin:10px 0 20px; flex-wrap:wrap;}
+  .numline{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center;}
+  .nbox{
+    width:52px; height:52px; border-radius:12px; background:var(--track); border:2px solid var(--track-line);
+    display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:800;
+  }
+  .nbox.missing{ background:#fff3f2; border-color:var(--brand); color:var(--brand); animation:pulse 1.4s infinite;}
+  @keyframes pulse{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.08);} }
+  .dotsWrap{ display:flex; flex-wrap:wrap; gap:8px; max-width:320px; justify-content:center;}
+  .dot{ width:22px; height:22px; border-radius:50%; background:var(--brand); display:inline-block;}
+  .bundleWrap{ display:flex; gap:26px; align-items:flex-start; flex-wrap:wrap; justify-content:center;}
+  .bcol{ text-align:center; }
+  .blabel{ font-size:12px; font-weight:800; text-transform:uppercase; color:var(--ink-soft); margin-bottom:6px;}
+  .bicons{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; min-height:32px; align-items:center;}
+  .bicons.tens-box{ padding:8px 14px; border:2px dashed var(--team2); border-radius:10px; background:var(--team2-soft); }
+  .tenx{ font-weight:800; color:var(--team2); font-size:32px; line-height:1; }
+  .stick{ font-size:26px; color:var(--brand); }
+  .bignum{ font-size:34px; font-weight:800; text-align:center;}
+  .wordnum{ font-size:24px; color:var(--brand); }
+  .comparewrap{ display:flex; align-items:center; gap:18px; }
+  .comparewrap .qmark{ font-size:30px; font-weight:800; color:var(--brand);}
+
+  .options-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:480px){ .options-grid{ grid-template-columns:1fr; } }
+  .opt-btn{
+    padding:16px; border-radius:14px; border:3px solid #e2ddd2; background:#fff; font-size:19px; font-weight:800;
+    cursor:pointer; transition:.15s;
+  }
+  .opt-btn:active{ transform:scale(.98); }
+  .opt-btn.correct{ border-color:var(--ok); background:#eafaf0; color:var(--ok); }
+  .opt-btn.wrong{ border-color:var(--bad); background:#fdecea; color:var(--bad); }
+  .opt-btn:disabled{ cursor:default; }
+
+  .keypad-wrap{ display:flex; flex-direction:column; align-items:center; gap:14px; }
+  .display{
+    width:180px; height:60px; border:3px solid var(--brand); border-radius:14px; background:#fff3f2;
+    display:flex; align-items:center; justify-content:center; font-size:30px; font-weight:800; color:var(--brand);
+  }
+  .keypad{ display:grid; grid-template-columns:repeat(3,64px); gap:10px; }
+  .key{
+    width:64px; height:54px; border-radius:12px; border:2px solid #e2ddd2; background:#fff; font-size:20px; font-weight:800; cursor:pointer;
+  }
+  .key.wide{
+    grid-column:span 3; width:auto; height:56px; background:var(--brand); color:#fff; border:none;
+    font-size:17px; white-space:nowrap; padding:0 8px;
+  }
+  .key.del{ background:#f3f0ea; }
+  .key:active{ transform:scale(.96); }
+
+  .feedback{ text-align:center; font-size:17px; font-weight:800; margin:14px 0 6px; min-height:24px;}
+  .feedback.ok{ color:var(--ok); }
+  .feedback.bad{ color:var(--bad); }
+
+  .next-btn{
+    display:block; margin:14px auto 0; padding:14px 34px; border:none; border-radius:14px; background:var(--ink);
+    color:#fff; font-size:16px; font-weight:800; cursor:pointer;
+  }
+
+  /* ---------- END ---------- */
+  .end-card{ text-align:center; }
+  .trophy{ font-size:64px; margin-bottom:6px; }
+  .win-name{ font-size:26px; font-weight:800; margin-bottom:4px; }
+  .win-sub{ color:var(--ink-soft); margin-bottom:20px; }
+  .final-scores{ display:flex; justify-content:center; gap:30px; margin-bottom:24px; flex-wrap:wrap;}
+  .final-score{ padding:14px 22px; border-radius:16px; font-weight:800; font-size:16px; }
+  .final-score.t1{ background:var(--team1-soft); color:var(--brand-dark); }
+  .final-score.t2{ background:var(--team2-soft); color:var(--team2); }
+  .restart-btn{
+    padding:14px 30px; border:none; border-radius:14px; background:var(--brand); color:#fff; font-size:16px; font-weight:800; cursor:pointer;
+  }
+
+  .hidden{ display:none !important; }
+  .footer-note{ text-align:center; font-size:12px; color:#b7ac96; margin-top:26px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <a class="logo" href="https://matematichenonsinasce.com/" target="_blank" rel="noopener">
+    <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Matematiche non si nasce">
+    <span>Matematiche non si nasce</span>
+  </a>
+
+  <div class="gametitle">La Gara <b>dei Numeri</b></div>
+  <div class="subtitle">Un gioco a squadre ispirato al Quaderno Blu del progetto PerContare. Il quaderno è a disposizione liberamente, previa iscrizione, nel sito <a href="http://percontare.asphi.it/" target="_blank" rel="noopener">percontare.asphi.it</a></div>
+
+  <!-- ============ SETUP ============ -->
+  <div id="screen-setup">
+    <div class="card">
+      <div class="team-setup">
+        <div class="team-box t1">
+          <label>Squadra 1 - nome</label>
+          <input type="text" id="name1" value="Squadra Rossa" maxlength="18">
+          <label>Squadra 1 - simbolo</label>
+          <div class="emoji-row" id="emojiRow1"></div>
+        </div>
+        <div class="team-box t2">
+          <label>Squadra 2 - nome</label>
+          <input type="text" id="name2" value="Squadra Blu" maxlength="18">
+          <label>Squadra 2 - simbolo</label>
+          <div class="emoji-row" id="emojiRow2"></div>
+        </div>
+      </div>
+
+      <div id="emojiWarning" class="warning hidden">⚠️ Attenzione, avete scelto lo stesso animale! Scegliete due simboli diversi per continuare.</div>
+
+      <label style="display:block;text-align:center;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.6px;color:var(--ink-soft);margin-bottom:10px;">Quante domande per squadra?</label>
+      <div class="count-row">
+        <div class="count-btn" data-count="10">10<small>gara lampo</small></div>
+        <div class="count-btn selected" data-count="20">20<small>gara breve</small></div>
+        <div class="count-btn" data-count="30">30<small>gara lunga</small></div>
+      </div>
+
+      <button class="start-btn" id="startBtn">Inizia la gara 🚩</button>
+    </div>
+  </div>
+
+  <!-- ============ GAME ============ -->
+  <div id="screen-game" class="hidden">
+    <div class="card track-card">
+      <div class="lane-label"><span class="dot" style="background:var(--team1)"></span><span id="laneName1"></span><span class="score" id="laneScore1"></span></div>
+      <div class="lane" id="lane1"><div class="token" id="token1" style="left:0%"></div><div class="flag">🏁</div></div>
+      <div class="lane-label"><span class="dot" style="background:var(--team2)"></span><span id="laneName2"></span><span class="score" id="laneScore2"></span></div>
+      <div class="lane" id="lane2"><div class="token" id="token2" style="left:0%"></div><div class="flag">🏁</div></div>
+    </div>
+
+    <div class="card">
+      <div class="turn-banner" id="turnBanner"></div>
+      <div class="qmeta" id="qCategory"></div>
+      <div class="qprompt" id="qPrompt"></div>
+      <div class="visual" id="qVisual"></div>
+      <div id="answerArea"></div>
+      <div class="feedback" id="feedback"></div>
+      <button class="next-btn hidden" id="nextBtn">Prossima domanda ➜</button>
+    </div>
+  </div>
+
+  <!-- ============ END ============ -->
+  <div id="screen-end" class="hidden">
+    <div class="card end-card">
+      <div class="trophy" id="trophy">🏆</div>
+      <div class="win-name" id="winName"></div>
+      <div class="win-sub" id="winSub"></div>
+      <div class="fairness-note" id="fairnessNote"></div>
+      <div class="final-scores">
+        <div class="final-score t1" id="finalScore1"></div>
+        <div class="final-score t2" id="finalScore2"></div>
+      </div>
+      <button class="restart-btn" id="restartBtn">Rigioca 🔁</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- UTILS ---------- */
+  const randInt = (min,max)=> Math.floor(Math.random()*(max-min+1))+min;
+  const pick = arr => arr[randInt(0,arr.length-1)];
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = randInt(0,i);
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
+  }
+
+  const numberWords = ['zero','uno','due','tre','quattro','cinque','sei','sette','otto','nove','dieci',
+    'undici','dodici','tredici','quattordici','quindici','sedici','diciassette','diciotto','diciannove','venti'];
+
+  /* ---------- QUESTION GENERATORS ---------- */
+  function genMissingLine(){
+    const start = randInt(1,16);
+    const seq = [start,start+1,start+2,start+3,start+4];
+    const missingPos = randInt(0,4);
+    const correct = seq[missingPos];
+    const distractors = new Set();
+    while(distractors.size<3){
+      const d = correct + randInt(-3,3);
+      if(d!==correct && d>=0 && d<=20) distractors.add(d);
+    }
+    const options = shuffle([correct,...distractors]);
+    const correctIndex = options.indexOf(correct);
+    const visual = `<div class="numline">${seq.map((n,i)=> i===missingPos ? `<div class="nbox missing">❓</div>` : `<div class="nbox">${n}</div>`).join('')}</div>`;
+    return {category:'Linea dei numeri', prompt:'Osserva la sequenza: quale numero manca al posto del ❓?', visual, type:'mc', options:options.map(String), correctIndex};
+  }
+
+  function genCountDots(){
+    const n = randInt(1,10);
+    const dots = Array.from({length:n}).map(()=> '<span class="dot"></span>').join('');
+    const distractors = new Set();
+    while(distractors.size<3){
+      const d = n + randInt(-2,2);
+      if(d!==n && d>=0 && d<=10) distractors.add(d);
+    }
+    const options = shuffle([n,...distractors]);
+    const correctIndex = options.indexOf(n);
+    return {category:'Conta e scrivi', prompt:'Conta i pallini: quanti sono in tutto?', visual:`<div class="dotsWrap">${dots}</div>`, type:'mc', options:options.map(String), correctIndex};
+  }
+
+  function genBundles(){
+    const tens = randInt(1,2);
+    const units = randInt(0,9);
+    const total = tens*10+units;
+    const tensVisual = Array.from({length:tens}).map(()=>'<span class="tenx">X</span>').join('');
+    const unitsVisual = Array.from({length:units}).map(()=>'<span class="stick">❙</span>').join('');
+    const distractors = new Set();
+    while(distractors.size<3){
+      let d;
+      const r = Math.random();
+      if(r<0.34) d = total + randInt(-3,3);
+      else if(r<0.67) d = units*10+tens;
+      else d = total + (Math.random()<0.5?10:-10);
+      if(d!==total && d>=0 && d<=99) distractors.add(d);
+    }
+    const options = shuffle([total,...distractors]);
+    const correctIndex = options.indexOf(total);
+    const visual = `<div class="bundleWrap">
+      <div class="bcol"><div class="blabel">decine (ogni X = un fascetto da dieci)</div><div class="bicons tens-box">${tensVisual||'—'}</div></div>
+      <div class="bcol"><div class="blabel">unità (cannucce sparse)</div><div class="bicons">${unitsVisual||'—'}</div></div>
+    </div>`;
+    return {category:'Cannucce e fascetti', prompt:'Ogni X rappresenta un fascetto da dieci cannucce. Osserva le decine e le unità sparse: che numero rappresentano in tutto?', visual, type:'mc', options:options.map(String), correctIndex};
+  }
+
+  function genPrevNext(){
+    const mode = Math.random()<0.5?'prev':'next';
+    let x, correct;
+    if(mode==='prev'){ x = randInt(1,20); correct = x-1; }
+    else { x = randInt(0,19); correct = x+1; }
+    const distractors = new Set();
+    while(distractors.size<3){
+      const d = correct + randInt(-2,2);
+      if(d!==correct && d>=0 && d<=20) distractors.add(d);
+    }
+    const options = shuffle([correct,...distractors]);
+    const correctIndex = options.indexOf(correct);
+    const label = mode==='prev' ? 'PRECEDENTE (viene prima)' : 'SUCCESSIVO (viene dopo)';
+    return {category:'Precedente e successivo', prompt:`Qual è il numero ${label} di ${x}?`, visual:`<div class="bignum">${x}</div>`, type:'mc', options:options.map(String), correctIndex};
+  }
+
+  function genCompare(){
+    let a = randInt(0,20), b = randInt(0,20);
+    if(Math.random()<0.2) b = a;
+    const correctSym = a>b?'>':(a<b?'<':'=');
+    const options = ['>','<','='];
+    const correctIndex = options.indexOf(correctSym);
+    const visual = `<div class="comparewrap"><span class="bignum">${a}</span><span class="qmark">?</span><span class="bignum">${b}</span></div>`;
+    return {category:'Maggiore, minore, uguale', prompt:'Quale simbolo va messo al posto del punto interrogativo?', visual, type:'mc', options, correctIndex};
+  }
+
+  function genArithmetic(){
+    const op = Math.random()<0.5?'+':'-';
+    let a,b,correct;
+    if(op==='+'){ a=randInt(0,15); b=randInt(0,20-a); correct=a+b; }
+    else { a=randInt(1,20); b=randInt(0,a); correct=a-b; }
+    return {category:'Addizioni e sottrazioni', prompt:'Calcola il risultato (puoi aiutarti con la linea dei numeri).', visual:`<div class="bignum">${a} ${op} ${b} = ?</div>`, type:'num', correct};
+  }
+
+  function genWordToDigit(){
+    const n = randInt(0,20);
+    const word = numberWords[n];
+    const distractors = new Set();
+    while(distractors.size<3){ const d=n+randInt(-3,3); if(d!==n&&d>=0&&d<=20) distractors.add(d); }
+    const options = shuffle([n,...distractors]);
+    const correctIndex = options.indexOf(n);
+    return {category:'Numeri in lettere', prompt:'Quale cifra corrisponde a questa parola?', visual:`<div class="bignum wordnum">"${word.toUpperCase()}"</div>`, type:'mc', options:options.map(String), correctIndex};
+  }
+
+  function genDigitToWord(){
+    const n = randInt(0,20);
+    const distractorIdx = new Set();
+    while(distractorIdx.size<3){ const d=n+randInt(-3,3); if(d!==n&&d>=0&&d<=20) distractorIdx.add(d); }
+    const options = shuffle([n,...distractorIdx]).map(i=>numberWords[i]);
+    const correctIndex = options.indexOf(numberWords[n]);
+    return {category:'Numeri in lettere', prompt:'Come si scrive in lettere questo numero?', visual:`<div class="bignum">${n}</div>`, type:'mc', options, correctIndex};
+  }
+
+  function genOrderPick(){
+    const mode = Math.random()<0.5?'min':'max';
+    const nums = new Set();
+    while(nums.size<4){ nums.add(randInt(0,20)); }
+    const arr = shuffle([...nums]);
+    const correct = mode==='min'? Math.min(...arr) : Math.max(...arr);
+    const correctIndex = arr.indexOf(correct);
+    const label = mode==='min' ? 'più PICCOLO' : 'più GRANDE';
+    return {category:'Ordiniamo i numeri', prompt:`Quale di questi numeri è il ${label}?`, visual:'', type:'mc', options:arr.map(String), correctIndex};
+  }
+
+  function genWordProblem(){
+    const templates = [
+      ()=>{ const a=randInt(2,9), b=randInt(2,9); return {prompt:`Il pittore ha incorniciato ${a} quadri con la cornice nera e ${b} quadri con la cornice bianca. Quanti quadri ha incorniciato in tutto?`, correct:a+b}; },
+      ()=>{ const t=randInt(5,10), w=randInt(1,t-1); return {prompt:`Marco ha pescato ${t} scarponi in tutto; ${w} sono bianchi, gli altri sono neri. Quanti scarponi neri ha pescato Marco?`, correct:t-w}; },
+      ()=>{ const t=randInt(5,10), g=randInt(1,t-1); return {prompt:`Nel prato ci sono ${t} farfalle: ${g} sono gialle, le altre sono rosse. Quante farfalle rosse ci sono nel prato?`, correct:t-g}; },
+      ()=>{ const t=randInt(5,10), v=randInt(1,t-1); return {prompt:`Mara ha raccolto ${t} mele in tutto: ${v} hanno il verme, le altre sono buone. Quante mele buone ha raccolto Mara?`, correct:t-v}; },
+    ];
+    const chosen = pick(templates)();
+    return {category:'Problemino', prompt:chosen.prompt, visual:'', type:'num', correct:chosen.correct};
+  }
+
+  const GENERATORS = [genMissingLine, genCountDots, genBundles, genPrevNext, genCompare, genArithmetic, genWordToDigit, genDigitToWord, genOrderPick, genWordProblem];
+
+  function generateQueue(n){
+    const q = [];
+    let lastIdx = -1;
+    for(let i=0;i<n;i++){
+      let idx;
+      do{ idx = randInt(0,GENERATORS.length-1); } while(idx===lastIdx);
+      lastIdx = idx;
+      q.push(GENERATORS[idx]());
+    }
+    return q;
+  }
+
+  /* ---------- STATE ---------- */
+  const EMOJIS = ['🐇','🦊','🐢','🐸','🦁','🐼','🐝','🐳'];
+  let state = null;
+
+  function buildEmojiRow(rowId, teamClass, defaultChar, onPick){
+    const row = document.getElementById(rowId);
+    row.innerHTML = '';
+    EMOJIS.forEach(e=>{
+      const btn = document.createElement('div');
+      btn.className = 'emoji-btn' + (e===defaultChar ? ' selected '+teamClass : '');
+      btn.textContent = e;
+      btn.addEventListener('click', ()=>{
+        [...row.children].forEach(c=>{ c.classList.remove('selected','t1','t2'); });
+        btn.classList.add('selected', teamClass);
+        onPick(e);
+        checkEmojiConflict();
+      });
+      row.appendChild(btn);
+    });
+  }
+
+  let team1Emoji = '🐇', team2Emoji = '🦊';
+  buildEmojiRow('emojiRow1','t1', team1Emoji, e=>team1Emoji=e);
+  buildEmojiRow('emojiRow2','t2', team2Emoji, e=>team2Emoji=e);
+
+  function checkEmojiConflict(){
+    const warn = document.getElementById('emojiWarning');
+    const startBtn = document.getElementById('startBtn');
+    const conflict = team1Emoji === team2Emoji;
+    warn.classList.toggle('hidden', !conflict);
+    startBtn.disabled = conflict;
+  }
+  checkEmojiConflict();
+
+  let selectedCount = 20;
+  document.querySelectorAll('.count-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.count-btn').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedCount = parseInt(btn.dataset.count,10);
+    });
+  });
+
+  document.getElementById('startBtn').addEventListener('click', startGame);
+  document.getElementById('restartBtn').addEventListener('click', ()=>{
+    show('screen-setup');
+  });
+
+  function show(id){
+    ['screen-setup','screen-game','screen-end'].forEach(s=>{
+      document.getElementById(s).classList.toggle('hidden', s!==id);
+    });
+  }
+
+  function startGame(){
+    if(team1Emoji === team2Emoji){ checkEmojiConflict(); return; }
+    const n1 = document.getElementById('name1').value.trim() || 'Squadra Rossa';
+    const n2 = document.getElementById('name2').value.trim() || 'Squadra Blu';
+    const N = selectedCount;
+
+    state = {
+      N,
+      teams: [
+        { name:n1, emoji:team1Emoji, queue:generateQueue(N), correct:0, answered:0 },
+        { name:n2, emoji:team2Emoji, queue:generateQueue(N), correct:0, answered:0 },
+      ],
+      turnOrder: [],
+      turnPointer: 0,
+    };
+    for(let i=0;i<N;i++){ state.turnOrder.push(0); state.turnOrder.push(1); }
+
+    document.getElementById('laneName1').textContent = `${team1Emoji} ${n1}`;
+    document.getElementById('laneName2').textContent = `${team2Emoji} ${n2}`;
+
+    renderTrack();
+    show('screen-game');
+    nextQuestion();
+  }
+
+  function renderTrack(){
+    const [t1,t2] = state.teams;
+    document.getElementById('token1').textContent = t1.emoji;
+    document.getElementById('token2').textContent = t2.emoji;
+    const pct1 = (t1.correct/state.N)*92;
+    const pct2 = (t2.correct/state.N)*92;
+    document.getElementById('token1').style.left = pct1+'%';
+    document.getElementById('token2').style.left = pct2+'%';
+    document.getElementById('laneScore1').textContent = `${t1.correct} / ${state.N}`;
+    document.getElementById('laneScore2').textContent = `${t2.correct} / ${state.N}`;
+  }
+
+  function nextQuestion(){
+    if(state.turnPointer >= state.turnOrder.length){
+      endGame();
+      return;
+    }
+    const teamIdx = state.turnOrder[state.turnPointer];
+    const team = state.teams[teamIdx];
+    const q = team.queue[team.answered];
+    renderQuestion(teamIdx, q);
+  }
+
+  function renderQuestion(teamIdx, q){
+    const team = state.teams[teamIdx];
+    const banner = document.getElementById('turnBanner');
+    banner.className = 'turn-banner ' + (teamIdx===0?'t1':'t2');
+    banner.textContent = `Turno di ${team.emoji} ${team.name} — Domanda ${team.answered+1} di ${state.N}`;
+
+    document.getElementById('qCategory').textContent = q.category;
+    document.getElementById('qPrompt').textContent = q.prompt;
+    document.getElementById('qVisual').innerHTML = q.visual || '';
+    document.getElementById('feedback').textContent = '';
+    document.getElementById('feedback').className = 'feedback';
+    document.getElementById('nextBtn').classList.add('hidden');
+
+    const area = document.getElementById('answerArea');
+    area.innerHTML = '';
+
+    if(q.type === 'mc'){
+      const grid = document.createElement('div');
+      grid.className = 'options-grid';
+      q.options.forEach((opt,i)=>{
+        const b = document.createElement('button');
+        b.className = 'opt-btn';
+        b.textContent = opt;
+        b.addEventListener('click', ()=> handleAnswer(teamIdx, i===q.correctIndex, ()=>{
+          [...grid.children].forEach((c,ci)=>{
+            c.disabled = true;
+            if(ci===q.correctIndex) c.classList.add('correct');
+            else if(ci===i) c.classList.add('wrong');
+          });
+        }));
+        grid.appendChild(b);
+      });
+      area.appendChild(grid);
+    } else {
+      let current = '';
+      const wrap = document.createElement('div');
+      wrap.className = 'keypad-wrap';
+      const display = document.createElement('div');
+      display.className = 'display';
+      display.textContent = '_';
+      const keypad = document.createElement('div');
+      keypad.className = 'keypad';
+
+      function makeKey(label, cls, handler){
+        const k = document.createElement('button');
+        k.className = 'key ' + (cls||'');
+        k.textContent = label;
+        k.addEventListener('click', handler);
+        return k;
+      }
+
+      for(let d=1; d<=9; d++){
+        keypad.appendChild(makeKey(String(d), '', ()=>{ if(current.length<2){ current+=d; display.textContent=current; } }));
+      }
+      keypad.appendChild(makeKey('⌫','del', ()=>{ current=current.slice(0,-1); display.textContent = current||'_'; }));
+      keypad.appendChild(makeKey('0','', ()=>{ if(current.length<2){ current+='0'; display.textContent=current; } }));
+      keypad.appendChild(makeKey('C','del', ()=>{ current=''; display.textContent='_'; }));
+      const okKey = makeKey('Conferma ✓','wide', ()=>{
+        if(current==='') return;
+        const val = parseInt(current,10);
+        okKey.disabled = true;
+        [...keypad.children].forEach(k=>k.disabled=true);
+        handleAnswer(teamIdx, val===q.correct, ()=>{
+          display.textContent = current + (val===q.correct ? '' : `  (giusto: ${q.correct})`);
+        });
+      });
+
+      wrap.appendChild(display);
+      wrap.appendChild(keypad);
+      wrap.appendChild(okKey);
+      area.appendChild(wrap);
+    }
+  }
+
+  function handleAnswer(teamIdx, isCorrect, disableUI){
+    const team = state.teams[teamIdx];
+    team.answered++;
+    if(isCorrect) team.correct++;
+
+    disableUI();
+
+    const fb = document.getElementById('feedback');
+    if(isCorrect){
+      fb.textContent = 'Esatto! 🎉 avanti di una casella!';
+      fb.className = 'feedback ok';
+    } else {
+      fb.textContent = 'Non è corretto, ma niente paura: si continua!';
+      fb.className = 'feedback bad';
+    }
+
+    renderTrack();
+    state.turnPointer++;
+
+    const nextBtn = document.getElementById('nextBtn');
+    nextBtn.classList.remove('hidden');
+    nextBtn.textContent = state.turnPointer >= state.turnOrder.length ? 'Vedi il risultato finale 🏆' : 'Prossima domanda ➜';
+    nextBtn.onclick = nextQuestion;
+  }
+
+  function endGame(){
+    const [t1,t2] = state.teams;
+    document.getElementById('finalScore1').textContent = `${t1.emoji} ${t1.name}: ${t1.correct} / ${state.N}`;
+    document.getElementById('finalScore2').textContent = `${t2.emoji} ${t2.name}: ${t2.correct} / ${state.N}`;
+
+    const winName = document.getElementById('winName');
+    const winSub = document.getElementById('winSub');
+    const trophy = document.getElementById('trophy');
+
+    if(t1.correct === t2.correct){
+      trophy.textContent = '🤝';
+      winName.textContent = 'Pareggio!';
+      winSub.textContent = 'Entrambe le squadre hanno tagliato il traguardo insieme.';
+    } else {
+      const winner = t1.correct > t2.correct ? t1 : t2;
+      trophy.textContent = '🏆';
+      winName.textContent = `Vince ${winner.emoji} ${winner.name}!`;
+      winSub.textContent = 'Complimenti a entrambe le squadre per l\'impegno.';
+    }
+
+    document.getElementById('fairnessNote').textContent =
+      (t1.answered === state.N && t2.answered === state.N)
+        ? `La gara è stata giocata ad armi pari: entrambe le squadre hanno risposto a ${state.N} domande.`
+        : '';
+
+    show('screen-end');
+  }
+
+})();
+</script>
+</body>
+</html>
