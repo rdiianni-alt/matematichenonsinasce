@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Gara dei Numeri 2 - Matematiche non si nasce</title>
+<style>
+  :root{
+    --red:#e10600;
+    --text-secondary:#5f5e5a;
+    --bg:#fdf9f2;
+    --team1:#2f6fed;
+    --team2:#e08a00;
+    --ok:#2e9b4f;
+    --bad:#d64545;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI', Verdana, Arial, sans-serif;
+    background:linear-gradient(180deg,#fff8ec 0%, #fdf3e3 100%);
+    color:#3a3630;
+    min-height:100vh;
+  }
+  .logo{
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    text-decoration:none; padding-top:18px;
+  }
+  .logo img{ width:60px; height:60px; object-fit:contain; border-radius:50%; box-shadow:0 2px 6px rgba(0,0,0,0.15);}
+  .logo span{ font-size:15px; color:var(--text-secondary); font-weight:600; letter-spacing:.3px;}
+
+  .wrap{ max-width:820px; margin:0 auto; padding:10px 16px 40px; }
+
+  h1.title{
+    text-align:center; font-size:28px; color:var(--red); margin:14px 0 4px;
+    font-weight:800; letter-spacing:.5px;
+  }
+  p.subtitle{ text-align:center; color:var(--text-secondary); margin:0 0 20px; font-size:15px;}
+
+  .screen{ display:none; }
+  .screen.active{ display:block; animation:fadeIn .35s ease; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  .card{
+    background:#fff; border-radius:18px; padding:22px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.08); border:2px solid #f1e6d0;
+  }
+
+  .team-setup{ display:flex; flex-direction:column; gap:16px; }
+  .team-box{
+    border-radius:14px; padding:14px 16px; border:2px solid #eee;
+  }
+  .team-box.t1{ border-color:var(--team1); background:#eef4ff; }
+  .team-box.t2{ border-color:var(--team2); background:#fff6e8; }
+  .team-box h3{ margin:0 0 10px; font-size:17px; }
+  .team-box input[type=text]{
+    width:100%; padding:10px 12px; border-radius:10px; border:1.5px solid #ccc;
+    font-size:16px; margin-bottom:10px;
+  }
+  .emoji-picker{ display:flex; flex-wrap:wrap; gap:6px; }
+  .emoji-picker button{
+    font-size:22px; border:2px solid transparent; background:#fff; border-radius:10px;
+    width:44px; height:44px; cursor:pointer;
+  }
+  .emoji-picker button.sel{ border-color:#333; background:#fffbe0; }
+
+  .n-choice{ display:flex; gap:10px; justify-content:center; margin:18px 0; flex-wrap:wrap;}
+  .n-choice button{
+    padding:10px 20px; border-radius:30px; border:2px solid var(--red);
+    background:#fff; color:var(--red); font-weight:700; cursor:pointer; font-size:15px;
+  }
+  .n-choice button.sel{ background:var(--red); color:#fff; }
+
+  .btn-primary{
+    display:block; width:100%; padding:14px; border-radius:14px; border:none;
+    background:var(--red); color:#fff; font-size:18px; font-weight:800;
+    cursor:pointer; margin-top:16px; letter-spacing:.3px;
+  }
+  .btn-primary:disabled{ opacity:.45; cursor:not-allowed; }
+  .btn-secondary{
+    display:inline-block; padding:10px 18px; border-radius:12px; border:2px solid var(--red);
+    background:#fff; color:var(--red); font-weight:700; cursor:pointer; font-size:14px; text-decoration:none;
+  }
+
+  /* --- gioco --- */
+  .tracks{ display:flex; flex-direction:column; gap:14px; margin-bottom:18px;}
+  .track-row{ display:flex; align-items:center; gap:10px; }
+  .track-name{ width:110px; font-weight:700; font-size:14px; flex-shrink:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .track-name.t1{ color:var(--team1); }
+  .track-name.t2{ color:var(--team2); }
+  .track-line{
+    position:relative; flex:1; height:26px; background:#eee; border-radius:14px; overflow:visible;
+    border:1.5px solid #ddd;
+  }
+  .track-fill{
+    position:absolute; left:0; top:0; bottom:0; border-radius:14px;
+    transition:width .5s ease;
+  }
+  .track-fill.t1{ background:linear-gradient(90deg,#a9c6ff,var(--team1)); }
+  .track-fill.t2{ background:linear-gradient(90deg,#ffd699,var(--team2)); }
+  .track-marker{
+    position:absolute; top:50%; transform:translate(-50%,-50%); font-size:22px;
+    transition:left .5s ease;
+  }
+  .track-flag{ position:absolute; right:-6px; top:50%; transform:translateY(-50%); font-size:20px;}
+
+  .turn-banner{
+    text-align:center; font-weight:800; font-size:16px; padding:8px 12px; border-radius:12px;
+    margin-bottom:14px;
+  }
+  .turn-banner.t1{ background:#eef4ff; color:var(--team1); }
+  .turn-banner.t2{ background:#fff6e8; color:var(--team2); }
+
+  .progress-info{ text-align:center; color:var(--text-secondary); font-size:13px; margin-bottom:6px;}
+
+  #question-area{ min-height:120px; }
+  .q-prompt{ font-size:18px; font-weight:700; margin-bottom:14px; text-align:center; line-height:1.4;}
+  .q-prompt small{ display:block; font-weight:400; font-size:14px; color:var(--text-secondary); margin-top:4px;}
+
+  .options-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .options-grid.single{ grid-template-columns:1fr; }
+  .opt-btn{
+    padding:14px 10px; border-radius:12px; border:2px solid #ddd; background:#fafafa;
+    font-size:17px; font-weight:700; cursor:pointer; color:#333;
+  }
+  .opt-btn:hover{ border-color:var(--red); }
+  .opt-btn.correct{ background:#e3f7e6; border-color:var(--ok); color:var(--ok); }
+  .opt-btn.wrong{ background:#fbe6e6; border-color:var(--bad); color:var(--bad); }
+  .opt-btn:disabled{ cursor:default; }
+
+  .open-answer{ display:flex; flex-direction:column; align-items:center; gap:10px;}
+  .open-display{
+    font-size:24px; font-weight:800; letter-spacing:2px; background:#fafafa; border:2px solid #ddd;
+    border-radius:12px; padding:10px 22px; min-width:90px; text-align:center;
+  }
+  .keypad{ display:grid; grid-template-columns:repeat(3,56px); gap:8px; }
+  .keypad button{
+    width:56px; height:48px; border-radius:10px; border:1.5px solid #ccc; background:#fff;
+    font-size:18px; font-weight:700; cursor:pointer;
+  }
+  .keypad button.wide{ grid-column:span 3; width:auto; background:#f2f2f2; }
+  .keypad button.ok-key{ grid-column:span 3; width:auto; background:var(--ok); color:#fff; border:none; }
+  .keypad button.del-key{ background:#fdeaea; }
+
+  .feedback{ text-align:center; font-weight:800; font-size:16px; margin:14px 0 6px; min-height:22px; }
+  .feedback.ok{ color:var(--ok); }
+  .feedback.bad{ color:var(--bad); }
+
+  .grid-viz{ display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px; }
+  .ten-mark{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:34px; height:34px; font-size:24px; font-weight:900; color:#fff;
+    background:var(--team2); border-radius:8px; box-shadow:0 2px 4px rgba(0,0,0,0.15);
+  }
+  .unit-mark{ width:12px; height:12px; border-radius:50%; background:var(--red); display:inline-block; }
+  .units-wrap{ display:inline-flex; gap:5px; flex-wrap:wrap; max-width:130px; }
+  .straw{ width:8px; height:36px; background:#f0c35a; border-radius:2px; margin:0 1px; display:inline-block;}
+  .bundle{ display:inline-flex; align-items:flex-end; padding:3px 4px; border:2px solid #e08a00; border-radius:6px; margin:2px; background:#fff8ea;}
+  .dot{ width:16px; height:16px; border-radius:50%; background:var(--red); display:inline-block; margin:2px;}
+  .cell-grid{ display:inline-grid; gap:3px; border:2px solid #bbb; padding:4px; border-radius:6px; background:#fff;}
+  .cell{ width:20px; height:20px; background:#fce7a3; border:1px solid #e0c15a; border-radius:3px;}
+
+  .card-item{ font-size:34px; margin:0 6px; }
+
+  #nextBtn{ margin-top:16px; }
+
+  .end-scores{ display:flex; justify-content:center; gap:26px; margin:18px 0; flex-wrap:wrap;}
+  .end-score-box{ text-align:center; padding:14px 20px; border-radius:14px; background:#faf7ef; border:2px solid #eee; min-width:150px;}
+  .end-score-box .emo{ font-size:38px; }
+  .end-score-box .name{ font-weight:700; margin-top:4px;}
+  .end-score-box .num{ font-size:22px; font-weight:800; color:var(--red); margin-top:2px;}
+
+  .trophy{ text-align:center; font-size:64px; margin-top:6px; }
+  .win-name{ text-align:center; font-size:22px; font-weight:800; margin-top:6px;}
+  .win-sub{ text-align:center; color:var(--text-secondary); margin-top:4px;}
+
+  .bottom-actions{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:20px;}
+
+  .hidden{ display:none !important; }
+
+  @media (max-width:480px){
+    h1.title{ font-size:22px; }
+    .card{ padding:16px; }
+    .track-name{ width:76px; font-size:12px; }
+    .options-grid{ grid-template-columns:1fr; }
+    .keypad{ grid-template-columns:repeat(3,48px); }
+    .keypad button{ width:48px; height:42px; font-size:16px;}
+    .end-score-box{ min-width:120px; padding:10px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<a class="logo" href="https://matematichenonsinasce.com/" target="_self">
+  <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="logo">
+  <span>Matematiche non si nasce</span>
+</a>
+
+<div class="wrap">
+  <h1 class="title">La Gara dei Numeri 2</h1>
+  <p class="subtitle">Un gioco a squadre ispirato al Quaderno di fine estate del progetto PerContare. Il quaderno è a disposizione liberamente, previa iscrizione, nel sito <a href="http://percontare.asphi.it/" target="_blank" style="color:var(--red);">percontare.asphi.it</a></p>
+
+  <!-- SCHERMATA INIZIALE -->
+  <div class="screen active" id="screen-start">
+    <div class="card">
+      <div class="team-setup">
+        <div class="team-box t1">
+          <h3>Squadra 1</h3>
+          <div class="emoji-picker" data-team="1"></div>
+        </div>
+        <div class="team-box t2">
+          <h3>Squadra 2</h3>
+          <div class="emoji-picker" data-team="2"></div>
+        </div>
+      </div>
+
+      <p style="text-align:center; font-weight:700; margin-top:20px; margin-bottom:4px;">Quante domande per squadra?</p>
+      <div class="n-choice" id="n-choice">
+        <button data-n="10">10</button>
+        <button data-n="20">20</button>
+        <button data-n="30">30</button>
+      </div>
+
+      <button class="btn-primary" id="startBtn">Inizia la gara 🏁</button>
+      <p id="startHint" style="text-align:center; color:var(--bad); font-weight:600; font-size:14px; margin-top:10px; min-height:18px;"></p>
+    </div>
+  </div>
+
+  <!-- SCHERMATA GIOCO -->
+  <div class="screen" id="screen-game">
+    <div class="card">
+      <div class="tracks" id="tracks"></div>
+      <div class="progress-info" id="progress-info"></div>
+      <div class="turn-banner" id="turn-banner"></div>
+
+      <div id="question-area"></div>
+
+      <div class="feedback" id="feedback"></div>
+      <button class="btn-primary hidden" id="nextBtn">Prossima domanda ➜</button>
+    </div>
+  </div>
+
+  <!-- SCHERMATA FINALE -->
+  <div class="screen" id="screen-end">
+    <div class="card">
+      <div class="trophy" id="trophy">🏆</div>
+      <div class="win-name" id="winName"></div>
+      <div class="win-sub" id="winSub"></div>
+      <div class="end-scores">
+        <div class="end-score-box">
+          <div class="emo" id="finalEmo1"></div>
+          <div class="name" id="finalName1"></div>
+          <div class="num" id="finalScore1"></div>
+        </div>
+        <div class="end-score-box">
+          <div class="emo" id="finalEmo2"></div>
+          <div class="name" id="finalName2"></div>
+          <div class="num" id="finalScore2"></div>
+        </div>
+      </div>
+      <div class="bottom-actions">
+        <button class="btn-secondary" id="replayBtn">Rigioca 🔄</button>
+        <a class="btn-secondary" href="https://matematichenonsinasce.com/" target="_blank">Torna al blog</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+
+  const EMOJIS = ['🐇','🦊','🐻','🐼','🐸','🦁','🐢','🐙','🐝','🦄','🐧','🦉'];
+
+  const state = {
+    teams: [
+      {name:'', emoji:'', correct:0, answered:0, pos:0},
+      {name:'', emoji:'', correct:0, answered:0, pos:0}
+    ],
+    N: 10,
+    turnOrder: [],
+    turnPointer: 0,
+    currentQuestion: null,
+    usedRecently: []
+  };
+
+  function show(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  /* ---------- SETUP SCHERMATA INIZIALE ---------- */
+  function buildEmojiPickers(){
+    [1,2].forEach(teamNum=>{
+      const box = document.querySelector(`.emoji-picker[data-team="${teamNum}"]`);
+      EMOJIS.forEach(e=>{
+        const b = document.createElement('button');
+        b.type='button'; b.textContent = e;
+        b.addEventListener('click', ()=>{
+          box.querySelectorAll('button').forEach(x=>x.classList.remove('sel'));
+          b.classList.add('sel');
+          state.teams[teamNum-1].emoji = e;
+          document.getElementById('startHint').textContent = '';
+        });
+        box.appendChild(b);
+      });
+    });
+  }
+  buildEmojiPickers();
+
+  document.querySelectorAll('#n-choice button').forEach(btn=>{
+    if(parseInt(btn.dataset.n,10) === state.N) btn.classList.add('sel');
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#n-choice button').forEach(b=>b.classList.remove('sel'));
+      btn.classList.add('sel');
+      state.N = parseInt(btn.dataset.n, 10);
+      document.getElementById('startHint').textContent = '';
+    });
+  });
+
+  function checkStartReady(){
+    const missing = [];
+    if(!state.teams[0].emoji) missing.push('un animale per la Squadra 1');
+    if(!state.teams[1].emoji) missing.push('un animale per la Squadra 2');
+    return missing;
+  }
+
+  document.getElementById('startBtn').addEventListener('click', ()=>{
+    const missing = checkStartReady();
+    const hint = document.getElementById('startHint');
+    if(missing.length){
+      hint.textContent = 'Manca ancora: ' + missing.join(', ') + '.';
+      return;
+    }
+    hint.textContent = '';
+    startGame();
+  });
+
+  function startGame(){
+    state.teams[0].name = 'Squadra 1';
+    state.teams[1].name = 'Squadra 2';
+    state.teams.forEach(t=>{ t.correct=0; t.answered=0; t.pos=0; });
+
+    state.turnOrder = [];
+    for(let i=0;i<state.N;i++){ state.turnOrder.push(0); state.turnOrder.push(1); }
+    state.turnPointer = 0;
+    state.usedRecently = [];
+
+    renderTrack();
+    show('screen-game');
+    nextQuestion();
+  }
+
+  document.getElementById('replayBtn').addEventListener('click', ()=>{
+    show('screen-start');
+  });
+
+  /* ---------- TRACK ---------- */
+  function renderTrack(){
+    const wrap = document.getElementById('tracks');
+    wrap.innerHTML = '';
+    state.teams.forEach((t, idx)=>{
+      const pct = Math.min(100, (t.pos/state.N)*100);
+      const row = document.createElement('div');
+      row.className = 'track-row';
+      row.innerHTML = `
+        <div class="track-name t${idx+1}">${t.emoji} ${escapeHtml(t.name)}</div>
+        <div class="track-line">
+          <div class="track-fill t${idx+1}" style="width:${pct}%"></div>
+          <div class="track-marker" style="left:${pct}%">${t.emoji}</div>
+          <div class="track-flag">🏁</div>
+        </div>
+      `;
+      wrap.appendChild(row);
+    });
+  }
+
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  /* ---------- GENERAZIONE DOMANDE ---------- */
+  function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+  function pick(arr){ return arr[randInt(0,arr.length-1)]; }
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){ const j=randInt(0,i); [a[i],a[j]]=[a[j],a[i]]; }
+    return a;
+  }
+
+  const NUMBER_WORDS = {
+    0:'zero',1:'uno',2:'due',3:'tre',4:'quattro',5:'cinque',6:'sei',7:'sette',8:'otto',9:'nove',
+    10:'dieci',11:'undici',12:'dodici',13:'tredici',14:'quattordici',15:'quindici',16:'sedici',
+    17:'diciassette',18:'diciotto',19:'diciannove',20:'venti'
+  };
+  const TENS_WORDS = {2:'venti',3:'trenta',4:'quaranta',5:'cinquanta',6:'sessanta',7:'settanta',8:'ottanta',9:'novanta'};
+  const TENS_APOC = {3:'trent',4:'quarant',5:'cinquant',6:'sessant',7:'settant',8:'ottant',9:'novant'};
+
+  function numberToWord(n){
+    if(n<=20) return NUMBER_WORDS[n];
+    if(n===100) return 'cento';
+    const t = Math.floor(n/10), u = n%10;
+    if(u===0) return TENS_WORDS[t];
+    if(u===1 || u===8) return TENS_APOC[t] + NUMBER_WORDS[u];
+    return TENS_WORDS[t] + NUMBER_WORDS[u];
+  }
+
+  /* --- generatori di domande --- */
+  const generators = [];
+
+  // 1. Scrivi il numero in cifre corrispondente alla parola (multiple choice)
+  generators.push(function(){
+    const n = randInt(13, 99);
+    const word = numberToWord(n).toUpperCase();
+    const opts = new Set([n]);
+    while(opts.size<4){ opts.add(randInt(Math.max(10,n-15), Math.min(99,n+15))); }
+    return {
+      prompt: `Quale numero corrisponde alla parola <b>${word}</b>?`,
+      type:'mc',
+      options: shuffle([...opts]).map(String),
+      correct: String(n)
+    };
+  });
+
+  // 2. Scrivi in lettere il numero (multiple choice tra parole)
+  generators.push(function(){
+    const n = randInt(13, 99);
+    const correctWord = numberToWord(n);
+    const distractors = new Set();
+    while(distractors.size<3){
+      const d = randInt(Math.max(10,n-15), Math.min(99,n+15));
+      if(d!==n) distractors.add(numberToWord(d));
+    }
+    return {
+      prompt: `Come si scrive in lettere il numero <b>${n}</b>?`,
+      type:'mc',
+      options: shuffle([correctWord, ...distractors]),
+      correct: correctWord
+    };
+  });
+
+  // 4. Numero precedente e successivo (risposta aperta doppia -> semplifico: chiedo solo uno dei due)
+  generators.push(function(){
+    const n = randInt(1,98);
+    const askPrev = Math.random()<0.5;
+    return {
+      prompt: askPrev
+        ? `Qual è il numero <b>precedente</b> a <b>${n}</b>?`
+        : `Qual è il numero <b>successivo</b> a <b>${n}</b>?`,
+      type:'open',
+      correct: String(askPrev ? n-1 : n+1),
+      maxDigits:2
+    };
+  });
+
+  // 4bis. Precedente/successivo a scelta multipla
+  generators.push(function(){
+    const n = randInt(2,97);
+    const askPrev = Math.random()<0.5;
+    const correct = askPrev ? n-1 : n+1;
+    const opts = new Set([correct]);
+    while(opts.size<4){
+      const d = correct + randInt(-3,3);
+      if(d>=0 && d!==correct) opts.add(d);
+    }
+    return {
+      prompt: askPrev
+        ? `Quale numero viene subito <b>prima</b> di <b>${n}</b>?`
+        : `Quale numero viene subito <b>dopo</b> <b>${n}</b>?`,
+      type:'mc',
+      options: shuffle([...opts]).map(String),
+      correct: String(correct)
+    };
+  });
+
+  // 4ter. Precedente/successivo al contrario: dato il precedente o successivo, trova il numero di partenza
+  generators.push(function(){
+    const n = randInt(2,97);
+    const givePrev = Math.random()<0.5;
+    const shown = givePrev ? n-1 : n+1;
+    return {
+      prompt: givePrev
+        ? `Un numero ha come <b>precedente</b> <b>${shown}</b>. Qual è questo numero?`
+        : `Un numero ha come <b>successivo</b> <b>${shown}</b>. Qual è questo numero?`,
+      type:'open',
+      correct: String(n),
+      maxDigits:2
+    };
+  });
+
+  // 5. Maggiore, minore o uguale (simboli <,>,=)
+  generators.push(function(){
+    const a = randInt(1,99);
+    let b = randInt(1,99);
+    if(Math.random()<0.2) b = a;
+    let symbol = '=';
+    if(a>b) symbol='>'; else if(a<b) symbol='<';
+    return {
+      prompt: `Quale simbolo va messo tra <b>${a}</b> e <b>${b}</b>?<br><small>${a} ... ${b}</small>`,
+      type:'mc',
+      options: ['<','>','='],
+      correct: symbol,
+      optionsSingleCol:true
+    };
+  });
+
+  // 6. Metti in ordine crescente/decrescente: individua il più piccolo/grande di 4
+  generators.push(function(){
+    const nums = new Set();
+    while(nums.size<4){ nums.add(randInt(10,90)); }
+    const arr = [...nums];
+    const asc = Math.random()<0.5;
+    const target = asc ? Math.min(...arr) : Math.max(...arr);
+    return {
+      prompt: `Tra questi numeri, qual è il ${asc ? 'più piccolo' : 'più grande'}?<br><small>${arr.join(' - ')}</small>`,
+      type:'mc',
+      options: shuffle(arr.map(String)),
+      correct: String(target)
+    };
+  });
+
+  // 6bis. Metti in ordine crescente/decrescente: individua la sequenza intera corretta
+  generators.push(function(){
+    const nums = new Set();
+    while(nums.size<4){ nums.add(randInt(10,90)); }
+    const arr = [...nums];
+    const asc = Math.random()<0.5;
+    const sorted = arr.slice().sort((a,b)=> asc ? a-b : b-a);
+    const correctLabel = sorted.join(' - ');
+
+    const labels = new Set([correctLabel]);
+    let tries = 0;
+    while(labels.size<4 && tries<30){
+      tries++;
+      const shuffled = shuffle(arr);
+      const label = shuffled.join(' - ');
+      if(label !== correctLabel) labels.add(label);
+    }
+    // se non abbiamo raggiunto 4 opzioni (poco probabile), aggiungo l'ordine opposto
+    if(labels.size<4) labels.add(sorted.slice().reverse().join(' - '));
+
+    return {
+      prompt: `Metti questi numeri in ordine ${asc ? 'crescente (dal più piccolo al più grande)' : 'decrescente (dal più grande al più piccolo)'}:<br><small>${arr.join(' - ')}</small><br>Quale sequenza è quella giusta?`,
+      type:'mc',
+      options: shuffle([...labels]),
+      correct: correctLabel,
+      optionsSingleCol:true
+    };
+  });
+
+  // 7. Decine e unità -> trasforma in numero
+  generators.push(function(){
+    const da = randInt(1,9);
+    const u = randInt(0,9);
+    const n = da*10+u;
+    const opts = new Set([n]);
+    while(opts.size<4){ opts.add(randInt(10,99)); }
+    return {
+      prompt: `Quanto vale <b>${da} decine e ${u} unità</b>?`,
+      type:'mc',
+      options: shuffle([...opts]).map(String),
+      correct: String(n)
+    };
+  });
+
+  // 7bis. Da numero a decine e unità
+  generators.push(function(){
+    const n = randInt(10,99);
+    const da = Math.floor(n/10), u = n%10;
+    const correct = `${da} decine e ${u} unità`;
+    const distractors = new Set();
+    while(distractors.size<3){
+      const dd = Math.max(0,da+randInt(-1,1));
+      const uu = Math.max(0,Math.min(9,u+randInt(-2,2)));
+      const label = `${dd} decine e ${uu} unità`;
+      if(label!==correct) distractors.add(label);
+    }
+    return {
+      prompt: `Come si scompone il numero <b>${n}</b> in decine e unità?`,
+      type:'mc',
+      options: shuffle([correct,...distractors]),
+      correct
+    };
+  });
+
+  // 8. Addizione in colonna entro 100 (risposta aperta)
+  generators.push(function(){
+    const a = randInt(10,79);
+    const b = randInt(5, 20);
+    const sum = a+b;
+    return {
+      prompt: `Calcola: <b>${a} + ${b} = ?</b>`,
+      type:'open',
+      correct: String(sum),
+      maxDigits:3
+    };
+  });
+
+  // 9. Sottrazione entro 100 (risposta aperta)
+  generators.push(function(){
+    const a = randInt(20,99);
+    const b = randInt(5, Math.min(30,a-1));
+    return {
+      prompt: `Calcola: <b>${a} - ${b} = ?</b>`,
+      type:'open',
+      correct: String(a-b),
+      maxDigits:3
+    };
+  });
+
+  // 10. Tabelline / moltiplicazioni (risposta aperta con tastierino)
+  generators.push(function(){
+    const a = randInt(1,9);
+    const b = randInt(1,9);
+    return {
+      prompt: `Calcola: <b>${a} x ${b} = ?</b>`,
+      type:'open',
+      correct: String(a*b),
+      maxDigits:2
+    };
+  });
+
+  // 11. Conta i pallini e scrivi la moltiplicazione (visuale)
+  generators.push(function(){
+    const righe = randInt(2,5);
+    const colonne = randInt(2,6);
+    const tot = righe*colonne;
+    let viz = '<div class="cell-grid" style="grid-template-columns:repeat('+colonne+',20px);">';
+    for(let i=0;i<righe*colonne;i++) viz += '<div class="cell"></div>';
+    viz += '</div>';
+    return {
+      prompt: `Osserva i quadratini: quanti sono in tutto?<br>${viz}`,
+      type:'open',
+      correct: String(tot),
+      maxDigits:2,
+      isHtmlPrompt:true
+    };
+  });
+
+  // 12. Rappresentazione con X (decine) e pallini (unità)
+  generators.push(function(){
+    const da = randInt(1,6);
+    const u = randInt(0,9);
+    const n = da*10+u;
+    let viz = '<div class="grid-viz">';
+    for(let i=0;i<da;i++){
+      viz += '<div class="ten-mark">X</div>';
+    }
+    if(u>0){
+      viz += '<div class="units-wrap">';
+      for(let i=0;i<u;i++) viz += '<div class="unit-mark"></div>';
+      viz += '</div>';
+    }
+    viz += '</div>';
+    return {
+      prompt: `Ogni X vale una decina, ogni pallino vale un'unità. Quanto vale in tutto?${viz}`,
+      type:'open',
+      correct: String(n),
+      maxDigits:2,
+      isHtmlPrompt:true
+    };
+  });
+
+  // 13. Problemini a scelta multipla (variazioni dai testi del quaderno)
+  const problemTemplates = [
+    (a,b)=>({text:`Il Signor Mario ha aggiustato ${a} ombrelli neri e ${b} ombrelli bianchi. Quanti ombrelli ha aggiustato in tutto?`, op:'+'}),
+    (a,b)=>({text:`Il pittore ha incorniciato ${a+b} quadri: ${a} con cornice nera, gli altri con cornice bianca. Quanti quadri ha con la cornice bianca?`, op:'-', total:a+b, part:a}),
+    (a,b)=>({text:`Nel bosco ci sono ${a} nanetti con il cappello blu e ${b} nanetti con il cappello bianco. Quanti nanetti ci sono nel bosco?`, op:'+'}),
+    (a,b)=>({text:`Il contadino ha raccolto ${a} mele rosse e ${b} mele verdi. Quante mele ci sono nel cesto?`, op:'+'}),
+    (a,b)=>({text:`Al circo ci sono ${a} pagliacci con il cappello e ${b} senza cappello. Quanti pagliacci ci sono in tutto?`, op:'+'}),
+    (a,b)=>({text:`Nel cortile giocano ${a+b} bambini. ${b} bambini vanno a casa. Quanti bambini rimangono in cortile?`, op:'-', total:a+b, part:b}),
+    (a,b)=>({text:`Giovanni ha comprato ${a+b} pesci per l'acquario: ${b} sono blu, gli altri rossi. Quanti pesci rossi ha comprato?`, op:'-', total:a+b, part:b}),
+    (a,b)=>({text:`Ho comprato ${a} sacchetti di caramelle, ognuno con ${b} caramelle. Quante caramelle ho in tutto?`, op:'x'}),
+    (a,b)=>({text:`Un treno ha ${a} vagoni. In ogni vagone viaggiano ${b} bambini. Quanti bambini viaggiano sul treno?`, op:'x'}),
+    (a,b)=>({text:`Nell'orto sono state piantate ${a} file di carote, con ${b} carote in ciascuna fila. Quante carote sono state piantate?`, op:'x'}),
+  ];
+  generators.push(function(){
+    const tpl = pick(problemTemplates);
+    let a = randInt(2,9), b = randInt(2,9);
+    const p = tpl(a,b);
+    let correct;
+    if(p.op==='+') correct = a+b;
+    else if(p.op==='-') correct = p.total - p.part;
+    else correct = a*b;
+    const opts = new Set([correct]);
+    while(opts.size<4){
+      const delta = randInt(-4,4);
+      const val = correct+delta;
+      if(val>0 && val!==correct) opts.add(val);
+    }
+    return {
+      prompt: p.text,
+      type:'mc',
+      options: shuffle([...opts]).map(String),
+      correct: String(correct)
+    };
+  });
+
+  // 14. Conta in avanti sulla linea dei numeri (qual è il numero successivo di 3)
+  generators.push(function(){
+    const start = randInt(5,90);
+    const step = pick([1,1,1,2]);
+    const n2 = start+step;
+    const n3 = n2+step;
+    const opts = new Set([n3]);
+    while(opts.size<4){ opts.add(n3+randInt(-3,3)); }
+    return {
+      prompt: `Segui la sequenza: ${start}, ${n2}, ... Quale numero viene dopo?`,
+      type:'mc',
+      options: shuffle([...opts].filter(x=>x>0)).map(String),
+      correct: String(n3)
+    };
+  });
+
+  function getQuestion(){
+    let idx;
+    do{ idx = randInt(0, generators.length-1); }
+    while(state.usedRecently.includes(idx) && state.usedRecently.length < generators.length);
+    state.usedRecently.push(idx);
+    if(state.usedRecently.length > 4) state.usedRecently.shift();
+    return generators[idx]();
+  }
+
+  /* ---------- FLUSSO DOMANDE ---------- */
+  function nextQuestion(){
+    document.getElementById('nextBtn').classList.add('hidden');
+    document.getElementById('feedback').textContent = '';
+    document.getElementById('feedback').className = 'feedback';
+
+    if(state.turnPointer >= state.turnOrder.length){
+      endGame();
+      return;
+    }
+
+    const teamIdx = state.turnOrder[state.turnPointer];
+    const team = state.teams[teamIdx];
+
+    const banner = document.getElementById('turn-banner');
+    banner.className = 'turn-banner t' + (teamIdx+1);
+    banner.textContent = `Turno di ${team.emoji} ${team.name}`;
+
+    const askedForTeam = state.turnOrder.slice(0,state.turnPointer).filter(x=>x===teamIdx).length + 1;
+    document.getElementById('progress-info').textContent = `Domanda ${askedForTeam} di ${state.N} per ${team.name}`;
+
+    const q = getQuestion();
+    state.currentQuestion = q;
+    renderQuestion(q, teamIdx);
+  }
+
+  function renderQuestion(q, teamIdx){
+    const area = document.getElementById('question-area');
+    area.innerHTML = '';
+
+    const promptEl = document.createElement('div');
+    promptEl.className = 'q-prompt';
+    promptEl.innerHTML = q.prompt;
+    area.appendChild(promptEl);
+
+    if(q.type === 'mc'){
+      const grid = document.createElement('div');
+      grid.className = 'options-grid' + (q.optionsSingleCol ? ' single' : '');
+      q.options.forEach(opt=>{
+        const b = document.createElement('button');
+        b.className = 'opt-btn';
+        b.textContent = opt;
+        b.addEventListener('click', ()=>{
+          const isCorrect = (opt === q.correct);
+          grid.querySelectorAll('button').forEach(x=>{
+            x.disabled = true;
+            if(x.textContent === q.correct) x.classList.add('correct');
+            else if(x===b) x.classList.add('wrong');
+          });
+          handleAnswer(teamIdx, isCorrect);
+        });
+        grid.appendChild(b);
+      });
+      area.appendChild(grid);
+    } else if(q.type === 'open'){
+      const wrap = document.createElement('div');
+      wrap.className = 'open-answer';
+      const display = document.createElement('div');
+      display.className = 'open-display';
+      display.id = 'openDisplay';
+      display.textContent = '_';
+      wrap.appendChild(display);
+
+      let currentVal = '';
+      const keypad = document.createElement('div');
+      keypad.className = 'keypad';
+
+      ['1','2','3','4','5','6','7','8','9'].forEach(d=>{
+        const k = document.createElement('button');
+        k.textContent = d;
+        k.addEventListener('click', ()=>{
+          if(currentVal.length < (q.maxDigits||3)){
+            currentVal += d;
+            display.textContent = currentVal;
+          }
+        });
+        keypad.appendChild(k);
+      });
+      const zero = document.createElement('button');
+      zero.textContent = '0';
+      zero.addEventListener('click', ()=>{
+        if(currentVal.length>0 && currentVal.length < (q.maxDigits||3)){
+          currentVal += '0';
+          display.textContent = currentVal;
+        }
+      });
+      keypad.appendChild(zero);
+
+      const del = document.createElement('button');
+      del.textContent = '⌫';
+      del.className = 'del-key';
+      del.addEventListener('click', ()=>{
+        currentVal = currentVal.slice(0,-1);
+        display.textContent = currentVal || '_';
+      });
+      keypad.appendChild(del);
+
+      const okKey = document.createElement('button');
+      okKey.textContent = 'Conferma ✔';
+      okKey.className = 'ok-key';
+      okKey.addEventListener('click', ()=>{
+        const isCorrect = (currentVal === q.correct);
+        keypad.querySelectorAll('button').forEach(b=>b.disabled=true);
+        display.textContent = currentVal || '_';
+        display.style.borderColor = isCorrect ? 'var(--ok)' : 'var(--bad)';
+        display.style.color = isCorrect ? 'var(--ok)' : 'var(--bad)';
+        if(!isCorrect){
+          const corr = document.createElement('div');
+          corr.style.color = 'var(--text-secondary)';
+          corr.style.fontSize = '14px';
+          corr.textContent = `Risposta corretta: ${q.correct}`;
+          wrap.appendChild(corr);
+        }
+        handleAnswer(teamIdx, isCorrect);
+      });
+
+      wrap.appendChild(keypad);
+      wrap.appendChild(okKey);
+      area.appendChild(wrap);
+    }
+  }
+
+  function handleAnswer(teamIdx, isCorrect){
+    const team = state.teams[teamIdx];
+    team.answered++;
+    if(isCorrect){
+      team.correct++;
+      team.pos++;
+    }
+
+    const fb = document.getElementById('feedback');
+    if(isCorrect){
+      fb.textContent = 'Esatto! 🎉 avanti di una casella!';
+      fb.className = 'feedback ok';
+    } else {
+      fb.textContent = 'Non è corretto, ma niente paura: si continua!';
+      fb.className = 'feedback bad';
+    }
+
+    renderTrack();
+    state.turnPointer++;
+
+    const nextBtn = document.getElementById('nextBtn');
+    nextBtn.classList.remove('hidden');
+    nextBtn.textContent = state.turnPointer >= state.turnOrder.length ? 'Vedi il risultato finale 🏆' : 'Prossima domanda ➜';
+    nextBtn.onclick = nextQuestion;
+  }
+
+  function endGame(){
+    const [t1,t2] = state.teams;
+    document.getElementById('finalEmo1').textContent = t1.emoji;
+    document.getElementById('finalName1').textContent = t1.name;
+    document.getElementById('finalScore1').textContent = `${t1.correct} / ${state.N}`;
+    document.getElementById('finalEmo2').textContent = t2.emoji;
+    document.getElementById('finalName2').textContent = t2.name;
+    document.getElementById('finalScore2').textContent = `${t2.correct} / ${state.N}`;
+
+    const winName = document.getElementById('winName');
+    const winSub = document.getElementById('winSub');
+    const trophy = document.getElementById('trophy');
+
+    if(t1.correct === t2.correct){
+      trophy.textContent = '🤝';
+      winName.textContent = 'Pareggio!';
+      winSub.textContent = 'Entrambe le squadre hanno tagliato il traguardo insieme.';
+    } else {
+      const winner = t1.correct > t2.correct ? t1 : t2;
+      trophy.textContent = '🏆';
+      winName.textContent = `Vince ${winner.emoji} ${winner.name}!`;
+      winSub.textContent = 'Complimenti a entrambe le squadre per l\'impegno.';
+    }
+
+    show('screen-end');
+  }
+
+})();
+</script>
+</body>
+</html>
