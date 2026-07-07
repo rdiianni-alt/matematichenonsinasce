@@ -187,6 +187,27 @@
     .keypad button{ width:48px; height:42px; font-size:16px;}
     .end-score-box{ min-width:120px; padding:10px 14px; }
   }
+
+  /* --- foglio stampabile --- */
+  #printable-sheet{ display:none; }
+  .print-header{ display:flex; flex-direction:column; align-items:center; gap:6px; margin-bottom:8px; }
+  .print-logo{ width:60px; height:60px; object-fit:contain; border-radius:50%; }
+  .print-blogname{ font-weight:700; color:#5f5e5a; font-size:14px; }
+  .print-title{ text-align:center; color:var(--red); margin:6px 0 20px; font-size:20px; }
+  .print-question{ display:flex; gap:10px; margin-bottom:18px; }
+  .print-q-num{ font-weight:800; min-width:24px; }
+  .print-q-prompt{ font-size:14.5px; margin-bottom:6px; line-height:1.4; }
+  .print-options{ display:grid; grid-template-columns:1fr 1fr; gap:3px 16px; font-size:13.5px; }
+  .print-blank{ font-size:13.5px; margin-top:6px; }
+  .print-blank .line{ display:inline-block; border-bottom:1px solid #999; width:160px; margin-left:6px; }
+  .print-footer{ text-align:center; font-size:11.5px; color:#777; margin-top:28px; border-top:1px solid #ddd; padding-top:10px; }
+
+  @media print{
+    html, body{ background:#fff !important; }
+    body > *:not(#printable-sheet){ display:none !important; }
+    #printable-sheet{ display:block !important; background:#fff !important; padding:16px 22px; }
+    .print-question{ break-inside:avoid; page-break-inside:avoid; }
+  }
 </style>
 </head>
 <body>
@@ -223,6 +244,23 @@
 
       <button class="btn-primary" id="startBtn">Inizia la gara 🏁</button>
       <p id="startHint" style="text-align:center; color:var(--bad); font-weight:600; font-size:14px; margin-top:10px; min-height:18px;"></p>
+    </div>
+
+    <div class="card" style="margin-top:18px;">
+      <h3 style="margin-top:0; color:var(--red);">Stampa una scheda con domande 🖨️</h3>
+      <p style="color:var(--text-secondary); font-size:14px; margin-top:4px;">Genera un foglio stampabile (o salvabile in PDF) con domande casuali: ogni volta che lo generi, le domande cambiano.</p>
+      <p style="text-align:center; font-weight:700; margin-top:16px; margin-bottom:4px;">Quante domande vuoi in totale?</p>
+      <div class="n-choice" id="print-n-choice">
+        <button data-n="10">10</button>
+        <button data-n="20" class="sel">20</button>
+        <button data-n="30">30</button>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px; justify-content:center; margin-top:12px; flex-wrap:wrap;">
+        <label for="print-n-custom" style="font-size:14px; color:var(--text-secondary);">oppure un numero a scelta:</label>
+        <input type="number" id="print-n-custom" min="1" max="60" placeholder="es. 15" style="width:80px; padding:8px 10px; border-radius:8px; border:1.5px solid #ccc; font-size:15px;">
+      </div>
+      <button class="btn-primary" id="printBtn" style="margin-top:18px;">Genera e stampa la scheda 📄</button>
+      <p id="printHint" style="text-align:center; color:var(--bad); font-weight:600; font-size:14px; margin-top:10px; min-height:18px;"></p>
     </div>
   </div>
 
@@ -264,6 +302,16 @@
       </div>
     </div>
   </div>
+</div>
+
+<div id="printable-sheet">
+  <div class="print-header">
+    <img id="print-logo-img" src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="logo" class="print-logo">
+    <div class="print-blogname">Matematiche non si nasce</div>
+  </div>
+  <h2 class="print-title">Scheda di allenamento — Numeri e problemi</h2>
+  <div class="print-questions" id="print-questions"></div>
+  <div class="print-footer">Ispirato al Quaderno di fine estate del progetto PerContare. Il quaderno è a disposizione liberamente, previa iscrizione, nel sito percontare.asphi.it</div>
 </div>
 
 <script>
@@ -894,6 +942,101 @@
 
     show('screen-end');
   }
+
+  /* ---------- STAMPA SCHEDA PDF ---------- */
+  let printSelectedN = 20;
+
+  document.querySelectorAll('#print-n-choice button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#print-n-choice button').forEach(b=>b.classList.remove('sel'));
+      btn.classList.add('sel');
+      printSelectedN = parseInt(btn.dataset.n, 10);
+      document.getElementById('print-n-custom').value = '';
+      document.getElementById('printHint').textContent = '';
+    });
+  });
+
+  document.getElementById('print-n-custom').addEventListener('input', ()=>{
+    document.querySelectorAll('#print-n-choice button').forEach(b=>b.classList.remove('sel'));
+    document.getElementById('printHint').textContent = '';
+  });
+
+  function stripHtml(s){
+    return s.replace(/<[^>]*>/g, ' ').replace(/\s+/g,' ').trim();
+  }
+
+  function generateUniquePrintQuestions(n){
+    const questions = [];
+    const seen = new Set();
+    const maxAttempts = n * 25 + 300;
+    let attempts = 0;
+    while(questions.length < n && attempts < maxAttempts){
+      attempts++;
+      const idx = randInt(0, generators.length-1);
+      const q = generators[idx]();
+      const key = stripHtml(q.prompt) + '|' + q.correct;
+      if(seen.has(key)) continue;
+      seen.add(key);
+      questions.push(q);
+    }
+    return questions;
+  }
+
+  function buildPrintQuestionHtml(q, index){
+    let html = `<div class="print-question"><div class="print-q-num">${index}.</div><div class="print-q-body">`;
+    html += `<div class="print-q-prompt">${q.prompt}</div>`;
+    if(q.type === 'mc'){
+      const letters = ['A','B','C','D'];
+      html += '<div class="print-options">';
+      q.options.forEach((opt, i)=>{
+        html += `<div class="print-opt">${letters[i]||''}) ${opt}</div>`;
+      });
+      html += '</div>';
+    } else {
+      html += `<div class="print-blank">Risposta: <span class="line"></span></div>`;
+    }
+    html += '</div></div>';
+    return html;
+  }
+
+  function populatePrintable(n){
+    const qs = generateUniquePrintQuestions(n);
+    const container = document.getElementById('print-questions');
+    container.innerHTML = qs.map((q,i)=>buildPrintQuestionHtml(q, i+1)).join('');
+  }
+
+  document.getElementById('printBtn').addEventListener('click', ()=>{
+    const hint = document.getElementById('printHint');
+    const customVal = parseInt(document.getElementById('print-n-custom').value, 10);
+    let n = printSelectedN;
+    if(!isNaN(customVal) && customVal>0) n = customVal;
+    if(!n || n<1){
+      hint.textContent = 'Scegli quante domande vuoi inserire nella scheda.';
+      return;
+    }
+    if(n>60){
+      hint.textContent = 'Puoi generare al massimo 60 domande per scheda.';
+      return;
+    }
+    hint.textContent = '';
+
+    populatePrintable(n);
+
+    const logoImg = document.getElementById('print-logo-img');
+    function triggerPrint(){
+      requestAnimationFrame(()=>{
+        requestAnimationFrame(()=>{
+          window.print();
+        });
+      });
+    }
+    if(logoImg.complete){
+      triggerPrint();
+    } else {
+      logoImg.addEventListener('load', triggerPrint, {once:true});
+      logoImg.addEventListener('error', triggerPrint, {once:true});
+    }
+  });
 
 })();
 </script>
