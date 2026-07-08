@@ -867,28 +867,63 @@
     return Promise.all(imgs.map(img => img.complete ? Promise.resolve() : new Promise(res=>{ img.onload = res; img.onerror = res; })));
   }
 
-  document.getElementById('printConfirmBtn').addEventListener('click', ()=>{
+  function timeoutAfter(ms){
+    return new Promise(res => setTimeout(res, ms));
+  }
+
+  const printConfirmBtn = document.getElementById('printConfirmBtn');
+
+  printConfirmBtn.addEventListener('click', ()=>{
+    if(printConfirmBtn.disabled) return; // evita doppio clic / doppia stampa
+
     let n = parseInt(printCountInput.value, 10);
     if(isNaN(n) || n < 5) n = 5;
     if(n > 60) n = 60;
 
-    const questions = generateQueue(n);
-    const printArea = document.getElementById('printArea');
-    printArea.innerHTML = buildPrintHTML(questions);
-    printArea.classList.remove('hidden');
+    printConfirmBtn.disabled = true;
+    const originalLabel = printConfirmBtn.textContent;
+    printConfirmBtn.textContent = 'Preparazione...';
 
-    waitForImages(printArea).then(()=>{
-      requestAnimationFrame(()=>{
-        requestAnimationFrame(()=>{
-          window.print();
+    // ripristino di sicurezza: qualunque cosa succeda, dopo max 6 secondi
+    // il pulsante torna sempre cliccabile, così l'interfaccia non resta bloccata
+    const safetyTimer = setTimeout(()=>{
+      printConfirmBtn.disabled = false;
+      printConfirmBtn.textContent = originalLabel;
+    }, 6000);
+
+    try{
+      const questions = generateQueue(n);
+      const printArea = document.getElementById('printArea');
+      printArea.innerHTML = buildPrintHTML(questions);
+      printArea.classList.remove('hidden');
+
+      // non aspettiamo il logo per più di 2 secondi: se la rete è lenta o
+      // instabile la stampa parte comunque, senza restare bloccati in attesa
+      Promise.race([waitForImages(printArea), timeoutAfter(2000)])
+        .then(()=>{
+          requestAnimationFrame(()=>{
+            requestAnimationFrame(()=>{
+              try{ window.print(); }
+              finally{
+                clearTimeout(safetyTimer);
+                printConfirmBtn.disabled = false;
+                printConfirmBtn.textContent = originalLabel;
+              }
+            });
+          });
         });
-      });
-    });
+    } catch(err){
+      clearTimeout(safetyTimer);
+      printConfirmBtn.disabled = false;
+      printConfirmBtn.textContent = originalLabel;
+    }
   });
 
   window.addEventListener('afterprint', ()=>{
     document.getElementById('printArea').classList.add('hidden');
     printModal.classList.add('hidden');
+    printConfirmBtn.disabled = false;
+    printConfirmBtn.textContent = 'Genera e stampa';
   });
 
 })();
