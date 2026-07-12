@@ -202,6 +202,22 @@
   .feedback.no{ color:var(--red); }
 
   footer.note{ text-align:center; font-size:0.8em; color:#aaa; margin-top:30px; }
+
+  .pdf-banner{
+    display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap;
+    max-width:640px; margin:0 auto 22px auto; padding:12px 18px;
+    background:#fff6e8; border:2px solid var(--orange); border-radius:16px;
+    text-decoration:none; color:#5a4526; font-weight:600; font-size:0.92em;
+    text-align:center; transition:.15s;
+  }
+  .pdf-banner:hover{ background:#ffedcf; }
+  .pdf-banner .pdf-chip{
+    font-family:'Baloo 2', sans-serif; font-weight:700; font-size:0.95em;
+    background:var(--orange); color:#fff; padding:6px 14px; border-radius:999px; white-space:nowrap;
+  }
+  .pdf-end-btn{
+    display:inline-flex; align-items:center; gap:8px; text-decoration:none;
+  }
 </style>
 </head>
 <body>
@@ -213,6 +229,11 @@
 
 <h1 class="game-title">🗺️ Esploratori di Mappe</h1>
 <p class="subtitle">Un viaggio tra mappe, simboli, coordinate e quartieri!</p>
+
+<a class="pdf-banner" href="laboratori-mappe.pdf" target="_blank">
+  🎉 Alla fine del gioco trovi anche 3 idee di laboratorio a gruppi da fare in classe!
+  <span class="pdf-chip">Scarica il PDF ⬇️</span>
+</a>
 
 <div id="progress">
   <div class="step" data-step="1">1</div>
@@ -386,6 +407,7 @@
       <div class="end-msg" id="end-msg"></div>
       <div class="btn-row">
         <button class="btn" onclick="location.reload()">Ricomincia 🔄</button>
+        <a class="btn secondary pdf-end-btn" href="laboratori-mappe.pdf" target="_blank">📄 Scarica le idee per i laboratori</a>
       </div>
     </div>
   </div>
