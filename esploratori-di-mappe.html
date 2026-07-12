@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Esploratori di Mappe</title>
+<title>Alla scoperta delle mappe</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -227,7 +227,7 @@
   <span>Matematiche non si nasce</span>
 </a>
 
-<h1 class="game-title">🗺️ Esploratori di Mappe</h1>
+<h1 class="game-title">🗺️ Alla scoperta delle mappe</h1>
 <p class="subtitle">Un viaggio tra mappe, simboli, coordinate e quartieri!</p>
 
 <a class="pdf-banner" href="laboratori-mappe.pdf" target="_blank">
@@ -250,9 +250,9 @@
     <div class="card">
       <div class="start-emoji">🗺️🧭🏙️</div>
       <p class="instructions">
-        Ciao esploratore! In questo gioco metterai alla prova quello che hai imparato sulle mappe:
+        Ciao! In questo gioco metterai alla prova quello che hai imparato sulle mappe:
         i punti chiave di una mappa, i simboli e le legende, poi ne inventerai di nuovi,
-        leggerai il reticolo con le coordinate e infine costruirai il tuo quartiere. Pronto a partire?
+        leggerai il reticolo con le coordinate e infine costruirai il tuo quartiere. Tutto pronto? Si parte!
       </p>
       <div class="btn-row">
         <button class="btn" onclick="goToScreen('level1')">Inizia il viaggio 🚀</button>
@@ -472,7 +472,7 @@
       fb.textContent = "Quasi! Correggi le risposte in rosso e riprova.";
       fb.className = "feedback no";
     } else {
-      fb.textContent = "Bravissimo! Hai capito come funziona una mappa! 🎉";
+      fb.textContent = "Esatto! Hai capito come funziona una mappa! 🎉";
       fb.className = "feedback ok";
       const nextBtn = document.getElementById('l1-next');
       nextBtn.disabled = false;
@@ -547,7 +547,7 @@
       fb.textContent = 'Abbinamento corretto! ✅';
       fb.className = 'feedback ok';
       if(l2Matched === pairs.length){
-        fb.textContent = 'Hai abbinato tutti i simboli! Sei un vero esperto di legende! 🎉';
+        fb.textContent = 'Hai abbinato tutti i simboli! Conosci proprio bene le legende! 🎉';
         window.score2 = 6;
         const nextBtn = document.getElementById('l2-next');
         nextBtn.disabled = false;
@@ -910,7 +910,7 @@
     else if(pct >= 0.6) stars = '⭐⭐';
     document.getElementById('end-stars').textContent = stars;
     let msg = "Complimenti, hai completato tutte le tappe del viaggio tra le mappe, e hai anche inventato nuovi simboli e costruito un quartiere tutto tuo!";
-    if(pct >= 0.9) msg += " Sei un vero esperto di geografia! 🗺️";
+    if(pct >= 0.9) msg += " Conosci davvero bene le mappe! 🗺️";
     else if(pct >= 0.6) msg += " Ottimo lavoro, continua così! 💪";
     else msg += " Ricomincia il gioco per allenarti ancora un po'!";
     document.getElementById('end-msg').textContent = msg;
