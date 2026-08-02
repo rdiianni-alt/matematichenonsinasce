@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fattoria delle Moltiplicazioni – Matematiche non si nasce</title>
+<style>
+  :root{
+    --sky: #eaf6e3;
+    --grass: #7cb342;
+    --grass-dark: #588a2e;
+    --wood: #a9764f;
+    --wood-dark: #7a5335;
+    --sun: #ffd54f;
+    --card: #fffdf7;
+    --text-primary: #3e2f23;
+    --text-secondary: #5f5e5a;
+    --accent: #e10600;
+    --accent-dark: #b30500;
+    --ok: #4caf50;
+    --ok-dark: #357a38;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    font-family: 'Comic Sans MS', 'Trebuchet MS', 'Segoe UI', sans-serif;
+    background: linear-gradient(180deg, var(--sky) 0%, var(--sky) 40%, var(--grass) 40%, var(--grass-dark) 100%);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    color: var(--text-primary);
+    padding-bottom: 40px;
+  }
+
+  body::before{
+    content:"";
+    position:fixed;
+    top:20px; right:6%;
+    width:90px; height:90px;
+    background: var(--sun);
+    border-radius:50%;
+    box-shadow: 0 0 0 8px rgba(255,213,79,0.35);
+    z-index:0;
+  }
+
+  .logo{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    text-decoration:none;
+    margin-top:18px;
+    z-index:2;
+  }
+  .logo img{
+    width:60px; height:60px;
+    object-fit:contain;
+    border-radius:50%;
+    border:3px solid var(--card);
+    box-shadow:0 2px 8px rgba(0,0,0,0.15);
+  }
+  .logo span{
+    font-size:14px;
+    color: var(--text-secondary);
+    font-family: 'Segoe UI', sans-serif;
+  }
+
+  h1{
+    margin: 10px 0 4px;
+    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    color: var(--wood-dark);
+    text-shadow: 1px 1px 0 #fff;
+    z-index:2;
+    text-align:center;
+  }
+
+  .subtitle{
+    color: var(--text-secondary);
+    font-family:'Segoe UI', sans-serif;
+    margin-bottom: 18px;
+    z-index:2;
+    text-align:center;
+  }
+
+  .hud{
+    display:flex;
+    gap:18px;
+    align-items:center;
+    background: var(--card);
+    border: 3px solid var(--wood);
+    border-radius: 20px;
+    padding: 10px 22px;
+    margin-bottom: 18px;
+    font-family:'Segoe UI', sans-serif;
+    font-weight:bold;
+    z-index:2;
+    flex-wrap: wrap;
+    justify-content:center;
+  }
+  .hud .stars{ color:#e6a817; font-size:1.2rem; }
+  .hud .progress-track{
+    width:140px; height:12px;
+    background:#e9e2d3;
+    border-radius:8px;
+    overflow:hidden;
+  }
+  .hud .progress-fill{
+    height:100%;
+    background: var(--accent);
+    width:0%;
+    transition: width .4s ease;
+  }
+
+  .card{
+    background: var(--card);
+    border: 6px solid var(--wood);
+    border-radius: 26px;
+    padding: 24px 28px 30px;
+    max-width: 640px;
+    width: 92%;
+    box-shadow: 0 10px 0 var(--wood-dark), 0 14px 24px rgba(0,0,0,0.25);
+    z-index:2;
+    text-align:center;
+  }
+
+  .story{
+    font-size: clamp(1.05rem, 2.6vw, 1.3rem);
+    line-height:1.5;
+    margin-bottom: 16px;
+  }
+
+  .status-line{
+    font-family:'Segoe UI', sans-serif;
+    font-size: 1.05rem;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+  }
+
+  .rows-container{
+    display:flex;
+    flex-direction:column;
+    gap: 10px;
+    margin-bottom: 16px;
+    align-items:center;
+  }
+
+  .farm-row{
+    display:flex;
+    align-items:center;
+    gap: 6px;
+    background: #dfeecb;
+    border: 2px solid var(--grass-dark);
+    border-radius: 12px;
+    padding: 8px 10px;
+    flex-wrap: wrap;
+    justify-content:center;
+    max-width: 100%;
+  }
+
+  .animal-chip{
+    width: 38px;
+    height: 38px;
+    background:#fff3d6;
+    border: 2px solid var(--sun);
+    border-radius: 8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size: 1.35rem;
+    cursor:pointer;
+    user-select:none;
+    animation: pop .18s ease;
+  }
+  @keyframes pop{
+    0%{ transform: scale(0.5); }
+    70%{ transform: scale(1.15); }
+    100%{ transform: scale(1); }
+  }
+
+  .add-animal-btn{
+    width: 38px;
+    height: 38px;
+    background:#fff;
+    border: 2px dashed #b9b192;
+    border-radius: 8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    cursor:pointer;
+  }
+  .add-animal-btn:hover{ background:#fffaf0; }
+
+  .remove-row-btn{
+    margin-left: 6px;
+    background: none;
+    border: none;
+    color: var(--accent-dark);
+    font-size: 1.1rem;
+    cursor:pointer;
+    padding: 4px 6px;
+  }
+
+  .row-builder-buttons{
+    display:flex;
+    gap: 10px;
+    justify-content:center;
+    margin-bottom: 18px;
+    flex-wrap:wrap;
+  }
+
+  .btn-add-row{ background: var(--grass-dark); }
+  .btn-add-row:hover{ filter: brightness(1.1); }
+
+  .answer-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    margin-bottom: 16px;
+    flex-wrap:wrap;
+    font-family:'Segoe UI', sans-serif;
+  }
+  .answer-row label{ font-weight:bold; color: var(--text-secondary); }
+  .answer-row input{
+    font-size: 1.3rem;
+    text-align:center;
+    padding: 8px;
+    border-radius: 10px;
+    border: 2px solid var(--wood);
+    font-family:'Segoe UI', sans-serif;
+  }
+  .factor-input{ width: 60px; }
+  .result-input{ width: 80px; }
+  .eq-symbol{
+    font-size: 1.4rem;
+    font-weight:bold;
+    color: var(--wood-dark);
+  }
+
+  .buttons{
+    display:flex;
+    gap:12px;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+
+  button{
+    font-family:'Segoe UI', sans-serif;
+    font-weight:bold;
+    font-size: 1rem;
+    padding: 12px 22px;
+    border-radius: 14px;
+    border: none;
+    cursor:pointer;
+    color: #fff;
+    transition: transform .1s ease, filter .15s ease;
+  }
+  button:active{ transform: scale(0.96); }
+
+  .btn-check{ background: var(--accent); }
+  .btn-check:hover{ filter: brightness(1.08); }
+  .btn-check:disabled{ background:#d7d2c5; cursor:not-allowed; }
+
+  .btn-clear{ background: var(--wood); }
+  .btn-clear:hover{ filter: brightness(1.08); }
+
+  .btn-next{ background: var(--ok); display:none; }
+  .btn-next:hover{ filter: brightness(1.08); }
+
+  .feedback{
+    margin-top: 14px;
+    font-weight:bold;
+    font-family:'Segoe UI', sans-serif;
+    min-height: 28px;
+    font-size: 1.05rem;
+  }
+  .feedback.ok{ color: var(--ok-dark); }
+  .feedback.no{ color: var(--accent-dark); }
+
+  .end-screen{
+    display:none;
+  }
+  .end-screen h2{ color: var(--wood-dark); }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+  }
+
+  .print-trigger{
+    margin-bottom: 18px;
+    z-index:2;
+  }
+  .btn-print{ background: var(--wood-dark); }
+  .btn-print:hover{ filter: brightness(1.1); }
+
+  .modal-overlay{
+    display:none;
+    position:fixed; inset:0;
+    background: rgba(62,47,35,0.45);
+    align-items:center; justify-content:center;
+    z-index:6000;
+  }
+  .modal-overlay.active{ display:flex; }
+  .modal-box{
+    background: var(--card);
+    border: 4px solid var(--wood);
+    border-radius: 20px;
+    padding: 24px 28px;
+    max-width: 340px;
+    width: 90%;
+    text-align:center;
+    font-family:'Segoe UI', sans-serif;
+  }
+  .modal-box h2{ margin-bottom:12px; color: var(--wood-dark); font-size:1.1rem; }
+  .modal-box label{ display:block; margin-bottom:8px; font-weight:bold; color: var(--text-secondary); }
+  .modal-box input{
+    width: 80px;
+    font-size: 1.2rem;
+    text-align:center;
+    padding: 8px;
+    border-radius: 10px;
+    border: 2px solid var(--wood);
+    margin-bottom: 16px;
+    font-family:'Segoe UI', sans-serif;
+  }
+  .modal-buttons{ display:flex; gap:10px; justify-content:center; }
+
+  .print-sheet{ display:none; }
+
+  @page{
+    margin: 18mm 15mm;
+  }
+
+  @media print{
+    body *{ visibility: hidden; }
+    #printSheet, #printSheet *{ visibility: visible; }
+    #printSheet{
+      display:block !important;
+      position:absolute; top:0; left:0; width:100%;
+      padding: 6mm 8mm;
+    }
+    html, body, #printSheet{ background:#fff !important; }
+    .print-header{ display:flex; align-items:center; gap:14px; margin-bottom:16px; }
+    .print-header img{ width:50px; height:50px; border-radius:50%; }
+    .print-title{ font-weight:bold; font-size:16px; color:#1a1a1a; }
+    .print-subtitle{ font-size:13px; color:#555; }
+    .print-instructions{ font-size:12px; color:#333; margin-bottom:18px; }
+    .print-problem{
+      border:1px solid #ccc; border-radius:8px;
+      padding:12px 16px; margin-bottom:14px;
+      page-break-inside: avoid;
+    }
+    .print-problem-number{ font-weight:bold; font-size:13px; color:#1a1a1a; }
+    .print-problem-text{ font-size:13px; line-height:1.5; color:#1a1a1a; margin:6px 0 10px; }
+    .print-answer-line{ font-size:13px; color:#1a1a1a; margin-top:8px; }
+    .print-draw-box{ border:1px dashed #999; height:46mm; border-radius:6px; margin-top:8px; }
+    .print-draw-label{ font-size:10px; color:#777; margin-top:6px; margin-bottom:2px; }
+  }
+</style>
+</head>
+<body>
+
+  <a class="logo" href="https://matematichenonsinasce.com/" target="_blank" rel="noopener">
+    <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Matematiche non si nasce">
+    <span>Matematiche non si nasce</span>
+  </a>
+
+  <h1>🚜 La Fattoria delle Moltiplicazioni</h1>
+  <p class="subtitle">Costruisci le file di animali e trova il totale!</p>
+
+  <div class="hud">
+    <div class="stars">⭐ <span id="starCount">0</span></div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div id="progressText">0 / 0</div>
+  </div>
+
+  <div class="print-trigger">
+    <button class="btn-print" id="printBtn">🖨️ Foglio di problemi da stampare</button>
+  </div>
+
+  <div class="card" id="gameCard">
+    <div class="story" id="storyText"></div>
+
+    <div class="status-line" id="statusLine">Animali posizionati finora: 0</div>
+
+    <div class="rows-container" id="rowsContainer"></div>
+
+    <div class="row-builder-buttons">
+      <button class="btn-add-row" id="addRowBtn">🐣 Aggiungi fila</button>
+    </div>
+
+    <div class="answer-row" id="answerRow">
+      <input type="number" id="factor1Input" inputmode="numeric" placeholder="?" class="factor-input">
+      <span class="eq-symbol">×</span>
+      <input type="number" id="factor2Input" inputmode="numeric" placeholder="?" class="factor-input">
+      <span class="eq-symbol">=</span>
+      <input type="number" id="resultInput" inputmode="numeric" placeholder="?" class="result-input">
+    </div>
+
+    <div class="buttons">
+      <button class="btn-check" id="checkBtn">Verifica ✅</button>
+      <button class="btn-clear" id="clearBtn">Ricomincia questo problema 🧹</button>
+      <button class="btn-next" id="nextBtn">Prossimo problema ➡️</button>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <div class="card end-screen" id="endScreen">
+    <h2>🎉 Bravo/a! Hai finito tutti i problemi! 🎉</h2>
+    <p id="endSummary"></p>
+    <div class="buttons">
+      <button class="btn-check" id="restartBtn">Ricomincia dall'inizio 🔄</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="printModalOverlay">
+    <div class="modal-box">
+      <h2>🖨️ Foglio di problemi da stampare</h2>
+      <label for="printCountInput">Quanti problemi vuoi inserire nel foglio?</label>
+      <input type="number" id="printCountInput" min="1" max="20" value="6">
+      <div class="modal-buttons">
+        <button class="btn-check" id="printConfirmBtn">Genera e stampa</button>
+        <button class="btn-clear" id="printCancelBtn">Annulla</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="print-sheet" id="printSheet"></div>
+
+<script>
+  const animalBank = [
+    { emoji:"🐔", group:"file", each:"galline in ogni fila" },
+    { emoji:"🐄", group:"gruppi", each:"mucche in ogni gruppo" },
+    { emoji:"🐑", group:"file", each:"pecore in ogni fila" },
+    { emoji:"🐰", group:"file", each:"conigli in ogni fila" },
+    { emoji:"🐷", group:"gruppi", each:"maialini in ogni gruppo" },
+    { emoji:"🦆", group:"file", each:"anatre in ogni fila" },
+    { emoji:"🐴", group:"file", each:"cavalli in ogni fila" },
+    { emoji:"🐐", group:"gruppi", each:"capre in ogni gruppo" },
+    { emoji:"🐝", group:"file", each:"api in ogni fila" }
+  ];
+
+  const problems = [
+    { animal:"🐔", rows:4, cols:3, group:"file", each:"galline in ogni fila" },
+    { animal:"🐄", rows:3, cols:5, group:"gruppi", each:"mucche in ogni gruppo" },
+    { animal:"🐑", rows:5, cols:4, group:"file", each:"pecore in ogni fila" },
+    { animal:"🐰", rows:2, cols:8, group:"file", each:"conigli in ogni fila" },
+    { animal:"🐷", rows:6, cols:3, group:"gruppi", each:"maialini in ogni gruppo" },
+    { animal:"🦆", rows:4, cols:4, group:"file", each:"anatre in ogni fila" },
+    { animal:"🐴", rows:3, cols:6, group:"file", each:"cavalli in ogni fila" },
+    { animal:"🐐", rows:5, cols:5, group:"gruppi", each:"capre in ogni gruppo" },
+    { animal:"🐝", rows:7, cols:3, group:"file", each:"api in ogni fila" },
+    { animal:"🐔", rows:6, cols:4, group:"file", each:"galline in ogni fila" },
+    { animal:"🐄", rows:4, cols:6, group:"gruppi", each:"mucche in ogni gruppo" },
+    { animal:"🐑", rows:8, cols:2, group:"file", each:"pecore in ogni fila" },
+    { animal:"🐰", rows:3, cols:7, group:"file", each:"conigli in ogni fila" },
+    { animal:"🐷", rows:9, cols:2, group:"gruppi", each:"maialini in ogni gruppo" },
+    { animal:"🦆", rows:10, cols:2, group:"file", each:"anatre in ogni fila" }
+  ];
+
+  const MAX_PER_ROW = 12;
+
+  let order = [];
+  let currentIndex = 0;
+  let currentProblem = null;
+  let rowsData = []; // array of numbers, one per farm-row, each = animals in that row
+  let stars = 0;
+  let solvedCount = 0;
+
+  const storyText = document.getElementById('storyText');
+  const statusLine = document.getElementById('statusLine');
+  const rowsContainer = document.getElementById('rowsContainer');
+  const addRowBtn = document.getElementById('addRowBtn');
+  const factor1Input = document.getElementById('factor1Input');
+  const factor2Input = document.getElementById('factor2Input');
+  const resultInput = document.getElementById('resultInput');
+  const checkBtn = document.getElementById('checkBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const feedback = document.getElementById('feedback');
+  const starCount = document.getElementById('starCount');
+  const progressFill = document.getElementById('progressFill');
+  const progressText = document.getElementById('progressText');
+  const gameCard = document.getElementById('gameCard');
+  const endScreen = document.getElementById('endScreen');
+  const endSummary = document.getElementById('endSummary');
+  const restartBtn = document.getElementById('restartBtn');
+  const printBtn = document.getElementById('printBtn');
+  const printModalOverlay = document.getElementById('printModalOverlay');
+  const printCountInput = document.getElementById('printCountInput');
+  const printConfirmBtn = document.getElementById('printConfirmBtn');
+  const printCancelBtn = document.getElementById('printCancelBtn');
+  const printSheet = document.getElementById('printSheet');
+
+  function generatePrintProblems(n){
+    const list = [];
+    for(let i = 0; i < n; i++){
+      const a = animalBank[Math.floor(Math.random() * animalBank.length)];
+      const rows = 2 + Math.floor(Math.random() * 8); // 2-9
+      const cols = 2 + Math.floor(Math.random() * 8); // 2-9
+      list.push({ animal:a.emoji, rows, cols, group:a.group, each:a.each });
+    }
+    return list;
+  }
+
+  function buildPrintSheet(list){
+    let html = `
+      <div class="print-header">
+        <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Matematiche non si nasce">
+        <div>
+          <div class="print-title">Matematiche non si nasce</div>
+          <div class="print-subtitle">🚜 Problemi di moltiplicazione — la fattoria</div>
+        </div>
+      </div>
+      <p class="print-instructions">Leggi ogni problema, disegna lo schieramento sul quaderno e scrivi la moltiplicazione con il risultato.</p>
+    `;
+    list.forEach((p, idx) => {
+      html += `
+        <div class="print-problem">
+          <div class="print-problem-number">${idx + 1}. ${p.animal}</div>
+          <div class="print-problem-text">Nella fattoria ci sono <strong>${p.rows} ${p.group}</strong> di ${p.animal}, con <strong>${p.cols} ${p.each}</strong>. Quanti ${p.animal} ci sono in tutto?</div>
+          <div class="print-draw-box"></div>
+          <div class="print-draw-label">Spazio per il disegno</div>
+          <div class="print-answer-line">___________ × ___________ = ___________</div>
+        </div>
+      `;
+    });
+    return html;
+  }
+
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i = a.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function beep(good){
+    try{
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = good ? 660 : 220;
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      osc.start();
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      osc.stop(ctx.currentTime + 0.3);
+    }catch(e){ /* audio non disponibile, va bene comunque */ }
+  }
+
+  function startGame(){
+    order = shuffle(problems.map((_, i) => i));
+    currentIndex = 0;
+    stars = 0;
+    solvedCount = 0;
+    starCount.textContent = stars;
+    endScreen.style.display = 'none';
+    gameCard.style.display = 'block';
+    loadProblem();
+  }
+
+  function loadProblem(){
+    if(currentIndex >= order.length){
+      showEndScreen();
+      return;
+    }
+    currentProblem = problems[order[currentIndex]];
+    rowsData = [];
+    feedback.textContent = '';
+    feedback.className = 'feedback';
+    factor1Input.value = '';
+    factor2Input.value = '';
+    resultInput.value = '';
+    factor1Input.disabled = false;
+    factor2Input.disabled = false;
+    resultInput.disabled = false;
+    checkBtn.disabled = false;
+    nextBtn.style.display = 'none';
+
+    const p = currentProblem;
+    storyText.innerHTML = `Nella fattoria ci sono <strong>${p.rows} ${p.group}</strong> di ${p.animal}, con <strong>${p.cols} ${p.each}</strong>.<br>Costruisci le file di animali e scrivi quanti ${p.animal} ci sono in tutto!`;
+
+    renderRows();
+    updateStatus();
+    updateProgress();
+  }
+
+  function renderRows(){
+    rowsContainer.innerHTML = '';
+    rowsData.forEach((count, rowIndex) => {
+      const rowEl = document.createElement('div');
+      rowEl.className = 'farm-row';
+
+      for(let i = 0; i < count; i++){
+        const chip = document.createElement('div');
+        chip.className = 'animal-chip';
+        chip.textContent = currentProblem.animal;
+        chip.title = 'Tocca per togliere questo animale';
+        chip.addEventListener('click', () => {
+          rowsData[rowIndex]--;
+          renderRows();
+          updateStatus();
+        });
+        rowEl.appendChild(chip);
+      }
+
+      if(count < MAX_PER_ROW){
+        const addBtn = document.createElement('div');
+        addBtn.className = 'add-animal-btn';
+        addBtn.textContent = '+';
+        addBtn.title = 'Aggiungi un animale a questa fila';
+        addBtn.addEventListener('click', () => {
+          rowsData[rowIndex]++;
+          renderRows();
+          updateStatus();
+        });
+        rowEl.appendChild(addBtn);
+      }
+
+      const removeRowBtn = document.createElement('button');
+      removeRowBtn.className = 'remove-row-btn';
+      removeRowBtn.textContent = '✕';
+      removeRowBtn.title = 'Elimina questa fila';
+      removeRowBtn.addEventListener('click', () => {
+        rowsData.splice(rowIndex, 1);
+        renderRows();
+        updateStatus();
+      });
+      rowEl.appendChild(removeRowBtn);
+
+      rowsContainer.appendChild(rowEl);
+    });
+  }
+
+  function updateStatus(){
+    const total = rowsData.reduce((a, b) => a + b, 0);
+    const rowWord = rowsData.length === 1 ? 'fila creata' : 'file create';
+    statusLine.textContent = `${rowsData.length} ${rowWord} — Animali posizionati finora: ${total}`;
+  }
+
+  function updateProgress(){
+    progressFill.style.width = `${Math.round((currentIndex / order.length) * 100)}%`;
+    progressText.textContent = `${currentIndex} / ${order.length}`;
+  }
+
+  function checkAnswer(){
+    const p = currentProblem;
+    const expectedTotal = p.rows * p.cols;
+    const rowCountCorrect = rowsData.length === p.rows;
+    const everyRowCorrect = rowsData.every(c => c === p.cols) && rowsData.length > 0;
+    const shapeCorrect = rowCountCorrect && everyRowCorrect;
+
+    const f1 = parseInt(factor1Input.value, 10);
+    const f2 = parseInt(factor2Input.value, 10);
+    const res = parseInt(resultInput.value, 10);
+    const factorsCorrect = (f1 === p.rows && f2 === p.cols) || (f1 === p.cols && f2 === p.rows);
+    const resultCorrect = res === expectedTotal;
+    const equationCorrect = factorsCorrect && resultCorrect;
+
+    if(shapeCorrect && equationCorrect){
+      feedback.textContent = `🎉 Perfetto! ${f1} × ${f2} = ${res}. Hai costruito le file giuste e scritto la moltiplicazione!`;
+      feedback.className = 'feedback ok';
+      stars++;
+      solvedCount++;
+      starCount.textContent = stars;
+      checkBtn.disabled = true;
+      factor1Input.disabled = true;
+      factor2Input.disabled = true;
+      resultInput.disabled = true;
+      nextBtn.style.display = 'inline-block';
+      beep(true);
+      return;
+    }
+
+    if(!rowCountCorrect){
+      const diff = p.rows - rowsData.length;
+      if(diff > 0){
+        feedback.textContent = `Il problema parla di ${p.rows} ${p.group}: ti manca ancora qualche fila.`;
+      } else {
+        feedback.textContent = `Il problema parla di ${p.rows} ${p.group}: hai creato troppe file, togline qualcuna.`;
+      }
+    } else if(!everyRowCorrect){
+      feedback.textContent = `Ogni fila deve avere ${p.cols} animali. Controlla le tue file, qualcuna non è giusta.`;
+    } else if(!factorsCorrect && !resultCorrect){
+      feedback.textContent = `Le file sono giuste! Ora scrivi la moltiplicazione: quante file × quanti animali per fila, e il risultato.`;
+    } else if(!factorsCorrect){
+      feedback.textContent = `Il risultato è giusto, ma controlla i due numeri della moltiplicazione (fila × animali per fila).`;
+    } else if(!resultCorrect){
+      feedback.textContent = `I numeri della moltiplicazione sono giusti, ma il risultato scritto è sbagliato.`;
+    }
+    feedback.className = 'feedback no';
+    beep(false);
+  }
+
+  function clearCurrentProblem(){
+    rowsData = [];
+    renderRows();
+    updateStatus();
+    factor1Input.value = '';
+    factor2Input.value = '';
+    resultInput.value = '';
+    feedback.textContent = '';
+    feedback.className = 'feedback';
+  }
+
+  function nextProblem(){
+    currentIndex++;
+    loadProblem();
+  }
+
+  function showEndScreen(){
+    updateProgress();
+    gameCard.style.display = 'none';
+    endScreen.style.display = 'block';
+    endSummary.textContent = `Hai risolto ${solvedCount} problemi su ${order.length} e guadagnato ${stars} stelline ⭐`;
+  }
+
+  addRowBtn.addEventListener('click', () => {
+    rowsData.push(0);
+    renderRows();
+    updateStatus();
+  });
+
+  checkBtn.addEventListener('click', checkAnswer);
+  clearBtn.addEventListener('click', clearCurrentProblem);
+  nextBtn.addEventListener('click', nextProblem);
+  restartBtn.addEventListener('click', startGame);
+  [factor1Input, factor2Input, resultInput].forEach(inp => {
+    inp.addEventListener('keydown', (e) => { if(e.key === 'Enter') checkAnswer(); });
+  });
+
+  printBtn.addEventListener('click', () => { printModalOverlay.classList.add('active'); });
+  printCancelBtn.addEventListener('click', () => { printModalOverlay.classList.remove('active'); });
+  printModalOverlay.addEventListener('click', (e) => { if(e.target === printModalOverlay) printModalOverlay.classList.remove('active'); });
+  printConfirmBtn.addEventListener('click', () => {
+    let n = parseInt(printCountInput.value, 10);
+    if(isNaN(n) || n < 1) n = 1;
+    if(n > 20) n = 20;
+    const list = generatePrintProblems(n);
+    printSheet.innerHTML = buildPrintSheet(list);
+    printModalOverlay.classList.remove('active');
+    setTimeout(() => window.print(), 150);
+  });
+
+  startGame();
+</script>
+</body>
+</html>
