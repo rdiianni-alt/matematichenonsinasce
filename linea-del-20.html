@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linea dei numeri</title>
+<style>
+  :root{
+    --plate-1:#2b2f38;
+    --plate-2:#1c1f26;
+    --plate-edge:#0f1115;
+    --slot:#14161b;
+    --red-1:#f0577a;
+    --red-2:#d43f61;
+    --red-edge:#a12b48;
+    --green-1:#63c24a;
+    --green-2:#3fa532;
+    --green-edge:#297c1f;
+    --bg-1:#e9e4da;
+    --bg-2:#cfc7b8;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0;
+    height:100%;
+    width:100%;
+    background:
+      radial-gradient(1200px 700px at 50% -10%, #ffffff 0%, transparent 60%),
+      linear-gradient(160deg, var(--bg-1), var(--bg-2));
+    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    overflow:hidden;
+  }
+
+  #logo-wrap{
+    position:fixed; top:1.5vh; left:50%; transform:translateX(-50%);
+    z-index:10; display:flex; flex-direction:column; align-items:center; gap:2px;
+    text-decoration:none;
+  }
+  #logo-wrap img{
+    width:5vmin; height:5vmin; min-width:26px; min-height:26px; max-width:44px; max-height:44px;
+    object-fit:contain; border-radius:50%;
+  }
+  #logo-wrap span{
+    font-size:clamp(0.55rem, 1.3vmin, 0.75rem); font-weight:600; color:#1a5276;
+    text-align:center; white-space:nowrap;
+  }
+
+  .stage{
+    height:100%;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:2.4vh;
+    padding:9vh 2vw 4vh;
+  }
+
+  .toy{
+    position:relative;
+    width:100%;
+    display:flex;
+    justify-content:center;
+    background:
+      linear-gradient(180deg, var(--plate-1), var(--plate-2) 70%);
+    border-radius:20px;
+    padding: max(10px,2.6vw) max(12px,3vw) max(12px,2.6vw);
+    box-shadow:
+      0 30px 60px -20px rgba(0,0,0,.45),
+      0 2px 0 var(--plate-edge) inset,
+      0 -6px 14px rgba(0,0,0,.35) inset;
+  }
+
+  .rows{
+    display:flex;
+    width:100%;
+    max-width:1900px;
+    justify-content:center;
+    align-items:flex-end;
+    gap:max(8px, 2.6vw);
+  }
+
+  .group-col{
+    display:flex;
+    flex-direction:column;
+    flex:1 1 0;
+    max-width:220px;
+    gap:max(5px, 0.8vw);
+  }
+
+  .toggle-bar{
+    align-self:center;
+    width:70%;
+    height:max(3px, 0.32vw);
+    border-radius:999px;
+    background:rgba(255,255,255,0.14);
+    cursor:pointer;
+    border:none;
+    padding:0;
+    transition: background .15s ease, transform .15s ease;
+  }
+  .toggle-bar:hover{ background:rgba(255,255,255,0.34); }
+  .toggle-bar:active{ transform:scaleY(2.2); }
+  .toggle-bar:focus-visible{ outline:2px solid #4d90fe; outline-offset:3px; }
+
+  .group{
+    display:flex;
+    width:100%;
+    gap:max(2px, 0.6vw);
+    padding: max(6px,0.9vw) max(4px,0.6vw) max(8px,1vw);
+    background:var(--slot);
+    border-radius:8px;
+    box-shadow: 0 3px 6px rgba(0,0,0,.5) inset;
+    overflow:hidden;
+  }
+
+  .key{
+    appearance:none;
+    -webkit-appearance:none;
+    border:none;
+    cursor:pointer;
+    flex:1 1 0;
+    aspect-ratio: 34 / 118;
+    min-width:10px;
+    border-radius: 22% 22% 10% 10%;
+    padding:0;
+    position:relative;
+    transform:translateY(66%);
+    transition: transform .16s cubic-bezier(.34,1.56,.64,1), filter .15s ease, box-shadow .15s ease;
+    outline-offset:4px;
+  }
+
+  .key:focus-visible{
+    outline:3px solid #4d90fe;
+  }
+
+  .key.up{
+    transform:translateY(0);
+  }
+
+  .key.red{
+    background: linear-gradient(180deg, var(--red-1), var(--red-2) 88%);
+    box-shadow: 0 6px 0 var(--red-edge), 0 8px 10px rgba(0,0,0,.35);
+  }
+  .key.green{
+    background: linear-gradient(180deg, var(--green-1), var(--green-2) 88%);
+    box-shadow: 0 6px 0 var(--green-edge), 0 8px 10px rgba(0,0,0,.35);
+  }
+
+  .key.red.up{ box-shadow: 0 3px 0 var(--red-edge), 0 4px 6px rgba(0,0,0,.3); }
+  .key.green.up{ box-shadow: 0 3px 0 var(--green-edge), 0 4px 6px rgba(0,0,0,.3); }
+
+  .key:hover{ filter:brightness(1.06); }
+
+  .key::after{
+    content:"";
+    position:absolute;
+    top:6%; bottom:8%; left:50%;
+    width:1px;
+    background:rgba(255,255,255,.35);
+    transform:translateX(-50%);
+  }
+
+  .reset{
+    border:1px solid #b9b1a1;
+    background:transparent;
+    color:#6b6255;
+    font-size:12px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    cursor:pointer;
+    padding:8px 14px;
+    border-radius:999px;
+    transition: background .15s ease, color .15s ease;
+  }
+  .reset:hover{
+    background:#3a3d45;
+    color:#efe9dd;
+    border-color:#3a3d45;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .key{ transition:none; }
+  }
+</style>
+</head>
+<body>
+
+<a id="logo-wrap" href="https://matematichenonsinasce.com/" target="_self">
+  <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Logo" />
+  <span>Matematiche non si nasce</span>
+</a>
+
+<div class="stage">
+  <div class="toy">
+    <div class="rows" id="rows"></div>
+  </div>
+  <button class="reset" id="reset">Abbassa tutti</button>
+</div>
+
+<script>
+  const rows = document.getElementById('rows');
+  const groupsColors = ['red','red','green','green'];
+
+  for (let g = 0; g < 4; g++){
+    const col = document.createElement('div');
+    col.className = 'group-col';
+
+    const toggleBar = document.createElement('button');
+    toggleBar.className = 'toggle-bar';
+    toggleBar.setAttribute('aria-label', 'alza o abbassa questa cinquina');
+
+    const group = document.createElement('div');
+    group.className = 'group';
+
+    const keysInGroup = [];
+    for (let i = 0; i < 5; i++){
+      const key = document.createElement('button');
+      key.className = 'key ' + groupsColors[g];
+      key.setAttribute('aria-label', 'tasto');
+      key.setAttribute('aria-pressed', 'false');
+      key.addEventListener('click', () => {
+        const isUp = key.classList.toggle('up');
+        key.setAttribute('aria-pressed', String(isUp));
+      });
+      group.appendChild(key);
+      keysInGroup.push(key);
+    }
+
+    toggleBar.addEventListener('click', () => {
+      const tuttiAlzati = keysInGroup.every(k => k.classList.contains('up'));
+      keysInGroup.forEach(k => {
+        if (tuttiAlzati) k.classList.remove('up');
+        else k.classList.add('up');
+        k.setAttribute('aria-pressed', String(!tuttiAlzati));
+      });
+    });
+
+    col.appendChild(toggleBar);
+    col.appendChild(group);
+    rows.appendChild(col);
+  }
+
+  document.getElementById('reset').addEventListener('click', () => {
+    document.querySelectorAll('.key.up').forEach(k => {
+      k.classList.remove('up');
+      k.setAttribute('aria-pressed', 'false');
+    });
+  });
+</script>
+
+</body>
+</html>

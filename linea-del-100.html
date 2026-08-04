@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>La Linea del 100 | Matematiche non si nasce</title>
+<meta name="description" content="Linea del 100 interattiva con finestrelle scorrevoli, per LIM, tablet e cellulare.">
+<link rel="icon" href="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png">
+<style>
+  :root{
+    --pink:#ec4899;
+    --pink-dark:#be185d;
+    --pink-light:#fbcfe8;
+    --green:#22c55e;
+    --green-dark:#15803d;
+    --green-light:#bbf7d0;
+    --cover:#f7f1e4;
+    --cover-border:#d8cba8;
+    --ink:#1f2a44;
+    --text-secondary:#5f5e5a;
+    --accent:#e10600;
+    --card-bg:#ffffff;
+    --righe-bg:#1c2b45;
+    --righe-border: rgba(255,255,255,.08);
+    --card-text:#f5f4ee;
+    --card-text-dim: rgba(245,244,238,.62);
+    --panel-bg: rgba(255,255,255,.10);
+    --panel-bg-strong: rgba(255,255,255,.16);
+    --page-bg:#f4f2ee;
+    --dot: clamp(20px, 3.6vw, 38px);
+    --row-gap: clamp(6px, 1.2vw, 12px);
+    --dot-gap: clamp(3px, 0.7vw, 7px);
+    --group-gap: clamp(18px, 5vw, 40px);
+    --radius: 14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--page-bg);
+    font-family:'Segoe UI', Verdana, Tahoma, sans-serif;
+    color:var(--ink);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding: clamp(10px,2vw,24px);
+    min-height:100vh;
+    -webkit-user-select:none;
+    user-select:none;
+  }
+
+  .logo{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    text-decoration:none;
+    margin-bottom: 6px;
+  }
+  .logo img{
+    width:60px;
+    height:60px;
+    object-fit:contain;
+    border-radius:50%;
+  }
+  .logo span{
+    font-size:14px;
+    color:var(--text-secondary);
+  }
+
+  .card{
+    background:var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: 0 4px 18px rgba(0,0,0,.08);
+    padding: clamp(12px, 2.4vw, 26px);
+    width:100%;
+    max-width: 760px;
+  }
+
+  /* ---- barra comandi ---- */
+  .toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 2px dashed #e7e3da;
+  }
+  .btn{
+    border:none;
+    border-radius:999px;
+    padding: 9px 16px;
+    font-size: 14px;
+    font-weight:600;
+    cursor:pointer;
+    color:#fff;
+    background: var(--accent);
+    transition: filter .15s, transform .1s;
+  }
+  .btn:hover{filter:brightness(1.08);}
+  .btn:active{transform:scale(.96);}
+  .btn.secondary{
+    background:#eceae3;
+    color: var(--ink);
+  }
+  .vai-box{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    background:#f6f4ee;
+    border-radius:999px;
+    padding: 4px 6px 4px 14px;
+  }
+  .vai-box label{font-size:13px; color:var(--text-secondary); white-space:nowrap;}
+  .vai-box input{
+    width: 58px;
+    border:1px solid #d8d4c9;
+    border-radius:999px;
+    padding: 6px 10px;
+    font-size:14px;
+    text-align:center;
+    background:#fff;
+    color:#1f2a44;
+  }
+  .switch-box{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    color:var(--text-secondary);
+  }
+  .switch{
+    position:relative;
+    width:38px;
+    height:22px;
+    background:#d8d4c9;
+    border-radius:999px;
+    cursor:pointer;
+    transition:background .15s;
+    flex-shrink:0;
+  }
+  .switch::after{
+    content:'';
+    position:absolute;
+    top:2px; left:2px;
+    width:18px; height:18px;
+    border-radius:50%;
+    background:#fff;
+    box-shadow:0 1px 3px rgba(0,0,0,.3);
+    transition:left .15s;
+  }
+  .switch.on{background:var(--accent);}
+  .switch.on::after{left:18px;}
+
+  /* ---- totale ---- */
+  .totale-wrap{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom: 18px;
+  }
+  .totale-numero{
+    font-size: clamp(22px,3.4vw,30px);
+    font-weight:800;
+    color:var(--accent);
+    min-width: 78px;
+    text-align:right;
+  }
+  .totale-barra-wrap{
+    flex:1;
+    height:14px;
+    background:#eee9dc;
+    border-radius:999px;
+    overflow:hidden;
+    border:1px solid #e2ddcc;
+  }
+  .totale-barra{
+    height:100%;
+    width:0%;
+    background: linear-gradient(90deg, var(--pink), var(--green));
+    border-radius:999px;
+    transition: width .15s ease-out;
+  }
+  .totale-label{
+    font-size:12px;
+    color:var(--text-secondary);
+  }
+
+  /* ---- righe ---- */
+  .righe{
+    display:flex;
+    flex-direction:column;
+    gap: var(--row-gap);
+    background: var(--righe-bg);
+    border: 1px solid var(--righe-border);
+    border-radius: 18px;
+    padding: clamp(14px, 3vw, 26px) clamp(10px, 2.4vw, 20px);
+    box-shadow: 0 10px 26px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: clamp(6px, 1.6vw, 12px);
+  }
+  .row-count{
+    width: clamp(30px,5vw,40px);
+    text-align:center;
+    font-size: clamp(11px, 1.7vw, 14px);
+    font-weight:700;
+    color: var(--card-text);
+    background: var(--panel-bg);
+    border-radius:8px;
+    padding: 3px 0;
+    flex-shrink:0;
+  }
+
+  .track-wrap{
+    position:relative;
+    max-width: 100%;
+  }
+  .track{
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    height: var(--dot);
+    padding: 6px clamp(10px,2vw,18px);
+    background:#f7f5ef;
+    border:1px solid rgba(0,0,0,.4);
+    border-radius: 10px;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,.4);
+    touch-action:none;
+    cursor:pointer;
+    max-width: 100%;
+  }
+  .dots{
+    position:relative;
+    display:flex;
+    align-items:center;
+    height:100%;
+    gap: var(--group-gap);
+  }
+  .grp{
+    display:flex;
+    align-items:center;
+    gap: var(--dot-gap);
+    height:100%;
+  }
+  .dot-wrap{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .dot{
+    width: var(--dot);
+    height: var(--dot);
+    border-radius:50%;
+    border: 2px solid rgba(0,0,0,.12);
+    box-shadow: inset 0 -2px 3px rgba(0,0,0,.15), inset 0 2px 2px rgba(255,255,255,.4);
+  }
+  .row.pink .dot{ background: var(--pink); }
+  .row.green .dot{ background: var(--green); }
+
+  .num-label{
+    position:absolute;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    font-size: clamp(9px, 1.5vw, 14px);
+    font-weight:700;
+    color:#fff;
+    text-shadow: 0 1px 2px rgba(0,0,0,.35);
+    pointer-events:none;
+  }
+  body.show-numbers .num-label{ display:flex; }
+
+  .cover{
+    position:absolute;
+    top:0; bottom:0; right:0;
+    left:0;
+    background: repeating-linear-gradient(135deg, var(--cover), var(--cover) 8px, #f1ead6 8px, #f1ead6 16px);
+    border-radius: 6px;
+    border-right: 1px solid var(--cover-border);
+    pointer-events:none;
+  }
+  .handle{
+    position:absolute;
+    top:-6px; bottom:-6px;
+    left:0;
+    width: clamp(14px,2.6vw,20px);
+    transform: translateX(-50%);
+    background:#fff;
+    border:2px solid var(--accent);
+    border-radius:8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,.25);
+    cursor: grab;
+    touch-action:none;
+  }
+  .handle:active{ cursor:grabbing; }
+  .handle::before, .handle::after{
+    content:'';
+    position:absolute;
+    left:50%;
+    top:50%;
+    width: 2px;
+    height: 50%;
+    background: var(--accent);
+    opacity:.5;
+  }
+  .handle::before{ transform: translate(-4px,-50%); }
+  .handle::after{ transform: translate(2px,-50%); }
+
+  .row.pink .handle{ border-color: var(--pink-dark); }
+  .row.green .handle{ border-color: var(--green-dark); }
+  .row.pink .cover{ border-right-color: var(--pink-light); }
+  .row.green .cover{ border-right-color: var(--green-light); }
+
+  @media (max-width: 420px){
+    .vai-box label{display:none;}
+  }
+</style>
+</head>
+<body>
+
+  <a class="logo" href="https://matematichenonsinasce.com/" target="_blank" rel="noopener">
+    <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Logo">
+    <span>Matematiche non si nasce</span>
+  </a>
+
+  <div class="card">
+
+    <div class="toolbar">
+      <button class="btn" id="btnMostra">Mostra tutto</button>
+      <button class="btn secondary" id="btnNascondi">Nascondi tutto</button>
+      <div class="vai-box">
+        <label for="vaiInput">Vai al numero</label>
+        <input type="number" id="vaiInput" min="0" max="100" placeholder="0-100">
+        <button class="btn secondary" id="btnVai">Vai</button>
+      </div>
+      <div class="switch-box">
+        <span>Mostra numeri</span>
+        <div class="switch" id="switchNumeri"></div>
+      </div>
+    </div>
+
+    <div class="totale-wrap">
+      <div class="totale-barra-wrap"><div class="totale-barra" id="totaleBarra"></div></div>
+      <div class="totale-numero" id="totaleNumero">0<span style="font-size:.55em; color:var(--text-secondary); font-weight:600;">/100</span></div>
+    </div>
+
+    <div class="righe" id="righe"></div>
+
+  </div>
+
+<script>
+(function(){
+  const righeContainer = document.getElementById('righe');
+  const rows = [];
+
+  for(let r=0; r<10; r++){
+    const isPink = r < 5;
+    const rowStart = r*10 + 1;
+
+    const rowEl = document.createElement('div');
+    rowEl.className = 'row ' + (isPink ? 'pink' : 'green');
+
+    const trackWrap = document.createElement('div');
+    trackWrap.className = 'track-wrap';
+
+    const track = document.createElement('div');
+    track.className = 'track';
+
+    const dotsWrap = document.createElement('div');
+    dotsWrap.className = 'dots';
+
+    const dotEls = [];
+    for(let g=0; g<2; g++){
+      const grp = document.createElement('div');
+      grp.className = 'grp';
+      for(let d=0; d<5; d++){
+        const idx = g*5 + d;
+        const dw = document.createElement('div');
+        dw.className = 'dot-wrap';
+
+        const numLbl = document.createElement('div');
+        numLbl.className = 'num-label';
+        numLbl.textContent = rowStart + idx;
+        dw.appendChild(numLbl);
+
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        dw.appendChild(dot);
+
+        grp.appendChild(dw);
+        dotEls.push(dot);
+      }
+      dotsWrap.appendChild(grp);
+    }
+    track.appendChild(dotsWrap);
+
+    const cover = document.createElement('div');
+    cover.className = 'cover';
+    track.appendChild(cover);
+
+    const handle = document.createElement('div');
+    handle.className = 'handle';
+    handle.setAttribute('role','slider');
+    handle.setAttribute('aria-valuemin','0');
+    handle.setAttribute('aria-valuemax','10');
+    handle.setAttribute('aria-valuenow','0');
+    handle.setAttribute('tabindex','0');
+    handle.setAttribute('aria-label', 'Riga ' + (r+1) + ', da ' + rowStart + ' a ' + (rowStart+9));
+    track.appendChild(handle);
+
+    trackWrap.appendChild(track);
+    rowEl.appendChild(trackWrap);
+
+    const countLabel = document.createElement('div');
+    countLabel.className = 'row-count';
+    countLabel.textContent = '0';
+    rowEl.appendChild(countLabel);
+
+    righeContainer.appendChild(rowEl);
+
+    rows.push({
+      index: r,
+      start: rowStart,
+      track, cover, handle, countLabel, dotEls,
+      revealed: 0,
+      snaps: []
+    });
+  }
+
+  function computeSnaps(row){
+    const trackRect = row.track.getBoundingClientRect();
+    const snaps = [0];
+    for(let i=0;i<row.dotEls.length;i++){
+      const r = row.dotEls[i].getBoundingClientRect();
+      const rightEdge = r.right - trackRect.left;
+      let boundary;
+      if(i+1 < row.dotEls.length){
+        const nextLeft = row.dotEls[i+1].getBoundingClientRect().left - trackRect.left;
+        boundary = (rightEdge + nextLeft) / 2;
+      } else {
+        boundary = trackRect.width;
+      }
+      snaps.push(boundary);
+    }
+    row.snaps = snaps;
+  }
+
+  function computeAllSnaps(){
+    rows.forEach(computeSnaps);
+    rows.forEach(row => applyPosition(row));
+  }
+
+  function applyPosition(row){
+    const x = row.snaps[row.revealed] !== undefined ? row.snaps[row.revealed] : 0;
+    row.cover.style.left = x + 'px';
+    row.handle.style.left = x + 'px';
+  }
+
+  function setRevealed(row, count, skipTotal){
+    count = Math.max(0, Math.min(10, count));
+    row.revealed = count;
+    applyPosition(row);
+    row.countLabel.textContent = count;
+    row.handle.setAttribute('aria-valuenow', String(count));
+    if(!skipTotal) updateTotal();
+  }
+
+  function updateTotal(){
+    const tot = rows.reduce((s,row)=> s + row.revealed, 0);
+    document.getElementById('totaleNumero').innerHTML = tot + '<span style="font-size:.55em; color:var(--text-secondary); font-weight:600;">/100</span>';
+    document.getElementById('totaleBarra').style.width = tot + '%';
+  }
+
+  function nearestSnapIndex(row, x){
+    let best = 0, bestDist = Infinity;
+    for(let i=0;i<row.snaps.length;i++){
+      const d = Math.abs(row.snaps[i]-x);
+      if(d < bestDist){ bestDist = d; best = i; }
+    }
+    return best;
+  }
+
+  let dragging = null;
+
+  function startDrag(row, clientX, pointerId, targetEl){
+    dragging = row;
+    if(pointerId !== undefined && targetEl && targetEl.setPointerCapture){
+      try{ targetEl.setPointerCapture(pointerId); }catch(e){}
+    }
+    moveTo(row, clientX);
+  }
+
+  function moveTo(row, clientX){
+    const trackRect = row.track.getBoundingClientRect();
+    let x = clientX - trackRect.left;
+    x = Math.max(0, Math.min(trackRect.width, x));
+    const idx = nearestSnapIndex(row, x);
+    if(idx !== row.revealed) setRevealed(row, idx);
+  }
+
+  rows.forEach(row => {
+    row.handle.addEventListener('pointerdown', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      startDrag(row, e.clientX, e.pointerId, row.handle);
+    });
+    row.track.addEventListener('pointerdown', e => {
+      if(e.target === row.handle) return;
+      e.preventDefault();
+      startDrag(row, e.clientX, e.pointerId, row.track);
+    });
+    row.handle.addEventListener('keydown', e => {
+      if(e.key === 'ArrowRight' || e.key === 'ArrowUp'){ e.preventDefault(); setRevealed(row, row.revealed+1); }
+      if(e.key === 'ArrowLeft' || e.key === 'ArrowDown'){ e.preventDefault(); setRevealed(row, row.revealed-1); }
+      if(e.key === 'Home'){ e.preventDefault(); setRevealed(row, 0); }
+      if(e.key === 'End'){ e.preventDefault(); setRevealed(row, 10); }
+    });
+  });
+
+  document.addEventListener('pointermove', e => {
+    if(!dragging) return;
+    moveTo(dragging, e.clientX);
+  });
+  document.addEventListener('pointerup', () => { dragging = null; });
+  document.addEventListener('pointercancel', () => { dragging = null; });
+
+  document.getElementById('btnMostra').addEventListener('click', () => {
+    rows.forEach(row => setRevealed(row, 10, true));
+    updateTotal();
+  });
+  document.getElementById('btnNascondi').addEventListener('click', () => {
+    rows.forEach(row => setRevealed(row, 0, true));
+    updateTotal();
+  });
+  document.getElementById('btnVai').addEventListener('click', () => {
+    const input = document.getElementById('vaiInput');
+    let n = parseInt(input.value, 10);
+    if(isNaN(n)) n = 0;
+    n = Math.max(0, Math.min(100, n));
+    let remaining = n;
+    rows.forEach(row => {
+      const val = Math.max(0, Math.min(10, remaining));
+      setRevealed(row, val, true);
+      remaining -= val;
+    });
+    updateTotal();
+  });
+  document.getElementById('vaiInput').addEventListener('keydown', e => {
+    if(e.key === 'Enter') document.getElementById('btnVai').click();
+  });
+
+  const switchNumeri = document.getElementById('switchNumeri');
+  switchNumeri.addEventListener('click', () => {
+    switchNumeri.classList.toggle('on');
+    document.body.classList.toggle('show-numbers');
+  });
+
+  window.addEventListener('load', computeAllSnaps);
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(computeAllSnaps, 120);
+  });
+  computeAllSnaps();
+})();
+</script>
+
+</body>
+</html>
