@@ -95,16 +95,22 @@ header a{display:flex;flex-direction:column;align-items:center;gap:6px;text-deco
     <label>Quanti numeri vuoi inserire?
       <input type="number" id="pdfCount" min="1" max="80" value="20">
     </label>
+    <label>Intervallo: da
+      <input type="number" id="pdfMin" min="0" max="100" value="1" style="width:60px;">
+      a
+      <input type="number" id="pdfMax" min="0" max="100" value="100" style="width:60px;">
+    </label>
     <div class="pdf-modal-btns">
       <button class="btn" onclick="generatePDF()">Genera PDF</button>
       <button class="btn secondary" onclick="closePdfModal()">Annulla</button>
     </div>
-    <div class="pdf-note">I numeri vengono estratti a caso da 1 a 100, senza ripetizioni fino a 100 numeri.</div>
+    <div class="pdf-note">I numeri vengono estratti a caso nell'intervallo scelto (0-100), senza ripetizioni finché possibile.</div>
   </div>
 </div>
 
 <script>
 const numeri = {
+  0:"ZERO",
   1:"UNO",2:"DUE",3:"TRE",4:"QUATTRO",5:"CINQUE",6:"SEI",7:"SETTE",8:"OTTO",9:"NOVE",10:"DIECI",
   11:"UNDICI",12:"DODICI",13:"TREDICI",14:"QUATTORDICI",15:"QUINDICI",16:"SEDICI",17:"DICIASSETTE",
   18:"DICIOTTO",19:"DICIANNOVE",20:"VENTI",21:"VENTUNO",22:"VENTIDUE",23:"VENTITRE",24:"VENTIQUATTRO",
@@ -254,16 +260,16 @@ function closePdfModal(){
   document.getElementById('pdfOverlay').style.display='none';
 }
 
-function pickRandomNumbers(count){
+function pickRandomNumbers(count,min,max){
   const pool=[];
-  for(let i=1;i<=100;i++) pool.push(i);
+  for(let i=min;i<=max;i++) pool.push(i);
   for(let i=pool.length-1;i>0;i--){
     const j=Math.floor(Math.random()*(i+1));
     [pool[i],pool[j]]=[pool[j],pool[i]];
   }
-  if(count<=100) return pool.slice(0,count);
+  if(count<=pool.length) return pool.slice(0,count);
   const result=[];
-  for(let i=0;i<count;i++) result.push(pool[i%100]);
+  for(let i=0;i<count;i++) result.push(pool[i%pool.length]);
   return result;
 }
 
@@ -286,7 +292,18 @@ async function loadLogoBase64(url){
 async function generatePDF(){
   const countInput=parseInt(document.getElementById('pdfCount').value);
   const count=(isNaN(countInput)||countInput<1) ? 20 : countInput;
-  const numbers=pickRandomNumbers(count);
+
+  let minInput=parseInt(document.getElementById('pdfMin').value);
+  let maxInput=parseInt(document.getElementById('pdfMax').value);
+  if(isNaN(minInput)) minInput=0;
+  if(isNaN(maxInput)) maxInput=100;
+  minInput=Math.min(Math.max(minInput,0),100);
+  maxInput=Math.min(Math.max(maxInput,0),100);
+  if(minInput>maxInput){ const t=minInput; minInput=maxInput; maxInput=t; }
+  document.getElementById('pdfMin').value=minInput;
+  document.getElementById('pdfMax').value=maxInput;
+
+  const numbers=pickRandomNumbers(count,minInput,maxInput);
 
   const { jsPDF }=window.jspdf;
   const doc=new jsPDF({unit:'mm',format:'a4'});
