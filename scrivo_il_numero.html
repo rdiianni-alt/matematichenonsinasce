@@ -91,7 +91,7 @@ header a{display:flex;flex-direction:column;align-items:center;gap:6px;text-deco
 <div class="pdf-overlay" id="pdfOverlay">
   <div class="pdf-modal">
     <h3>Scheda stampabile</h3>
-    <p>Numero in cifre &rarr; spazio per scriverlo in lettere</p>
+    <p id="pdfModeDesc">Numero in cifre &rarr; spazio per scriverlo in lettere</p>
     <label>Quanti numeri vuoi inserire?
       <input type="number" id="pdfCount" min="1" max="80" value="20">
     </label>
@@ -133,6 +133,9 @@ function setMode(m){
   correctCount=0;attemptCount=0;
   document.getElementById('correct').textContent=0;
   document.getElementById('attempts').textContent=0;
+  document.getElementById('pdfModeDesc').textContent = m==='n2w'
+    ? 'Numero in cifre → spazio per scriverlo in lettere'
+    : 'Numero in lettere → spazio per scriverlo in cifre';
   newNumber();
 }
 
@@ -293,15 +296,7 @@ async function generatePDF(){
   const rowHeight=15;
   let y=marginTop;
 
-  // dimensioni fisse: riquadro cifra, freccia, riquadri lettera
-  const digitBoxW=16, digitBoxH=11;
   const arrowGap=3, arrowW=8, afterArrowGap=4;
-  const lettersStartX=marginLeft+digitBoxW+arrowGap+arrowW+afterArrowGap;
-  const availableForLetters=pageWidth-marginRight-lettersStartX;
-  const maxWordLen=16; // parola più lunga tra 1 e 100: CINQUANTAQUATTRO
-  const letterGap=1;
-  const letterBoxW=(availableForLetters-(maxWordLen-1)*letterGap)/maxWordLen;
-  const letterBoxH=11;
 
   const logoData=await loadLogoBase64(LOGO_URL);
 
@@ -315,7 +310,7 @@ async function generatePDF(){
     doc.setFont('helvetica','bold');
     doc.setFontSize(16);
     doc.setTextColor(44,62,122);
-    doc.text('Scrivo il numero in lettere', pageWidth/2, y, {align:'center'});
+    doc.text(mode==='n2w' ? 'Scrivo il numero in lettere' : 'Scrivo il numero in cifre', pageWidth/2, y, {align:'center'});
     y+=7;
     doc.setFont('helvetica','normal');
     doc.setFontSize(10);
@@ -337,36 +332,87 @@ async function generatePDF(){
     doc.triangle(xStart+arrowW-2.5, yMid-1.6, xStart+arrowW-2.5, yMid+1.6, xStart+arrowW, yMid, 'F');
   }
 
-  drawHeader();
+  if(mode==='n2w'){
+    // cifre -> lettere: riquadro cifra, freccia, riquadri lettera
+    const digitBoxW=16, digitBoxH=11;
+    const lettersStartX=marginLeft+digitBoxW+arrowGap+arrowW+afterArrowGap;
+    const availableForLetters=pageWidth-marginRight-lettersStartX;
+    const maxWordLen=16; // parola più lunga tra 1 e 100: CINQUANTAQUATTRO
+    const letterGap=1;
+    const letterBoxW=(availableForLetters-(maxWordLen-1)*letterGap)/maxWordLen;
+    const letterBoxH=11;
 
-  numbers.forEach(num=>{
-    if(y+rowHeight>pageHeight-marginBottom){
-      doc.addPage();
-      y=marginTop;
-      drawHeader();
-    }
-    doc.setDrawColor(44,62,122);
-    doc.setLineWidth(0.4);
-    doc.roundedRect(marginLeft, y-8, digitBoxW, digitBoxH, 1.5, 1.5);
+    drawHeader();
+
+    numbers.forEach(num=>{
+      if(y+rowHeight>pageHeight-marginBottom){
+        doc.addPage();
+        y=marginTop;
+        drawHeader();
+      }
+      doc.setDrawColor(44,62,122);
+      doc.setLineWidth(0.4);
+      doc.roundedRect(marginLeft, y-8, digitBoxW, digitBoxH, 1.5, 1.5);
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(13);
+      doc.setTextColor(44,62,122);
+      doc.text(String(num), marginLeft+digitBoxW/2, y, {align:'center'});
+
+      drawArrow(marginLeft+digitBoxW+arrowGap);
+
+      const parola=numeri[num];
+      doc.setDrawColor(150,150,150);
+      doc.setLineWidth(0.35);
+      for(let i=0;i<parola.length;i++){
+        const bx=lettersStartX+i*(letterBoxW+letterGap);
+        doc.rect(bx, y-8, letterBoxW, letterBoxH);
+      }
+
+      y+=rowHeight;
+    });
+  } else {
+    // lettere -> cifre: parola stampata, freccia, riquadri cifra
     doc.setFont('helvetica','bold');
-    doc.setFontSize(13);
-    doc.setTextColor(44,62,122);
-    doc.text(String(num), marginLeft+digitBoxW/2, y, {align:'center'});
+    doc.setFontSize(12);
+    let maxWordWidth=0;
+    Object.values(numeri).forEach(w=>{
+      const width=doc.getTextWidth(w);
+      if(width>maxWordWidth) maxWordWidth=width;
+    });
 
-    drawArrow(marginLeft+digitBoxW+arrowGap);
+    const wordX=marginLeft;
+    const digitsStartX=wordX+maxWordWidth+arrowGap+arrowW+afterArrowGap;
+    const digitBoxW=11, digitBoxH=11, digitGap=2;
 
-    const parola=numeri[num];
-    doc.setDrawColor(150,150,150);
-    doc.setLineWidth(0.35);
-    for(let i=0;i<parola.length;i++){
-      const bx=lettersStartX+i*(letterBoxW+letterGap);
-      doc.rect(bx, y-8, letterBoxW, letterBoxH);
-    }
+    drawHeader();
 
-    y+=rowHeight;
-  });
+    numbers.forEach(num=>{
+      if(y+rowHeight>pageHeight-marginBottom){
+        doc.addPage();
+        y=marginTop;
+        drawHeader();
+      }
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(12);
+      doc.setTextColor(44,62,122);
+      doc.text(numeri[num], wordX, y);
 
-  doc.save('scrivo-il-numero-schede.pdf');
+      drawArrow(wordX+maxWordWidth+arrowGap);
+
+      const digits=String(num);
+      doc.setDrawColor(150,150,150);
+      doc.setLineWidth(0.35);
+      for(let i=0;i<digits.length;i++){
+        const bx=digitsStartX+i*(digitBoxW+digitGap);
+        doc.rect(bx, y-8, digitBoxW, digitBoxH);
+      }
+
+      y+=rowHeight;
+    });
+  }
+
+  const filename = mode==='n2w' ? 'scrivo-il-numero-schede.pdf' : 'scrivo-il-numero-lettere-cifre-schede.pdf';
+  doc.save(filename);
   closePdfModal();
 }
 </script>
