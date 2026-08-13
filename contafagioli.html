@@ -15,12 +15,9 @@
     align-items: center;
     padding: 16px;
   }
-  #logo-bar {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 12px;
-  }
+  #logo-bar { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-bottom: 12px; }
   #logo-bar img { width: 60px; height: 60px; border-radius: 50%; }
-  #logo-bar a { font-size: 0.8rem; color: #5a3e1b; text-decoration: none; }
+  #logo-bar a { font-size: 0.95rem; color: #4a90c4; text-decoration: none; font-weight: bold; letter-spacing: 0.02em; }
 
   #info-bar {
     background: #fff8f0;
@@ -41,17 +38,8 @@
     margin-bottom: 14px;
     min-height: 90px;
   }
-  .bicchiere {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-  }
-  .bicchiere-label {
-    font-size: 0.75rem;
-    color: #5a3e1b;
-    font-weight: bold;
-  }
+  .bicchiere { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .bicchiere-label { font-size: 0.75rem; color: #5a3e1b; font-weight: bold; }
 
   #tavolo {
     background: #d4a96a;
@@ -64,18 +52,8 @@
     position: relative;
     margin-bottom: 14px;
   }
-  #tavolo-label {
-    text-align: center;
-    font-size: 0.8rem;
-    color: #5a3e1b;
-    margin-bottom: 8px;
-    font-weight: bold;
-  }
-  #fagioli-area {
-    position: relative;
-    width: 100%;
-    height: 180px;
-  }
+  #tavolo-label { text-align: center; font-size: 0.8rem; color: #5a3e1b; margin-bottom: 8px; font-weight: bold; }
+  #fagioli-area { position: relative; width: 100%; height: 180px; }
   .fagiolo {
     position: absolute;
     width: 28px;
@@ -99,13 +77,7 @@
     box-shadow: 0 0 8px #ff8800aa;
   }
 
-  #selezione-bar {
-    font-size: 0.95rem;
-    color: #5a3e1b;
-    margin-bottom: 6px;
-    min-height: 1.4em;
-    text-align: center;
-  }
+  #selezione-bar { font-size: 0.95rem; color: #5a3e1b; margin-bottom: 6px; min-height: 1.4em; text-align: center; }
 
   #btn-area { display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; justify-content: center; }
   button {
@@ -116,30 +88,13 @@
     cursor: pointer;
     font-weight: bold;
   }
-  #btn-metti {
-    background: #5a8a3a;
-    color: white;
-  }
+  #btn-metti { background: #5a8a3a; color: white; }
   #btn-metti:disabled { background: #aaa; cursor: default; }
-  #btn-nuovo {
-    background: #5a3e1b;
-    color: white;
-  }
+  #btn-nuovo { background: #5a3e1b; color: white; }
+  #btn-pdf { background: #4a90c4; color: white; }
 
-  #risultato {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
-  }
-  #risposta-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 1.1rem;
-    color: #5a3e1b;
-  }
+  #risultato { display: none; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 8px; }
+  #risposta-row { display: flex; align-items: center; gap: 8px; font-size: 1.1rem; color: #5a3e1b; }
   #input-tot {
     width: 64px;
     font-size: 1.2rem;
@@ -158,25 +113,127 @@
     font-weight: bold;
     cursor: pointer;
   }
-  #feedback {
-    font-size: 1.1rem;
-    min-height: 1.4em;
-    text-align: center;
-  }
+  #feedback { font-size: 1.1rem; min-height: 1.4em; text-align: center; }
   #coppa { font-size: 3rem; display: none; }
+
+  #stima-bar { margin-bottom: 12px; font-size: 1rem; color: #5a3e1b; display: flex; align-items: center; gap: 10px; }
+  #input-stima {
+    width: 64px; font-size: 1.1rem; text-align: center;
+    border: 2px solid #c8a97a; border-radius: 8px; padding: 4px;
+  }
+
+  /* --- Pannello scheda PDF --- */
+  #pdf-config {
+    background: #fff8f0;
+    border: 2px solid #c8a97a;
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.95rem;
+    color: #5a3e1b;
+  }
+  #pdf-config input {
+    width: 56px; font-size: 1rem; text-align: center;
+    border: 2px solid #c8a97a; border-radius: 8px; padding: 4px;
+  }
 
   @media (max-width: 480px) {
     .fagiolo { width: 24px; height: 17px; }
     #fagioli-area { height: 150px; }
   }
+
+  /* --- Area di stampa (nascosta a schermo) --- */
+  #area-stampa { display: none; }
+
+  @media print {
+    @page { size: A4; margin: 10mm; }
+    body * { visibility: hidden; }
+    #area-stampa, #area-stampa * { visibility: visible; }
+    #area-stampa { display: block; position: absolute; top: 0; left: 0; width: 100%; }
+    .pagina { page-break-after: always; }
+    .pagina:last-child { page-break-after: auto; }
+  }
+
+  .pagina {
+    width: 190mm;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+  .scheda {
+    width: 100%;
+    padding: 2mm 0;
+    font-family: sans-serif;
+    color: #3a2a10;
+  }
+  .scheda-logo {
+    display: flex; flex-direction: column; align-items: center; gap: 2px; margin-bottom: 1.5mm;
+  }
+  .scheda-logo img { width: 24px; height: 24px; border-radius: 50%; }
+  .scheda-logo .nome { font-size: 0.65rem; color: #4a90c4; font-weight: bold; }
+  .scheda-titolo { text-align: center; font-size: 1rem; font-weight: bold; margin-bottom: 1mm; color: #5a3e1b; }
+  .scheda-numero { text-align: center; font-size: 0.7rem; color: #8a6a3a; margin-bottom: 2mm; }
+  .scheda-tavolo {
+    background: #f0dcb8;
+    border: 2px solid #b07d3a;
+    border-radius: 8px;
+    width: 100%;
+    height: 68mm;
+    position: relative;
+    margin-bottom: 3mm;
+  }
+  .scheda-fagiolo {
+    position: absolute;
+    width: 6mm;
+    height: 4.2mm;
+    background: #a17a3e;
+    border: 0.35mm solid #5a3e1b;
+    border-radius: 50%;
+  }
+  .scheda-domande { display: flex; flex-direction: column; gap: 4mm; font-size: 1rem; }
+  .scheda-domande .riga { display: flex; align-items: baseline; gap: 3mm; }
+  .scheda-domande .linea {
+    flex: 1;
+    border-bottom: 0.4mm solid #5a3e1b;
+    height: 11mm;
+  }
+  .divisore {
+    width: 100%;
+    border: none;
+    border-top: 0.4mm dashed #b07d3a;
+    margin: 1mm 0 2mm;
+    position: relative;
+  }
+  .divisore::after {
+    content: '✂ taglia qui';
+    position: absolute;
+    top: -2.2mm;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 0 3mm;
+    font-size: 0.6rem;
+    color: #b07d3a;
+  }
 </style>
 </head>
 <body>
 
-<div id="logo-bar" style="display:flex; flex-direction:column; align-items:center; gap:6px; margin-bottom:12px;">
-  <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="logo" style="width:60px; height:60px; border-radius:50%;">
-  <a href="https://matematichenonsinasce.com" target="_blank" style="font-size:0.95rem; color:#4a90c4; text-decoration:none; font-weight:bold; letter-spacing:0.02em;">Matematiche non si nasce</a>
+<div id="logo-bar">
+  <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="logo">
+  <a href="https://matematichenonsinasce.com" target="_blank">Matematiche non si nasce</a>
   <div style="font-weight:bold; color:#5a3e1b; font-size:1.2rem; margin-top:6px;">Il Contafagioli</div>
+</div>
+
+<div id="pdf-config">
+  <span>Schermate nella scheda:</span>
+  <input id="input-n-schede" type="number" min="1" max="8" value="3">
+  <button id="btn-pdf">📄 Crea scheda PDF</button>
 </div>
 
 <div id="info-bar">
@@ -185,8 +242,8 @@
 
 <div id="bicchierini"></div>
 
-<div id="stima-bar" style="margin-bottom:12px; font-size:1rem; color:#5a3e1b; display:flex; align-items:center; gap:10px;">
-  La mia stima: <input id="input-stima" type="number" min="0" max="199" placeholder="?" style="width:64px; font-size:1.1rem; text-align:center; border:2px solid #c8a97a; border-radius:8px; padding:4px;">
+<div id="stima-bar">
+  La mia stima: <input id="input-stima" type="number" min="0" max="199" placeholder="?">
 </div>
 
 <div id="tavolo">
@@ -210,6 +267,9 @@
   <div id="feedback"></div>
   <div id="coppa">🏆</div>
 </div>
+
+<!-- Area usata solo in stampa -->
+<div id="area-stampa"></div>
 
 <script>
   const areaEl = document.getElementById('fagioli-area');
@@ -277,7 +337,6 @@
       f.el.classList.remove('sel-giallo', 'sel-arancio');
       f.colore = null;
     } else {
-      // assegna colore fisso al momento della selezione
       const nSelNow = fagioli.filter(f => f.selected).length;
       f.colore = nSelNow <= 5 ? 'sel-giallo' : 'sel-arancio';
       f.el.classList.add(f.colore);
@@ -354,6 +413,89 @@
 
   btnNuovo.addEventListener('click', nuovoGiro);
   nuovoGiro();
+
+  /* ================= SCHEDA PDF ================= */
+
+  const LOGO_URL = 'https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png';
+
+  function posizionaFagioliStampa(container, n) {
+    // dimensioni in mm, coerenti con .scheda-tavolo (190mm larghezza, 68mm altezza)
+    const W = 186, H = 64;
+    const fw = 7, fh = 5, margin = 2;
+    const placed = [];
+
+    for (let i = 0; i < n; i++) {
+      let x, y, tries = 0, ok;
+      do {
+        x = Math.random() * (W - fw - margin) + margin;
+        y = Math.random() * (H - fh - margin) + margin;
+        ok = placed.every(p => Math.abs(p.x - x) > fw - 1.5 || Math.abs(p.y - y) > fh - 1.5);
+        tries++;
+      } while (!ok && tries < 300);
+
+      placed.push({x, y});
+      const el = document.createElement('div');
+      el.className = 'scheda-fagiolo';
+      el.style.left = x + 'mm';
+      el.style.top = y + 'mm';
+      el.style.transform = `rotate(${rnd(-30, 30)}deg)`;
+      container.appendChild(el);
+    }
+  }
+
+  function creaScheda(numero, quantita) {
+    const scheda = document.createElement('div');
+    scheda.className = 'scheda';
+    scheda.innerHTML = `
+      <div class="scheda-logo">
+        <img src="${LOGO_URL}" alt="logo">
+        <div class="nome">Matematiche non si nasce</div>
+      </div>
+      <div class="scheda-titolo">Il Contafagioli</div>
+      <div class="scheda-numero">Schermata ${numero}</div>
+      <div class="scheda-tavolo"></div>
+      <div class="scheda-domande">
+        <div class="riga">La mia stima iniziale: <div class="linea"></div></div>
+        <div class="riga">Quanti fagioli in tutto? <div class="linea"></div></div>
+      </div>
+    `;
+    const tavolo = scheda.querySelector('.scheda-tavolo');
+    posizionaFagioliStampa(tavolo, quantita);
+    return scheda;
+  }
+
+  document.getElementById('btn-pdf').addEventListener('click', () => {
+    const nSchede = Math.min(8, Math.max(1, parseInt(document.getElementById('input-n-schede').value) || 3));
+    const areaStampa = document.getElementById('area-stampa');
+    areaStampa.innerHTML = '';
+
+    // quantità diverse e non ripetute, tra 15 e 99 fagioli
+    const usati = new Set();
+    const schede = [];
+    for (let i = 1; i <= nSchede; i++) {
+      let q;
+      do { q = rnd(15, 99); } while (usati.has(q));
+      usati.add(q);
+      schede.push(creaScheda(i, q));
+    }
+
+    // raggruppa 2 schede per pagina A4
+    for (let i = 0; i < schede.length; i += 2) {
+      const pagina = document.createElement('div');
+      pagina.className = 'pagina';
+      pagina.appendChild(schede[i]);
+      if (schede[i + 1]) {
+        const divisore = document.createElement('hr');
+        divisore.className = 'divisore';
+        pagina.appendChild(divisore);
+        pagina.appendChild(schede[i + 1]);
+      }
+      areaStampa.appendChild(pagina);
+    }
+
+    // aspetta che l'immagine del logo sia pronta prima di stampare
+    setTimeout(() => window.print(), 200);
+  });
 </script>
 </body>
 </html>
