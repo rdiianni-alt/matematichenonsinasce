@@ -165,7 +165,9 @@
     @page { size: A4; margin: 15mm; }
   }
 
-  .stampa-header { text-align: center; margin-bottom: 20px; }
+  .stampa-pagina { page-break-after: always; }
+  .stampa-pagina:last-child { page-break-after: auto; }
+  .stampa-header { text-align: center; margin-bottom: 26px; }
   .stampa-header img {
     width: 60px; height: 60px; object-fit: contain; border-radius: 50%;
     margin-bottom: 6px;
@@ -173,18 +175,26 @@
   .stampa-header .stampa-blognome {
     font-size: 0.85rem; font-weight: 600; color: #3a3a8c; margin-bottom: 12px;
   }
-  .stampa-header h2 { font-size: 1.25rem; color: #222; margin-bottom: 14px; }
+  .stampa-header h2 { font-size: 1.3rem; color: #222; margin-bottom: 14px; }
   .stampa-info {
-    font-size: 0.95rem; color: #333; margin-bottom: 30px; text-align: left;
+    font-size: 1rem; color: #333; margin-bottom: 36px; text-align: left;
+    padding: 0 8%;
   }
-  .stampa-domande { columns: 1; }
+  .stampa-domande {
+    display: grid;
+    grid-template-columns: 1fr;
+    row-gap: 30px;
+    padding: 0 8%;
+  }
   .stampa-domanda {
-    break-inside: avoid; font-size: 1rem; color: #222;
-    margin-bottom: 20px; line-height: 1.4;
+    break-inside: avoid; font-size: 1.35rem; color: #222;
+    line-height: 1.5; display: flex; align-items: baseline; gap: 14px;
   }
-  .stampa-domanda .num { font-weight: bold; color: #3a3a8c; white-space: pre; }
+  .stampa-domanda .punto {
+    font-size: 1.1em; color: #3a3a8c; line-height: 1; flex-shrink: 0;
+  }
   .stampa-footer {
-    margin-top: 34px; text-align: center; display: flex;
+    margin-top: 40px; text-align: center; display: flex;
     flex-direction: column; align-items: center; gap: 4px;
     font-size: 0.8rem; color: #666;
   }
@@ -236,6 +246,10 @@
   <div class="stampa-riga">
     <label for="numDomande">Numero di domande:</label>
     <input type="number" id="numDomande" value="20" min="4" max="50">
+  </div>
+  <div class="stampa-riga">
+    <label for="risultatoMax">Risultato massimo:</label>
+    <input type="number" id="risultatoMax" placeholder="es. 30" min="10" max="999">
   </div>
   <div class="stampa-btn-row">
     <button class="btn btn-secondary" onclick="generaPDF(1)">🖨️ Stampa PDF Livello 1</button>
@@ -414,43 +428,129 @@ document.getElementById('risposta').addEventListener('keydown', e => {
 
 const LOGO_URL = "https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png";
 
+const MAX_PER_PAGINA = 12;
+
+function chunk(arr, size) {
+  const out = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+}
+
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// Scompone "r" nei posti indicati (es. [100,10] = centinaia, decine), scegliendo
+// per ognuno un conteggio a caso fra 0 e il massimo possibile: così le unità
+// (e le decine, nel Livello 2) spaziano su tutti i valori, non solo 0-9,
+// anche quando il posto superiore non è zero (es. 28 UNITÀ + 3 DECINE).
+function decomponi(r, posti) {
+  let resto = r;
+  const conteggi = [];
+  for (const val of posti) {
+    const maxConteggio = Math.floor(resto / val);
+    const conteggio = randInt(0, maxConteggio);
+    conteggi.push(conteggio);
+    resto -= conteggio * val;
+  }
+  conteggi.push(resto);
+  return conteggi;
+}
+
+// Genera una combinazione decine/unità il cui totale è "r" (r <= maxR).
+function generaCombinazioneL1(maxR) {
+  const r = randInt(1, maxR);
+  const [decine, unita] = decomponi(r, [10]);
+  const tDecine = decine === 1 ? '1 DECINA' : `${decine} DECINE`;
+  const tUnita = `${unita} UNITÀ`;
+  return { t: [tDecine, tUnita], r, s: `${decine * 10} + ${unita} = ${r}` };
+}
+
+// Come sopra, ma con anche le centinaia.
+function generaCombinazioneL2(maxR) {
+  const r = randInt(1, maxR);
+  const [centinaia, decine, unita] = decomponi(r, [100, 10]);
+  const tCentinaia = centinaia === 1 ? '1 CENTINAIO' : `${centinaia} CENTINAIA`;
+  const tDecine = decine === 1 ? '1 DECINA' : `${decine} DECINE`;
+  const tUnita = `${unita} UNITÀ`;
+  return { t: [tCentinaia, tDecine, tUnita], r, s: `${centinaia * 100} + ${decine * 10} + ${unita} = ${r}` };
+}
+
+// Genera fino a "richieste" combinazioni diverse (senza ripetizioni) entro il risultato massimo.
+function generaSetDinamico(lvl, maxR, richieste) {
+  const generatore = lvl === 1 ? generaCombinazioneL1 : generaCombinazioneL2;
+  const visti = new Set();
+  const risultati = [];
+  const tentativiMax = Math.max(3000, richieste * 60);
+  let tentativi = 0;
+  while (risultati.length < richieste && tentativi < tentativiMax) {
+    tentativi++;
+    const d = generatore(maxR);
+    const key = d.r + '|' + [...d.t].sort().join('|');
+    if (visti.has(key)) continue;
+    visti.add(key);
+    risultati.push(d);
+  }
+  return risultati;
+}
+
 function generaPDF(lvl) {
   const richieste = parseInt(document.getElementById('numDomande').value) || 20;
-  const p = pool[lvl];
-  const scelte = shuffle(p.slice()).slice(0, Math.min(richieste, p.length));
+  const maxRisultatoVal = document.getElementById('risultatoMax').value;
+  const maxRisultato = maxRisultatoVal ? parseInt(maxRisultatoVal) : null;
 
-  if (richieste > p.length) {
-    alert(`Per il Livello ${lvl} sono disponibili solo ${p.length} domande diverse: verranno stampate tutte.`);
+  let scelte;
+  if (maxRisultato !== null && !isNaN(maxRisultato)) {
+    scelte = generaSetDinamico(lvl, maxRisultato, richieste);
+    if (scelte.length === 0) {
+      alert(`Non è stato possibile generare somme con risultato massimo ${maxRisultato}. Prova con un numero più alto.`);
+      return;
+    }
+    if (scelte.length < richieste) {
+      alert(`Con risultato massimo ${maxRisultato} sono state trovate solo ${scelte.length} combinazioni diverse: verranno stampate tutte.`);
+    }
+  } else {
+    const p = pool[lvl];
+    scelte = shuffle(p.slice()).slice(0, Math.min(richieste, p.length));
+    if (richieste > p.length) {
+      alert(`Per il Livello ${lvl} sono disponibili solo ${p.length} domande diverse: verranno stampate tutte.`);
+    }
   }
 
-  const titolo = lvl === 1
+  const titoloBase = lvl === 1
     ? 'Somme Parlate — Livello 1 (Unità e Decine)'
     : 'Somme Parlate — Livello 2 (Unità, Decine e Centinaia)';
+  const titolo = maxRisultato !== null ? `${titoloBase} — fino a ${maxRisultato}` : titoloBase;
 
-  let html = `
-    <div class="stampa-header">
-      <img src="${LOGO_URL}" alt="logo">
-      <div class="stampa-blognome">Matematiche non si nasce</div>
-      <h2>${titolo}</h2>
-      <div class="stampa-info">Nome: _____________________________&nbsp;&nbsp;&nbsp; Data: _______________</div>
-    </div>
-    <div class="stampa-domande">
-  `;
+  const pagine = chunk(scelte, MAX_PER_PAGINA);
 
-  scelte.forEach((d, i) => {
-    const termini = shuffle([...d.t]).join(' + ');
-    const numeroTesto = (i + 1) + '.';
-    const spazi = (i + 1) < 10 ? '  ' : ' ';
-    html += `<div class="stampa-domanda"><span class="num">${numeroTesto}${spazi}</span>${termini} = ______</div>`;
+  let html = '';
+  pagine.forEach(paginaDomande => {
+    html += `
+      <div class="stampa-pagina">
+        <div class="stampa-header">
+          <img src="${LOGO_URL}" alt="logo">
+          <div class="stampa-blognome">Matematiche non si nasce</div>
+          <h2>${titolo}</h2>
+          <div class="stampa-info">Nome: _____________________________&nbsp;&nbsp;&nbsp; Data: _______________</div>
+        </div>
+        <div class="stampa-domande">
+    `;
+
+    paginaDomande.forEach(d => {
+      const termini = shuffle([...d.t]).join(' + ');
+      html += `<div class="stampa-domanda"><span class="punto">●</span>${termini} = ______</div>`;
+    });
+
+    html += `
+        </div>
+        <div class="stampa-footer">
+          <img src="${LOGO_URL}" alt="logo">
+          <div>Matematiche non si nasce — matematichenonsinasce.com</div>
+        </div>
+      </div>
+    `;
   });
-
-  html += `
-    </div>
-    <div class="stampa-footer">
-      <img src="${LOGO_URL}" alt="logo">
-      <div>Matematiche non si nasce — matematichenonsinasce.com</div>
-    </div>
-  `;
 
   document.getElementById('stampaArea').innerHTML = html;
   setTimeout(() => window.print(), 150);
