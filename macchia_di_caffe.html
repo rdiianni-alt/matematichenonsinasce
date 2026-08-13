@@ -216,22 +216,30 @@
   .ps-grid.ps-grid-vert { grid-template-columns: repeat(2, 1fr); }
   .ps-cell {
     border: 2px solid #c8a97e; border-radius: 8px;
-    padding: 10px 6px 14px;
+    padding: 10px 14px 14px;
     display: flex; flex-direction: column; align-items: center; gap: 6px;
+    overflow: hidden;
   }
-  .ps-op-inline { display: flex; align-items: center; justify-content: center; gap: 4px; }
-  .ps-sign { font-size: 1.6rem; font-weight: bold; color: #444; margin: 0 4px; }
+  .ps-op-inline { display: flex; align-items: center; justify-content: center; gap: 3px; }
+  .ps-sign { font-size: 1.3rem; font-weight: bold; color: #444; margin: 0 2px; }
+  .ps-op-inline .digit-cell {
+    width: 30px; height: 40px; font-size: 1.3rem; border-width: 2px; border-radius: 3px;
+  }
+  .ps-op-inline .digit-cell.dot-cell { width: 10px; font-size: 1.1rem; }
+  .ps-op-inline .stain-wrap { width: 30px; height: 40px; }
+  .ps-op-inline .stain-svg { width: 44px; height: 46px; }
   .ps-footer {
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; width: 100%; gap: 6px;
     border-top: 1px solid #e8d5b0; padding-top: 14px;
   }
-  .ps-footer img { width: 44px; height: 44px; object-fit: contain; border-radius: 50%; }
-  .ps-footer .logo-text { font-size: 12px; font-style: italic; color: #5d3a1a; letter-spacing: 1px; }
+  .ps-footer img { width: 44px; height: 44px; object-fit: contain; border-radius: 50%; margin: 0 auto; }
+  .ps-footer .logo-text { font-size: 12px; font-style: italic; color: #5d3a1a; letter-spacing: 1px; text-align: center; }
   .ps-footer .logo-text span { color: #5d3a1a; }
 
   /* Formato verticale (1000, 10000, decimali): tutto più compatto per stare in una pagina */
   .ps-grid-vert { gap: 12px 8px; }
-  .ps-grid-vert .ps-cell { padding: 6px 4px 8px; gap: 3px; }
+  .ps-grid-vert .ps-cell { padding: 6px 14px 8px; gap: 3px; }
   .ps-grid-vert .op-vertical { gap: 2px; padding: 4px 0; }
   .ps-grid-vert .op-vert-row { gap: 3px; }
   .ps-grid-vert .op-vert-label { font-size: 1.15rem; width: 22px; }
@@ -245,9 +253,25 @@
 
   @media print {
     @page { margin: 14mm; }
+    html, body { background: #fff !important; }
     body * { visibility: hidden; }
     #printSheet, #printSheet * { visibility: visible; }
-    #printSheet { display: block !important; position: absolute; top: 0; left: 0; width: 100%; }
+    #printSheet {
+      display: block !important; position: absolute; top: 0; left: 0; width: 100%;
+      padding: 8mm;
+      background: #fff !important;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    /* Tutto in bianco e nero, tranne le macchie di caffè (.stain-svg) */
+    #printSheet .ps-title { color: #000 !important; }
+    #printSheet .ps-cell { border-color: #555 !important; }
+    #printSheet .ps-sign, #printSheet .op-vert-label { color: #000 !important; }
+    #printSheet .digit-cell { border-color: #000 !important; color: #000 !important; background: #fff !important; }
+    #printSheet .op-vert-line { background: #000 !important; }
+    #printSheet .ps-footer { border-top-color: #999 !important; }
+    #printSheet .ps-footer .logo-text,
+    #printSheet .ps-footer .logo-text span { color: #000 !important; }
+    #printSheet .ps-footer img { filter: grayscale(100%); }
   }
 </style>
 </head>
