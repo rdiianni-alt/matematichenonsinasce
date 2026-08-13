@@ -191,9 +191,9 @@ body { font-family: 'Segoe UI', sans-serif; background: #f7f3ff; min-height: 100
   html, body { background: #fff !important; }
   body * { visibility: hidden; }
   .foglio-stampa, .foglio-stampa * { visibility: visible; }
-  .foglio-stampa { display: block; position: absolute; top: 0; left: 0; width: 100%; background: #fff; }
+  .foglio-stampa { display: block; position: absolute; top: 0; left: 0; width: 100%; background: #fff; padding: 6mm; }
   .no-print { display: none !important; }
-  @page { size: A4; margin: 14mm; }
+  @page { size: A4; margin: 16mm; }
 }
 
 .foglio-header {
@@ -306,6 +306,10 @@ body { font-family: 'Segoe UI', sans-serif; background: #f7f3ff; min-height: 100
     <div class="slider-row">
       <label>Quanti fantasmini? <span id="slider-val">8</span></label>
       <input type="range" id="slider-count" min="4" max="12" step="2" value="8" oninput="document.getElementById('slider-val').textContent=this.value">
+    </div>
+    <div class="slider-row" id="max-result-row" style="display:none">
+      <label>Il risultato non deve superare <span id="slider-maxrisultato-val">100</span></label>
+      <input type="range" id="slider-maxrisultato" min="10" max="100" step="10" value="100" oninput="document.getElementById('slider-maxrisultato-val').textContent=this.value">
     </div>
     <div class="modal-azioni">
       <button class="btn-azione btn-annulla" onclick="chiudiPannelloStampa()">Annulla</button>
@@ -587,6 +591,16 @@ function nuovaCarta(){
 const NOMI_DIFF = { interi: 'Numeri interi', decimi: 'Decimi', centesimi: 'Centesimi' };
 
 function apriPannelloStampa(){
+  const row = document.getElementById('max-result-row');
+  if(diff === 'interi'){
+    row.style.display = '';
+    const slider = document.getElementById('slider-maxrisultato');
+    slider.max = cfg.max;
+    if(parseInt(slider.value, 10) > cfg.max) slider.value = cfg.max;
+    document.getElementById('slider-maxrisultato-val').textContent = slider.value;
+  } else {
+    row.style.display = 'none';
+  }
   document.getElementById('modal-overlay').classList.add('show');
 }
 
@@ -594,12 +608,37 @@ function chiudiPannelloStampa(){
   document.getElementById('modal-overlay').classList.remove('show');
 }
 
-function generaEquazioniStampa(n){
+function generaEquazioniStampa(n, maxRisultato){
   const [aMin, aMax] = cfg.rangeA;
   const [fMin, fMax] = cfg.rangeFant;
+  const step = cfg.step;
   const eqs = [];
   const viste = new Set();
   let tentativi = 0;
+
+  if(maxRisultato){
+    // con un tetto scelto dall'insegnante, pesco prima il risultato
+    // (sparso su tutto l'intervallo consentito) e poi il primo numero,
+    // così il fantasmino può essere sia piccolo che grande, non solo
+    // ammassato vicino al tetto massimo
+    const maxCap = Math.min(maxRisultato, cfg.max);
+    const bMinBase = Math.max(step, r(step * 3)); // partenza bassa ma non 0+0
+    while(eqs.length < n && tentativi < n * 100){
+      tentativi++;
+      const b = rndDec(Math.min(bMinBase, maxCap), maxCap, step);
+      if(b <= step) continue;
+      const a = rndDec(step, r(b - step), step);
+      const f = r(b - a);
+      if(f <= 0 || a <= 0) continue;
+      const chiave = a + '_' + b;
+      if(viste.has(chiave)) continue;
+      viste.add(chiave);
+      eqs.push({a, b});
+    }
+    return eqs;
+  }
+
+  // logica originale (nessun tetto scelto)
   while(eqs.length < n && tentativi < n * 60){
     tentativi++;
     let a = rndDec(aMin, aMax, cfg.step);
@@ -617,7 +656,8 @@ function generaEquazioniStampa(n){
 
 function generaEStampa(){
   const n = parseInt(document.getElementById('slider-count').value, 10);
-  const eqs = generaEquazioniStampa(n);
+  const maxRisultato = (diff === 'interi') ? parseInt(document.getElementById('slider-maxrisultato').value, 10) : null;
+  const eqs = generaEquazioniStampa(n, maxRisultato);
 
   document.getElementById('foglio-sottotitolo').textContent = NOMI_DIFF[diff];
 
