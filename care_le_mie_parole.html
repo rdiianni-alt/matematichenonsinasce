@@ -39,7 +39,7 @@
     display: block; width: 320px; margin: 16px auto;
     padding: 18px 24px; font-size: 1.2em; font-family: 'Courier New', monospace;
     font-weight: bold; border: 3px solid #222; background: #fff;
-    cursor: pointer;
+    cursor: pointer; line-height: 1.4;
   }
   .listino-btn:hover { background: #ffe; }
 
@@ -55,6 +55,35 @@
 
   .tabellone-wrap { margin-bottom: 20px; }
   .tabellone-wrap h2 { font-size: 1.1em; font-weight: bold; text-decoration: underline; margin-bottom: 10px; letter-spacing: 1px; }
+  .tabellone-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+  .tabellone-header h2 { margin-bottom: 0; }
+  .print-btn {
+    padding: 8px 16px; font-size: 0.9em; font-family: 'Courier New', monospace;
+    font-weight: bold; border: 2px solid #222; background: #fff; cursor: pointer;
+  }
+  .print-btn:hover { background: #eee; }
+
+  /* AREA DI STAMPA */
+  #print-area { display: none; }
+
+  @media print {
+    html, body { background: #fff !important; }
+    body * { visibility: hidden; }
+    #print-area, #print-area * { visibility: visible; }
+    #print-area { display: block; position: absolute; top: 0; left: 0; width: 100%; background: #fff !important; }
+    @page { size: A4; margin: 10mm; }
+    .print-block {
+      display: flex; flex-direction: column; align-items: center;
+      height: 90mm; page-break-inside: avoid; border-bottom: 1px dashed #999;
+      padding: 4mm 0; justify-content: flex-start;
+    }
+    .print-block:last-child { border-bottom: none; }
+    .print-block-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .print-block-header img { width: 32px; height: 32px; object-fit: contain; border-radius: 50%; }
+    .print-block-header .print-title { font-family: 'Courier New', monospace; font-size: 1em; font-weight: bold; text-decoration: underline; letter-spacing: 1px; }
+    .print-block table.listino { width: 95%; }
+    .print-block table.listino td { font-size: 0.75em; padding: 3px 5px; }
+  }
 
   table.listino { border-collapse: collapse; width: 100%; border: 3px solid #222; }
   table.listino td { border: 1px solid #888; padding: 6px 10px; text-align: center; font-size: 1em; }
@@ -107,7 +136,8 @@
   <h1>CARE LE MIE PAROLE</h1>
   <p style="margin-bottom:20px; font-size:0.95em; max-width:360px; margin-left:auto; margin-right:auto; line-height:1.6;">Ogni lettera ha un costo. Si estrae una categoria, si cerca una parola che vi appartiene e si calcola quanto costa. Vince chi trova la parola più costosa.</p>
   <p style="margin-bottom:24px; font-size:0.95em;">Scegli un listino:</p>
-  <button class="listino-btn" onclick="apriGioco('listino1')">Listino delle lettere</button>
+  <button class="listino-btn" onclick="apriGioco('base')">Listino delle lettere<br>livello base</button>
+  <button class="listino-btn" onclick="apriGioco('avanzato')">Listino delle lettere<br>livello avanzato</button>
   <p style="margin-top:48px; font-size:0.78em; color:#555; max-width:360px; margin-left:auto; margin-right:auto; line-height:1.6;">Versione digitale ispirata al gioco cartaceo <a href="https://www.pianodilavoro.org/2021/07/15/care-le-mie-parole/" target="_blank" style="color:#555;">"Care le mie parole"</a> di Lisa Salvetti e (Emi)Lia Venturato, pubblicato su pianodilavoro.org.</p>
 </div>
 
@@ -118,7 +148,10 @@
   </div>
 
   <div class="tabellone-wrap">
-    <h2>LISTINO DELLE LETTERE</h2>
+    <div class="tabellone-header">
+      <h2>LISTINO DELLE LETTERE</h2>
+      <button class="print-btn" onclick="stampaTabellone()">Stampa tabellone</button>
+    </div>
     <div id="tabellone-container"></div>
   </div>
 
@@ -137,45 +170,70 @@
   </div>
 </div>
 
+<div id="print-area"></div>
+
 <script>
 const LISTINI = {
-  listino1: {
-    nome: "Listino delle lettere",
+  base: {
+    nome: "Listino delle lettere - livello base",
+    prezzi: {
+      A:1, B:1, C:1, D:2, E:1, F:2, G:2, H:3, Z:5,
+      J:5, I:1, K:5, L:2, M:1, N:1, O:1, P:2, Q:3,
+      R:2, S:2, T:3, U:2, V:3, W:5, Y:5, X:5
+    },
+    categorie: [
+      "Animali",
+      "Frutti",
+      "Nomi di montagne",
+      "Giorni della settimana e mesi",
+      "Emozioni",
+      "Nomi di compagni di classe",
+      "Cibi",
+      "Animali del mare",
+      "Sport",
+      "Mezzi di trasporto",
+      "Insetti",
+      "Dinosauri",
+      "Stagioni e fenomeni atmosferici",
+      "Oggetti di scuola"
+    ]
+  },
+  avanzato: {
+    nome: "Listino delle lettere - livello avanzato",
     prezzi: {
       A:0.50, B:1, C:1, D:1.50, E:1, F:1.50, G:1.50, H:3, Z:5,
-      J:5, I:1, L:2, M:1, N:1, O:0.50, P:2, Q:3,
+      J:5, I:1, K:5, L:2, M:1, N:1, O:0.50, P:2, Q:3,
       R:2, S:1.50, T:2.50, U:1.50, V:3, W:5, Y:5, X:5
-    }
+    },
+    categorie: [
+      "Animali",
+      "Piante",
+      "Nomi propri di persona",
+      "Città italiane",
+      "Cibi",
+      "Oggetti di scuola",
+      "Mestieri",
+      "Colori",
+      "Animali del mare",
+      "Frutti",
+      "Sport",
+      "Strumenti musicali",
+      "Paesi del mondo",
+      "Mezzi di trasporto",
+      "Stagioni e fenomeni atmosferici",
+      "Numeri scritti in lettere",
+      "Nomi di fiumi italiani",
+      "Nomi di montagne",
+      "Giorni della settimana e mesi",
+      "Materiali",
+      "Emozioni",
+      "Aggettivi",
+      "Verbi all'infinito",
+      "Insetti",
+      "Dinosauri"
+    ]
   }
 };
-
-const CATEGORIE = [
-  "Animali",
-  "Piante",
-  "Nomi propri di persona",
-  "Città italiane",
-  "Cibi",
-  "Oggetti di scuola",
-  "Mestieri",
-  "Colori",
-  "Animali del mare",
-  "Frutti",
-  "Sport",
-  "Strumenti musicali",
-  "Paesi del mondo",
-  "Mezzi di trasporto",
-  "Stagioni e fenomeni atmosferici",
-  "Numeri scritti in lettere",
-  "Nomi di fiumi italiani",
-  "Nomi di montagne",
-  "Giorni della settimana e mesi",
-  "Materiali",
-  "Emozioni",
-  "Aggettivi",
-  "Verbi all'infinito",
-  "Insetti",
-  "Dinosauri"
-];
 
 let listinoCorrente = null;
 let ultimaCategoria = -1;
@@ -197,10 +255,11 @@ function tornaAllaScelta() {
 }
 
 function estraiCategoria() {
+  const categorie = listinoCorrente.categorie;
   let idx;
-  do { idx = Math.floor(Math.random() * CATEGORIE.length); } while (idx === ultimaCategoria && CATEGORIE.length > 1);
+  do { idx = Math.floor(Math.random() * categorie.length); } while (idx === ultimaCategoria && categorie.length > 1);
   ultimaCategoria = idx;
-  document.getElementById('categoria-display').textContent = CATEGORIE[idx].toUpperCase();
+  document.getElementById('categoria-display').textContent = categorie[idx].toUpperCase();
 }
 
 function costruisciTabellone(prezzi) {
@@ -225,6 +284,45 @@ function costruisciTabellone(prezzi) {
 
 function fmt(v) {
   return v === Math.floor(v) ? v + ' €' : v.toFixed(2).replace('.',',') + ' €';
+}
+
+const LOGO_URL = "https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png";
+
+function tabellaHTML(prezzi) {
+  const voci = Object.entries(prezzi).sort((a,b)=>a[0].localeCompare(b[0]));
+  const colSize = Math.ceil(voci.length / 3);
+  const col1 = voci.slice(0, colSize);
+  const col2 = voci.slice(colSize, colSize*2);
+  const col3 = voci.slice(colSize*2);
+  const rows = Math.max(col1.length, col2.length, col3.length);
+
+  let html = '<table class="listino"><tbody>';
+  for (let i = 0; i < rows; i++) {
+    html += '<tr>';
+    html += col1[i] ? `<td>${col1[i][0]}</td><td>${fmt(col1[i][1])}</td>` : '<td></td><td></td>';
+    html += col2[i] ? `<td>${col2[i][0]}</td><td>${fmt(col2[i][1])}</td>` : '<td></td><td></td>';
+    html += col3[i] ? `<td>${col3[i][0]}</td><td>${fmt(col3[i][1])}</td>` : '<td></td><td></td>';
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  return html;
+}
+
+function stampaTabellone() {
+  const prezzi = listinoCorrente.prezzi;
+  const nome = listinoCorrente.nome.toUpperCase();
+  let html = '';
+  for (let i = 0; i < 3; i++) {
+    html += `<div class="print-block">
+      <div class="print-block-header">
+        <img src="${LOGO_URL}" alt="Logo">
+        <div class="print-title">${nome}</div>
+      </div>
+      ${tabellaHTML(prezzi)}
+    </div>`;
+  }
+  document.getElementById('print-area').innerHTML = html;
+  window.print();
 }
 
 function calcola() {
