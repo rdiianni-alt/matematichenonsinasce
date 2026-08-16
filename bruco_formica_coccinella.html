@@ -49,6 +49,11 @@ body { font-family: system-ui, sans-serif; background: #f5f4f0; color: #1a1a18; 
   <span>Matematiche non si nasce</span>
 </a>
 
+<div id="livello-selettore" style="display:flex;gap:8px;margin-bottom:1rem;">
+  <button id="btn-livello-classico" class="btn-livello" style="flex:1;font-size:13px;padding:8px 10px;cursor:pointer;border:0.5px solid #aaa;border-radius:8px;background:#1a1a18;color:#fff;">Livello classico</button>
+  <button id="btn-livello-avanzato" class="btn-livello" style="flex:1;font-size:13px;padding:8px 10px;cursor:pointer;border:0.5px solid #aaa;border-radius:8px;background:transparent;color:#1a1a18;">Livello avanzato</button>
+</div>
+
 <div id="problema-box">Caricamento...</div>
 <button id="btn-nuovo">Nuovo problema ↺</button>
 
@@ -88,7 +93,7 @@ body { font-family: system-ui, sans-serif; background: #f5f4f0; color: #1a1a18; 
 </div>
 
 <div style="margin-top:2rem;text-align:center;padding-bottom:1rem;">
-  <button id="btn-pdf" style="font-size:13px;padding:8px 18px;cursor:pointer;border:none;border-radius:8px;background:#3b6d11;color:#fff;">🐛🐜🐞 Stampa 3 problemi per casa</button>
+  <button id="btn-pdf" style="font-size:13px;padding:8px 18px;cursor:pointer;border:none;border-radius:8px;background:#3b6d11;color:#fff;">🐛🐜🐞 Stampa problemi</button>
 </div>
 
 <script>
@@ -120,7 +125,26 @@ function p11() { var n=ns(),vs=[r(1,8),r(1,8),r(1,8)]; if(vs[0]+vs[1]+vs[2]>20)r
 function p12() { var n=ns(),vs=[r(1,8),r(1,8),r(1,8)]; if(vs[0]+vs[1]+vs[2]>20)return p12(); var idx=r(0,2); return '<strong>'+n[0]+'</strong> ha '+vs[0]+' fagioli, <strong>'+n[1]+'</strong> ne ha '+vs[1]+' e <strong>'+n[2]+'</strong> ne ha '+vs[2]+'. I fagioli di <strong>'+n[idx]+'</strong> sono i più numerosi?'; }
 function p13() { var n=ns(),a=r(1,9),b=r(1,9); if(a===b)return p13(); return '<strong>'+n[0]+'</strong> ha '+a+' fagioli e <strong>'+n[1]+'</strong> ne ha '+b+'. I fagioli di <strong>'+n[0]+'</strong> sono di più o di meno di quelli di <strong>'+n[1]+'</strong>?'; }
 
-var problemi = [p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13];
+function p14() {
+  var n = ns();
+  var a = r(3, 10);
+  var seg1 = r(0, 1) === 0 ? '+' : '-';
+  var d1 = r(1, 3);
+  var b = seg1 === '+' ? a + d1 : a - d1;
+  if (b < 1) return p14();
+  var seg2 = r(0, 1) === 0 ? '+' : '-';
+  var d2 = r(1, 3);
+  var c = seg2 === '+' ? b + d2 : b - d2;
+  if (c < 1) return p14();
+  var testo1 = seg1 === '+' ? 'più' : 'meno';
+  var testo2 = seg2 === '+' ? 'più' : 'meno';
+  return '<strong>' + n[0] + '</strong> ha ' + a + ' fagioli. <strong>' + n[1] + '</strong> ne ha ' + d1 + ' in ' + testo1 + ' di <strong>' + n[0] + '</strong>. <strong>' + n[2] + '</strong> ne ha ' + d2 + ' in ' + testo2 + ' di <strong>' + n[1] + '</strong>. Quanti fagioli ha <strong>' + n[2] + '</strong>?';
+}
+
+var problemiClassico = [p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13];
+var problemiAvanzato = [p14];
+var LIVELLO = 'classico';
+function problemiAttuali() { return LIVELLO === 'avanzato' ? problemiAvanzato : problemiClassico; }
 
 function aggiorna(i) {
   var area = document.getElementById('area-'+i);
@@ -150,7 +174,8 @@ function aggiungiFagiolino(idx) {
 }
 
 function nuovoProblema() {
-  var fn = problemi[r(0, problemi.length-1)];
+  var lista = problemiAttuali();
+  var fn = lista[r(0, lista.length-1)];
   document.getElementById('problema-box').innerHTML = fn();
   for (var i = 0; i < 3; i++) {
     document.getElementById('area-'+i).innerHTML = '';
@@ -159,6 +184,18 @@ function nuovoProblema() {
   document.getElementById('sn-box').style.display = 'none';
   document.getElementById('feedback-box').style.display = 'none';
 }
+
+function impostaLivello(liv) {
+  LIVELLO = liv;
+  document.getElementById('btn-livello-classico').style.background = liv === 'classico' ? '#1a1a18' : 'transparent';
+  document.getElementById('btn-livello-classico').style.color = liv === 'classico' ? '#fff' : '#1a1a18';
+  document.getElementById('btn-livello-avanzato').style.background = liv === 'avanzato' ? '#1a1a18' : 'transparent';
+  document.getElementById('btn-livello-avanzato').style.color = liv === 'avanzato' ? '#fff' : '#1a1a18';
+  nuovoProblema();
+}
+
+document.getElementById('btn-livello-classico').addEventListener('click', function() { impostaLivello('classico'); });
+document.getElementById('btn-livello-avanzato').addEventListener('click', function() { impostaLivello('avanzato'); });
 
 for (var i = 0; i < 3; i++) {
   (function(idx) {
@@ -224,6 +261,11 @@ function loadImageAsDataURL(url) {
 }
 
 document.getElementById('btn-pdf').addEventListener('click', async function() {
+  var input = window.prompt('Quanti problemi vuoi generare?', '3');
+  if (input === null) return;
+  var numProblemi = parseInt(input, 10);
+  if (isNaN(numProblemi) || numProblemi < 1) numProblemi = 3;
+
   var jsPDF = window.jspdf.jsPDF;
   var doc = new jsPDF({ unit: 'mm', format: 'a4' });
   var pageW = 210, pageH = 297;
@@ -238,19 +280,6 @@ document.getElementById('btn-pdf').addEventListener('click', async function() {
 
   function stripHtml(html) { return html.replace(/<[^>]+>/g, '').toUpperCase(); }
 
-  function drawHeader() {
-    var hy = 14;
-    if (logoData) doc.addImage(logoData, 'PNG', marginL, hy - 5, 11, 11);
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(30);
-    doc.text(BLOG_NAME, marginL + (logoData ? 15 : 0), hy);
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(150);
-    doc.text(BLOG_URL, marginL + (logoData ? 15 : 0), hy + 4.5);
-    hy += 9;
-    doc.setDrawColor(200); doc.setLineWidth(0.3);
-    doc.line(marginL, hy, pageW - marginR, hy);
-    return hy + 8;
-  }
-
   function drawPersonaggi(x, yStart, w) {
     var nomi = ['BRUCO', 'FORMICA', 'COCCINELLA'];
     var boxH = 10.5, gap = 2.5;
@@ -264,17 +293,18 @@ document.getElementById('btn-pdf').addEventListener('click', async function() {
     return 3 * boxH + 2 * gap;
   }
 
-  var y = drawHeader();
+  var y = 18;
+  var listaPdf = problemiAttuali();
 
-  for (var p = 0; p < 3; p++) {
-    var fn = problemi[r(0, problemi.length - 1)];
+  for (var p = 0; p < numProblemi; p++) {
+    var fn = listaPdf[r(0, listaPdf.length - 1)];
     var testo = stripHtml(fn());
     doc.setFontSize(11); doc.setFont('helvetica', 'bold');
     var lines = doc.splitTextToSize(testo, textW);
     var lineH = 5;
     var textBlockH = lines.length * lineH;
     var personaggiH = 3 * 10.5 + 2 * 2.5;
-    var boxH = innerPad + textBlockH + 5 + 5 + 6 + personaggiH + innerPad;
+    var boxH = innerPad + textBlockH + 5 + personaggiH + 5 + 6 + innerPad;
 
     if (y + boxH > pageH - marginBottom) {
       doc.addPage();
@@ -290,24 +320,20 @@ document.getElementById('btn-pdf').addEventListener('click', async function() {
     doc.setFontSize(11); doc.setTextColor(25); doc.setFont('helvetica', 'bold');
     doc.text(lines, innerX, textY);
 
-    var afterTextY = boxTop + innerPad + textBlockH + 5;
-    doc.setFontSize(8); doc.setTextColor(130); doc.setFont('helvetica', 'normal');
-    doc.text('Risposta:', innerX, afterTextY);
-    doc.setDrawColor(190); doc.setLineWidth(0.3); doc.setLineDash([1, 1.3]);
-    doc.line(innerX + 18, afterTextY, marginL + contentW - innerPad - sideStripW, afterTextY);
-    doc.setLineDash([]);
-
-    var persY = afterTextY + 6;
+    var persY = boxTop + innerPad + textBlockH + 5;
     drawPersonaggi(innerX, persY, contentW - innerPad * 2 - sideStripW);
+
+    var afterPersY = persY + personaggiH + 6;
+    doc.setFontSize(8); doc.setTextColor(130); doc.setFont('helvetica', 'normal');
+    doc.text('Risposta:', innerX, afterPersY);
+    doc.setDrawColor(190); doc.setLineWidth(0.3); doc.setLineDash([1, 1.3]);
+    doc.line(innerX + 18, afterPersY, marginL + contentW - innerPad - sideStripW, afterPersY);
+    doc.setLineDash([]);
 
     if (logoData) {
       var logoSize = 9;
       doc.addImage(logoData, 'PNG', marginL + contentW - innerPad - logoSize, boxTop + 3, logoSize, logoSize);
     }
-
-    doc.setDrawColor(210); doc.setLineWidth(0.2); doc.setLineDash([2, 1.5]);
-    doc.roundedRect(marginL - 2, boxTop - 2, contentW + 4, boxH + 4, 3, 3, 'S');
-    doc.setLineDash([]);
 
     y = boxTop + boxH + 10;
   }
