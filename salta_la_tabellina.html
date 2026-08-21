@@ -1,0 +1,1113 @@
+<title>Salta la Tabellina</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@600;700;800&display=swap">
+<style>
+  :root{
+    --sky-top:#bfe3fb;
+    --sky-bottom:#eaf7ff;
+    --ground-top:#8fcf7c;
+    --ground-bottom:#6fb35c;
+    --ink:#2c3142;
+    --ink-soft:#5b6478;
+    --card:#fffdf7;
+    --card-edge:#f0e6cf;
+    --chalk:#33415c;
+    --chalk-stripe:#3d4d6b;
+    --panel-shadow: 0 10px 26px -12px rgba(44,49,66,.35);
+    --accent:#57b894;
+    --accent-glow: rgba(87,184,148,.55);
+    --focus-ring:#2c6e49;
+  }
+
+  *{ box-sizing:border-box; }
+
+  html,body{
+    margin:0;
+    padding:0;
+    background: linear-gradient(180deg,#eef8ff 0%, #f7f2e3 100%);
+    color:var(--ink);
+    font-family:'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
+  }
+
+  .wrap{
+    max-width:880px;
+    margin:0 auto;
+    padding:22px 16px 48px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+
+  header.top{
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+
+  header.top h1{
+    font-family:'Baloo 2', 'Nunito', sans-serif;
+    font-weight:800;
+    font-size:clamp(1.7rem, 4.4vw, 2.5rem);
+    margin:0;
+    color:var(--ink);
+    text-wrap:balance;
+    letter-spacing:.2px;
+  }
+
+  header.top h1 .em{ filter:drop-shadow(0 2px 0 rgba(0,0,0,.08)); }
+
+  header.top p{
+    margin:0;
+    color:var(--ink-soft);
+    font-weight:700;
+    font-size:clamp(.85rem, 2vw, .98rem);
+    text-wrap:balance;
+  }
+
+  /* ---------- control card ---------- */
+  .controls{
+    background:var(--card);
+    border:1px solid var(--card-edge);
+    border-radius:22px;
+    box-shadow:var(--panel-shadow);
+    padding:16px 16px 14px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+
+  .control-row{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+
+  .control-label{
+    font-size:.72rem;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.09em;
+    color:var(--ink-soft);
+    padding-left:2px;
+  }
+
+  #tablePicker{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(64px,1fr));
+    gap:8px;
+  }
+
+  .animal-btn{
+    appearance:none;
+    border:2px solid var(--card-edge);
+    background:#fff;
+    border-radius:14px;
+    padding:8px 4px 6px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:3px;
+    cursor:pointer;
+    font-family:'Nunito', sans-serif;
+    transition: transform .15s ease, border-color .15s ease, background .15s ease, box-shadow .15s ease;
+  }
+  .animal-btn .emoji{ font-size:1.6rem; line-height:1; }
+  .animal-btn .lbl{ font-size:.68rem; font-weight:800; color:var(--ink-soft); }
+  .animal-btn:hover{ transform:translateY(-2px); }
+  .animal-btn:focus-visible{ outline:3px solid var(--focus-ring); outline-offset:2px; }
+  .animal-btn.active{
+    border-color: var(--btn-accent, var(--accent));
+    background: color-mix(in srgb, var(--btn-accent, var(--accent)) 16%, white);
+    box-shadow:0 4px 0 0 color-mix(in srgb, var(--btn-accent, var(--accent)) 55%, white);
+    transform:translateY(-2px);
+  }
+  .animal-btn.active .lbl{ color:var(--ink); }
+
+  .row-flex{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:10px;
+    justify-content:space-between;
+  }
+
+  .segmented{
+    display:inline-flex;
+    background:#f2ede1;
+    border-radius:999px;
+    padding:3px;
+    gap:2px;
+  }
+  .segmented button{
+    appearance:none;
+    border:none;
+    background:transparent;
+    padding:7px 12px;
+    border-radius:999px;
+    font-family:'Nunito',sans-serif;
+    font-weight:800;
+    font-size:.82rem;
+    color:var(--ink-soft);
+    cursor:pointer;
+    transition: background .15s ease, color .15s ease;
+  }
+  .segmented button.active{
+    background:var(--ink);
+    color:#fff;
+  }
+  .segmented button:focus-visible{ outline:3px solid var(--focus-ring); outline-offset:2px; }
+
+  .playback{
+    display:inline-flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+
+  .btn{
+    appearance:none;
+    border:none;
+    border-radius:14px;
+    padding:10px 16px;
+    font-family:'Nunito', sans-serif;
+    font-weight:800;
+    font-size:.88rem;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    transition: transform .12s ease, box-shadow .12s ease, background .15s ease;
+  }
+  .btn:active{ transform:translateY(1px); }
+  .btn:focus-visible{ outline:3px solid var(--focus-ring); outline-offset:2px; }
+  .btn-primary{
+    background:var(--focus-ring);
+    color:#fff;
+    box-shadow:0 4px 0 0 #1d4a31;
+  }
+  .btn-primary:active{ box-shadow:0 2px 0 0 #1d4a31; }
+  .btn-ghost{
+    background:#f2ede1;
+    color:var(--ink);
+    box-shadow:0 3px 0 0 #ddd3ba;
+  }
+  .btn-ghost:active{ box-shadow:0 1px 0 0 #ddd3ba; }
+  .btn-ghost[aria-pressed="false"]{ color:var(--ink-soft); }
+
+  .picker-shake{ animation: shake .4s ease; }
+  @keyframes shake{
+    0%,100%{ transform:translateX(0); }
+    20%{ transform:translateX(-6px); }
+    40%{ transform:translateX(6px); }
+    60%{ transform:translateX(-4px); }
+    80%{ transform:translateX(4px); }
+  }
+
+  /* ---------- stage / diorama ---------- */
+  .stage{
+    position:relative;
+    border-radius:24px;
+    overflow:hidden;
+    box-shadow:var(--panel-shadow);
+    background:linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 62%, var(--ground-top) 62%, var(--ground-bottom) 100%);
+    padding:14px 14px 0;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .stage::before, .stage::after{
+    content:"";
+    position:absolute;
+    border-radius:50%;
+    background:#fff;
+    opacity:.75;
+  }
+  .stage::before{ width:64px; height:24px; top:18px; left:8%; box-shadow:86px 14px 0 -4px #fff, 40px 6px 0 -2px #fff; }
+  .stage::after{ width:46px; height:18px; top:44px; right:10%; box-shadow:-60px 10px 0 -4px #fff; }
+
+  .equation-band{
+    align-self:center;
+    background:var(--card);
+    border:3px solid var(--band-accent, var(--accent));
+    border-radius:16px;
+    padding:8px 22px;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:clamp(1.3rem, 4.4vw, 1.9rem);
+    color:var(--ink);
+    font-variant-numeric: tabular-nums;
+    text-align:center;
+    box-shadow:0 4px 0 0 color-mix(in srgb, var(--band-accent, var(--accent)) 45%, white);
+    min-height:1.4em;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    z-index:2;
+  }
+  .equation-band.pop{ animation: eqpop .45s ease-out; }
+  @keyframes eqpop{
+    0%{ transform:scale(.82); }
+    55%{ transform:scale(1.08); }
+    100%{ transform:scale(1); }
+  }
+
+  .progress-dots{
+    align-self:center;
+    display:flex;
+    gap:6px;
+    position:relative;
+    z-index:2;
+  }
+  .progress-dots span{
+    width:9px; height:9px;
+    border-radius:50%;
+    background:rgba(255,255,255,.6);
+    border:1.5px solid rgba(44,49,66,.25);
+  }
+  .progress-dots span.done{
+    background:var(--band-accent, var(--accent));
+    border-color:transparent;
+  }
+
+  .viewport{
+    position:relative;
+    height:158px;
+    overflow:hidden;
+    z-index:1;
+  }
+
+  .scroll-track{
+    position:absolute;
+    inset:0;
+    transition: transform .6s cubic-bezier(.5,0,.25,1);
+  }
+  .scroll-track.no-transition{ transition:none; }
+
+  .flag{
+    position:absolute;
+    bottom:26px;
+    left:calc(-1 * (var(--cell-size) + var(--cell-gap)) + var(--cell-size)/2 - 8px);
+    font-size:1.5rem;
+    filter:drop-shadow(0 3px 2px rgba(0,0,0,.2));
+  }
+
+  .cells-row{
+    position:absolute;
+    bottom:26px;
+    left:0;
+    display:flex;
+    gap:var(--cell-gap);
+  }
+
+  :root{ --cell-size:56px; --cell-gap:10px; }
+  @media (max-width:480px){ :root{ --cell-size:44px; --cell-gap:8px; } }
+
+  .cell{
+    width:var(--cell-size);
+    height:var(--cell-size);
+    border-radius:12px;
+    background: repeating-linear-gradient(135deg, var(--chalk), var(--chalk) 8px, var(--chalk-stripe) 8px, var(--chalk-stripe) 16px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 4px 0 0 rgba(0,0,0,.18), inset 0 0 0 2px rgba(255,255,255,.06);
+    position:relative;
+    flex:0 0 auto;
+    transition: box-shadow .25s ease, background .25s ease;
+  }
+  .cell .num{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:clamp(.95rem, 3.4vw, 1.3rem);
+    color:#fff;
+    opacity:0;
+    font-variant-numeric: tabular-nums;
+  }
+  .cell.preview{
+    box-shadow:0 0 0 3px var(--accent-glow), 0 0 16px 3px var(--accent-glow), 0 4px 0 0 rgba(0,0,0,.18);
+    animation:pulseGlow 1s ease-in-out infinite;
+  }
+  .cell.preview .num{ opacity:.4; }
+  @keyframes pulseGlow{
+    0%,100%{ filter:brightness(1); }
+    50%{ filter:brightness(1.35); }
+  }
+  .cell.revealed{
+    background: var(--cell-accent, var(--accent));
+    box-shadow:0 4px 0 0 color-mix(in srgb, var(--cell-accent, var(--accent)) 60%, black);
+  }
+  .cell.revealed .num{ opacity:1; animation:pop .45s ease-out; }
+  @keyframes pop{
+    0%{ transform:scale(.4); opacity:0; }
+    60%{ transform:scale(1.28); opacity:1; }
+    100%{ transform:scale(1); opacity:1; }
+  }
+
+  .animal{
+    position:absolute;
+    bottom:26px;
+    width:var(--cell-size);
+    text-align:center;
+    font-size:clamp(1.6rem, 5.2vw, 2.1rem);
+    line-height:var(--cell-size);
+    transition: left .6s cubic-bezier(.5,0,.25,1);
+    transform-origin:70% 100%;
+    filter:drop-shadow(0 4px 3px rgba(0,0,0,.25));
+    z-index:3;
+  }
+  .animal.no-transition{ transition:none; }
+  .animal.hopping{ animation: hop var(--hop-dur, .6s) ease-in-out; }
+  @keyframes hop{
+    0%{ transform:translateY(0) rotate(0deg); }
+    35%{ transform:translateY(-40px) rotate(-10deg); }
+    62%{ transform:translateY(-40px) rotate(8deg); }
+    100%{ transform:translateY(0) rotate(0deg); }
+  }
+
+  .confetti-layer{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:4;
+  }
+  .confetti-layer span{
+    position:absolute;
+    top:-24px;
+    font-size:1.3rem;
+    animation: fall 1.7s ease-in forwards;
+  }
+  @keyframes fall{
+    0%{ transform:translateY(0) rotate(0deg); opacity:1; }
+    100%{ transform:translateY(200px) rotate(200deg); opacity:0; }
+  }
+
+  .celebrate-msg{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:0 20px;
+    z-index:5;
+    pointer-events:none;
+  }
+  .celebrate-msg .bubble{
+    background:var(--card);
+    border:3px solid var(--band-accent, var(--accent));
+    border-radius:18px;
+    padding:14px 22px;
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:clamp(1rem, 3.6vw, 1.3rem);
+    box-shadow:var(--panel-shadow);
+    animation: pop .4s ease-out;
+  }
+
+  .ground-strip{ height:16px; }
+
+  /* ---------- recap ---------- */
+  .recap-card{
+    background:var(--card);
+    border:1px solid var(--card-edge);
+    border-radius:20px;
+    box-shadow:var(--panel-shadow);
+    padding:14px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .recap-chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    min-height:34px;
+  }
+  .recap-chips .chip{
+    background: color-mix(in srgb, var(--band-accent, var(--accent)) 18%, white);
+    color:var(--ink);
+    border:1.5px solid color-mix(in srgb, var(--band-accent, var(--accent)) 45%, white);
+    padding:5px 12px;
+    border-radius:999px;
+    font-weight:800;
+    font-size:.9rem;
+    font-variant-numeric: tabular-nums;
+    animation: pop .35s ease-out;
+  }
+  .recap-empty{ color:var(--ink-soft); font-weight:700; font-size:.85rem; }
+
+  .logo{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    text-decoration:none;
+    align-self:center;
+    padding:2px;
+    border-radius:14px;
+  }
+  .logo img{
+    width:60px;
+    height:60px;
+    object-fit:contain;
+    border-radius:50%;
+    border:2px solid var(--card-edge);
+    background:#fff;
+    box-shadow:0 2px 6px rgba(44,49,66,.18);
+    flex:0 0 auto;
+  }
+  .logo-text{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:.95rem;
+    color:var(--ink);
+    text-wrap:balance;
+  }
+  .logo:hover .logo-text{ text-decoration:underline; }
+  .logo:focus-visible{ outline:3px solid var(--focus-ring); outline-offset:3px; }
+
+  footer.hint{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:.8rem;
+    font-weight:700;
+    padding:0 8px;
+  }
+
+  /* ---------- scheda stampabile ---------- */
+  .print-sheet{
+    display:none;
+    width:100%;
+    max-width:100%;
+    box-sizing:border-box;
+  }
+
+  .psheet-header{ position:relative; text-align:center; margin-bottom:4mm; }
+  .print-logo{
+    position:absolute;
+    top:0;
+    right:0;
+    width:20mm;
+    height:20mm;
+    object-fit:contain;
+    border-radius:50%;
+    border:1.5px solid #ddd;
+    background:#fff;
+  }
+  .ptitle{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:800;
+    font-size:18pt;
+    margin:0 0 2mm;
+  }
+  .pmeta{
+    font-size:10.5pt;
+    color:#333;
+  }
+  .pinstr{
+    text-align:center;
+    font-size:10.5pt;
+    color:#222;
+    margin:0 0 4mm;
+  }
+  .pgrid{
+    display:flex;
+    flex-direction:column;
+    gap:2mm;
+    width:100%;
+    box-sizing:border-box;
+  }
+  .prow-cells{
+    display:grid;
+    grid-template-columns:repeat(10, 1fr);
+    gap:1.8mm;
+    width:100%;
+    min-width:0;
+    box-sizing:border-box;
+  }
+  .pcell{
+    min-width:0;
+    aspect-ratio:1;
+    border:1px solid #bbb;
+    border-radius:2mm;
+    box-sizing:border-box;
+    position:relative;
+  }
+  .pcell.target{
+    border:1.6px solid #333;
+    background:#f0f0f0;
+  }
+  .pcell.target .paw{
+    position:absolute;
+    top:0.8mm;
+    left:1mm;
+    font-size:9pt;
+    line-height:1;
+  }
+  .peq-heading{
+    font-size:10.5pt;
+    font-weight:700;
+    color:#222;
+    margin:5mm 0 2mm;
+  }
+  .pequations{
+    display:grid;
+    grid-template-columns:repeat(2, 1fr);
+    gap:2mm 10mm;
+    font-size:11.5pt;
+    font-variant-numeric: tabular-nums;
+  }
+  .peq{ white-space:nowrap; color:#222; }
+
+  @media print{
+    html, body{ background:#fff !important; }
+    .wrap{ display:none !important; }
+    .print-sheet{ display:block !important; }
+    @page{ size:A4; margin:16mm; }
+  }
+</style>
+
+<div class="wrap">
+
+  <a class="logo" href="https://matematichenonsinasce.com/" target="_blank" rel="noopener noreferrer" aria-label="Vai al blog Matematiche non si nasce">
+    <img src="https://i0.wp.com/matematichenonsinasce.com/wp-content/uploads/2025/08/logo.jpg?fit=1931%2C1861&amp;ssl=1" alt="logo" onerror="this.style.display='none'">
+    <div class="logo-text">Matematiche non si nasce</div>
+  </a>
+
+  <header class="top">
+    <h1><span class="em">🎪</span> Salta la Tabellina</h1>
+    <p>Scegli un animale, guardalo saltare sui numeri giusti e recitate la tabellina insieme, ad alta voce!</p>
+  </header>
+
+  <section class="controls">
+    <div class="control-row">
+      <span class="control-label">Scegli la tabellina</span>
+      <div id="tablePicker"></div>
+    </div>
+
+    <div class="row-flex">
+      <div class="control-row" style="gap:6px;">
+        <span class="control-label">Velocità dei salti</span>
+        <div class="segmented" id="speedPicker" role="group" aria-label="Velocità">
+          <button type="button" data-speed="lento">🐢 Lento</button>
+          <button type="button" data-speed="normale" class="active">🚶 Normale</button>
+          <button type="button" data-speed="veloce">🐇 Veloce</button>
+        </div>
+      </div>
+
+      <div class="control-row" style="gap:6px;">
+        <span class="control-label">Audio ad ogni salto</span>
+        <div class="segmented" id="audioPicker" role="group" aria-label="Audio">
+          <button type="button" data-audio="suono" class="active">🔔 Suono</button>
+          <button type="button" data-audio="voce">🗣️ Voce</button>
+          <button type="button" data-audio="off">🔇 Nessuno</button>
+        </div>
+        <button type="button" class="btn btn-ghost" id="testVoiceBtn" style="align-self:flex-start; margin-top:2px;">🗣️ Prova voce</button>
+        <span id="voiceHint" style="font-size:.72rem; font-weight:700; color:var(--ink-soft); max-width:220px;">Se premendo "Prova voce" non senti nulla, il browser non ha una voce italiana disponibile: usa la modalità Suono.</span>
+      </div>
+
+      <div class="control-row" style="gap:6px; align-items:flex-end;">
+        <span class="control-label">Comandi</span>
+        <div class="playback">
+          <button type="button" class="btn btn-primary" id="playBtn">▶️ Gioca</button>
+          <button type="button" class="btn btn-ghost" id="restartBtn">🔁 Ricomincia</button>
+          <button type="button" class="btn btn-ghost" id="printBtn">🖨️ Stampa scheda</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stage" id="stage">
+    <div class="equation-band" id="equationBand">Scegli un animale qui sopra per cominciare!</div>
+    <div class="progress-dots" id="progressDots"></div>
+
+    <div class="viewport" id="viewport">
+      <div class="scroll-track" id="scrollTrack">
+        <span class="flag">🚩</span>
+        <div class="cells-row" id="cellsRow"></div>
+        <div class="animal" id="animal">🦗</div>
+      </div>
+      <div class="confetti-layer" id="confettiLayer"></div>
+      <div class="celebrate-msg" id="celebrateMsg" style="display:none;"><div class="bubble" id="celebrateBubble"></div></div>
+    </div>
+    <div class="ground-strip"></div>
+  </section>
+
+  <section class="recap-card">
+    <span class="control-label">Numeri della tabellina ripassati finora</span>
+    <div class="recap-chips" id="recapChips"><span class="recap-empty">Ancora nessun salto…</span></div>
+  </section>
+
+  <footer class="hint">Suggerimento per l'insegnante: mettete in pausa dopo ogni salto e fate ripetere il numero a tutta la classe prima di riprendere.</footer>
+</div>
+
+<div id="printSheet" class="print-sheet" aria-hidden="true"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  const ANIMALS = [
+    {n:1,  emoji:'🐌', name:'Lumaca',   color:'#8bc98c'},
+    {n:2,  emoji:'🦗', name:'Grillo',   color:'#57b894'},
+    {n:3,  emoji:'🐸', name:'Rana',     color:'#3aa6a6'},
+    {n:4,  emoji:'🐰', name:'Coniglio', color:'#4a90d9'},
+    {n:5,  emoji:'🐱', name:'Gatto',    color:'#7d6fd9'},
+    {n:6,  emoji:'🐶', name:'Cane',     color:'#a56fd9'},
+    {n:7,  emoji:'🦊', name:'Volpe',    color:'#d96fb0'},
+    {n:8,  emoji:'🦌', name:'Cervo',    color:'#e0637a'},
+    {n:9,  emoji:'🦘', name:'Canguro',  color:'#e8834a'},
+    {n:10, emoji:'🦖', name:'T-Rex',    color:'#e0b13a'},
+  ];
+
+  const LOGO_URL = 'https://i0.wp.com/matematichenonsinasce.com/wp-content/uploads/2025/08/logo.jpg?fit=1931%2C1861&ssl=1';
+
+  const SPEEDS = {
+    lento:   {hop:900, dwell:1700},
+    normale: {hop:600, dwell:1000},
+    veloce:  {hop:380, dwell:500},
+  };
+
+  const el = {
+    picker: document.getElementById('tablePicker'),
+    speedPicker: document.getElementById('speedPicker'),
+    audioPicker: document.getElementById('audioPicker'),
+    voiceHint: document.getElementById('voiceHint'),
+    playBtn: document.getElementById('playBtn'),
+    restartBtn: document.getElementById('restartBtn'),
+    stage: document.getElementById('stage'),
+    equationBand: document.getElementById('equationBand'),
+    progressDots: document.getElementById('progressDots'),
+    viewport: document.getElementById('viewport'),
+    scrollTrack: document.getElementById('scrollTrack'),
+    cellsRow: document.getElementById('cellsRow'),
+    animal: document.getElementById('animal'),
+    confettiLayer: document.getElementById('confettiLayer'),
+    celebrateMsg: document.getElementById('celebrateMsg'),
+    celebrateBubble: document.getElementById('celebrateBubble'),
+    recapChips: document.getElementById('recapChips'),
+  };
+
+  let tableN = null;
+  let currentAnimal = null;
+  let cells = [];
+  let stepIndex = 0;         // prossimo salto da fare, 0..9
+  let playing = false;
+  let loopToken = 0;
+  let speed = 'normale';
+  let audioMode = 'suono';   // 'suono' | 'voce' | 'off'
+  let audioCtx = null;
+  let itVoice = null;
+
+  // ---------- costruzione selettore animali ----------
+  ANIMALS.forEach(a => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'animal-btn';
+    btn.style.setProperty('--btn-accent', a.color);
+    btn.dataset.n = a.n;
+    btn.setAttribute('aria-pressed', 'false');
+    btn.innerHTML = `<span class="emoji">${a.emoji}</span><span class="lbl">Tab. ${a.n}</span>`;
+    btn.addEventListener('click', () => selectTable(a.n));
+    el.picker.appendChild(btn);
+  });
+
+  // ---------- progress dots ----------
+  for(let i=0;i<10;i++){
+    const d = document.createElement('span');
+    el.progressDots.appendChild(d);
+  }
+
+  function updateProgressDots(){
+    Array.from(el.progressDots.children).forEach((d,i)=>{
+      d.classList.toggle('done', i < stepIndex);
+    });
+  }
+
+  // ---------- audio ----------
+  function ensureAudio(){
+    if(!audioCtx){
+      try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch(e){ audioCtx = null; }
+    }
+    if(audioCtx && audioCtx.state === 'suspended'){
+      audioCtx.resume().catch(()=>{});
+    }
+  }
+
+  function blip(freq){
+    if(audioMode !== 'suono' || !audioCtx) return;
+    try{
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = 'sine';
+      o.frequency.value = freq;
+      g.gain.value = 0.0001;
+      o.connect(g); g.connect(audioCtx.destination);
+      const t = audioCtx.currentTime;
+      g.gain.exponentialRampToValueAtTime(0.16, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.28);
+      o.start(t); o.stop(t + 0.3);
+    }catch(e){}
+  }
+
+  // Scelta di una voce italiana esplicita: su alcuni browser, senza una voce
+  // assegnata esplicitamente, la sintesi vocale parte una volta e poi smette
+  // di funzionare silenziosamente per le chiamate successive.
+  function pickItalianVoice(){
+    try{
+      const voices = window.speechSynthesis.getVoices();
+      itVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('it')) || null;
+    }catch(e){ itVoice = null; }
+  }
+  if('speechSynthesis' in window){
+    pickItalianVoice();
+    window.speechSynthesis.onvoiceschanged = pickItalianVoice;
+    // "Keep-alive": su Chrome il motore vocale a volte si blocca dopo la
+    // prima frase se non arriva nuova sintesi entro pochi secondi.
+    setInterval(() => { try{ window.speechSynthesis.resume(); }catch(e){} }, 4000);
+  }
+
+  function speak(text){
+    if(audioMode !== 'voce') return;
+    try{
+      if(!('speechSynthesis' in window)) return;
+      const synth = window.speechSynthesis;
+      // Cancellare sempre prima di parlare, e con un piccolo ritardo dopo il
+      // cancel: su Chrome un cancel()+speak() nello stesso istante fa sì che
+      // la nuova frase venga silenziosamente scartata.
+      synth.cancel();
+      setTimeout(() => {
+        try{
+          const u = new SpeechSynthesisUtterance(text);
+          u.lang = 'it-IT';
+          if(itVoice) u.voice = itVoice;
+          u.rate = speed === 'veloce' ? 1.05 : (speed === 'lento' ? 0.85 : 0.95);
+          synth.speak(u);
+        }catch(e){}
+      }, 60);
+    }catch(e){}
+  }
+
+  el.testVoiceBtn = document.getElementById('testVoiceBtn');
+  el.testVoiceBtn.addEventListener('click', () => {
+    ensureAudio();
+    try{
+      if(!('speechSynthesis' in window)){
+        el.voiceHint.textContent = 'Questo browser non supporta la sintesi vocale: usa la modalità Suono.';
+        return;
+      }
+      const synth = window.speechSynthesis;
+      synth.cancel();
+      const u = new SpeechSynthesisUtterance('Prova. Uno, due, tre.');
+      u.lang = 'it-IT';
+      if(itVoice) u.voice = itVoice;
+      synth.speak(u);
+    }catch(e){}
+  });
+
+  el.audioPicker.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-audio]');
+    if(!btn) return;
+    audioMode = btn.dataset.audio;
+    Array.from(el.audioPicker.children).forEach(b => b.classList.toggle('active', b === btn));
+    if(audioMode === 'off'){
+      try{ window.speechSynthesis && window.speechSynthesis.cancel(); }catch(e){}
+    } else {
+      ensureAudio();
+    }
+  });
+
+  // ---------- velocità ----------
+  el.speedPicker.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-speed]');
+    if(!btn) return;
+    speed = btn.dataset.speed;
+    Array.from(el.speedPicker.children).forEach(b => b.classList.toggle('active', b === btn));
+  });
+
+  // ---------- costruzione tabellina ----------
+  function selectTable(n){
+    stopLoop();
+    tableN = n;
+    currentAnimal = ANIMALS.find(a => a.n === n);
+    stepIndex = 0;
+
+    el.stage.style.setProperty('--band-accent', currentAnimal.color);
+    el.animal.textContent = currentAnimal.emoji;
+
+    Array.from(el.picker.children).forEach(b => {
+      const active = Number(b.dataset.n) === n;
+      b.classList.toggle('active', active);
+      b.setAttribute('aria-pressed', String(active));
+    });
+
+    buildCells(n * 10);
+    resetPositions();
+    updateProgressDots();
+    clearRecap();
+
+    el.equationBand.textContent = `${currentAnimal.emoji} Tabellina del ${n} — premi ▶️ per iniziare!`;
+    el.playBtn.textContent = '▶️ Gioca';
+    hideCelebration();
+  }
+
+  function buildCells(total){
+    el.cellsRow.innerHTML = '';
+    cells = [];
+    for(let v = 1; v <= total; v++){
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.value = v;
+      const span = document.createElement('span');
+      span.className = 'num';
+      span.textContent = v;
+      cell.appendChild(span);
+      el.cellsRow.appendChild(cell);
+      cells.push(cell);
+    }
+  }
+
+  function resetPositions(){
+    el.animal.classList.add('no-transition');
+    el.scrollTrack.classList.add('no-transition');
+    el.animal.classList.remove('hopping');
+    el.animal.style.left = 'calc(-1 * (var(--cell-size) + var(--cell-gap)))';
+    el.scrollTrack.style.transform = 'translateX(0px)';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        el.animal.classList.remove('no-transition');
+        el.scrollTrack.classList.remove('no-transition');
+      });
+    });
+  }
+
+  function clearRecap(){
+    el.recapChips.innerHTML = '<span class="recap-empty">Ancora nessun salto…</span>';
+  }
+
+  function addRecapChip(value){
+    if(el.recapChips.querySelector('.recap-empty')){
+      el.recapChips.innerHTML = '';
+    }
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.textContent = value;
+    el.recapChips.appendChild(chip);
+  }
+
+  // ---------- camera & salto ----------
+  function updateCamera(index){
+    const targetCell = cells[index];
+    if(!targetCell) return;
+    const viewportWidth = el.viewport.clientWidth;
+    const anchor = viewportWidth * 0.22;
+    const trackWidth = el.cellsRow.scrollWidth;
+    let camera = targetCell.offsetLeft - anchor;
+    const maxScroll = Math.max(0, trackWidth - viewportWidth);
+    camera = Math.max(0, Math.min(camera, maxScroll));
+    el.scrollTrack.style.transform = `translateX(${-camera}px)`;
+  }
+
+  function doHop(index){
+    const targetCell = cells[index];
+    if(!targetCell) return;
+    el.animal.style.left = targetCell.offsetLeft + 'px';
+    el.animal.classList.remove('hopping');
+    void el.animal.offsetWidth;
+    el.animal.classList.add('hopping');
+  }
+
+  function sleep(ms){ return new Promise(res => setTimeout(res, ms)); }
+
+  async function runStep(i, token){
+    const targetValue = tableN * (i + 1);
+    const targetCell = cells[targetValue - 1];
+    if(!targetCell) return;
+
+    const cfg = SPEEDS[speed];
+    el.scrollTrack.style.setProperty('--hop-dur', cfg.hop + 'ms');
+    el.animal.style.setProperty('--hop-dur', cfg.hop + 'ms');
+
+    // anteprima: si intravede la prossima casella
+    targetCell.classList.add('preview');
+    updateCamera(targetValue - 1);
+    await sleep(cfg.dwell);
+    if(!playing || token !== loopToken){ targetCell.classList.remove('preview'); return; }
+    targetCell.classList.remove('preview');
+
+    // salto
+    doHop(targetValue - 1);
+    await sleep(cfg.hop);
+    if(!playing || token !== loopToken) return;
+
+    // rivelazione
+    targetCell.classList.add('revealed');
+    targetCell.style.setProperty('--cell-accent', currentAnimal.color);
+    el.equationBand.textContent = `${currentAnimal.emoji} ${tableN} × ${i + 1} = ${targetValue}`;
+    el.equationBand.classList.remove('pop');
+    void el.equationBand.offsetWidth;
+    el.equationBand.classList.add('pop');
+    addRecapChip(targetValue);
+    updateProgressDots();
+    blip(360 + i * 22);
+    speak(String(targetValue));
+  }
+
+  function shakePicker(){
+    el.picker.classList.remove('picker-shake');
+    void el.picker.offsetWidth;
+    el.picker.classList.add('picker-shake');
+  }
+
+  async function play(){
+    if(!tableN){
+      shakePicker();
+      return;
+    }
+    if(playing) return;
+    ensureAudio();
+    playing = true;
+    el.playBtn.textContent = '⏸️ Pausa';
+    const token = ++loopToken;
+
+    while(stepIndex < 10 && playing && token === loopToken){
+      await runStep(stepIndex, token);
+      if(token !== loopToken) return;
+      if(!playing) break;
+      stepIndex++;
+      updateProgressDots();
+    }
+
+    if(stepIndex >= 10 && token === loopToken){
+      celebrate();
+    }
+    if(token === loopToken){
+      playing = false;
+      el.playBtn.textContent = stepIndex >= 10 ? '🔁 Ricomincia' : '▶️ Gioca';
+    }
+  }
+
+  function stopLoop(){
+    playing = false;
+    loopToken++;
+    el.playBtn.textContent = '▶️ Gioca';
+  }
+
+  function pause(){
+    playing = false;
+    el.playBtn.textContent = '▶️ Gioca';
+  }
+
+  el.playBtn.addEventListener('click', () => {
+    if(playing) pause();
+    else if(stepIndex >= 10) { selectTable(tableN); }
+    else play();
+  });
+
+  el.restartBtn.addEventListener('click', () => {
+    if(tableN) selectTable(tableN);
+  });
+
+  // ---------- scheda stampabile ----------
+  function buildPrintSheet(){
+    const rows = [];
+    for(let r = 0; r < tableN; r++){
+      let cellsHtml = '';
+      for(let c = 1; c <= 10; c++){
+        const v = r * 10 + c;
+        const isTarget = v % tableN === 0;
+        cellsHtml += `<div class="pcell${isTarget ? ' target' : ''}">${isTarget ? `<span class="paw">${currentAnimal.emoji}</span>` : ''}</div>`;
+      }
+      rows.push(`<div class="prow-cells">${cellsHtml}</div>`);
+    }
+
+    const equations = [];
+    for(let k = 1; k <= 10; k++){
+      equations.push(`<div class="peq">${tableN} &times; ${k} = ______</div>`);
+    }
+
+    document.getElementById('printSheet').innerHTML = `
+      <div class="psheet-header">
+        <img class="print-logo" src="${LOGO_URL}" alt="logo" onerror="this.style.display='none'">
+        <div class="ptitle">${currentAnimal.emoji} Tabellina del ${tableN}</div>
+        <div class="pmeta">Nome: ______________________________&nbsp;&nbsp;&nbsp; Data: ____ / ____ / ______</div>
+      </div>
+      <p class="pinstr">Il ${currentAnimal.name.toLowerCase()} salta di ${tableN} in ${tableN}: scrivi il numero giusto in ogni casella con la zampetta ${currentAnimal.emoji}.</p>
+      <div class="pgrid">${rows.join('')}</div>
+      <div class="peq-heading">Ora scrivi la tabellina in ordine:</div>
+      <div class="pequations">${equations.join('')}</div>
+    `;
+  }
+
+  el.printBtn = document.getElementById('printBtn');
+  el.printBtn.addEventListener('click', () => {
+    if(!tableN){
+      shakePicker();
+      return;
+    }
+    buildPrintSheet();
+    window.print();
+  });
+
+  // ---------- celebrazione ----------
+  function hideCelebration(){
+    el.celebrateMsg.style.display = 'none';
+    el.confettiLayer.innerHTML = '';
+  }
+
+  function celebrate(){
+    el.celebrateBubble.innerHTML = `🎉 Bravissimi! Avete ripassato<br>tutta la tabellina del ${tableN}!`;
+    el.celebrateMsg.style.display = 'flex';
+    speak(`Bravissimi! Tabellina del ${tableN} completata!`);
+
+    const symbols = ['🎉','⭐','✨','🎈'];
+    el.confettiLayer.innerHTML = '';
+    for(let i = 0; i < 16; i++){
+      const s = document.createElement('span');
+      s.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+      s.style.left = (Math.random() * 92) + '%';
+      s.style.animationDelay = (Math.random() * 0.5) + 's';
+      s.style.fontSize = (1 + Math.random() * 0.8) + 'rem';
+      el.confettiLayer.appendChild(s);
+    }
+    setTimeout(() => { el.confettiLayer.innerHTML = ''; }, 2400);
+    setTimeout(() => { el.celebrateMsg.style.display = 'none'; }, 3600);
+  }
+
+  // ---------- resize: riallinea camera/animale senza animazione ----------
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if(!tableN) return;
+      el.animal.classList.add('no-transition');
+      el.scrollTrack.classList.add('no-transition');
+      const idx = Math.max(0, Math.min(stepIndex, 10) * tableN - 1);
+      const landedIdx = stepIndex > 0 ? tableN * stepIndex - 1 : -1;
+      if(landedIdx >= 0 && cells[landedIdx]){
+        el.animal.style.left = cells[landedIdx].offsetLeft + 'px';
+        updateCamera(landedIdx);
+      } else {
+        el.animal.style.left = 'calc(-1 * (var(--cell-size) + var(--cell-gap)))';
+        el.scrollTrack.style.transform = 'translateX(0px)';
+      }
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          el.animal.classList.remove('no-transition');
+          el.scrollTrack.classList.remove('no-transition');
+        });
+      });
+    }, 150);
+  });
+
+  // stato iniziale: nessuna tabellina selezionata
+  el.animal.style.left = 'calc(-1 * (var(--cell-size) + var(--cell-gap)))';
+})();
+</script>
