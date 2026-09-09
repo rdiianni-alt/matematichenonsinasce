@@ -436,17 +436,29 @@
   const numberWords = ['zero','uno','due','tre','quattro','cinque','sei','sette','otto','nove','dieci',
     'undici','dodici','tredici','quattordici','quindici','sedici','diciassette','diciotto','diciannove','venti'];
 
+  // Genera "count" distrattori distinti vicini a "correct", entro [min,max].
+  // Allarga la finestra di ricerca finché non trova abbastanza candidati:
+  // niente più cicli random che possono girare all'infinito sui numeri limite (es. 0, 10, 20).
+  function pickDistractors(correct, min, max, count, spread){
+    let s = spread;
+    while(true){
+      const lo = Math.max(min, correct-s), hi = Math.min(max, correct+s);
+      const candidates = [];
+      for(let d=lo; d<=hi; d++){ if(d!==correct) candidates.push(d); }
+      if(candidates.length >= count || (lo<=min && hi>=max)){
+        return shuffle(candidates).slice(0,count);
+      }
+      s++;
+    }
+  }
+
   /* ---------- QUESTION GENERATORS ---------- */
   function genMissingLine(){
     const start = randInt(1,16);
     const seq = [start,start+1,start+2,start+3,start+4];
     const missingPos = randInt(0,4);
     const correct = seq[missingPos];
-    const distractors = new Set();
-    while(distractors.size<3){
-      const d = correct + randInt(-3,3);
-      if(d!==correct && d>=0 && d<=20) distractors.add(d);
-    }
+    const distractors = pickDistractors(correct, 0, 20, 3, 3);
     const options = shuffle([correct,...distractors]);
     const correctIndex = options.indexOf(correct);
     const visual = `<div class="numline">${seq.map((n,i)=> i===missingPos ? `<div class="nbox missing">❓</div>` : `<div class="nbox">${n}</div>`).join('')}</div>`;
@@ -456,11 +468,7 @@
   function genCountDots(){
     const n = randInt(1,10);
     const dots = Array.from({length:n}).map(()=> '<span class="dot"></span>').join('');
-    const distractors = new Set();
-    while(distractors.size<3){
-      const d = n + randInt(-2,2);
-      if(d!==n && d>=0 && d<=10) distractors.add(d);
-    }
+    const distractors = pickDistractors(n, 0, 10, 3, 2);
     const options = shuffle([n,...distractors]);
     const correctIndex = options.indexOf(n);
     return {category:'Conta e scrivi', prompt:'Conta i pallini: quanti sono in tutto?', visual:`<div class="dotsWrap">${dots}</div>`, type:'mc', options:options.map(String), correctIndex};
@@ -495,11 +503,7 @@
     let x, correct;
     if(mode==='prev'){ x = randInt(1,20); correct = x-1; }
     else { x = randInt(0,19); correct = x+1; }
-    const distractors = new Set();
-    while(distractors.size<3){
-      const d = correct + randInt(-2,2);
-      if(d!==correct && d>=0 && d<=20) distractors.add(d);
-    }
+    const distractors = pickDistractors(correct, 0, 20, 3, 2);
     const options = shuffle([correct,...distractors]);
     const correctIndex = options.indexOf(correct);
     const label = mode==='prev' ? 'PRECEDENTE (viene prima)' : 'SUCCESSIVO (viene dopo)';
@@ -527,8 +531,7 @@
   function genWordToDigit(){
     const n = randInt(0,20);
     const word = numberWords[n];
-    const distractors = new Set();
-    while(distractors.size<3){ const d=n+randInt(-3,3); if(d!==n&&d>=0&&d<=20) distractors.add(d); }
+    const distractors = pickDistractors(n, 0, 20, 3, 3);
     const options = shuffle([n,...distractors]);
     const correctIndex = options.indexOf(n);
     return {category:'Numeri in lettere', prompt:'Quale cifra corrisponde a questa parola?', visual:`<div class="bignum wordnum">"${word.toUpperCase()}"</div>`, type:'mc', options:options.map(String), correctIndex};
@@ -536,8 +539,7 @@
 
   function genDigitToWord(){
     const n = randInt(0,20);
-    const distractorIdx = new Set();
-    while(distractorIdx.size<3){ const d=n+randInt(-3,3); if(d!==n&&d>=0&&d<=20) distractorIdx.add(d); }
+    const distractorIdx = pickDistractors(n, 0, 20, 3, 3);
     const options = shuffle([n,...distractorIdx]).map(i=>numberWords[i]);
     const correctIndex = options.indexOf(numberWords[n]);
     return {category:'Numeri in lettere', prompt:'Come si scrive in lettere questo numero?', visual:`<div class="bignum">${n}</div>`, type:'mc', options, correctIndex};
