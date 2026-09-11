@@ -16,9 +16,25 @@ body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; min-height: 100
 .setup input { width: 110px; padding: 6px 10px; border: 2px solid #9b72d8; border-radius: 8px; font-size: 15px; text-align: center; }
 .setup button { padding: 7px 18px; background: #5c3d9e; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
 .setup button:hover { background: #7b52c4; }
+.landing { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70vh; padding: 20px; text-align: center; }
+.landing h1 { font-size: 18px; color: #333; margin: 6px 0 24px; }
+.landing-choices { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+.landing-card { background: #fff; border: 2px solid #9b72d8; border-radius: 14px; padding: 20px 26px; cursor: pointer; width: 220px; transition: background 0.15s, transform 0.15s; }
+.landing-card:hover { background: #f3ecff; transform: translateY(-2px); }
+.landing-card .grid-preview { display: grid; gap: 2px; margin: 0 auto 12px; }
+.landing-card .grid-preview span { background: #5c3d9e; border-radius: 2px; aspect-ratio: 1; }
+.landing-card h2 { font-size: 16px; color: #5c3d9e; margin-bottom: 6px; }
+.landing-card p { font-size: 12px; color: #666; }
+@media (max-width: 480px) {
+  .landing { min-height: 50vh; }
+  .landing h1 { font-size: 15px; }
+  .landing-card { width: 150px; padding: 14px 16px; }
+  .landing-card h2 { font-size: 13px; }
+  .landing-card p { font-size: 10px; }
+}
 .main { display: flex; gap: 14px; padding: 8px 14px; align-items: flex-start; justify-content: center; flex-wrap: wrap; }
 .grid-wrap { flex: 1; min-width: 300px; overflow-x: auto; }
-#grid { display: grid; grid-template-columns: repeat(20, 1fr); border: 2px solid #9b72d8; border-radius: 10px; overflow: hidden; }
+#grid { display: grid; grid-template-columns: repeat(var(--cols, 20), 1fr); border: 2px solid #9b72d8; border-radius: 10px; overflow: hidden; }
 .cell { border: 1px solid #d0bfee; min-height: 36px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; user-select: none; }
 .hdr  { background: #5c3d9e; color: #fff; font-size: 12px; min-height: 28px; }
 .hdr.sel { background: #f0a500; }
@@ -41,6 +57,16 @@ body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; min-height: 100
 .arr:disabled { opacity: 0.25; cursor: default; }
 .res-line { font-size: 14px; font-weight: 700; color: #333; margin: 3px 0; }
 .res-line span { color: #5c3d9e; }
+.denom-group { border: 2px solid #d0bfee; border-radius: 10px; padding: 6px 8px; margin-bottom: 8px; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+.denom-group:hover { background: #f8f4ff; }
+.denom-group.sel { border-color: #f0a500; background: #fff8e8; }
+.denom-label { font-size: 11px; font-weight: 700; color: #555; margin-bottom: 5px; }
+.denom-tokens { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.tok-fisico { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 8px; font-weight: 800; color: #fff; cursor: pointer; flex-shrink: 0; }
+.tok-fisico:hover { filter: brightness(1.15); transform: scale(1.08); }
+.tok-fisico.unita { cursor: default; }
+.tok-fisico.unita:hover { filter: none; transform: none; }
+.denom-more { font-size: 10px; color: #888; }
 .finale { margin-top: 8px; padding: 8px; border-radius: 8px; font-size: 13px; font-weight: 700; text-align: center; display: none; border: 2px solid; }
 .hint { font-size: 10px; color: #999; text-align: center; margin-top: 5px; }
 .bottom-bar { display: flex; gap: 12px; justify-content: center; padding: 8px; }
@@ -70,6 +96,10 @@ body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; min-height: 100
   .tqty { font-size: 11px; min-width: 14px; }
   .tlbl { font-size: 8px; }
   .arr { width: 20px; height: 20px; font-size: 11px; }
+  .denom-group { padding: 4px 6px; margin-bottom: 5px; }
+  .denom-label { font-size: 9px; margin-bottom: 3px; }
+  .tok-fisico { width: 18px; height: 18px; font-size: 6px; }
+  .denom-more { font-size: 8px; }
   .res-line { font-size: 12px; }
   .finale { font-size: 11px; padding: 6px; }
   .hint { font-size: 8px; }
@@ -78,6 +108,31 @@ body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; min-height: 100
 </style>
 </head>
 <body>
+
+<div class="landing" id="landing">
+  <div class="header" style="padding:0 0 6px;">
+    <a href="https://matematichenonsinasce.com/" target="_blank">
+      <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="Logo">
+      <span class="blog-name">Matematiche non si nasce</span>
+      <span style="font-size:16px;font-weight:800;color:#333;letter-spacing:0.5px;">La Tavola delle Divisioni</span>
+    </a>
+  </div>
+  <h1>Scegli la griglia da usare</h1>
+  <div class="landing-choices">
+    <div class="landing-card" onclick="scegliGriglia(20)">
+      <div class="grid-preview" id="prev-20" style="grid-template-columns:repeat(20,1fr);width:180px;"></div>
+      <h2>Griglia a 20 colonne</h2>
+      <p>Divisore fino a 20</p>
+    </div>
+    <div class="landing-card" onclick="scegliGriglia(10)">
+      <div class="grid-preview" id="prev-10" style="grid-template-columns:repeat(10,1fr);width:150px;"></div>
+      <h2>Griglia a 10 colonne</h2>
+      <p>Divisore fino a 10</p>
+    </div>
+  </div>
+</div>
+
+<div id="app" style="display:none;">
 
 <div class="header">
   <a href="https://matematichenonsinasce.com/" target="_blank">
@@ -96,7 +151,7 @@ body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; min-height: 100
 <div class="main">
   <div class="grid-wrap">
     <div id="grid"></div>
-    <div class="hint">① Scrivi il dividendo e clicca un numero nella prima riga → ② Avvia e vai in banca → ③ Seleziona un gettone dalla banca → ④ Clicca le celle e distribuisci i gettoni</div>
+    <div class="hint" id="hint">① Scrivi il dividendo e clicca un numero nella prima riga → ② Avvia e vai in banca → ③ Seleziona un gettone dalla banca → ④ Clicca le celle e distribuisci i gettoni</div>
   </div>
   <div class="side-panel">
     <div class="panel-box">
@@ -122,6 +177,8 @@ body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; min-height: 100
   <button class="btn btn-green" onclick="mostraRisultato()">✅ Risultato</button>
   <button class="btn" style="background:#e08800;" onclick="apriStampa()">🖨️ Versione stampabile</button>
   <button class="btn" style="background:#5c3d9e;" onclick="window.location.href='https://rdiianni-alt.github.io/matematichenonsinasce/'">🏠 Torna alla pagina iniziale</button>
+</div>
+
 </div>
 
 <script id="stampa-template" type="text/plain">
@@ -234,7 +291,7 @@ body { font-family: 'Segoe UI', sans-serif; background: #f0f0f0; }
 .istruzioni ol { padding-left: 4mm; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 4mm; }
 .istruzioni li { font-size: 7.5px; line-height: 1.4; margin-bottom: 1mm; }
 .griglia-wrap { border: 1.5px solid #9b72d8; border-radius: 4px; overflow: hidden; flex: 1; }
-.griglia { display: grid; grid-template-columns: repeat(20, 1fr); height: 100%; }
+.griglia { display: grid; grid-template-columns: repeat(${COLS}, 1fr); height: 100%; }
 .cella { border: 0.5px solid #d0bfee; display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 700; }
 .cella.hdr { background: #5c3d9e; color: #fff; }
 .risultato-box { border: 1px solid #9b72d8; border-radius: 4px; padding: 2mm 3mm; background: #f8f4ff; margin-top: 2mm; }
@@ -306,7 +363,7 @@ ${buildGettoniHTML()}
 function buildGrigliaHTML() {
   let cells = '';
   for (let r=0; r<=10; r++)
-    for (let c=0; c<20; c++)
+    for (let c=0; c<COLS; c++)
       cells += `<div class="cella ${r===0?'hdr':''}">${r===0?c+1:''}</div>`;
   return `<script>
     document.getElementById('griglia').innerHTML = '${cells}';
@@ -322,7 +379,8 @@ function buildGrigliaHTML() {
 
 function buildGettoniHTML() { return ''; }
 
-const COLS = 20;
+let COLS = 20;
+let FISICO = false;
 const TK = [
   {l:'Unità',        v:1,     c:'#5bc0de'},
   {l:'Decine',       v:10,    c:'#e87fb8'},
@@ -357,6 +415,7 @@ function mkCell(r, c) {
 }
 
 function buildGrid() {
+  gridEl.style.setProperty('--cols', COLS);
   gridEl.innerHTML = '';
   cells = [];
   totalRows = 10;
@@ -452,6 +511,7 @@ function aggiungiRighe(n) {
 }
 
 function renderPort() {
+  if (FISICO) { renderPortFisico(); return; }
   const el=document.getElementById('port');
   el.innerHTML='';
   let any=false;
@@ -477,6 +537,60 @@ function renderPort() {
     el.appendChild(row);
   });
   if(!any) el.innerHTML='<div class="sub">Portafoglio vuoto</div>';
+}
+
+// Modalità "gettoni fisici" (griglia a 10 colonne): ogni gettone è visibile
+// singolarmente. Un click sul gettone lo scompone fisicamente in 10 gettoni
+// del valore inferiore. Un click sul riquadro del tipo lo seleziona per
+// collocarlo nella griglia.
+const MAX_GETTONI_MOSTRATI = 40;
+
+function renderPortFisico() {
+  const el=document.getElementById('port');
+  el.innerHTML='';
+  let any=false;
+  TK.forEach((t,i)=>{
+    if(port[i]===0) return; any=true;
+    const group=document.createElement('div');
+    group.className='denom-group'+(selTok===i?' sel':'');
+    group.onclick=()=>{selTok=(selTok===i?-1:i);renderPort();renderSel();};
+
+    const label=document.createElement('div');
+    label.className='denom-label';
+    label.textContent=`${t.l} — ${port[i]}`;
+    group.appendChild(label);
+
+    const wrap=document.createElement('div');
+    wrap.className='denom-tokens';
+    const showN=Math.min(port[i],MAX_GETTONI_MOSTRATI);
+    for(let k=0;k<showN;k++){
+      const chip=document.createElement('div');
+      chip.className='tok-fisico'+(i===0?' unita':'');
+      chip.style.background=t.c;
+      chip.textContent=lbl(t.v);
+      if(i>0){
+        chip.title=`Clicca per scomporre in 10 ${TK[i-1].l.toLowerCase()}`;
+        chip.onclick=(e)=>{e.stopPropagation();spaccaGettone(i);};
+      }
+      wrap.appendChild(chip);
+    }
+    if(port[i]>MAX_GETTONI_MOSTRATI){
+      const more=document.createElement('span');
+      more.className='denom-more';
+      more.textContent=`+${port[i]-MAX_GETTONI_MOSTRATI}`;
+      wrap.appendChild(more);
+    }
+    group.appendChild(wrap);
+    el.appendChild(group);
+  });
+  if(!any) el.innerHTML='<div class="sub">Portafoglio vuoto</div>';
+}
+
+function spaccaGettone(i) {
+  if(i-1<0||port[i]<1) return;
+  port[i]--; port[i-1]+=10;
+  if(selTok===i&&port[i]===0) selTok=-1;
+  renderPort(); renderSel();
 }
 
 function renderSel() {
@@ -559,7 +673,24 @@ function reset() {
   buildGrid();
 }
 
-buildGrid();
+function riempiAnteprima(id, n) {
+  const el = document.getElementById(id);
+  el.innerHTML = '';
+  for (let i=0; i<n; i++) el.appendChild(document.createElement('span'));
+}
+riempiAnteprima('prev-20', 20);
+riempiAnteprima('prev-10', 10);
+
+function scegliGriglia(n) {
+  COLS = n;
+  FISICO = (n === 10);
+  document.getElementById('hint').textContent = FISICO
+    ? '① Scrivi il dividendo e clicca un numero nella prima riga → ② Avvia e vai in banca → ③ Clicca il riquadro del gettone che vuoi usare → ④ Clicca le celle per collocarlo (clicca su un gettone per scomporlo in 10 di valore inferiore)'
+    : '① Scrivi il dividendo e clicca un numero nella prima riga → ② Avvia e vai in banca → ③ Seleziona un gettone dalla banca → ④ Clicca le celle e distribuisci i gettoni';
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('app').style.display = '';
+  buildGrid();
+}
 </script>
 </body>
 </html>
