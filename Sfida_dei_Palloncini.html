@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sfida dei Palloncini</title>
+<style>
+:root{
+  --bg:#f5f4ef;
+  --accent:#e10600;
+  --testo:#2e2b26;
+}
+*{ box-sizing:border-box; margin:0; padding:0; }
+html,body{ width:100%; height:100%; overflow:hidden; background:var(--bg); font-family:Arial, sans-serif; color:var(--testo); }
+
+#logo-wrap{
+  position:fixed; top:1vh; left:50%; transform:translateX(-50%);
+  z-index:3000; display:flex; flex-direction:column; align-items:center; gap:2px;
+  cursor:pointer; text-decoration:none;
+}
+#logo-wrap img{ width:60px; height:60px; border-radius:50%; object-fit:contain; }
+#logo-wrap span{ font-size:0.65rem; font-weight:700; color:var(--testo); text-align:center; white-space:nowrap; }
+
+/* ---------- SCHERMATA IMPOSTAZIONI ---------- */
+#setup{
+  position:fixed; inset:0; z-index:2000; overflow-y:auto;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2vh;
+  padding:9vh 4vw 3vh;
+}
+#setup h1{ font-size:clamp(1.2rem,3.6vmin,1.9rem); text-align:center; }
+.colonne-setup{ display:flex; gap:3vw; flex-wrap:wrap; justify-content:center; width:100%; }
+.pannello-setup{
+  background:white; border:2px solid var(--accent); border-radius:6px;
+  padding:clamp(12px,2.4vmin,20px); width:min(320px,42vw); min-width:230px;
+  display:flex; flex-direction:column; gap:10px;
+}
+.pannello-setup h2{ font-size:clamp(0.85rem,2.2vmin,1.05rem); text-align:center; text-transform:uppercase; letter-spacing:0.5px; }
+.pannello-setup label{ font-size:clamp(0.65rem,1.6vmin,0.78rem); font-weight:700; text-transform:uppercase; letter-spacing:0.3px; }
+.pannello-setup select{
+  width:100%; padding:clamp(6px,1.4vmin,9px); border:2px solid #ccc7ba; border-radius:4px;
+  font-size:clamp(0.8rem,2vmin,0.95rem); background:var(--bg); color:var(--testo);
+}
+.velocita-setup{ display:flex; flex-direction:column; align-items:center; gap:6px; }
+.velocita-setup label{ font-size:clamp(0.65rem,1.6vmin,0.78rem); font-weight:700; text-transform:uppercase; letter-spacing:0.3px; }
+.velocita-setup select{
+  padding:clamp(6px,1.4vmin,9px) clamp(14px,2.6vmin,20px); border:2px solid #ccc7ba; border-radius:4px;
+  font-size:clamp(0.8rem,2vmin,0.95rem); background:white;
+}
+#btn-inizia{
+  padding:clamp(9px,1.8vmin,13px) clamp(28px,5vmin,44px);
+  border-radius:4px; border:none; background:var(--accent); color:white;
+  font-size:clamp(0.9rem,2.2vmin,1.05rem); font-weight:700; cursor:pointer; text-transform:uppercase; letter-spacing:0.5px;
+}
+#btn-inizia:hover{ background:#b80500; }
+
+/* ---------- SCHERMATA DI GIOCO ---------- */
+#gioco{ display:none; position:fixed; inset:0; }
+.colonna{
+  position:absolute; top:0; bottom:0; width:50%;
+  display:flex; flex-direction:column; align-items:center;
+}
+#colonna-1{ left:0; border-right:2px dashed #d8d2c4; }
+#colonna-2{ right:0; }
+
+.pannello-op{
+  margin-top:9vh; display:flex; align-items:center; gap:clamp(8px,2vw,18px);
+  padding:0 2vw;
+}
+.timer-cerchio{
+  width:clamp(30px,6vmin,46px); height:clamp(30px,6vmin,46px); border-radius:50%;
+  background:conic-gradient(var(--accent) 360deg, #e4e0d8 0deg);
+  flex-shrink:0; position:relative;
+}
+.timer-cerchio::after{
+  content:''; position:absolute; inset:4px; border-radius:50%; background:var(--bg);
+}
+.operazione{
+  font-size:clamp(1.1rem,4.2vmin,2.1rem); font-weight:700; white-space:nowrap;
+}
+.area-palloncini{
+  position:relative; flex:1; width:100%; overflow:hidden;
+}
+.punteggio{
+  font-size:clamp(0.7rem,1.8vmin,0.95rem); font-weight:700; text-transform:uppercase;
+  letter-spacing:0.4px; padding:clamp(6px,1.4vmin,12px) 0 clamp(50px,9vh,80px);
+}
+
+.palloncino{
+  position:absolute; border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700; color:white; cursor:pointer; user-select:none;
+  box-shadow: inset -6px -6px 10px rgba(0,0,0,0.15), inset 6px 6px 10px rgba(255,255,255,0.28);
+}
+.palloncino::after{
+  content:''; position:absolute; bottom:-12px; left:50%; width:2px; height:12px;
+  background:rgba(0,0,0,0.22); transform:translateX(-50%);
+}
+@keyframes trema{
+  0%,100%{ transform:translateX(0); } 20%{ transform:translateX(-7px); }
+  40%{ transform:translateX(7px); } 60%{ transform:translateX(-5px); } 80%{ transform:translateX(5px); }
+}
+.palloncino.trema{ animation:trema 0.4s; }
+@keyframes scoppia{
+  0%{ transform:scale(1); opacity:1; } 55%{ transform:scale(1.4); opacity:0.7; } 100%{ transform:scale(0.2); opacity:0; }
+}
+.palloncino.scoppia{ animation:scoppia 0.35s ease-out forwards; pointer-events:none; }
+
+.esatto-flottante{
+  position:absolute; color:var(--accent); font-weight:700; font-size:clamp(0.85rem,2vmin,1.1rem);
+  pointer-events:none; animation:sale-e-svanisce 0.7s ease-out forwards;
+}
+@keyframes sale-e-svanisce{
+  0%{ transform:translateY(0); opacity:1; } 100%{ transform:translateY(-40px); opacity:0; }
+}
+
+#barra-gioco{
+  position:fixed; bottom:1.5vh; left:50%; transform:translateX(-50%); z-index:1000;
+  display:flex; gap:clamp(6px,1.4vw,14px);
+}
+.btn-ui{
+  padding:clamp(6px,1.2vmin,10px) clamp(12px,2.2vmin,22px);
+  font-size:clamp(0.7rem,1.7vmin,0.9rem); font-weight:700;
+  background:white; border:2px solid var(--accent); color:var(--accent);
+  border-radius:4px; cursor:pointer; text-transform:uppercase; letter-spacing:0.3px;
+}
+.btn-ui:hover{ background:#fbeceb; }
+
+#info-overlay{
+  display:none; position:fixed; inset:0; z-index:5000;
+  background:rgba(46,43,38,0.4); align-items:center; justify-content:center;
+}
+#info-box{
+  background:white; border-radius:6px; max-width:min(480px,90vw); width:90%;
+  max-height:80vh; overflow-y:auto; padding:clamp(16px,3vmin,24px) clamp(16px,3vmin,28px);
+  position:relative; line-height:1.55;
+}
+#info-box h2{ font-size:clamp(1rem,3vmin,1.3rem); margin-bottom:10px; }
+#info-box p{ font-size:clamp(0.75rem,1.8vmin,0.9rem); margin-bottom:8px; }
+#info-chiudi{
+  position:absolute; top:10px; right:10px; width:28px; height:28px;
+  border-radius:50%; border:2px solid var(--accent); background:white; color:var(--accent);
+  font-size:0.9rem; cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<a id="logo-wrap" href="https://matematichenonsinasce.com/">
+  <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Logo" />
+  <span>Matematiche non si nasce</span>
+</a>
+
+<div id="setup">
+  <h1>🎈 Sfida dei Palloncini</h1>
+  <div class="colonne-setup">
+    <div class="pannello-setup">
+      <h2>Squadra 1</h2>
+      <label>Operazione</label>
+      <select id="tipo-1">
+        <option value="add">Addizione</option>
+        <option value="sub">Sottrazione</option>
+        <option value="mul">Moltiplicazione</option>
+        <option value="div">Divisione</option>
+      </select>
+      <label>Livello</label>
+      <select id="range-1"></select>
+    </div>
+    <div class="pannello-setup">
+      <h2>Squadra 2</h2>
+      <label>Operazione</label>
+      <select id="tipo-2">
+        <option value="add">Addizione</option>
+        <option value="sub">Sottrazione</option>
+        <option value="mul">Moltiplicazione</option>
+        <option value="div">Divisione</option>
+      </select>
+      <label>Livello</label>
+      <select id="range-2"></select>
+    </div>
+  </div>
+  <div class="velocita-setup">
+    <label>Velocità dei palloncini</label>
+    <select id="velocita">
+      <option value="lenta">Lenta</option>
+      <option value="media" selected>Media</option>
+      <option value="veloce">Veloce</option>
+    </select>
+  </div>
+  <button id="btn-inizia">Inizia ▶</button>
+</div>
+
+<div id="gioco">
+  <div class="colonna" id="colonna-1">
+    <div class="pannello-op">
+      <div class="timer-cerchio" id="timer-1"></div>
+      <div class="operazione" id="op-testo-1">–</div>
+    </div>
+    <div class="area-palloncini" id="area-1"></div>
+    <div class="punteggio" id="punteggio-1">RISPOSTE ESATTE: 0</div>
+  </div>
+  <div class="colonna" id="colonna-2">
+    <div class="pannello-op">
+      <div class="timer-cerchio" id="timer-2"></div>
+      <div class="operazione" id="op-testo-2">–</div>
+    </div>
+    <div class="area-palloncini" id="area-2"></div>
+    <div class="punteggio" id="punteggio-2">RISPOSTE ESATTE: 0</div>
+  </div>
+</div>
+
+<div id="barra-gioco" style="display:none">
+  <button class="btn-ui" id="btn-ricomincia">Nuova partita</button>
+  <button class="btn-ui" id="btn-info">Istruzioni</button>
+</div>
+
+<div id="info-overlay">
+  <div id="info-box">
+    <button id="info-chiudi">✕</button>
+    <h2>🎈 Come si gioca</h2>
+    <p>Per ciascuna squadra si sceglie il tipo di operazione (addizione, sottrazione, moltiplicazione o divisione) e il livello di difficoltà, oltre a una velocità comune per i palloncini.</p>
+    <p>Sopra ogni metà dello schermo compare un'operazione. Dai palloncini che salgono bisogna toccare quello con il risultato esatto: se è corretto il palloncino scoppia e ne parte subito una nuova; se è sbagliato il palloncino trema e resta in gioco, così si può riprovare.</p>
+    <p>Il cerchietto accanto all'operazione indica il tempo a disposizione: se scade senza risposta corretta, parte comunque una nuova operazione, senza punto.</p>
+    <p>In basso, per ogni squadra, viene tenuto il conto delle risposte esatte.</p>
+  </div>
+</div>
+
+<script>
+/* ---------- Config velocità ---------- */
+const VELOCITA = {
+  lenta:  { attraversamento: 11, tempoOp: 20000 },
+  media:  { attraversamento: 7,  tempoOp: 13000 },
+  veloce: { attraversamento: 4,  tempoOp: 8500  }
+};
+const COLORI = ['#e07a5f','#3d5a80','#81b29a','#f2cc8f','#9b5de5'];
+
+let velocitaGlobale = 'media';
+let giocoAttivo = false;
+let statoA = null, statoB = null;
+let ultimoTs = null;
+
+/* ---------- utilità ---------- */
+function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+  return arr;
+}
+function generaDistrattori(corretto, quanti, minVal){
+  const risultati = new Set();
+  const deltas = shuffle([1,-1,2,-2,3,-3,4,-4,5,-5,10,-10]);
+  for(const d of deltas){
+    const v = corretto+d;
+    if(v>=minVal && v!==corretto && !risultati.has(v)) risultati.add(v);
+    if(risultati.size>=quanti) break;
+  }
+  let tentativi=0;
+  while(risultati.size<quanti && tentativi<80){
+    const v = Math.max(minVal, corretto + randInt(-12,12));
+    if(v!==corretto) risultati.add(v);
+    tentativi++;
+  }
+  return Array.from(risultati).slice(0,quanti);
+}
+
+/* ---------- generazione operazioni ---------- */
+function generaOperazione(cfg){
+  let a,b,f1,f2,divisore,quoziente,dividendo,testo,risultato;
+  if(cfg.tipo==='add'){
+    const R=cfg.range;
+    a=randInt(1,R-1); b=randInt(1,R-a);
+    risultato=a+b; testo=`${a} + ${b} =`;
+  } else if(cfg.tipo==='sub'){
+    const R=cfg.range;
+    a=randInt(2,R); b=randInt(1,a-1);
+    risultato=a-b; testo=`${a} - ${b} =`;
+  } else if(cfg.tipo==='mul'){
+    if(cfg.range==='mix'){ f1=randInt(2,10); } else { f1=cfg.range; }
+    f2=randInt(1,10);
+    if(Math.random()<0.5){ const t=f1; f1=f2; f2=t; }
+    risultato=f1*f2; testo=`${f1} × ${f2} =`;
+  } else {
+    divisore = cfg.range==='mix' ? randInt(2,10) : cfg.range;
+    quoziente = randInt(1,10);
+    dividendo = divisore*quoziente;
+    risultato = quoziente; testo=`${dividendo} ÷ ${divisore} =`;
+  }
+  return { testo, risultato };
+}
+
+/* ---------- pannello impostazioni: opzioni dinamiche ---------- */
+function popolaRange(indice){
+  const tipo = document.getElementById('tipo-'+indice).value;
+  const sel = document.getElementById('range-'+indice);
+  sel.innerHTML='';
+  if(tipo==='add'||tipo==='sub'){
+    [20,50,100].forEach(v=>{
+      const o=document.createElement('option'); o.value=v; o.textContent='Entro il '+v; sel.appendChild(o);
+    });
+  } else {
+    const oMix=document.createElement('option'); oMix.value='mix'; oMix.textContent='Tabelline miste (2–10)'; sel.appendChild(oMix);
+    for(let n=2;n<=10;n++){ const o=document.createElement('option'); o.value=n; o.textContent='Tabellina del '+n; sel.appendChild(o); }
+  }
+}
+document.getElementById('tipo-1').addEventListener('change',()=>popolaRange(1));
+document.getElementById('tipo-2').addEventListener('change',()=>popolaRange(2));
+popolaRange(1); popolaRange(2);
+
+/* ---------- stato di colonna ---------- */
+function creaStato(indice, tipo, range){
+  return {
+    tipo, range,
+    testoEl: document.getElementById('op-testo-'+indice),
+    timerEl: document.getElementById('timer-'+indice),
+    punteggioEl: document.getElementById('punteggio-'+indice),
+    areaEl: document.getElementById('area-'+indice),
+    punteggio: 0,
+    palloncini: [],
+    operazione: null,
+    tempoTotale: 0,
+    tempoRimanente: 0
+  };
+}
+
+function pulisciPalloncini(st){
+  st.palloncini.forEach(p=>p.el.remove());
+  st.palloncini=[];
+}
+
+function pallonSize(){
+  return Math.round(Math.min(window.innerWidth,window.innerHeight)*0.11);
+}
+
+function creaPalloncinoEl(st,val,indice,totale){
+  const size=pallonSize();
+  const el=document.createElement('div');
+  el.className='palloncino';
+  el.textContent=val;
+  const colore=COLORI[indice % COLORI.length];
+  el.style.cssText=`width:${size}px;height:${size}px;background:${colore};font-size:${Math.max(0.8,size/48)}rem`;
+  const areaW=st.areaEl.clientWidth, areaH=st.areaEl.clientHeight;
+  const x=randInt(4, Math.max(4, areaW-size-4));
+  const y=areaH + indice*(areaH/totale) + randInt(0,40);
+  el.style.left=x+'px'; el.style.top=y+'px';
+  st.areaEl.appendChild(el);
+  const obj={ el, val, x, y, size, popped:false };
+  el.addEventListener('pointerdown', e=>{ e.preventDefault(); gestisciClickPalloncino(st,obj); });
+  return obj;
+}
+
+function mostraEsatto(st,x,y){
+  const d=document.createElement('div');
+  d.className='esatto-flottante'; d.textContent='Esatto!';
+  d.style.left=x+'px'; d.style.top=y+'px';
+  st.areaEl.appendChild(d);
+  setTimeout(()=>d.remove(),700);
+}
+
+function gestisciClickPalloncino(st,obj){
+  if(obj.popped) return;
+  if(obj.val===st.operazione.risultato){
+    obj.popped=true;
+    obj.el.classList.add('scoppia');
+    mostraEsatto(st, obj.x+obj.size/2-20, obj.y);
+    setTimeout(()=>nuovaOperazione(st,true), 350);
+  } else {
+    obj.el.classList.remove('trema');
+    void obj.el.offsetWidth;
+    obj.el.classList.add('trema');
+    setTimeout(()=>obj.el.classList.remove('trema'),400);
+  }
+}
+
+function nuovaOperazione(st, corretto){
+  if(corretto){
+    st.punteggio++;
+    st.punteggioEl.textContent='RISPOSTE ESATTE: '+st.punteggio;
+  }
+  pulisciPalloncini(st);
+  st.operazione = generaOperazione({ tipo:st.tipo, range:st.range });
+  st.testoEl.textContent = st.operazione.testo;
+  const cfgVel = VELOCITA[velocitaGlobale];
+  st.tempoTotale = cfgVel.tempoOp;
+  st.tempoRimanente = st.tempoTotale;
+  const valori = shuffle([st.operazione.risultato, ...generaDistrattori(st.operazione.risultato,4,0)]);
+  st.palloncini = valori.map((v,i)=>creaPalloncinoEl(st,v,i,valori.length));
+}
+
+function aggiornaStato(st,dt){
+  st.tempoRimanente -= dt;
+  const perc = Math.max(0, Math.min(1, st.tempoRimanente/st.tempoTotale));
+  st.timerEl.style.background = `conic-gradient(var(--accent) ${perc*360}deg, #e4e0d8 0deg)`;
+  if(st.tempoRimanente<=0){ nuovaOperazione(st,false); return; }
+  const areaH = st.areaEl.clientHeight;
+  const cfgVel = VELOCITA[velocitaGlobale];
+  const pxPerSec = areaH / cfgVel.attraversamento;
+  st.palloncini.forEach(p=>{
+    if(p.popped) return;
+    p.y -= pxPerSec*dt/1000;
+    if(p.y < -p.size){
+      p.y = areaH + randInt(0,60);
+      p.x = randInt(4, Math.max(4, st.areaEl.clientWidth-p.size-4));
+      p.el.style.left = p.x+'px';
+    }
+    p.el.style.top = p.y+'px';
+  });
+}
+
+function loop(ts){
+  if(ultimoTs==null) ultimoTs=ts;
+  const dt = Math.min(50, ts-ultimoTs);
+  ultimoTs = ts;
+  if(giocoAttivo){
+    aggiornaStato(statoA,dt);
+    aggiornaStato(statoB,dt);
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ---------- avvio / reset ---------- */
+function leggiRange(indice){
+  const val = document.getElementById('range-'+indice).value;
+  return val==='mix' ? 'mix' : parseInt(val,10);
+}
+
+document.getElementById('btn-inizia').addEventListener('click',()=>{
+  velocitaGlobale = document.getElementById('velocita').value;
+  statoA = creaStato(1, document.getElementById('tipo-1').value, leggiRange(1));
+  statoB = creaStato(2, document.getElementById('tipo-2').value, leggiRange(2));
+  document.getElementById('setup').style.display='none';
+  document.getElementById('gioco').style.display='block';
+  document.getElementById('barra-gioco').style.display='flex';
+  giocoAttivo=true; ultimoTs=null;
+  requestAnimationFrame(()=>{ nuovaOperazione(statoA,false); nuovaOperazione(statoB,false); });
+});
+
+document.getElementById('btn-ricomincia').addEventListener('click',()=>{
+  giocoAttivo=false;
+  if(statoA) pulisciPalloncini(statoA);
+  if(statoB) pulisciPalloncini(statoB);
+  document.getElementById('gioco').style.display='none';
+  document.getElementById('barra-gioco').style.display='none';
+  document.getElementById('setup').style.display='flex';
+});
+
+document.getElementById('btn-info').addEventListener('click',()=>{
+  document.getElementById('info-overlay').style.display='flex';
+});
+document.getElementById('info-chiudi').addEventListener('click',()=>{
+  document.getElementById('info-overlay').style.display='none';
+});
+
+window.addEventListener('resize',()=>{
+  // le posizioni si adattano dinamicamente nel loop, nulla da rifare qui
+});
+</script>
+</body>
+</html>
