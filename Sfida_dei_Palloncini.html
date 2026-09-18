@@ -125,6 +125,28 @@ html,body{ width:100%; height:100%; overflow:hidden; background:var(--bg); font-
 }
 .btn-ui:hover{ background:#fbeceb; }
 
+#risultati{
+  display:none; position:fixed; inset:0; z-index:2500;
+  flex-direction:column; align-items:center; justify-content:center; gap:2.5vh;
+  background:var(--bg); padding:9vh 4vw 3vh;
+}
+#risultati h1{ font-size:clamp(1.1rem,3.4vmin,1.7rem); text-align:center; }
+.punteggi-finali{ display:flex; gap:4vw; flex-wrap:wrap; justify-content:center; }
+.punteggio-finale{
+  background:white; border:2px solid var(--accent); border-radius:6px;
+  padding:clamp(14px,2.6vmin,22px) clamp(20px,4vmin,32px); text-align:center; min-width:150px;
+}
+.punteggio-finale h3{ font-size:clamp(0.75rem,1.8vmin,0.95rem); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:8px; }
+.punteggio-finale .numero{ font-size:clamp(1.6rem,5vmin,2.6rem); font-weight:700; color:var(--accent); }
+.punteggio-finale.vincitrice{ background:#fdf3e7; }
+#risultati-esito{ font-size:clamp(0.9rem,2.2vmin,1.1rem); font-weight:700; text-align:center; }
+#btn-nuova-partita{
+  padding:clamp(9px,1.8vmin,13px) clamp(28px,5vmin,44px);
+  border-radius:4px; border:none; background:var(--accent); color:white;
+  font-size:clamp(0.9rem,2.2vmin,1.05rem); font-weight:700; cursor:pointer; text-transform:uppercase; letter-spacing:0.5px;
+}
+#btn-nuova-partita:hover{ background:#b80500; }
+
 #info-overlay{
   display:none; position:fixed; inset:0; z-index:5000;
   background:rgba(46,43,38,0.4); align-items:center; justify-content:center;
@@ -209,8 +231,24 @@ html,body{ width:100%; height:100%; overflow:hidden; background:var(--bg); font-
 </div>
 
 <div id="barra-gioco" style="display:none">
-  <button class="btn-ui" id="btn-ricomincia">Nuova partita</button>
+  <button class="btn-ui" id="btn-fine">Fine partita</button>
   <button class="btn-ui" id="btn-info">Istruzioni</button>
+</div>
+
+<div id="risultati">
+  <h1>🎈 Partita conclusa</h1>
+  <div class="punteggi-finali">
+    <div class="punteggio-finale" id="finale-1">
+      <h3>Squadra 1</h3>
+      <div class="numero" id="finale-numero-1">0</div>
+    </div>
+    <div class="punteggio-finale" id="finale-2">
+      <h3>Squadra 2</h3>
+      <div class="numero" id="finale-numero-2">0</div>
+    </div>
+  </div>
+  <div id="risultati-esito"></div>
+  <button id="btn-nuova-partita">Nuova partita</button>
 </div>
 
 <div id="info-overlay">
@@ -433,12 +471,30 @@ document.getElementById('btn-inizia').addEventListener('click',()=>{
   requestAnimationFrame(()=>{ nuovaOperazione(statoA,false); nuovaOperazione(statoB,false); });
 });
 
-document.getElementById('btn-ricomincia').addEventListener('click',()=>{
+document.getElementById('btn-fine').addEventListener('click',()=>{
   giocoAttivo=false;
   if(statoA) pulisciPalloncini(statoA);
   if(statoB) pulisciPalloncini(statoB);
   document.getElementById('gioco').style.display='none';
   document.getElementById('barra-gioco').style.display='none';
+  mostraRisultati();
+});
+
+function mostraRisultati(){
+  const p1 = statoA ? statoA.punteggio : 0;
+  const p2 = statoB ? statoB.punteggio : 0;
+  document.getElementById('finale-numero-1').textContent = p1;
+  document.getElementById('finale-numero-2').textContent = p2;
+  document.getElementById('finale-1').classList.toggle('vincitrice', p1>p2);
+  document.getElementById('finale-2').classList.toggle('vincitrice', p2>p1);
+  const esitoEl = document.getElementById('risultati-esito');
+  if(p1===p2) esitoEl.textContent = 'Pareggio!';
+  else esitoEl.textContent = (p1>p2 ? 'Squadra 1' : 'Squadra 2') + ' ha totalizzato più risposte esatte!';
+  document.getElementById('risultati').style.display='flex';
+}
+
+document.getElementById('btn-nuova-partita').addEventListener('click',()=>{
+  document.getElementById('risultati').style.display='none';
   document.getElementById('setup').style.display='flex';
 });
 
