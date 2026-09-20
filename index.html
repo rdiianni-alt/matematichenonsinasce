@@ -149,27 +149,6 @@
   .printall:hover{border-color:var(--red);color:var(--red);box-shadow:0 6px 18px rgba(200,29,37,.14);}
   .printall svg{width:18px;height:18px;}
 
-  /* Foglio stampabile: invisibile a schermo, unica cosa che va in stampa */
-  #printsheet{display:none;}
-  @media print{
-    @page{size:A4 portrait;margin:10mm;}
-    body{background:#fff;}
-    .wrap>*,.player,.sitehead,.hero,.gallery-tools{display:none !important;}
-    #printsheet{display:block !important;font-family:'Poppins',system-ui,sans-serif;color:#1A1A1A;}
-    #printsheet .ph{display:flex;align-items:baseline;gap:10px;border-bottom:2px solid #C81D25;padding-bottom:6px;margin-bottom:10px;}
-    #printsheet .ph h1{font-family:'Newsreader',Georgia,serif;font-weight:600;font-size:19pt;margin:0;}
-    #printsheet .ph span{font-size:8pt;color:#6A6A6A;margin-left:auto;}
-    #printsheet .cols{column-count:3;column-gap:7mm;}
-    #printsheet .pg{break-inside:avoid;margin:0 0 5mm;}
-    #printsheet .pg h2{font-size:9.5pt;font-weight:700;margin:0 0 2mm;padding:1.2mm 2.5mm;border-radius:2mm;
-      background:#FBEDEE;color:#C81D25;text-transform:uppercase;letter-spacing:.4px;}
-    #printsheet .pg.green h2{background:#EAF4EF;color:#2C7A57;}
-    #printsheet ul{margin:0;padding:0;list-style:none;}
-    #printsheet li{font-size:8.6pt;line-height:1.42;padding-left:3.2mm;position:relative;break-inside:avoid;}
-    #printsheet li:before{content:"·";position:absolute;left:0.6mm;color:#C81D25;font-weight:700;}
-    #printsheet li i{font-style:normal;color:#8A8A8A;font-size:7.6pt;}
-    #printsheet .pf{margin-top:3mm;padding-top:2mm;border-top:1px solid #ECECEC;font-size:7.6pt;color:#6A6A6A;text-align:center;}
-  }
 
   /* Player overlay */
   .player{position:fixed;inset:0;z-index:60;display:none;background:#fff;}
@@ -208,8 +187,6 @@
     </div>
   </div>
 </div>
-
-<div id="printsheet"></div>
 
 <div class="player" id="player">
   <iframe id="frame" title="Gioco"></iframe>
@@ -592,7 +569,6 @@
   // Foglio da stampare: tutti i giochi, divisi per argomento, su una pagina sola
   let PRINT_HTML = "";
   function buildPrintSheet(games){
-    const sheet = document.getElementById("printsheet");
     const oggi = new Date().toLocaleDateString("it-IT", {day:"numeric", month:"long", year:"numeric"});
     let html = '<div class="ph"><h1>I giochi di matematichenonsinasce</h1>' +
       '<span>' + games.length + ' giochi · aggiornato al ' + oggi + '</span></div><div class="cols">';
@@ -609,48 +585,43 @@
     });
     html += '</div><div class="pf">matematichenonsinasce.com · giochi gratuiti da usare alla LIM</div>';
     PRINT_HTML = html;
-    if(sheet) sheet.innerHTML = html;
   }
 
-  // Apre una finestra a parte con SOLO l'elenco e la manda in stampa:
-  // così, anche quando la pagina è incorporata nel blog, l'intestazione
-  // del blog non finisce nel foglio.
+  // Apre un documento AUTONOMO (nessuno stile o intestazione del blog)
+  // con solo l'elenco, già pronto per la stampa.
   function stampaElenco(){
-    const css = [...document.querySelectorAll("style")].map(s => s.textContent).join("\n");
-    const w = window.open("", "_blank");
-    if(!w){ window.print(); return; }
-    w.document.write('<!DOCTYPE html><html lang="it"><head><meta charset="utf-8">' +
+    const doc = '<!DOCTYPE html><html lang="it"><head><meta charset="utf-8">' +
       '<title>Elenco giochi · matematichenonsinasce</title>' +
       '<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">' +
-      '<style>' + css + '#printsheet{display:block !important;padding:14mm;}' +
-      'body{margin:0;background:#fff;font-family:Poppins,system-ui,sans-serif;color:#1A1A1A;}' +
-      '#printsheet .ph{display:flex;align-items:baseline;gap:10px;border-bottom:2px solid #C81D25;padding-bottom:6px;margin-bottom:10px;}' +
-      '#printsheet .ph h1{font-family:Newsreader,Georgia,serif;font-weight:600;font-size:19pt;margin:0;}' +
-      '#printsheet .ph span{font-size:8pt;color:#6A6A6A;margin-left:auto;}' +
-      '#printsheet .cols{column-count:3;column-gap:7mm;}' +
-      '#printsheet .pg{break-inside:avoid;margin:0 0 5mm;}' +
-      '#printsheet .pg h2{font-size:9.5pt;font-weight:700;margin:0 0 2mm;padding:1.2mm 2.5mm;border-radius:2mm;background:#FBEDEE;color:#C81D25;text-transform:uppercase;letter-spacing:.4px;}' +
-      '#printsheet .pg.green h2{background:#EAF4EF;color:#2C7A57;}' +
-      '#printsheet ul{margin:0;padding:0;list-style:none;}' +
-      '#printsheet li{font-size:8.6pt;line-height:1.42;padding-left:3.2mm;position:relative;break-inside:avoid;}' +
-      '#printsheet li:before{content:"·";position:absolute;left:0.6mm;color:#C81D25;font-weight:700;}' +
-      '#printsheet li i{font-style:normal;color:#8A8A8A;font-size:7.6pt;}' +
-      '#printsheet .pf{margin-top:3mm;padding-top:2mm;border-top:1px solid #ECECEC;font-size:7.6pt;color:#6A6A6A;text-align:center;}' +
-      '@page{size:A4 portrait;margin:10mm;}@media print{#printsheet{padding:0;}}' +
-      '</style></head><body><div id="printsheet">' + PRINT_HTML + '</div></body></html>');
-    w.document.close();
-    w.focus();
-    setTimeout(() => { try{ w.print(); }catch(e){} }, 600);
+      '<style>' +
+      '*{box-sizing:border-box;}' +
+      'html,body{margin:0;background:#fff;font-family:Poppins,system-ui,sans-serif;color:#1A1A1A;}' +
+      '.sheet{max-width:200mm;margin:0 auto;padding:12mm;}' +
+      '.ph{display:flex;align-items:baseline;gap:10px;border-bottom:2px solid #C81D25;padding-bottom:6px;margin-bottom:10px;}' +
+      '.ph h1{font-family:Newsreader,Georgia,serif;font-weight:600;font-size:19pt;margin:0;}' +
+      '.ph span{font-size:8pt;color:#6A6A6A;margin-left:auto;}' +
+      '.cols{column-count:3;column-gap:7mm;}' +
+      '.pg{break-inside:avoid;margin:0 0 5mm;}' +
+      '.pg h2{font-size:9.5pt;font-weight:700;margin:0 0 2mm;padding:1.2mm 2.5mm;border-radius:2mm;background:#FBEDEE;color:#C81D25;text-transform:uppercase;letter-spacing:.4px;}' +
+      '.pg.green h2{background:#EAF4EF;color:#2C7A57;}' +
+      'ul{margin:0;padding:0;list-style:none;}' +
+      'li{font-size:8.6pt;line-height:1.42;padding-left:3.2mm;position:relative;break-inside:avoid;}' +
+      'li:before{content:"·";position:absolute;left:0.6mm;color:#C81D25;font-weight:700;}' +
+      'li i{font-style:normal;color:#8A8A8A;font-size:7.6pt;}' +
+      '.pf{margin-top:3mm;padding-top:2mm;border-top:1px solid #ECECEC;font-size:7.6pt;color:#6A6A6A;text-align:center;}' +
+      '@page{size:A4 portrait;margin:10mm;}' +
+      '@media print{.sheet{padding:0;max-width:none;}}' +
+      '</style></head><body><div class="sheet">' + PRINT_HTML + '</div>' +
+      '<script>window.addEventListener("load",function(){setTimeout(function(){window.print();},500);});<\/script>' +
+      '</body></html>';
+    const url = URL.createObjectURL(new Blob([doc], {type:"text/html"}));
+    const a = document.createElement("a");
+    a.href = url; a.target = "_blank"; a.rel = "noopener";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
   }
-  // Scorciatoia riservata: un clic sul badge grigio "Stampabile" (in alto, nell'intro)
-  // stampa l'elenco completo dei giochi. Non è annunciata da nessuna parte.
-  (function scorciatoiaStampa(){
-    const badge = [...document.querySelectorAll(".hero p span")]
-      .find(s => /stampabile/i.test(s.textContent));
-    if(!badge) return;
-    badge.style.cursor = "default";
-    badge.addEventListener("click", stampaElenco);
-  })();
 
   function showSkeleton(){
     grid.innerHTML = "";
