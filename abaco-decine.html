@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L'abaco trasparente</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #faf6ee;
+    --ink: #2b2118;
+    --ink-soft: #6b5c4a;
+    --legno-chiaro: #b9814f;
+    --legno-scuro: #7a4f2c;
+    --legno-ombra: #5e3a1e;
+    --unita: #e2572b;
+    --unita-shine: #ffb08e;
+    --decina-bordo: rgba(43, 33, 24, 0.28);
+    --accent: #d9a441;
+    --accent-ink: #4a3006;
+    --surface: #fffdf8;
+    --grid-line: rgba(43, 33, 24, 0.07);
+    --danger: #b23a2e;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--bg);
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 28px 28px;
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 16px 40px;
+  }
+
+  #logo-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    text-decoration: none;
+    margin-bottom: 12px;
+  }
+  #logo-wrap img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: contain;
+  }
+  #logo-wrap span {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  header { text-align: center; max-width: 480px; margin-bottom: 4px; }
+  h1 {
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 700;
+    font-size: clamp(22px, 5vw, 30px);
+    margin: 0 0 6px;
+  }
+  .sottotitolo { color: var(--ink-soft); font-size: 14px; line-height: 1.5; margin: 0; }
+
+  .palco {
+    background: var(--surface);
+    border-radius: 22px;
+    padding: 30px 26px 20px;
+    margin-top: 20px;
+    box-shadow: 0 10px 30px rgba(43, 33, 24, 0.10);
+    border: 1px solid var(--grid-line);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    width: 100%;
+    max-width: 420px;
+  }
+
+  /* --- il telaio in legno: due stanghette verticali, una traversa in alto e una base in basso --- */
+  .telaio {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .colonne {
+    display: flex;
+    gap: 64px;
+    align-items: flex-end;
+    padding: 0 18px;
+  }
+  .colonna { position: relative; display: flex; flex-direction: column; align-items: center; }
+
+  .rod-area {
+    position: relative;
+    width: 86px;
+    height: calc(34px * 9 + 5px * 8 + 14px);
+    display: flex;
+    justify-content: center;
+  }
+  .stanghetta {
+    width: 10px;
+    height: 100%;
+    background: linear-gradient(90deg, var(--legno-scuro), var(--legno-chiaro) 45%, var(--legno-scuro));
+    border-radius: 5px;
+    box-shadow: 0 0 0 1px var(--legno-ombra) inset;
+  }
+  .palline-container {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .pallina { flex-shrink: 0; display: flex; align-items: center; justify-content: center; animation: comparsa 260ms cubic-bezier(.34,1.56,.64,1); }
+  .pallina.unita {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: radial-gradient(circle at 32% 28%, var(--unita-shine), var(--unita) 62%);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.18);
+  }
+  .pallina.decina {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    border: 2px solid var(--decina-bordo);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 1.5px;
+    padding: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.12);
+  }
+  .pallina.decina .puntino { width: 100%; height: 100%; border-radius: 50%; background: var(--unita); }
+
+  @keyframes comparsa { from { transform: scale(0.15); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+  .pallina.raggruppa { animation: raggruppa 480ms ease-in forwards; }
+  @keyframes raggruppa {
+    0% { transform: scale(1); opacity: 1; }
+    60% { transform: scale(0.8) translateX(-30px); opacity: 0.6; }
+    100% { transform: scale(0.2) translateX(-70px); opacity: 0; }
+  }
+  .pallina.sbriciola { animation: sbriciola 420ms ease-out forwards; }
+  @keyframes sbriciola {
+    0% { transform: scale(1) translateX(0); opacity: 1; }
+    40% { transform: scale(1.15); opacity: 0.9; }
+    100% { transform: scale(0.2) translateX(70px); opacity: 0; }
+  }
+
+  .base-legno {
+    width: calc(100% + 24px);
+    height: 22px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--legno-chiaro) 0px, var(--legno-chiaro) 10px,
+      var(--legno-scuro) 10px, var(--legno-scuro) 12px
+    );
+    border-radius: 6px;
+    box-shadow: 0 3px 0 var(--legno-ombra), 0 6px 10px rgba(43,33,24,0.18);
+    margin-top: -2px;
+  }
+
+  .etichette {
+    display: flex;
+    gap: 64px;
+    padding: 0 18px;
+    margin-top: -6px;
+  }
+  .etichette .colonna-info { width: 86px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .etichette span { font-size: 13px; font-weight: 600; color: var(--ink-soft); }
+  .etichette .cifra { font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 24px; color: var(--ink); }
+
+  .stato { min-height: 18px; font-size: 13px; color: var(--ink-soft); text-align: center; }
+  .stato.pieno { color: var(--danger); font-weight: 600; }
+
+  .controlli { display: flex; gap: 12px; margin-top: 2px; flex-wrap: wrap; justify-content: center; }
+  button.azione {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600; font-size: 15px;
+    border: none; border-radius: 14px;
+    padding: 13px 20px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: transform 120ms ease, filter 120ms ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button.azione:active { transform: scale(0.96); }
+  button.azione:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  #aggiungi { background: var(--accent); color: var(--accent-ink); }
+  #aggiungi:not(:disabled):hover { filter: brightness(1.05); }
+  #togli { background: transparent; color: var(--ink); border: 1.5px solid var(--grid-line); }
+  #togli:not(:disabled):hover { border-color: var(--ink-soft); }
+  #reset { background: transparent; color: var(--ink-soft); font-size: 13px; padding: 13px 14px; }
+  #reset:hover { color: var(--ink); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pallina, .pallina.raggruppa, .pallina.sbriciola { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<a id="logo-wrap" href="https://matematichenonsinasce.com/">
+  <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Logo" />
+  <span>Matematiche non si nasce</span>
+</a>
+
+<header>
+  <h1>L'abaco trasparente</h1>
+  <p class="sottotitolo">Ogni volta che le unità arrivano a dieci, si trasformano in una decina.</p>
+</header>
+
+<div class="palco">
+  <div class="telaio">
+    <div class="colonne">
+      <div class="colonna">
+        <div class="rod-area">
+          <div class="stanghetta"></div>
+          <div class="palline-container" id="decine-palline"></div>
+        </div>
+      </div>
+      <div class="colonna">
+        <div class="rod-area">
+          <div class="stanghetta"></div>
+          <div class="palline-container" id="unita-palline"></div>
+        </div>
+      </div>
+    </div>
+    <div class="base-legno"></div>
+  </div>
+  <div class="etichette">
+    <div class="colonna-info">
+      <span>decine</span>
+      <b class="cifra" id="decine-numero">0</b>
+    </div>
+    <div class="colonna-info">
+      <span>unità</span>
+      <b class="cifra" id="unita-numero">0</b>
+    </div>
+  </div>
+
+  <div class="stato" id="stato" aria-live="polite">Il numero formato è 0.</div>
+
+  <div class="controlli">
+    <button class="azione" id="togli" aria-label="Togli una pallina">− Togli</button>
+    <button class="azione" id="aggiungi" aria-label="Aggiungi una pallina">+ Aggiungi</button>
+  </div>
+  <button class="azione" id="reset">Ricomincia</button>
+</div>
+
+<script>
+(function () {
+  var decine = 0, unita = 0;
+  var animando = false;
+  var MAX_DECINE = 9;
+
+  var elDecinePalline = document.getElementById('decine-palline');
+  var elUnitaPalline = document.getElementById('unita-palline');
+  var elDecineNumero = document.getElementById('decine-numero');
+  var elUnitaNumero = document.getElementById('unita-numero');
+  var elStato = document.getElementById('stato');
+  var btnAggiungi = document.getElementById('aggiungi');
+  var btnTogli = document.getElementById('togli');
+  var btnReset = document.getElementById('reset');
+
+  function creaBundle() {
+    var bundle = document.createElement('div');
+    bundle.className = 'pallina decina';
+    for (var i = 0; i < 10; i++) {
+      var dot = document.createElement('div');
+      dot.className = 'puntino';
+      bundle.appendChild(dot);
+    }
+    return bundle;
+  }
+
+  function creaUnitaria() {
+    var b = document.createElement('div');
+    b.className = 'pallina unita';
+    return b;
+  }
+
+  function renderCompleto() {
+    elDecinePalline.innerHTML = '';
+    for (var i = 0; i < decine; i++) elDecinePalline.appendChild(creaBundle());
+    elUnitaPalline.innerHTML = '';
+    for (var j = 0; j < unita; j++) elUnitaPalline.appendChild(creaUnitaria());
+    aggiornaNumeri();
+  }
+
+  function aggiornaNumeri() {
+    elDecineNumero.textContent = decine;
+    elUnitaNumero.textContent = unita;
+    var totale = decine * 10 + unita;
+    elStato.textContent = 'Il numero formato è ' + totale + '.';
+    elStato.classList.remove('pieno');
+    btnAggiungi.disabled = animando || (decine === MAX_DECINE && unita === 9);
+    btnTogli.disabled = animando || (decine === 0 && unita === 0);
+    if (decine === MAX_DECINE && unita === 9) {
+      elStato.textContent = 'Abaco pieno a ' + totale + '. Prova a togliere una pallina.';
+      elStato.classList.add('pieno');
+    }
+  }
+
+  function aggiungi() {
+    if (animando) return;
+    if (decine === MAX_DECINE && unita === 9) return;
+
+    if (unita < 9) {
+      unita++;
+      elUnitaPalline.appendChild(creaUnitaria());
+      aggiornaNumeri();
+      return;
+    }
+
+    animando = true;
+    btnAggiungi.disabled = true;
+    btnTogli.disabled = true;
+    elUnitaPalline.appendChild(creaUnitaria());
+    elStato.textContent = 'Dieci unità! Si forma una decina...';
+
+    setTimeout(function () {
+      var palline = elUnitaPalline.querySelectorAll('.pallina');
+      palline.forEach(function (p) { p.classList.add('raggruppa'); });
+
+      setTimeout(function () {
+        unita = 0;
+        decine++;
+        elUnitaPalline.innerHTML = '';
+        elDecinePalline.appendChild(creaBundle());
+        animando = false;
+        aggiornaNumeri();
+      }, 480);
+    }, 260);
+  }
+
+  function togli() {
+    if (animando) return;
+    if (decine === 0 && unita === 0) return;
+
+    if (unita > 0) {
+      unita--;
+      var palline = elUnitaPalline.querySelectorAll('.pallina');
+      var ultima = palline[palline.length - 1];
+      if (ultima) ultima.remove();
+      aggiornaNumeri();
+      return;
+    }
+
+    animando = true;
+    btnAggiungi.disabled = true;
+    btnTogli.disabled = true;
+    elStato.textContent = 'Scomponiamo una decina in dieci unità...';
+
+    var bundles = elDecinePalline.querySelectorAll('.pallina');
+    var ultimoBundle = bundles[bundles.length - 1];
+    if (ultimoBundle) ultimoBundle.classList.add('sbriciola');
+
+    setTimeout(function () {
+      decine--;
+      unita = 10;
+      if (ultimoBundle) ultimoBundle.remove();
+      elUnitaPalline.innerHTML = '';
+      for (var i = 0; i < 10; i++) elUnitaPalline.appendChild(creaUnitaria());
+
+      setTimeout(function () {
+        unita = 9;
+        var palline = elUnitaPalline.querySelectorAll('.pallina');
+        var ultima = palline[palline.length - 1];
+        if (ultima) ultima.remove();
+        animando = false;
+        aggiornaNumeri();
+      }, 260);
+    }, 420);
+  }
+
+  function reset() {
+    if (animando) return;
+    decine = 0;
+    unita = 0;
+    renderCompleto();
+  }
+
+  btnAggiungi.addEventListener('click', aggiungi);
+  btnTogli.addEventListener('click', togli);
+  btnReset.addEventListener('click', reset);
+
+  renderCompleto();
+})();
+</script>
+</body>
+</html>
