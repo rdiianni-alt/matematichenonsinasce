@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le Cannucce delle Decine e Unità</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --red:#e10600;
+    --ink:#2b2b2b;
+    --muted:#5f5e5a;
+    --sea:#1f6fb2;
+    --sea-light:#eaf5fb;
+    --aqua:#bfe3ef;
+    --success:#2e9e5b;
+    --error:#c0392b;
+    --straw-default:#b9c4cb;
+    --group1:#e10600;
+    --group2:#1f6fb2;
+    --band:#8a6240;
+    --success-bg:#e5f6ec;
+    --error-bg:#fbe9e7;
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    font-family:'Quicksand', system-ui, sans-serif;
+    background:#ffffff;
+    color:var(--ink);
+    margin:0;
+    padding:14px 14px 24px;
+  }
+
+  .logo-wrap{display:flex;justify-content:center;margin-bottom:2px;}
+  .logo{display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;}
+  .logo img{width:40px;height:40px;object-fit:contain;border-radius:50%;}
+  .logo span{font-size:12px;color:var(--muted);}
+
+  h1{
+    text-align:center;
+    font-weight:700;
+    font-size:21px;
+    margin:2px 0 1px;
+    color:var(--ink);
+  }
+  .subtitle{
+    text-align:center;
+    color:var(--muted);
+    margin:0 0 10px;
+    font-size:13px;
+  }
+
+  .tabs{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    margin-bottom:10px;
+    flex-wrap:wrap;
+  }
+  .tab-btn{
+    border:2px solid var(--sea);
+    background:#fff;
+    color:var(--sea);
+    padding:10px 20px;
+    border-radius:999px;
+    font-family:inherit;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:background .15s, color .15s;
+  }
+  .tab-btn.active{background:var(--sea); color:#fff;}
+  .tab-btn:hover{opacity:.9;}
+
+  .panel{display:none; max-width:780px; margin:0 auto;}
+  .panel.active{display:block;}
+
+  .instructions{
+    text-align:center;
+    color:var(--muted);
+    font-size:13px;
+    margin-bottom:10px;
+    line-height:1.4;
+  }
+
+  .score-bar{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:16px;
+    margin-bottom:10px;
+    font-size:14px;
+    flex-wrap:wrap;
+  }
+  .score{padding:4px 12px; border-radius:10px; background:var(--success-bg); font-weight:600;}
+  .score.wrong{background:var(--error-bg);}
+  .link-btn{
+    background:none;
+    border:none;
+    color:var(--muted);
+    text-decoration:underline;
+    cursor:pointer;
+    font-size:12px;
+    font-family:inherit;
+  }
+
+  .target-display{
+    text-align:center;
+    font-size:19px;
+    font-weight:700;
+    color:var(--sea);
+    margin-bottom:10px;
+  }
+
+  .game-area{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:20px;
+    background:var(--sea-light);
+    border-radius:22px;
+    padding:16px 16px 14px;
+    margin-bottom:12px;
+    flex-wrap:wrap;
+  }
+
+  .cups-row{display:flex; gap:24px; flex-wrap:wrap; justify-content:center;}
+  .cup-block{display:flex; flex-direction:column; align-items:center;}
+
+  .cup{
+    position:relative;
+    width:350px;
+    height:340px;
+    border:3px solid var(--sea);
+    border-top:none;
+    border-radius:0 0 26px 26px;
+    background:linear-gradient(180deg, rgba(191,227,239,.35), rgba(191,227,239,.7));
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    flex-wrap:wrap-reverse;
+    align-content:flex-start;
+    gap:8px 8px;
+    padding:14px 10px 10px;
+    overflow:visible;
+  }
+  .cup::before{
+    content:'';
+    position:absolute;
+    top:-3px; left:-3px; right:-3px;
+    height:10px;
+    background:#fff;
+    border:3px solid var(--sea);
+    border-bottom:none;
+    border-radius:8px 8px 0 0;
+  }
+
+  .cup-label{margin-top:10px; font-weight:700; color:var(--ink); font-size:16px;}
+
+  /* single straw (unit) */
+  .straw{
+    width:11px;
+    height:100px;
+    background:var(--straw-default);
+    border-radius:6px 6px 2px 2px;
+    cursor:pointer;
+    transition:background .15s;
+  }
+  .straw.g1{background:var(--group1);}
+  .straw.g2{background:var(--group2);}
+
+  /* bundle of ten */
+  .bundle{position:relative; width:58px; height:150px; cursor:pointer;}
+  .bundle .straw-line{
+    position:absolute;
+    bottom:0;
+    left:50%;
+    width:3px;
+    height:116px;
+    margin-left:-1.5px;
+    background:var(--straw-default);
+    border-radius:4px;
+    transform-origin:50% calc(100% - 26px);
+  }
+  .bundle.g1 .straw-line{background:var(--group1);}
+  .bundle.g2 .straw-line{background:var(--group2);}
+  .bundle .band{
+    position:absolute;
+    bottom:22px; left:-2px; right:-2px;
+    height:10px;
+    background:var(--band);
+    border-radius:4px;
+    transform:rotate(-2deg);
+    z-index:2;
+  }
+
+  .bundle-rows{
+    position:relative;
+    width:100%; height:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    align-items:center;
+    gap:8px;
+  }
+  .bundle-row{
+    display:flex;
+    justify-content:center;
+    align-items:flex-end;
+    gap:8px;
+    width:100%;
+    min-height:150px;
+  }
+  .bundle-extra{
+    position:absolute;
+    left:50%; top:50%;
+    transform:translate(-50%, -50%);
+    z-index:5;
+    filter:drop-shadow(0 3px 4px rgba(0,0,0,.3));
+  }
+
+  .side-controls{display:flex; flex-direction:column; gap:10px; flex-wrap:nowrap;}
+  .icon-btn{
+    width:46px; height:46px;
+    border-radius:50%;
+    border:none;
+    background:#fff;
+    box-shadow:0 2px 6px rgba(0,0,0,.15);
+    font-size:20px;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .1s;
+    flex-shrink:0;
+  }
+  .icon-btn:hover{transform:scale(1.08);}
+  .icon-btn:active{transform:scale(.95);}
+
+  .answer-row{display:flex; flex-direction:column; align-items:center; gap:10px;}
+  .answer-box{
+    min-width:90px; min-height:44px;
+    border:3px solid var(--sea);
+    border-radius:12px;
+    font-size:24px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    background:#fff;
+    padding:0 14px;
+  }
+
+  .keypad{
+    display:flex;
+    flex-wrap:nowrap;
+    gap:5px;
+    justify-content:center;
+  }
+  .key-btn{
+    width:38px; height:42px;
+    flex-shrink:0;
+    border-radius:9px;
+    border:2px solid var(--sea);
+    background:#fff;
+    color:var(--sea);
+    font-size:16px; font-weight:700;
+    cursor:pointer;
+    padding:0;
+  }
+  .key-btn:hover{background:var(--sea); color:#fff;}
+
+  .check-btn{
+    background:var(--success);
+    color:#fff;
+    border:none;
+    padding:10px 28px;
+    border-radius:999px;
+    font-size:16px; font-weight:700;
+    cursor:pointer;
+    box-shadow:0 3px 8px rgba(0,0,0,.15);
+    display:block;
+    margin:0 auto;
+  }
+  .check-btn:hover{filter:brightness(1.06);}
+
+  .feedback{
+    text-align:center;
+    font-size:16px; font-weight:700;
+    margin-top:8px;
+    min-height:22px;
+  }
+  .feedback.correct{color:var(--success);}
+  .feedback.wrong{color:var(--error);}
+
+  .stepper{display:flex; align-items:center; gap:10px; margin-top:12px; font-size:18px; font-weight:700;}
+  .step-btn{
+    width:40px; height:40px;
+    border-radius:50%;
+    border:2px solid var(--sea);
+    background:#fff;
+    color:var(--sea);
+    font-size:20px; font-weight:700;
+    cursor:pointer;
+  }
+  .step-btn:hover{background:var(--sea); color:#fff;}
+  .step-btn:disabled{opacity:.3; cursor:not-allowed; background:#fff; color:var(--sea);}
+
+  footer{text-align:center; color:var(--muted); font-size:11px; margin-top:18px;}
+
+  @media (max-width:820px){
+    .cup{width:260px; height:280px;}
+    .bundle{width:44px; height:120px;}
+    .bundle .straw-line{height:92px;}
+    .bundle .band{bottom:18px;}
+    .bundle-row{min-height:120px;}
+    .cups-row{gap:14px;}
+    .game-area{flex-direction:column; gap:12px; padding:14px 10px 12px;}
+    .side-controls{flex-direction:row;}
+  }
+  @media (max-width:420px){
+    .key-btn{width:30px; height:38px; font-size:14px;}
+    .keypad{gap:3px;}
+  }
+</style>
+</head>
+<body>
+
+  <div class="logo-wrap">
+    <a class="logo" href="https://matematichenonsinasce.com/" target="_blank" rel="noopener">
+      <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Matematiche non si nasce">
+      <span>Matematiche non si nasce</span>
+    </a>
+  </div>
+
+  <h1>Le Cannucce delle Decine e Unità</h1>
+  <p class="subtitle">Gioca con i fasci di cannucce per riconoscere e comporre i numeri</p>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="recognize">🔍 Riconosci le quantità</button>
+    <button class="tab-btn" data-tab="compose">🧩 Componi le quantità</button>
+  </nav>
+
+  <!-- GIOCO 1: RICONOSCI LE QUANTITÀ -->
+  <section id="panel-recognize" class="panel active">
+    <p class="instructions">Osserva quante decine (fasci da 10) e quante unità (cannucce singole) sono apparse nei bicchieri.<br>Tocca le cannucce per contarle, poi scrivi il numero con la tastiera.</p>
+
+    <div class="score-bar">
+      <span class="score">✅ Esatti: <b id="r-correct">0</b></span>
+      <span class="score wrong">❌ Errati: <b id="r-wrong">0</b></span>
+      <button class="link-btn" id="r-reset-score">Azzera punteggio</button>
+    </div>
+
+    <div class="game-area">
+      <div class="cups-row">
+        <div class="cup-block">
+          <div class="cup" id="r-cup-tens"></div>
+          <div class="cup-label">Decine</div>
+        </div>
+        <div class="cup-block">
+          <div class="cup" id="r-cup-units"></div>
+          <div class="cup-label">Unità</div>
+        </div>
+      </div>
+      <div class="side-controls">
+        <button class="icon-btn" id="r-new" title="Nuovo numero">🎲</button>
+        <button class="icon-btn" id="r-clear-colors" title="Pulisci i colori">🧽</button>
+        <button class="icon-btn" id="r-speak" title="Ascolta il numero">🔊</button>
+        <button class="icon-btn" id="r-clear-answer" title="Cancella la risposta">🗑️</button>
+      </div>
+    </div>
+
+    <div class="answer-row">
+      <div class="answer-box" id="r-answer">&nbsp;</div>
+      <div class="keypad" id="r-keypad"></div>
+      <button class="check-btn" id="r-check">Verifica ✔</button>
+    </div>
+    <div class="feedback" id="r-feedback"></div>
+  </section>
+
+  <!-- GIOCO 2: COMPONI LE QUANTITÀ -->
+  <section id="panel-compose" class="panel">
+    <p class="instructions">Riempi i bicchieri con il numero esatto di decine e unità richiesto.<br>Usa i pulsanti + e − sotto ogni bicchiere, poi verifica.</p>
+
+    <div class="score-bar">
+      <span class="score">✅ Esatti: <b id="c-correct">0</b></span>
+      <span class="score wrong">❌ Errati: <b id="c-wrong">0</b></span>
+      <button class="link-btn" id="c-reset-score">Azzera punteggio</button>
+    </div>
+
+    <div class="target-display" id="c-target">— decine e — unità</div>
+
+    <div class="game-area">
+      <div class="cups-row">
+        <div class="cup-block">
+          <div class="cup" id="c-cup-tens"></div>
+          <div class="cup-label">Decine</div>
+          <div class="stepper">
+            <button class="step-btn minus" data-target="tens">−</button>
+            <span id="c-tens-count">0</span>
+            <button class="step-btn plus" data-target="tens">+</button>
+          </div>
+        </div>
+        <div class="cup-block">
+          <div class="cup" id="c-cup-units"></div>
+          <div class="cup-label">Unità</div>
+          <div class="stepper">
+            <button class="step-btn minus" data-target="units">−</button>
+            <span id="c-units-count">0</span>
+            <button class="step-btn plus" data-target="units">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="side-controls">
+        <button class="icon-btn" id="c-new" title="Nuovo numero">🎲</button>
+        <button class="icon-btn" id="c-speak" title="Ascolta il numero">🔊</button>
+        <button class="icon-btn" id="c-undo" title="Annulla ultima mossa">↩️</button>
+        <button class="icon-btn" id="c-clear" title="Svuota i bicchieri">🗑️</button>
+      </div>
+    </div>
+
+    <button class="check-btn" id="c-check">Verifica ✔</button>
+    <div class="feedback" id="c-feedback"></div>
+  </section>
+
+  <footer>Creato per Matematiche non si nasce</footer>
+
+<script>
+(function(){
+  const TENS_ANGLES = [-27,-21,-15,-9,-3,3,9,15,21,27];
+
+  function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+  function speak(number){
+    if(!('speechSynthesis' in window)) return;
+    speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(String(number));
+    utter.lang = 'it-IT';
+    speechSynthesis.speak(utter);
+  }
+
+  function groupClass(idx, clickedArr){
+    const pos = clickedArr.indexOf(idx);
+    if(pos === -1) return '';
+    return pos < 5 ? 'g1' : 'g2';
+  }
+
+  function makeBundleEl(idx, clickedArr, onClick){
+    const item = document.createElement('div');
+    item.className = 'bundle';
+    const gc = groupClass(idx, clickedArr);
+    if(gc) item.classList.add(gc);
+    TENS_ANGLES.forEach(a=>{
+      const line = document.createElement('span');
+      line.className = 'straw-line';
+      line.style.transform = 'rotate(' + a + 'deg)';
+      item.appendChild(line);
+    });
+    const band = document.createElement('span');
+    band.className = 'band';
+    item.appendChild(band);
+    item.addEventListener('click', ()=> onClick(idx));
+    return item;
+  }
+
+  function renderUnitsCup(containerId, count, clickedArr, onClick){
+    const el = document.getElementById(containerId);
+    el.innerHTML = '';
+    for(let i=0;i<count;i++){
+      const item = document.createElement('div');
+      item.className = 'straw';
+      const gc = groupClass(i, clickedArr);
+      if(gc) item.classList.add(gc);
+      item.addEventListener('click', ()=> onClick(i));
+      el.appendChild(item);
+    }
+  }
+
+  function renderTensCup(containerId, count, clickedArr, onClick){
+    const el = document.getElementById(containerId);
+    el.innerHTML = '';
+    const wrap = document.createElement('div');
+    wrap.className = 'bundle-rows';
+    const rowTop = document.createElement('div');
+    rowTop.className = 'bundle-row row-top';
+    const rowBottom = document.createElement('div');
+    rowBottom.className = 'bundle-row row-bottom';
+    wrap.appendChild(rowTop);
+    wrap.appendChild(rowBottom);
+    el.appendChild(wrap);
+
+    const bottomCount = Math.min(count, 4);
+    const topCount = Math.min(Math.max(count - 4, 0), 4);
+    const hasExtra = count > 8;
+
+    for(let i=0;i<bottomCount;i++) rowBottom.appendChild(makeBundleEl(i, clickedArr, onClick));
+    for(let i=0;i<topCount;i++) rowTop.appendChild(makeBundleEl(4+i, clickedArr, onClick));
+    if(hasExtra){
+      const extraEl = makeBundleEl(8, clickedArr, onClick);
+      extraEl.classList.add('bundle-extra');
+      wrap.appendChild(extraEl);
+    }
+  }
+
+  function toggleClicked(arr, i){
+    const pos = arr.indexOf(i);
+    if(pos === -1) arr.push(i); else arr.splice(pos,1);
+  }
+
+  /* ---------------- GIOCO 1: RICONOSCI ---------------- */
+  const r_state = { tens:0, units:0, clickedTens:[], clickedUnits:[], answer:'' };
+  let r_correct = 0, r_wrong = 0;
+
+  function r_render(){
+    renderTensCup('r-cup-tens', r_state.tens, r_state.clickedTens, r_toggleTens);
+    renderUnitsCup('r-cup-units', r_state.units, r_state.clickedUnits, r_toggleUnits);
+    document.getElementById('r-answer').textContent = r_state.answer || '\u00A0';
+  }
+
+  function r_toggleTens(i){ toggleClicked(r_state.clickedTens, i); r_render(); }
+  function r_toggleUnits(i){ toggleClicked(r_state.clickedUnits, i); r_render(); }
+
+  function r_newRound(){
+    r_state.tens = randInt(0,9);
+    r_state.units = randInt(0,9);
+    r_state.clickedTens = [];
+    r_state.clickedUnits = [];
+    r_state.answer = '';
+    r_render();
+    const fb = document.getElementById('r-feedback');
+    fb.textContent = '';
+    fb.className = 'feedback';
+  }
+
+  const r_keypad = document.getElementById('r-keypad');
+  for(let d=0; d<=9; d++){
+    const b = document.createElement('button');
+    b.className = 'key-btn';
+    b.textContent = d;
+    b.addEventListener('click', ()=>{
+      if(r_state.answer.length < 2){
+        r_state.answer += d;
+        document.getElementById('r-answer').textContent = r_state.answer;
+      }
+    });
+    r_keypad.appendChild(b);
+  }
+  const r_back = document.createElement('button');
+  r_back.className = 'key-btn';
+  r_back.textContent = '⌫';
+  r_back.addEventListener('click', ()=>{
+    r_state.answer = r_state.answer.slice(0,-1);
+    document.getElementById('r-answer').textContent = r_state.answer || '\u00A0';
+  });
+  r_keypad.appendChild(r_back);
+
+  document.getElementById('r-check').addEventListener('click', ()=>{
+    const target = r_state.tens*10 + r_state.units;
+    const guess = parseInt(r_state.answer, 10);
+    const fb = document.getElementById('r-feedback');
+    if(isNaN(guess)){
+      fb.textContent = 'Scrivi un numero prima di verificare.';
+      fb.className = 'feedback wrong';
+      return;
+    }
+    if(guess === target){
+      r_correct++;
+      document.getElementById('r-correct').textContent = r_correct;
+      fb.textContent = 'Esatto!';
+      fb.className = 'feedback correct';
+      setTimeout(r_newRound, 1400);
+    } else {
+      r_wrong++;
+      document.getElementById('r-wrong').textContent = r_wrong;
+      fb.textContent = 'Non è esatto. Il numero era ' + target + '.';
+      fb.className = 'feedback wrong';
+      setTimeout(r_newRound, 2200);
+    }
+  });
+
+  document.getElementById('r-new').addEventListener('click', r_newRound);
+  document.getElementById('r-clear-colors').addEventListener('click', ()=>{
+    r_state.clickedTens = []; r_state.clickedUnits = []; r_render();
+  });
+  document.getElementById('r-speak').addEventListener('click', ()=> speak(r_state.tens*10 + r_state.units));
+  document.getElementById('r-clear-answer').addEventListener('click', ()=>{
+    r_state.answer = ''; document.getElementById('r-answer').textContent = '\u00A0';
+  });
+  document.getElementById('r-reset-score').addEventListener('click', ()=>{
+    r_correct = 0; r_wrong = 0;
+    document.getElementById('r-correct').textContent = 0;
+    document.getElementById('r-wrong').textContent = 0;
+  });
+
+  r_newRound();
+
+  /* ---------------- GIOCO 2: COMPONI ---------------- */
+  const c_state = { targetTens:0, targetUnits:0, curTens:0, curUnits:0, history:[] };
+  let c_correct = 0, c_wrong = 0;
+
+  function c_updateStepperButtons(){
+    document.querySelector('.step-btn.minus[data-target="tens"]').disabled = c_state.curTens <= 0;
+    document.querySelector('.step-btn.plus[data-target="tens"]').disabled = c_state.curTens >= 9;
+    document.querySelector('.step-btn.minus[data-target="units"]').disabled = c_state.curUnits <= 0;
+    document.querySelector('.step-btn.plus[data-target="units"]').disabled = c_state.curUnits >= 9;
+  }
+
+  function c_render(){
+    document.getElementById('c-target').textContent = c_state.targetTens + ' decine e ' + c_state.targetUnits + ' unità';
+    const tensArr = Array.from({length:c_state.curTens}, (_,i)=>i);
+    const unitsArr = Array.from({length:c_state.curUnits}, (_,i)=>i);
+    renderTensCup('c-cup-tens', c_state.curTens, tensArr, ()=>{});
+    renderUnitsCup('c-cup-units', c_state.curUnits, unitsArr, ()=>{});
+    document.getElementById('c-tens-count').textContent = c_state.curTens;
+    document.getElementById('c-units-count').textContent = c_state.curUnits;
+    c_updateStepperButtons();
+  }
+
+  function c_newTarget(){
+    c_state.targetTens = randInt(0,9);
+    c_state.targetUnits = randInt(0,9);
+    c_state.curTens = 0;
+    c_state.curUnits = 0;
+    c_state.history = [];
+    c_render();
+    const fb = document.getElementById('c-feedback');
+    fb.textContent = '';
+    fb.className = 'feedback';
+  }
+
+  function c_pushHistory(){
+    c_state.history.push({ tens: c_state.curTens, units: c_state.curUnits });
+    if(c_state.history.length > 50) c_state.history.shift();
+  }
+
+  document.querySelectorAll('.step-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const target = btn.dataset.target;
+      const isPlus = btn.classList.contains('plus');
+      c_pushHistory();
+      if(target === 'tens'){
+        c_state.curTens = Math.max(0, Math.min(9, c_state.curTens + (isPlus ? 1 : -1)));
+      } else {
+        c_state.curUnits = Math.max(0, Math.min(9, c_state.curUnits + (isPlus ? 1 : -1)));
+      }
+      c_render();
+    });
+  });
+
+  document.getElementById('c-undo').addEventListener('click', ()=>{
+    const prev = c_state.history.pop();
+    if(prev){ c_state.curTens = prev.tens; c_state.curUnits = prev.units; c_render(); }
+  });
+
+  document.getElementById('c-clear').addEventListener('click', ()=>{
+    c_pushHistory();
+    c_state.curTens = 0; c_state.curUnits = 0; c_render();
+  });
+
+  document.getElementById('c-new').addEventListener('click', c_newTarget);
+  document.getElementById('c-speak').addEventListener('click', ()=> speak(c_state.targetTens*10 + c_state.targetUnits));
+
+  document.getElementById('c-check').addEventListener('click', ()=>{
+    const fb = document.getElementById('c-feedback');
+    if(c_state.curTens === c_state.targetTens && c_state.curUnits === c_state.targetUnits){
+      c_correct++;
+      document.getElementById('c-correct').textContent = c_correct;
+      fb.textContent = 'Esatto!';
+      fb.className = 'feedback correct';
+      setTimeout(c_newTarget, 1400);
+    } else {
+      c_wrong++;
+      document.getElementById('c-wrong').textContent = c_wrong;
+      fb.textContent = 'Non corrisponde ancora. Controlla decine e unità.';
+      fb.className = 'feedback wrong';
+    }
+  });
+
+  document.getElementById('c-reset-score').addEventListener('click', ()=>{
+    c_correct = 0; c_wrong = 0;
+    document.getElementById('c-correct').textContent = 0;
+    document.getElementById('c-wrong').textContent = 0;
+  });
+
+  c_newTarget();
+
+  /* ---------------- TAB SWITCHING ---------------- */
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
