@@ -207,6 +207,117 @@
   @media (prefers-reduced-motion: reduce) {
     .pallina, .pallina.raggruppa, .pallina.sbriciola { animation: none !important; }
   }
+
+  .stampa-controlli {
+    display: flex;
+    gap: 10px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  button.azione.stampa {
+    background: transparent;
+    color: var(--ink-soft);
+    border: 1.5px dashed var(--grid-line);
+    font-size: 13px;
+    padding: 10px 16px;
+  }
+  button.azione.stampa:hover { color: var(--ink); border-color: var(--ink-soft); }
+
+  /* --- schede stampabili: nascoste a schermo, visibili solo in stampa --- */
+  .stampa-pagina { display: none; }
+
+  @page { size: A4 portrait; margin: 8mm; }
+
+  @media print {
+    body > *:not(.stampa-pagina) { display: none !important; }
+    body { background: #fff !important; }
+    .stampa-pagina {
+      display: block;
+      background: #fff;
+      color: #2b2118;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      color-adjust: exact;
+    }
+    .stampa-pagina * {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      color-adjust: exact;
+    }
+    .griglia-schede {
+      display: grid;
+      grid-template-columns: repeat(2, 82mm);
+      grid-auto-rows: 47mm;
+      gap: 3mm 6mm;
+      justify-content: center;
+    }
+    .scheda-card {
+      position: relative;
+      border: 0.4mm solid #999;
+      border-radius: 3mm;
+      padding: 2mm 2mm;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0.8mm;
+      break-inside: avoid;
+    }
+    .mini-logo {
+      position: absolute;
+      top: 1mm;
+      right: 1.5mm;
+      width: 5mm;
+      height: 5mm;
+      border-radius: 50%;
+      object-fit: contain;
+    }
+    .mini-telaio { display: flex; flex-direction: column; align-items: center; }
+    .mini-colonne { display: flex; gap: 12mm; align-items: flex-end; padding: 0 3mm; }
+    .mini-colonna { display: flex; flex-direction: column; align-items: center; }
+    .mini-rod {
+      position: relative;
+      width: 8mm;
+      height: 30mm;
+      display: flex;
+      justify-content: center;
+    }
+    .mini-stanghetta {
+      width: 2mm;
+      height: 100%;
+      background: #7a4f2c;
+      border-radius: 1mm;
+      box-shadow: 0 0 0 0.2mm #5e3a1e;
+    }
+    .mini-base {
+      width: calc(100% - 6mm);
+      height: 2.6mm;
+      margin-top: -0.5mm;
+      background: repeating-linear-gradient(
+        90deg,
+        #b9814f 0mm, #b9814f 1.6mm,
+        #7a4f2c 1.6mm, #7a4f2c 2mm
+      );
+      border-radius: 1mm;
+      box-shadow: 0 0.4mm 0 #5e3a1e;
+    }
+    .mini-palline {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: center;
+      gap: 0.6mm;
+      z-index: 1;
+    }
+    .mini-pallina { flex-shrink: 0; border-radius: 50%; }
+    .mini-pallina.unita { width: 3mm; height: 3mm; background: #fff; border: 0.4mm solid #7a4f2c; }
+    .mini-pallina.decina { width: 3mm; height: 3mm; background: #fff; border: 0.4mm dashed #7a4f2c; }
+    .mini-etichette { display: flex; gap: 12mm; font-size: 6.5pt; font-weight: 600; color: #6b5c4a; margin-top: 0.5mm; }
+    .mini-etichette span { width: 14mm; text-align: center; }
+    .mini-riga-numero { font-size: 7pt; color: #2b2118; margin-top: 1mm; }
+  }
 </style>
 </head>
 <body>
@@ -257,7 +368,14 @@
     <button class="azione" id="aggiungi" aria-label="Aggiungi una pallina">+ Aggiungi</button>
   </div>
   <button class="azione" id="reset">Ricomincia</button>
+
+  <div class="stampa-controlli">
+    <button class="azione stampa" id="stampa-vuota">🖨️ Scheda vuota (PDF)</button>
+    <button class="azione stampa" id="stampa-composizioni">🖨️ Scheda con palline (PDF)</button>
+  </div>
 </div>
+
+<div class="stampa-pagina" id="print-area"></div>
 
 <script>
 (function () {
@@ -391,6 +509,102 @@
     unita = 0;
     renderCompleto();
   }
+
+  // --- schede stampabili ---
+  var SCHEDE_PER_PAGINA = 10;
+
+  function miniPallina(tipo) {
+    var d = document.createElement('div');
+    d.className = 'mini-pallina ' + tipo;
+    return d;
+  }
+
+  function costruisciCard(comp) {
+    var card = document.createElement('div');
+    card.className = 'scheda-card';
+
+    var logo = document.createElement('img');
+    logo.className = 'mini-logo';
+    logo.src = 'https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png';
+    logo.alt = '';
+    card.appendChild(logo);
+
+    var telaio = document.createElement('div');
+    telaio.className = 'mini-telaio';
+
+    var colonne = document.createElement('div');
+    colonne.className = 'mini-colonne';
+
+    ['decina', 'unita'].forEach(function (tipo) {
+      var colonna = document.createElement('div');
+      colonna.className = 'mini-colonna';
+      var rod = document.createElement('div');
+      rod.className = 'mini-rod';
+      var stanghetta = document.createElement('div');
+      stanghetta.className = 'mini-stanghetta';
+      var palline = document.createElement('div');
+      palline.className = 'mini-palline';
+      rod.appendChild(stanghetta);
+      rod.appendChild(palline);
+      colonna.appendChild(rod);
+      colonne.appendChild(colonna);
+      if (comp) {
+        var n = tipo === 'decina' ? comp.decine : comp.unita;
+        for (var i = 0; i < n; i++) palline.appendChild(miniPallina(tipo));
+      }
+    });
+
+    telaio.appendChild(colonne);
+    var base = document.createElement('div');
+    base.className = 'mini-base';
+    telaio.appendChild(base);
+
+    card.appendChild(telaio);
+
+    var etichette = document.createElement('div');
+    etichette.className = 'mini-etichette';
+    etichette.innerHTML = '<span>decine</span><span>unità</span>';
+    card.appendChild(etichette);
+
+    if (comp) {
+      var riga = document.createElement('div');
+      riga.className = 'mini-riga-numero';
+      riga.textContent = 'Numero: ______';
+      card.appendChild(riga);
+    }
+
+    return card;
+  }
+
+  function generaComposizioni(n) {
+    var usati = {}, lista = [];
+    while (lista.length < n) {
+      var d = Math.floor(Math.random() * 10);
+      var u = Math.floor(Math.random() * 10);
+      if (d === 0 && u === 0) continue;
+      var chiave = d + '_' + u;
+      if (usati[chiave]) continue;
+      usati[chiave] = true;
+      lista.push({ decine: d, unita: u });
+    }
+    return lista;
+  }
+
+  function stampaScheda(conComposizioni) {
+    var pagina = document.getElementById('print-area');
+    pagina.innerHTML = '';
+    var griglia = document.createElement('div');
+    griglia.className = 'griglia-schede';
+    var lista = conComposizioni ? generaComposizioni(SCHEDE_PER_PAGINA) : null;
+    for (var i = 0; i < SCHEDE_PER_PAGINA; i++) {
+      griglia.appendChild(costruisciCard(conComposizioni ? lista[i] : null));
+    }
+    pagina.appendChild(griglia);
+    setTimeout(function () { window.print(); }, 50);
+  }
+
+  document.getElementById('stampa-vuota').addEventListener('click', function () { stampaScheda(false); });
+  document.getElementById('stampa-composizioni').addEventListener('click', function () { stampaScheda(true); });
 
   btnAggiungi.addEventListener('click', aggiungi);
   btnTogli.addEventListener('click', togli);
