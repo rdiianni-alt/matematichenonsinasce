@@ -121,6 +121,10 @@
     <h2>❓ Che numero è?</h2>
     <p>Si accende una pallina. Che numero è?</p>
   </div>
+  <div class="menu-card" onclick="startGame('semplice')">
+    <h2>⚪ Armadio semplice</h2>
+    <p>Colora le palline che vuoi, senza domande. Poi scopri quante sono.</p>
+  </div>
 </div>
 
 <div id="contaScreen" class="screen">
@@ -168,6 +172,16 @@
     <div class="hint" id="indovinaHint"></div>
     <button class="btn primary" id="indovinaRevBtn" onclick="revealIndovina()">Controlla!</button>
     <button class="btn" onclick="openPrintModal()">🖨️ Stampa scheda</button>
+  </div>
+</div>
+
+<div id="sempliceScreen" class="screen">
+  <button class="back-btn" onclick="goMenu()">← Menu</button>
+  <h1 class="game-title">Armadio semplice</h1>
+  <div class="grid" id="sempliceGrid"></div>
+  <div class="controls">
+    <button class="btn" onclick="resetSemplice()">🔄 Azzera</button>
+    <button class="btn primary" onclick="mostraRisultatoSemplice()">Mostra i numeri</button>
   </div>
 </div>
 
@@ -221,6 +235,7 @@
     document.getElementById('contaScreen').classList.remove('active');
     document.getElementById('trovaScreen').classList.remove('active');
     document.getElementById('indovinaScreen').classList.remove('active');
+    document.getElementById('sempliceScreen').classList.remove('active');
   }
 
   function startGame(g) {
@@ -228,6 +243,7 @@
     document.getElementById('contaScreen').classList.remove('active');
     document.getElementById('trovaScreen').classList.remove('active');
     document.getElementById('indovinaScreen').classList.remove('active');
+    document.getElementById('sempliceScreen').classList.remove('active');
     activeGame = g;
     if (g === 'conta') {
       document.getElementById('contaScreen').classList.add('active');
@@ -241,6 +257,10 @@
       document.getElementById('indovinaScreen').classList.add('active');
       buildGrid('indovinaGrid', 'i');
       newIndovina();
+    } else if (g === 'semplice') {
+      document.getElementById('sempliceScreen').classList.add('active');
+      buildGrid('sempliceGrid', 's');
+      resetSemplice();
     }
   }
 
@@ -374,6 +394,35 @@
     else txt = dec + (dec === 1 ? ' decina' : ' decine') + ' + ' + uni + ' unità';
     document.getElementById('indovinaHint').textContent = txt;
     document.getElementById('indovinaRevBtn').style.display = 'none';
+  }
+
+  function resetSemplice() {
+    for (var i = 0; i < 100; i++) {
+      var b = document.getElementById('s' + i);
+      if (b) {
+        b.className = 'ball';
+        b.textContent = '';
+        b.style.color = '';
+        b.onclick = (function (idx) {
+          return function () { toggleSemplice(idx); };
+        })(i);
+      }
+    }
+  }
+
+  function toggleSemplice(idx) {
+    var b = document.getElementById('s' + idx);
+    if (!b) return;
+    b.classList.toggle('on');
+  }
+
+  function mostraRisultatoSemplice() {
+    for (var i = 0; i < 100; i++) {
+      var b = document.getElementById('s' + i);
+      if (!b) continue;
+      b.textContent = i + 1;
+      b.style.color = '#000';
+    }
   }
 
   /* --- Stampa scheda PDF --- */
