@@ -181,7 +181,7 @@
   <div class="grid" id="sempliceGrid"></div>
   <div class="controls">
     <button class="btn" onclick="resetSemplice()">🔄 Azzera</button>
-    <button class="btn primary" onclick="mostraRisultatoSemplice()">Mostra i numeri</button>
+    <button class="btn primary" id="sempliceRevBtn" onclick="toggleNumeriSemplice()">Mostra i numeri</button>
   </div>
 </div>
 
@@ -396,7 +396,11 @@
     document.getElementById('indovinaRevBtn').style.display = 'none';
   }
 
+  var sempliceNumeriVisibili = false;
+
   function resetSemplice() {
+    sempliceNumeriVisibili = false;
+    document.getElementById('sempliceRevBtn').textContent = 'Mostra i numeri';
     for (var i = 0; i < 100; i++) {
       var b = document.getElementById('s' + i);
       if (b) {
@@ -416,13 +420,20 @@
     b.classList.toggle('on');
   }
 
-  function mostraRisultatoSemplice() {
+  function toggleNumeriSemplice() {
+    sempliceNumeriVisibili = !sempliceNumeriVisibili;
     for (var i = 0; i < 100; i++) {
       var b = document.getElementById('s' + i);
       if (!b) continue;
-      b.textContent = i + 1;
-      b.style.color = '#000';
+      if (sempliceNumeriVisibili) {
+        b.textContent = i + 1;
+        b.style.color = '#000';
+      } else {
+        b.textContent = '';
+        b.style.color = '';
+      }
     }
+    document.getElementById('sempliceRevBtn').textContent = sempliceNumeriVisibili ? 'Nascondi i numeri' : 'Mostra i numeri';
   }
 
   /* --- Stampa scheda PDF --- */
