@@ -16,17 +16,14 @@ body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; min-height: 100
 .setup input { width: 110px; padding: 6px 10px; border: 2px solid #9b72d8; border-radius: 8px; font-size: 15px; text-align: center; }
 .setup button { padding: 7px 18px; background: #5c3d9e; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
 .setup button:hover { background: #7b52c4; }
-.landing { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70vh; padding: 20px; text-align: center; }
-.landing h1 { font-size: 18px; color: #333; margin: 6px 0 24px; }
+.landing { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 16px 20px 20px; text-align: center; }
+.landing h1 { font-size: 18px; color: #333; margin: 6px 0 18px; }
 .landing-choices { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
-.landing-card { background: #fff; border: 2px solid #9b72d8; border-radius: 14px; padding: 20px 26px; cursor: pointer; width: 220px; transition: background 0.15s, transform 0.15s; }
+.landing-card { background: #fff; border: 2px solid #9b72d8; border-radius: 14px; padding: 18px 26px; cursor: pointer; width: 220px; transition: background 0.15s, transform 0.15s; }
 .landing-card:hover { background: #f3ecff; transform: translateY(-2px); }
-.landing-card .grid-preview { display: grid; gap: 2px; margin: 0 auto 12px; }
-.landing-card .grid-preview span { background: #5c3d9e; border-radius: 2px; aspect-ratio: 1; }
 .landing-card h2 { font-size: 16px; color: #5c3d9e; margin-bottom: 6px; }
 .landing-card p { font-size: 12px; color: #666; }
 @media (max-width: 480px) {
-  .landing { min-height: 50vh; }
   .landing h1 { font-size: 15px; }
   .landing-card { width: 150px; padding: 14px 16px; }
   .landing-card h2 { font-size: 13px; }
@@ -119,15 +116,13 @@ body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; min-height: 100
   </div>
   <h1>Scegli la griglia da usare</h1>
   <div class="landing-choices">
-    <div class="landing-card" onclick="scegliGriglia(20)">
-      <div class="grid-preview" id="prev-20" style="grid-template-columns:repeat(20,1fr);width:180px;"></div>
-      <h2>Griglia a 20 colonne</h2>
-      <p>Divisore fino a 20</p>
-    </div>
     <div class="landing-card" onclick="scegliGriglia(10)">
-      <div class="grid-preview" id="prev-10" style="grid-template-columns:repeat(10,1fr);width:150px;"></div>
       <h2>Griglia a 10 colonne</h2>
       <p>Divisore fino a 10</p>
+    </div>
+    <div class="landing-card" onclick="scegliGriglia(20)">
+      <h2>Griglia a 20 colonne</h2>
+      <p>Divisore fino a 20</p>
     </div>
   </div>
 </div>
@@ -650,7 +645,7 @@ function mostraRisultato() {
     fin.textContent=`Puoi riempire ancora un\'altra riga! Hai ${resto} da distribuire.`;
   } else {
     fin.style.cssText+='background:#f0fff0;border-color:#3a9e5c;color:#2a7a4a;';
-    fin.textContent=''; 
+    fin.textContent='';
     const r1=document.createElement('div');
     r1.textContent=resto===0?`${DVD} = ${q} × ${DIV}`:`${DVD} = ${q} × ${DIV} + ${resto}`;
     const r2=document.createElement('div');
@@ -672,14 +667,6 @@ function reset() {
   document.getElementById('sel-box').innerHTML='<div class="sub">Nessun gettone selezionato</div>';
   buildGrid();
 }
-
-function riempiAnteprima(id, n) {
-  const el = document.getElementById(id);
-  el.innerHTML = '';
-  for (let i=0; i<n; i++) el.appendChild(document.createElement('span'));
-}
-riempiAnteprima('prev-20', 20);
-riempiAnteprima('prev-10', 10);
 
 function scegliGriglia(n) {
   COLS = n;
