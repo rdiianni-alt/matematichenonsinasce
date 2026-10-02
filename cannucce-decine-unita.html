@@ -24,7 +24,7 @@
 }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;margin:0;padding:20px}
-.wrap{max-width:1120px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.wrap{max-width:1400px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
 .logo{display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none}
 .logo img{width:60px;height:60px;object-fit:contain;border-radius:50%}
 .logo span{font-size:14px;color:var(--muted)}
@@ -34,11 +34,13 @@ h1{font-family:var(--display);font-weight:700;font-size:32px;text-align:center;m
 .tab-btn{border:2px solid var(--accent);background:#fff;color:var(--accent);padding:12px 24px;border-radius:999px;font-family:var(--display);font-size:15px;font-weight:600;cursor:pointer;transition:all .15s}
 .tab-btn.active{background:var(--accent);color:#fff}
 .tab-btn:hover{opacity:.9}
-.stage{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:20px}
+.game-container{display:flex;flex-direction:column;gap:20px}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
 canvas{display:block;width:100%;aspect-ratio:1180/760;max-width:100%;background:#e3e1da}
 .bar{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:16px;border-top:1px solid var(--line);font-size:14px}
 #score,#score-c{font-family:var(--display);font-weight:600;color:var(--ink)}
 .caption{flex:1;margin:0;color:var(--ink);min-height:1.5em}
+.top-controls{display:flex;gap:12px;margin-bottom:0}
 form{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:16px}
 .row{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
 .fld{display:flex;flex-direction:column;gap:4px}
@@ -63,14 +65,25 @@ button.primary:hover{filter:brightness(1.08)}
 .counter-controls button{width:44px;height:44px;padding:0;font-size:18px}
 .counter-value{font-size:24px;font-weight:700;color:var(--accent);min-width:50px;text-align:center}
 .target-display{font-family:var(--display);font-weight:700;font-size:26px;color:var(--accent);text-align:center;margin:10px 0}
-@media (max-width:600px){
+@media (min-width:900px){
+  .game-container{flex-direction:row;align-items:flex-start}
+  .stage{flex:1;min-width:0}
+  #form-r{flex:0 0 auto;width:280px;height:fit-content}
+  canvas{max-height:70vh;width:100%;height:auto}
+}
+@media (min-width:600px) and (max-width:899px){
+  .game-container{gap:16px}
+  canvas{max-height:60vh;width:100%;height:auto}
+}
+@media (max-width:599px){
   body{padding:12px}
   h1{font-size:24px}
-  canvas{aspect-ratio:1180/760}
+  canvas{aspect-ratio:1180/760;max-height:50vh}
   .tabs{gap:6px}
   .tab-btn{padding:10px 16px;font-size:14px}
   button{font-size:13px;padding:8px 12px}
   .fld input{font-size:22px;width:70px}
+  .top-controls{margin-bottom:12px}
 }
 </style>
 </head>
@@ -88,29 +101,31 @@ button.primary:hover{filter:brightness(1.08)}
 
   <!-- RICONOSCI LE QUANTITÀ -->
   <section id="panel-recognize" class="panel active">
-    <section class="stage">
-      <canvas id="canvas-r"></canvas>
-      <div class="bar">
-        <span id="score-r">✅ 0 | ❌ 0</span>
-        <p class="caption" id="caption-r">Conta le cannucce sulla tovaglietta.</p>
-      </div>
-    </section>
-
-    <form id="form-r">
-      <div class="controls-row">
-        <button type="button" class="icon-btn" id="speak-r" title="Ascolta il numero">🔊</button>
-        <button type="button" class="icon-btn" id="newnum-r" title="Nuovo numero">🎲</button>
-      </div>
-      <div class="row">
-        <div class="fld">
-          <label for="ans-r">Numero</label>
-          <input id="ans-r" type="text" placeholder="0" inputmode="numeric" maxlength="2">
+    <div class="game-container">
+      <section class="stage">
+        <canvas id="canvas-r"></canvas>
+        <div class="bar">
+          <span id="score-r">✅ 0 | ❌ 0</span>
+          <p class="caption" id="caption-r">Conta le cannucce sulla tovaglietta.</p>
         </div>
-        <button id="check-r" type="button" class="primary">Verifica</button>
-        <button id="clear-r" type="button">Cancella</button>
-      </div>
-      <p class="msg" id="msg-r"></p>
-    </form>
+      </section>
+
+      <form id="form-r">
+        <div class="top-controls">
+          <button type="button" class="icon-btn" id="speak-r" title="Ascolta il numero">🔊</button>
+          <button type="button" class="icon-btn" id="newnum-r" title="Nuovo numero">🎲</button>
+        </div>
+        <div class="row">
+          <div class="fld">
+            <label for="ans-r">Numero</label>
+            <input id="ans-r" type="text" placeholder="0" inputmode="numeric" maxlength="2">
+          </div>
+          <button id="check-r" type="button" class="primary">Verifica</button>
+          <button id="clear-r" type="button">Cancella</button>
+        </div>
+        <p class="msg" id="msg-r"></p>
+      </form>
+    </div>
   </section>
 
 </div>
