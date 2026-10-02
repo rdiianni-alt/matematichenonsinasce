@@ -147,11 +147,19 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
 
   <section class="pdfcard" aria-label="Scheda da stampare">
     <h2>Scheda da stampare: a quanto arrivo?</h2>
-    <p class="note">Ogni esercizio ha una tovaglietta già pronta, senza numeri scritti: il bambino conta le cannucce e poi risponde a tre domande «Se aggiungo…, arrivo a…». Sempre senza cambio: le unità restano meno di 10. I numeri cambiano ogni volta che premi il pulsante.</p>
+    <p class="note">Ogni esercizio ha una tovaglietta già pronta, senza numeri scritti: il bambino conta le cannucce e poi risponde a tre domande «Se aggiungo…, arrivo a…» oppure «Se tolgo…, arrivo a…». Sempre senza cambio: aggiungendo non si lega un nuovo mazzetto, togliendo non si slega nessun mazzetto. I numeri cambiano ogni volta che premi il pulsante.</p>
     <div class="row">
       <div class="group">
-        <span class="lbl">Cosa aggiungo</span>
-        <div class="seg speed" role="radiogroup" aria-label="Cosa aggiungo">
+        <span class="lbl">Operazione</span>
+        <div class="seg speed" role="radiogroup" aria-label="Operazione">
+          <input type="radio" name="pop" id="po-add" value="add" checked><label for="po-add">aggiungo</label>
+          <input type="radio" name="pop" id="po-sub" value="sub"><label for="po-sub">tolgo</label>
+          <input type="radio" name="pop" id="po-mix" value="mix"><label for="po-mix">misto</label>
+        </div>
+      </div>
+      <div class="group">
+        <span class="lbl">Cosa aggiungo o tolgo</span>
+        <div class="seg speed" role="radiogroup" aria-label="Cosa aggiungo o tolgo">
           <input type="radio" name="pmode" id="pm-mix" value="mix" checked><label for="pm-mix">decine e unità</label>
           <input type="radio" name="pmode" id="pm-tens" value="tens"><label for="pm-tens">solo decine</label>
           <input type="radio" name="pmode" id="pm-units" value="units"><label for="pm-units">solo unità</label>
@@ -707,17 +715,38 @@ document.querySelectorAll('.examples button').forEach(btn=>btn.addEventListener(
 const pdfStatus=document.getElementById('pdfStatus');
 const pRandInt=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
 const CROP={x:20,y:6,w:902,h:754};
-function pNewStart(prev){ let s; do{ s=pRandInt(1,6)*10+pRandInt(0,6); }while(s===prev); return s; }
-function pAddend(S,mode,used){
+// decine e unità del numero di partenza, scelte in modo che ci siano sempre almeno 3 domande diverse senza cambio
+const START_RANGE={add:[1,6,0,6], sub:[3,9,3,9], mix:[3,6,3,6]};
+function pNewStart(op,prev){
+  const [a0,a1,b0,b1]=START_RANGE[op];
+  let s; do{ s=pRandInt(a0,a1)*10+pRandInt(b0,b1); }while(s===prev); return s;
+}
+// op: '+' o '-'; used: elenco di domande già fatte ("+23", "-12")
+function pNumber(S,mode,op,used){
   const a=Math.floor(S/10), b=S%10;
-  for(let k=0;k<200;k++){
+  for(let k=0;k<300;k++){
     let m=mode; if(m==='any') m=['mix','tens','units'][pRandInt(0,2)];
-    const c=m==='units'?0:pRandInt(1,9-a);
-    const d=m==='tens'?0:pRandInt(1,9-b);
+    let c=0,d=0;
+    if(op==='+'){
+      if(m!=='units'){ if(a>=9) continue; c=pRandInt(1,9-a); }
+      if(m!=='tens'){ if(b>=9) continue; d=pRandInt(1,9-b); }
+    } else {
+      if(m!=='units'){ if(a<1) continue; c=pRandInt(1,a); }
+      if(m!=='tens'){ if(b<1) continue; d=pRandInt(1,b); }
+    }
     const x=c*10+d;
-    if(!used.includes(x)) return x;
+    if(x>0 && !used.includes(op+x)) return x;
   }
   return null;
+}
+function pQuestions(S,mode,op){
+  let ops;
+  if(op==='add') ops=['+','+','+'];
+  else if(op==='sub') ops=['-','-','-'];
+  else { ops=['+','-',pRandInt(0,1)?'+':'-']; ops.sort(()=>Math.random()-.5); }
+  const used=[], qs=[];
+  for(const o of ops){ const x=pNumber(S,mode,o,used); if(x!==null){ used.push(o+x); qs.push({op:o,x}); } }
+  return qs;
 }
 function matImage(n){
   const c=document.createElement('canvas'); c.width=CROP.w; c.height=CROP.h;
@@ -753,11 +782,11 @@ async function genPdf(){
     const count=parseInt(document.querySelector('input[name="pcount"]:checked').value,10);
     const mode=document.querySelector('input[name="pmode"]:checked').value;
     const withSol=document.getElementById('psol').checked;
+    const pop=document.querySelector('input[name="pop"]:checked').value;
     const sheet=[]; let prev=0;
     for(let i=0;i<count;i++){
-      const s=pNewStart(prev); prev=s;
-      const qs=[]; for(let k=0;k<3;k++){ const x=pAddend(s,mode,qs); if(x!==null) qs.push(x); }
-      sheet.push({s,qs});
+      const s=pNewStart(pop,prev); prev=s;
+      sheet.push({s,qs:pQuestions(s,mode,pop)});
     }
     const logo=await loadLogo();
     const { jsPDF }=window.jspdf;
@@ -790,11 +819,12 @@ async function genPdf(){
       doc.text('Sulla tovaglietta ci sono ______ cannucce.',x+10,y+5.9);
       doc.setFontSize(13);
       let yy=y+24;
-      for(const a of qs){
-        doc.setFont('helvetica','normal'); doc.text('Se aggiungo ',x,yy);
-        const w1=doc.getTextWidth('Se aggiungo ');
-        doc.setFont('helvetica','bold'); doc.text(String(a),x+w1,yy);
-        const w2=doc.getTextWidth(String(a));
+      for(const q of qs){
+        const lead=q.op==='+'?'Se aggiungo ':'Se tolgo ';
+        doc.setFont('helvetica','normal'); doc.text(lead,x,yy);
+        const w1=doc.getTextWidth(lead);
+        doc.setFont('helvetica','bold'); doc.text(String(q.x),x+w1,yy);
+        const w2=doc.getTextWidth(String(q.x));
         doc.setFont('helvetica','normal'); doc.text(', arrivo a ______',x+w1+w2,yy);
         yy+=14;
       }
@@ -806,7 +836,7 @@ async function genPdf(){
       doc.setFont('helvetica','normal'); doc.setFontSize(12); doc.setTextColor(30,30,30);
       let y=32;
       sheet.forEach(({s,qs},i)=>{
-        doc.text(`${i+1}.  Sulla tovaglietta: ${s}.   `+qs.map(a=>`${s} + ${a} = ${s+a}`).join('     '),M,y);
+        doc.text(`${i+1}.  Sulla tovaglietta: ${s}.   `+qs.map(q=>`${s} ${q.op} ${q.x} = ${q.op==='+'?s+q.x:s-q.x}`).join('     '),M,y);
         y+=9;
       });
     }
