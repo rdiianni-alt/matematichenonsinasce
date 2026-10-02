@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Lexend:wght@300;400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root{
   --bg:#ffffff; --panel:#fbfcf7; --ink:#1f2a22; --muted:#5a6758; --line:#d3dac6;
@@ -72,6 +73,8 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
 .examples{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .examples button{font-family:var(--display);font-size:18px;font-weight:600;padding:2px 12px;min-height:36px;border-radius:20px;background:var(--soft);border-color:transparent;font-variant-numeric:tabular-nums}
 .note{color:var(--muted);font-size:13px;margin:0;max-width:75ch}
+.pdfcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:14px;margin-top:10px}
+.pdfcard h2{font-family:var(--display);font-weight:700;font-size:24px;line-height:1.1;margin:0;color:var(--ink)}
 @media (max-width:560px){
   #eq{font-size:24px}
   button.primary{width:100%}
@@ -141,6 +144,33 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
     <button type="button" data-ex="63,-,28">63 − 28</button>
   </div>
   <p class="note">Se il numero di partenza è già sulla tovaglietta, le mani fanno solo l'operazione; altrimenti prima svuotano e ricompongono. Dopo ogni operazione il risultato diventa il nuovo numero di partenza, così puoi continuare.</p>
+
+  <section class="pdfcard" aria-label="Scheda da stampare">
+    <h2>Scheda da stampare: a quanto arrivo?</h2>
+    <p class="note">Ogni esercizio ha una tovaglietta già pronta, senza numeri scritti: il bambino conta le cannucce e poi risponde a tre domande «Se aggiungo…, arrivo a…». Sempre senza cambio: le unità restano meno di 10. I numeri cambiano ogni volta che premi il pulsante.</p>
+    <div class="row">
+      <div class="group">
+        <span class="lbl">Cosa aggiungo</span>
+        <div class="seg speed" role="radiogroup" aria-label="Cosa aggiungo">
+          <input type="radio" name="pmode" id="pm-mix" value="mix" checked><label for="pm-mix">decine e unità</label>
+          <input type="radio" name="pmode" id="pm-tens" value="tens"><label for="pm-tens">solo decine</label>
+          <input type="radio" name="pmode" id="pm-units" value="units"><label for="pm-units">solo unità</label>
+          <input type="radio" name="pmode" id="pm-any" value="any"><label for="pm-any">di tutto un po'</label>
+        </div>
+      </div>
+      <div class="group">
+        <span class="lbl">Tovagliette</span>
+        <div class="seg speed" role="radiogroup" aria-label="Numero di tovagliette">
+          <input type="radio" name="pcount" id="pc-3" value="3"><label for="pc-3">3 (1 pagina)</label>
+          <input type="radio" name="pcount" id="pc-6" value="6" checked><label for="pc-6">6 (2 pagine)</label>
+          <input type="radio" name="pcount" id="pc-9" value="9"><label for="pc-9">9 (3 pagine)</label>
+        </div>
+      </div>
+      <label class="check" for="psol"><input type="checkbox" id="psol" checked> Aggiungi la pagina delle soluzioni</label>
+      <button type="button" id="pdfBtn" class="primary">Genera PDF</button>
+    </div>
+    <p id="pdfStatus" class="note" role="status"></p>
+  </section>
 </div>
 
 <script>
@@ -672,6 +702,123 @@ document.querySelectorAll('.examples button').forEach(btn=>btn.addEventListener(
   form.querySelector(`input[name="op"][value="${o}"]`).checked=true; syncOp();
   run(parseInt(a,10),o,o?parseInt(b,10):0);
 }));
+
+/* ---------- scheda PDF: a quanto arrivo? ---------- */
+const pdfStatus=document.getElementById('pdfStatus');
+const pRandInt=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const CROP={x:20,y:6,w:902,h:754};
+function pNewStart(prev){ let s; do{ s=pRandInt(1,6)*10+pRandInt(0,6); }while(s===prev); return s; }
+function pAddend(S,mode,used){
+  const a=Math.floor(S/10), b=S%10;
+  for(let k=0;k<200;k++){
+    let m=mode; if(m==='any') m=['mix','tens','units'][pRandInt(0,2)];
+    const c=m==='units'?0:pRandInt(1,9-a);
+    const d=m==='tens'?0:pRandInt(1,9-b);
+    const x=c*10+d;
+    if(!used.includes(x)) return x;
+  }
+  return null;
+}
+function matImage(n){
+  const c=document.createElement('canvas'); c.width=CROP.w; c.height=CROP.h;
+  const g=c.getContext('2d');
+  g.fillStyle='#ffffff'; g.fillRect(0,0,c.width,c.height);
+  g.translate(-CROP.x,-CROP.y);
+  drawStatic(g);
+  const d=Math.floor(n/10), u=n%10;
+  for(let i=0;i<u;i++){const sl=unitSlot(i); drawStraw(g,rk(),sl.x,sl.y,rand(-.035,.035));}
+  for(let j=0;j<d;j++){const sl=tenSlot(j); drawBundle(g,makeBundle(sl.x,sl.y));}
+  drawHand(g,{x:HOME.L.x,y:HOME.L.y,sx:250,sy:1090,mirror:true,curl:0});
+  drawHand(g,{x:HOME.R.x,y:HOME.R.y,sx:850,sy:1090,mirror:false,curl:0});
+  return c.toDataURL('image/jpeg',0.86);
+}
+function loadLogo(){
+  return new Promise(res=>{
+    const img=new Image(); img.crossOrigin='anonymous';
+    img.onload=()=>{ try{
+      const c=document.createElement('canvas'); c.width=c.height=200; const g=c.getContext('2d');
+      g.beginPath(); g.arc(100,100,100,0,7); g.clip(); g.fillStyle='#fff'; g.fillRect(0,0,200,200);
+      const s=Math.min(200/img.width,200/img.height); g.drawImage(img,100-img.width*s/2,100-img.height*s/2,img.width*s,img.height*s);
+      res(c.toDataURL('image/png')); }catch(e){ res(null); } };
+    img.onerror=()=>res(null);
+    img.src=document.querySelector('.logo img').src;
+    setTimeout(()=>res(null),4000);
+  });
+}
+async function genPdf(){
+  if(!window.jspdf){ pdfStatus.textContent='Non riesco a caricare lo strumento per il PDF: controlla la connessione a internet e ricarica la pagina.'; return; }
+  const btn=document.getElementById('pdfBtn'); btn.disabled=true; pdfStatus.textContent='Preparo il PDF…';
+  try{
+    await document.fonts.ready;
+    const count=parseInt(document.querySelector('input[name="pcount"]:checked').value,10);
+    const mode=document.querySelector('input[name="pmode"]:checked').value;
+    const withSol=document.getElementById('psol').checked;
+    const sheet=[]; let prev=0;
+    for(let i=0;i<count;i++){
+      const s=pNewStart(prev); prev=s;
+      const qs=[]; for(let k=0;k<3;k++){ const x=pAddend(s,mode,qs); if(x!==null) qs.push(x); }
+      sheet.push({s,qs});
+    }
+    const logo=await loadLogo();
+    const { jsPDF }=window.jspdf;
+    const doc=new jsPDF({unit:'mm',format:'a4'});
+    const M=14, PW=210, IW=84, IH=IW*CROP.h/CROP.w, GAP=9, TOP=18, TH=8;
+    const teal=[28,124,144], red=[225,6,0];
+    for(let i=0;i<sheet.length;i++){
+      const pi=i%3;
+      if(pi===0 && i>0) doc.addPage();
+      const ty=TOP+pi*(TH+IH+GAP);
+      if(pi>0){
+        const ly=ty-GAP/2-1;
+        doc.setDrawColor(...red); doc.setLineWidth(.5); doc.setLineDashPattern([2.2,1.6],0);
+        doc.line(M,ly,PW-M,ly); doc.setLineDashPattern([],0);
+      }
+      doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.setTextColor(...teal);
+      doc.text('A quanto arrivo?',M,ty+4);
+      const y=ty+TH;
+      const {s,qs}=sheet[i];
+      doc.addImage(matImage(s),'JPEG',M,y,IW,IH);
+      doc.setDrawColor(200,205,190); doc.setLineWidth(.3); doc.roundedRect(M,y,IW,IH,1.5,1.5,'S');
+      const x=M+IW+8;
+      if(logo){ doc.addImage(logo,'PNG',x-0.5,y+0.5,8,8); }
+      else {
+        doc.setFillColor(...teal); doc.circle(x+3.5,y+4.5,3.5,'F');
+        doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(255,255,255);
+        doc.text(String(i+1),x+3.5,y+5.8,{align:'center'});
+      }
+      doc.setFont('helvetica','normal'); doc.setFontSize(10.5); doc.setTextColor(30,30,30);
+      doc.text('Sulla tovaglietta ci sono ______ cannucce.',x+10,y+5.9);
+      doc.setFontSize(13);
+      let yy=y+24;
+      for(const a of qs){
+        doc.setFont('helvetica','normal'); doc.text('Se aggiungo ',x,yy);
+        const w1=doc.getTextWidth('Se aggiungo ');
+        doc.setFont('helvetica','bold'); doc.text(String(a),x+w1,yy);
+        const w2=doc.getTextWidth(String(a));
+        doc.setFont('helvetica','normal'); doc.text(', arrivo a ______',x+w1+w2,yy);
+        yy+=14;
+      }
+    }
+    if(withSol){
+      doc.addPage();
+      doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.setTextColor(...teal);
+      doc.text('Soluzioni',M,20);
+      doc.setFont('helvetica','normal'); doc.setFontSize(12); doc.setTextColor(30,30,30);
+      let y=32;
+      sheet.forEach(({s,qs},i)=>{
+        doc.text(`${i+1}.  Sulla tovaglietta: ${s}.   `+qs.map(a=>`${s} + ${a} = ${s+a}`).join('     '),M,y);
+        y+=9;
+      });
+    }
+    doc.save(`a-quanto-arrivo-${count}-tovagliette.pdf`);
+    pdfStatus.textContent=`PDF pronto: ${count} tovagliette${withSol?' e la pagina delle soluzioni':''}. Se premi di nuovo, i numeri cambiano.`;
+  }catch(e){
+    console.error(e);
+    pdfStatus.textContent='Il PDF non è stato creato. Riprova; se succede ancora, apri la pagina dal file scaricato sul computer.';
+  }
+  btn.disabled=false;
+}
+document.getElementById('pdfBtn').addEventListener('click',genPdf);
 
 /* ---------- start ---------- */
 setInstant(0); syncOp();
