@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Addiziona in modo furbo entro il 100</title>
+<style>
+  :root { --ink:#222; --muted:#666; --line:#d9d9d9; --accent:#2f5d7c; --paper:#fff; --bg:#f4f4f2; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body { background: var(--bg); color: var(--ink); font-family: "Georgia", "Times New Roman", serif; line-height: 1.45; }
+  .hidden { display: none !important; }
+
+  /* ---------- intestazione del sito ---------- */
+  .sito {
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    padding: 8px 0 2px; text-decoration: none; color: #1a5276;
+  }
+  .sito img { width: 40px; height: 40px; object-fit: contain; border-radius: 50%; }
+  .sito span { font-size: 0.7rem; font-weight: 600; }
+
+  .screen { max-width: 1200px; margin: 0 auto; padding: 8px 16px 16px; }
+  h1 { font-size: clamp(1.1rem, 2.4vw, 1.5rem); margin: 0 0 4px; font-weight: 600; text-align: center; }
+  .sub { color: var(--muted); text-align: center; margin: 0 0 16px; font-size: 0.95rem; }
+  .center { text-align: center; }
+
+  button {
+    font: inherit; background: var(--accent); color: #fff;
+    border: none; border-radius: 6px; padding: 8px 14px; cursor: pointer;
+  }
+  button.secondary { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+
+  /* ---------- menu ---------- */
+  .livelli { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 22px; max-width: 760px; margin-left: auto; margin-right: auto; }
+  @media (max-width: 520px) { .livelli { grid-template-columns: 1fr; } }
+  .btn-liv {
+    background: var(--c); color: #fff; padding: 18px 12px; font-size: 1.05rem;
+    border-radius: 14px; text-align: left; box-shadow: inset -4px -6px 12px rgba(0,0,0,0.15);
+  }
+  .btn-liv small { display: block; opacity: 0.9; font-size: 0.85rem; margin-top: 4px; }
+
+  /* ---------- barre ---------- */
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .toolbar .titolo { font-weight: 600; color: var(--accent); }
+  .hint { color: var(--muted); font-size: 0.9rem; text-align: center; margin-top: 10px; }
+
+  /* ---------- scheda da gioco: occupa lo spazio disponibile ---------- */
+  .card {
+    position: relative; background: #fff; margin: 0 auto;
+    width: min(100%, max(300px, calc((100vh - 210px) * 4 / 3)));
+    aspect-ratio: 4 / 3;
+    border: 8px solid var(--c, #4a6a8a); border-radius: 18px;
+    overflow: hidden; user-select: none; touch-action: none;
+  }
+  .card .head {
+    position: absolute; top: 3%; left: 0; right: 0; text-align: center;
+    font-family: "Comic Sans MS", "Trebuchet MS", sans-serif; font-size: clamp(0.8rem, 2.6vw, 1.1rem); color: #111;
+  }
+  #arena { position: absolute; left: 4%; top: 16%; width: 58%; height: 62%; }
+  .bolla {
+    position: absolute; border-radius: 50%; cursor: grab;
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Comic Sans MS", "Trebuchet MS", sans-serif; color: #fff; font-weight: 700;
+    background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.45), transparent 45%), var(--c);
+    box-shadow: inset -4px -6px 10px rgba(0,0,0,0.18);
+    transition: box-shadow 0.12s;
+  }
+  .bolla:active { cursor: grabbing; }
+  .bolla.over { box-shadow: 0 0 0 4px #fff, 0 0 0 7px #27ae60; }
+  .bolla.nuova { animation: nasce 0.35s ease-out; }
+  @keyframes nasce { from { transform: scale(0.3); } to { transform: scale(1); } }
+  .card .pic { position: absolute; right: 2%; bottom: 6%; width: 30%; }
+  .card .pic img { width: 100%; height: auto; display: block; }
+  .card .footer {
+    position: absolute; left: 4%; bottom: 3%; width: 60%;
+    font-family: "Comic Sans MS", "Trebuchet MS", sans-serif; font-size: clamp(0.7rem, 1.9vw, 0.95rem); color: #111;
+  }
+  .card .footer .log { color: #555; font-size: 0.85em; min-height: 1.2em; }
+  .card .footer .esito { font-weight: 700; color: #1e8449; min-height: 1.3em; }
+
+  /* ---------- pagina di schedine (schermo e stampa) ---------- */
+  .page {
+    position: relative; width: 100%; max-width: 900px; margin: 0 auto; background: #fff;
+    padding: 14px; overflow: hidden;
+    font-family: "Comic Sans MS", "Trebuchet MS", sans-serif; color: #111;
+  }
+  .intest {
+    display: flex; align-items: center; gap: 10px; height: 52px;
+    border-bottom: 1px solid #ccc; margin-bottom: 12px;
+  }
+  .intest img { height: 40px; width: 40px; object-fit: contain; border-radius: 50%; }
+  .intest .nome-blog { font-size: 1.05rem; font-weight: 700; color: #1a5276; }
+  .griglia { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .pcard {
+    position: relative; min-height: 170px; border: 5px solid var(--c); border-radius: 12px;
+    background: #fff; padding: 10px 10px 30px; overflow: hidden;
+  }
+  .pcard .ptitolo { text-align: center; font-size: 0.85rem; margin-bottom: 6px; }
+  .pcard .pbolle {
+    display: flex; flex-wrap: wrap; gap: 6px 8px; width: 58%; min-height: 80px; margin: 0 auto;
+    justify-content: center; align-content: center;
+  }
+  .pcard .pbolla {
+    width: 42px; height: 42px; border-radius: 50%; color: #fff; font-weight: 700; font-size: 0.95rem;
+    display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.45), transparent 45%), var(--c);
+  }
+  .pcard .ppic { position: absolute; right: 6px; top: 26px; bottom: 30px; width: 20%; display: flex; align-items: flex-start; justify-content: center; }
+  .pcard .ppic img { width: 100%; height: auto; max-height: 100%; object-fit: contain; display: block; }
+  .pcard .priga { position: absolute; left: 10px; bottom: 14px; font-size: 0.95rem; font-weight: 700; }
+  .pcard .priga .blank { display: inline-block; width: 60px; border-bottom: 1px solid #111; }
+  .op { font-size: 0.8rem; color: #888; font-weight: 400; padding: 0 4px; }
+  .pcopy {
+    position: absolute; left: 6px; right: 6px; bottom: 2px; text-align: center;
+    font-size: 0.55rem; color: #999; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  /* ---------- stampa ---------- */
+  #print-area { display: none; }
+  @media print {
+    @page { size: A4; margin: 10mm; }
+    html, body { background: #fff; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body * { visibility: hidden; }
+    #print-area, #print-area * { visibility: visible; }
+    #print-area { display: block; position: absolute; left: 0; top: 0; width: 100%; }
+    .screen, .sito { display: none !important; }
+    #print-area .page { width: 190mm; height: 277mm; max-width: none; padding: 0; }
+    #print-area .intest { height: 20mm; margin-bottom: 4mm; }
+    #print-area .intest img { height: 14mm; width: 14mm; }
+    #print-area .intest .nome-blog { font-size: 13pt; }
+    #print-area .griglia { gap: 4mm; }
+    #print-area .pcard { height: 56mm; min-height: 0; border-width: 5px; padding: 4mm 4mm 9mm; }
+    #print-area .pcard .ptitolo { font-size: 10pt; margin-bottom: 2mm; }
+    #print-area .pcard .pbolle { gap: 2mm 2.5mm; width: 58%; min-height: 26mm; }
+    #print-area .pcard .pbolla { width: 12mm; height: 12mm; font-size: 10pt; background: var(--c) !important; }
+    #print-area .pcard .ppic { top: 12mm; bottom: 8mm; right: 3mm; width: 20%; }
+    #print-area .pcard .priga { left: 4mm; bottom: 7mm; font-size: 10.5pt; }
+    #print-area .pcard .priga .blank { width: 16mm; }
+    #print-area .pcopy { font-size: 6pt; bottom: 1.5mm; }
+  }
+</style>
+</head>
+<body>
+
+<a class="sito" href="https://matematicaconlemani.wordpress.com/" target="_blank" rel="noopener">
+  <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="Logo" onerror="this.style.display='none'">
+  <span>Matematiche non si nasce</span>
+</a>
+
+<!-- ============ MENU ============ -->
+<div id="menu" class="screen">
+  <h1>Addiziona in modo furbo entro il 100</h1>
+  <p class="sub">Scegli un livello per giocare, oppure genera una pagina di schede da stampare.</p>
+  <div class="livelli" id="livelli"></div>
+  <div class="center">
+    <button class="secondary" id="btnPagina">Genera pagina di schede</button>
+  </div>
+</div>
+
+<!-- ============ GIOCO ============ -->
+<div id="gioco" class="screen hidden">
+  <div class="toolbar">
+    <button class="secondary" id="btnMenu">← Livelli</button>
+    <span class="titolo" id="titoloLiv"></span>
+    <div>
+      <button class="secondary" id="btnRicomincia">Ricomincia</button>
+      <button class="secondary" id="btnNuova">Nuova scheda</button>
+      <button class="secondary" id="btnStampaLiv">Stampa / salva PDF</button>
+    </div>
+  </div>
+
+  <div class="card" id="scheda">
+    <div class="head">Addiziona in modo furbo entro il 100!</div>
+    <div id="arena"></div>
+    <div class="pic"><img id="imgPic" alt=""></div>
+    <div class="footer">
+      <div class="log" id="log"></div>
+      <div class="esito" id="esito"></div>
+    </div>
+  </div>
+  <p class="hint">Trascina una pallina sopra un'altra per calcolare la somma.</p>
+</div>
+
+<!-- ============ PAGINA DI SCHEDE ============ -->
+<div id="pagina" class="screen hidden">
+  <div class="toolbar">
+    <button class="secondary" id="btnMenu2">← Livelli</button>
+    <div>
+      <button class="secondary" id="btnNuovaPagina">Nuove schede</button>
+      <button id="btnStampaPagina">Stampa / salva PDF</button>
+    </div>
+  </div>
+  <div id="paginaContenuto"></div>
+</div>
+
+<!-- area usata solo per la stampa -->
+<div id="print-area"></div>
+
+<script>
+  // =====================================================================
+  //  LINK: modifica qui se cambi o sposti le illustrazioni o il logo
+  // =====================================================================
+  const IMMAGINI = {
+    1: "https://raw.githubusercontent.com/rdiianni-alt/archivio_privato/c1cb80e2bd45f5f80d9286c13cfd811d95915956/dis1.jpg",
+    2: "https://raw.githubusercontent.com/rdiianni-alt/archivio_privato/56119a35f38775358c3eca71a3402d70ec184b0b/dis2.jpg",
+    3: "https://raw.githubusercontent.com/rdiianni-alt/archivio_privato/c1cb80e2bd45f5f80d9286c13cfd811d95915956/dis3.jpg",
+    4: "https://raw.githubusercontent.com/rdiianni-alt/archivio_privato/56119a35f38775358c3eca71a3402d70ec184b0b/dis4.jpg"
+  };
+  const LOGO_BLOG = "https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png";
+  const NOME_BLOG = "Matematiche non si nasce";
+  const FRASE_CARTA = "© 2026 Rita Di Ianni · matematichenonsinasce · idee e materiali per la scuola primaria";
+  const SCHEDE_PER_PAGINA = 8;
+
+  const LIVELLI = {
+    1: { colore: "#4a6a8a", palline: 2, descr: "due addendi" },
+    2: { colore: "#d9822b", palline: 3, descr: "tre addendi" },
+    3: { colore: "#3f8f5a", palline: 3, descr: "tre addendi più grandi" },
+    4: { colore: "#7d5ba6", palline: 4, descr: "quattro addendi" }
+  };
+
+  // ---------- utilità ----------
+  function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = rnd(0, i);
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+  const sum = arr => arr.reduce((s, x) => s + x, 0);
+  const $ = id => document.getElementById(id);
+
+  function findFriendPairs(addends) {
+    const used = new Set(); const pairs = [];
+    for (let i = 0; i < addends.length; i++) {
+      if (used.has(i)) continue;
+      for (let j = i + 1; j < addends.length; j++) {
+        if (used.has(j)) continue;
+        if ((addends[i] % 10) + (addends[j] % 10) === 10) {
+          pairs.push([i, j]); used.add(i); used.add(j); break;
+        }
+      }
+    }
+    return pairs;
+  }
+
+  // ---------- generatori (amici del 10) ----------
+  function genAmici({ level, pairs, n, maxTens, extraMax, minTot = 1, maxTot = 100 }) {
+    for (let t = 0; t < 3000; t++) {
+      const addends = [];
+      for (let p = 0; p < pairs; p++) {
+        const u = rnd(1, 9);
+        addends.push(rnd(0, maxTens) * 10 + u);
+        addends.push(rnd(0, maxTens) * 10 + (10 - u));
+      }
+      while (addends.length < n) addends.push(rnd(1, extraMax));
+      if (addends.some(v => v < 1 || v > 99)) continue;
+      const tot = sum(addends);
+      if (tot < minTot || tot > maxTot) continue;
+      if (findFriendPairs(addends).length < pairs) continue;
+      return { addends: shuffle(addends), level };
+    }
+    return null;
+  }
+  const GENERATORI = {
+    1: () => genAmici({ level: 1, pairs: 1, n: 2, maxTens: 8, extraMax: 0, minTot: 10 }) || { addends: [28, 12], level: 1 },
+    2: () => genAmici({ level: 2, pairs: 1, n: 3, maxTens: 4, extraMax: 20, minTot: 20 }) || { addends: [28, 12, 14], level: 2 },
+    3: () => genAmici({ level: 3, pairs: 1, n: 3, maxTens: 5, extraMax: 45, minTot: 40 }) || { addends: [34, 16, 25], level: 3 },
+    4: () => genAmici({ level: 4, pairs: 2, n: 4, maxTens: 6, extraMax: 0, minTot: 70 }) || { addends: [46, 24, 37, 13], level: 4 }
+  };
+
+  // Genera n esercizi senza ripetizioni. Se mixed = true, i livelli crescono da 1 a 4.
+  function generaSchede(n, mixed, livelloFisso) {
+    const seen = new Set(); const out = []; let guard = 0;
+    while (out.length < n && guard < 4000) {
+      guard++;
+      const l = mixed ? Math.min(4, 1 + Math.floor((out.length * 4) / n)) : livelloFisso;
+      const ex = GENERATORI[l]();
+      const key = ex.addends.slice().sort((a, b) => a - b).join("|");
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(ex);
+    }
+    return out;
+  }
+
+  // ---------- HTML della pagina di schedine ----------
+  function pcardHtml(ex) {
+    const L = LIVELLI[ex.level];
+    const bolle = ex.addends.map(v => `<div class="pbolla">${v}</div>`).join("");
+    const riga = ex.addends.join('<span class="op">+</span>');
+    return `
+      <div class="pcard" style="--c:${L.colore}">
+        <div class="ptitolo">Addiziona in modo furbo entro il 100!</div>
+        <div class="pbolle">${bolle}</div>
+        <div class="ppic"><img src="${IMMAGINI[ex.level]}" alt=""></div>
+        <div class="priga">${riga}<span class="op">=</span><span class="blank"></span></div>
+        <div class="pcopy">${FRASE_CARTA}</div>
+      </div>`;
+  }
+
+  function paginaHtml(schede) {
+    return `
+      <div class="page">
+        <div class="intest">
+          <img src="${LOGO_BLOG}" alt="Logo" onerror="this.style.display='none'">
+          <div class="nome-blog">${NOME_BLOG}</div>
+        </div>
+        <div class="griglia">${schede.map(pcardHtml).join("")}</div>
+      </div>`;
+  }
+
+  // ---------- menu ----------
+  function costruisciMenu() {
+    const box = $("livelli");
+    box.innerHTML = "";
+    [1, 2, 3, 4].forEach(l => {
+      const b = document.createElement("button");
+      b.className = "btn-liv";
+      b.style.setProperty("--c", LIVELLI[l].colore);
+      b.innerHTML = `Livello ${l}<small>${LIVELLI[l].palline} palline · ${LIVELLI[l].descr}</small>`;
+      b.addEventListener("click", () => apriLivello(l));
+      box.appendChild(b);
+    });
+  }
+
+  function mostraSchermata(nome) {
+    $("menu").classList.toggle("hidden", nome !== "menu");
+    $("gioco").classList.toggle("hidden", nome !== "gioco");
+    $("pagina").classList.toggle("hidden", nome !== "pagina");
+  }
+
+  // ---------- pagina di schede ----------
+  let schedePagina = [];
+  function mostraPagina() {
+    schedePagina = generaSchede(SCHEDE_PER_PAGINA, true);
+    $("paginaContenuto").innerHTML = paginaHtml(schedePagina);
+    mostraSchermata("pagina");
+  }
+
+  // ---------- gioco ----------
+  let esercizi = {};
+  let livelloAttivo = null;
+  let bolle = [];
+  let D = 60;
+  let drag = null;
+  let operazioni = [];
+  const arena = $("arena");
+
+  function calcolaD(W, H) { return Math.max(40, Math.min(90, Math.round(Math.min(W, H) * 0.42))); }
+
+  // Posizione salvata anche come frazione dell'arena, così resta proporzionata al ridimensionamento.
+  function setPos(o, x, y) {
+    const W = arena.clientWidth, H = arena.clientHeight;
+    o.x = x; o.y = y;
+    o.fx = (W - D) > 0 ? x / (W - D) : 0;
+    o.fy = (H - D) > 0 ? y / (H - D) : 0;
+    o.el.style.left = x + "px";
+    o.el.style.top = y + "px";
+  }
+
+  function apriLivello(l) {
+    livelloAttivo = l;
+    if (!esercizi[l]) esercizi[l] = GENERATORI[l]();
+    $("scheda").style.setProperty("--c", LIVELLI[l].colore);
+    $("titoloLiv").textContent = `Livello ${l}`;
+    $("imgPic").src = IMMAGINI[l];
+    $("imgPic").onerror = () => { $("imgPic").alt = "Immagine non caricata: controlla il link in IMMAGINI"; };
+    mostraSchermata("gioco");
+    requestAnimationFrame(() => ricomincia());
+  }
+
+  function ricomincia() {
+    operazioni = [];
+    $("log").textContent = "";
+    $("esito").textContent = "";
+    layoutIniziale(esercizi[livelloAttivo].addends);
+  }
+
+  function layoutIniziale(vals) {
+    arena.innerHTML = "";
+    bolle = [];
+    const W = arena.clientWidth, H = arena.clientHeight;
+    D = calcolaD(W, H);
+    vals.forEach(v => {
+      let x = 0, y = 0, ok = false;
+      for (let t = 0; t < 400 && !ok; t++) {
+        x = Math.random() * (W - D);
+        y = Math.random() * (H - D);
+        ok = bolle.every(o => Math.hypot(x - o.x, y - o.y) > D * 1.15);
+      }
+      creaBolla(v, x, y);
+    });
+  }
+
+  function creaBolla(v, x, y, animata = false) {
+    const el = document.createElement("div");
+    el.className = "bolla" + (animata ? " nuova" : "");
+    el.textContent = v;
+    el.style.width = el.style.height = D + "px";
+    el.style.fontSize = Math.max(0.8, D / 34) + "rem";
+    arena.appendChild(el);
+    const obj = { val: v, x: 0, y: 0, fx: 0, fy: 0, el };
+    setPos(obj, x, y);
+    bolle.push(obj);
+    el.addEventListener("pointerdown", e => iniziaTrascinamento(e, obj));
+    return obj;
+  }
+
+  // Quando cambia la dimensione della finestra, le palline restano dove sono (in proporzione).
+  function ridimensiona() {
+    if ($("gioco").classList.contains("hidden") || !livelloAttivo) return;
+    const W = arena.clientWidth, H = arena.clientHeight;
+    D = calcolaD(W, H);
+    bolle.forEach(o => {
+      o.el.style.width = o.el.style.height = D + "px";
+      o.el.style.fontSize = Math.max(0.8, D / 34) + "rem";
+      setPos(o, o.fx * (W - D), o.fy * (H - D));
+    });
+  }
+
+  function iniziaTrascinamento(e, obj) {
+    e.preventDefault();
+    const r = obj.el.getBoundingClientRect();
+    drag = { obj, dx: e.clientX - r.left, dy: e.clientY - r.top };
+    obj.el.style.zIndex = 50;
+    obj.el.setPointerCapture(e.pointerId);
+  }
+
+  arena.addEventListener("pointermove", e => {
+    if (!drag) return;
+    const ar = arena.getBoundingClientRect();
+    const W = arena.clientWidth, H = arena.clientHeight;
+    const x = Math.max(0, Math.min(e.clientX - ar.left - drag.dx, W - D));
+    const y = Math.max(0, Math.min(e.clientY - ar.top - drag.dy, H - D));
+    setPos(drag.obj, x, y);
+    const bersaglio = trovaBersaglio(drag.obj);
+    bolle.forEach(o => o.el.classList.toggle("over", o === bersaglio));
+  });
+
+  function fineTrascinamento() {
+    if (!drag) return;
+    const obj = drag.obj;
+    obj.el.style.zIndex = "";
+    const bersaglio = trovaBersaglio(obj);
+    bolle.forEach(o => o.el.classList.remove("over"));
+    drag = null;
+    if (bersaglio) unisci(obj, bersaglio);
+  }
+  arena.addEventListener("pointerup", fineTrascinamento);
+  arena.addEventListener("pointercancel", fineTrascinamento);
+
+  function trovaBersaglio(obj) {
+    const cx = obj.x + D / 2, cy = obj.y + D / 2;
+    return bolle.find(o => o !== obj && Math.hypot(cx - (o.x + D / 2), cy - (o.y + D / 2)) < D * 0.8) || null;
+  }
+
+  function unisci(a, b) {
+    const v = a.val + b.val;
+    const x = b.x, y = b.y;
+    a.el.remove(); b.el.remove();
+    bolle = bolle.filter(o => o !== a && o !== b);
+    creaBolla(v, x, y, true);
+    operazioni.push(`${a.val} + ${b.val} = ${v}`);
+    $("log").textContent = operazioni.slice(-4).join("   ·   ");
+    if (bolle.length === 1) $("esito").textContent = `Risultato: ${bolle[0].val}`;
+  }
+
+  // ---------- stampa ----------
+  function stampa(schede) {
+    $("print-area").innerHTML = paginaHtml(schede);
+    window.print();
+  }
+
+  // ---------- eventi ----------
+  $("btnPagina").addEventListener("click", mostraPagina);
+  $("btnMenu").addEventListener("click", () => mostraSchermata("menu"));
+  $("btnMenu2").addEventListener("click", () => mostraSchermata("menu"));
+  $("btnRicomincia").addEventListener("click", ricomincia);
+  $("btnNuova").addEventListener("click", () => {
+    esercizi[livelloAttivo] = GENERATORI[livelloAttivo]();
+    ricomincia();
+  });
+  $("btnStampaLiv").addEventListener("click", () => stampa(generaSchede(SCHEDE_PER_PAGINA, false, livelloAttivo)));
+  $("btnNuovaPagina").addEventListener("click", mostraPagina);
+  $("btnStampaPagina").addEventListener("click", () => stampa(schedePagina));
+  window.addEventListener("resize", ridimensiona);
+
+  costruisciMenu();
+</script>
+</body>
+</html>
