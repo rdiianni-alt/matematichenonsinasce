@@ -7,6 +7,7 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#f5f4ef;font-family:Arial,sans-serif;color:#2b2b2b;padding:0 12px 16px;line-height:1.35}
+[hidden]{display:none!important}
 #logo{display:flex;flex-direction:column;align-items:center;gap:2px;margin:8px auto 0;color:#2b2b2b;text-decoration:none;width:max-content}
 #logo img{width:48px;height:48px;border-radius:50%;object-fit:contain}
 #logo span{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
@@ -14,6 +15,7 @@ h1{font-size:clamp(18px,3.6vmin,26px);margin-top:6px;text-align:center}
 .intro{text-align:center;font-size:clamp(12px,2vmin,14px);max-width:640px;margin:4px auto 8px}
 .controlli{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:4px 0 2px}
 .btn-n{background:#fff;border:2px solid #e10600;color:#e10600;padding:6px 14px;font:inherit;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;border-radius:0}
+.btn-n:disabled{opacity:.4;cursor:default}
 .btn-n[hidden]{display:none}
 #stato{min-height:20px;text-align:center;font-size:clamp(12px,2vmin,14px);margin:4px auto 6px;max-width:820px}
 
@@ -34,6 +36,64 @@ h1{font-size:clamp(18px,3.6vmin,26px);margin-top:6px;text-align:center}
 details{max-width:720px;margin:12px auto 0;font-size:13px}
 summary{cursor:pointer;font-weight:700;color:#7a705c;text-transform:uppercase;letter-spacing:1px;font-size:11px}
 details p{margin-top:6px}
+
+/* ===== Generatore di schede ===== */
+#vista-schede{max-width:900px;margin:0 auto}
+#vista-schede fieldset{background:#fff;border:1px solid #8a7f6a;padding:10px 14px;margin-bottom:10px}
+#vista-schede legend{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#7a705c;padding:0 4px}
+#vista-schede fieldset label{display:block;margin:4px 0;font-size:14px}
+#vista-schede input[type=text],#vista-schede input[type=number],#vista-schede select{font:inherit;font-size:14px;padding:6px 8px;border:1px solid #8a7f6a;border-radius:0;background:#fff}
+#vista-schede #titolo{width:100%}
+#vista-schede #quanti{width:90px}
+#vista-schede .fondo{text-align:center;margin:14px 0}
+#vista-schede #msg{font-size:14px;margin-left:10px}
+#vista-schede .barra-stampa{margin:14px 0 6px;text-align:center}
+
+.foglio{background:#fff;color:#000;padding:22px 26px;border:1px solid #ccc;margin-top:10px}
+.foglio .logo-s{display:block;margin:0 auto 6px;width:44px;height:44px;border-radius:50%;object-fit:contain}
+.riga-nome{font-size:13px;margin:6px 0 4px}
+.foglio h2{text-align:center;font-size:18px;margin:6px 0 10px}
+.es{display:flex;gap:10px;padding:10px 0;border-bottom:1px dashed #bbb;break-inside:avoid;page-break-inside:avoid}
+.numero{font-weight:700;min-width:22px;font-size:14px}
+.corpo{flex:1;font-size:14px}
+.corpo p{margin-bottom:6px}
+.gruppo{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.gruppo>div{width:92px;text-align:center}
+.mini{width:92px;aspect-ratio:3/4}
+.mini svg{width:100%;height:100%;display:block}
+.mini.sm{width:58px;flex-shrink:0}
+.mini.grande{width:150px}
+.num-carta{font-size:11px;margin-top:2px}
+table.vf{border-collapse:collapse;width:100%;margin-top:6px;font-size:14px}
+table.vf td{border:1px solid #444;padding:4px 6px}
+table.vf td.opz{width:90px;white-space:nowrap}
+.opz{white-space:nowrap;font-size:13px;display:flex;align-items:center;gap:4px}
+.quadr{display:inline-block;width:14px;height:14px;border:1.5px solid #222;flex-shrink:0}
+.riga{border-bottom:1px solid #222;height:24px;margin:8px 0}
+.descrivi{display:flex;gap:14px;align-items:flex-start}
+.descrivi .righe{flex:1;padding-top:10px}
+.disegna{display:flex;gap:16px;align-items:flex-start}
+.disegna ul{flex:1;padding-left:18px;margin-top:6px}
+.disegna li{margin:6px 0}
+.striscia{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px dashed #888}
+.striscia .testo{flex:1}
+.striscia .opz{margin-left:auto}
+.sol{page-break-before:always}
+.sol h2{margin-top:0}
+.sol-riga{font-size:14px;margin:8px 0}
+
+.pie{display:flex;align-items:center;justify-content:center;gap:8px;font-size:11px;color:#444;margin-top:14px;padding:6px 0;border-top:1px solid #ccc;background:#fff}
+.pie img{height:34px;width:auto}
+
+@media print{
+  body{background:#fff;padding:0}
+  #vista-gioco,.noprint,#logo{display:none!important}
+  #vista-schede{max-width:none}
+  .foglio{border:none;margin:0;padding:0}
+  .foglio + .foglio{margin-top:0}
+  .pie{position:fixed;bottom:0;left:0;right:0;margin:0;padding:4px 0}
+  @page{margin:14mm 14mm 22mm}
+}
 </style>
 </head>
 <body>
@@ -43,34 +103,91 @@ details p{margin-top:6px}
   <span>Matematiche non si nasce</span>
 </a>
 
-<h1>Dov'è nascosta la maestra?</h1>
-<p class="intro">Trenta carte con bambine, cifre e figure geometriche. Chi conduce sceglie dove nascondere la maestra, poi le carte si girano una alla volta.</p>
+<!-- ===== VISTA DEL GIOCO ===== -->
+<div id="vista-gioco">
+  <h1>Dov'è nascosta la maestra?</h1>
+  <p class="intro">Trenta carte con bambine, cifre e figure geometriche. Chi conduce sceglie dove nascondere la maestra, poi le carte si girano una alla volta.</p>
 
-<div class="controlli">
-  <button class="btn-n" id="btn-inizia">Inizia partita</button>
-  <button class="btn-n" id="btn-nuova">Nuova partita</button>
+  <div class="controlli">
+    <button class="btn-n" id="btn-inizia">Inizia partita</button>
+    <button class="btn-n" id="btn-nuova">Nuova partita</button>
+    <button class="btn-n" id="btn-schede">Crea schede</button>
+  </div>
+
+  <div id="stato"></div>
+
+  <div id="griglia"></div>
+
+  <details>
+    <summary>Come si gioca</summary>
+    <p>Prima fase: chi conduce tocca la carta sotto cui nasconde la maestra. Tocca un'altra carta per cambiare idea, poi premi "Inizia partita".</p>
+    <p>Seconda fase: le carte si girano toccandole, una alla volta, da chiunque. Anche la carta con la maestra si gira come tutte le altre. Quando ne resta una sola a faccia in su, si scopre se la maestra è davvero lì.</p>
+  </details>
 </div>
 
-<div id="stato"></div>
+<!-- ===== VISTA DEL GENERATORE DI SCHEDE ===== -->
+<div id="vista-schede" hidden>
+  <div class="noprint">
+    <p style="text-align:left;margin:6px 0"><button class="btn-n" id="btn-torna">← Torna al gioco</button></p>
+    <h1>Generatore di schede</h1>
 
-<div id="griglia"></div>
+    <fieldset>
+      <legend>Titolo</legend>
+      <input type="text" id="titolo" value="Scheda">
+    </fieldset>
 
-<details>
-  <summary>Come si gioca</summary>
-  <p>Prima fase: chi conduce tocca la carta sotto cui nasconde la maestra. Tocca un'altra carta per cambiare idea, poi premi "Inizia partita".</p>
-  <p>Seconda fase: le carte si girano toccandole, una alla volta, da chiunque. Anche la carta con la maestra si gira come tutte le altre. Quando ne resta una sola a faccia in su, si scopre se la maestra è davvero lì.</p>
-</details>
+    <fieldset>
+      <legend>Tipi di esercizio</legend>
+      <label><input type="checkbox" class="tipo-check" value="vf" checked> Vero o falso su un gruppo di carte</label>
+      <label><input type="checkbox" class="tipo-check" value="descrivi" checked> Descrivi la carta con le parole indicate</label>
+      <label><input type="checkbox" class="tipo-check" value="disegna" checked> Disegna una carta con le caratteristiche date</label>
+      <label><input type="checkbox" class="tipo-check" value="domanda" checked> Domanda vincente: elimina tutte le carte tranne una</label>
+      <label><input type="checkbox" class="tipo-check" value="strisce" checked> Strisce di domande vero o falso da ritagliare</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Come costruire la scheda</legend>
+      <label><input type="radio" name="modo" value="variegata" checked> Pagina variegata: mescola i tipi selezionati</label>
+      <label><input type="radio" name="modo" value="ripeti"> Stesso esercizio ripetuto, scelto qui sotto:
+        <select id="tipo-unico">
+          <option value="vf">Vero o falso</option>
+          <option value="descrivi">Descrivi la carta</option>
+          <option value="disegna">Disegna una carta</option>
+          <option value="domanda">Domanda vincente</option>
+          <option value="strisce">Strisce di domande</option>
+        </select>
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Quanti esercizi nella scheda</legend>
+      <input type="number" id="quanti" min="1" max="20" value="4">
+    </fieldset>
+
+    <fieldset>
+      <label><input type="checkbox" id="sol" checked> Aggiungi le soluzioni su una pagina a parte</label>
+    </fieldset>
+
+    <div class="fondo">
+      <button class="btn-n" id="costruisci">Costruisci scheda</button>
+      <span id="msg"></span>
+    </div>
+  </div>
+
+  <div class="noprint barra-stampa">
+    <button class="btn-n" id="stampa" disabled>Stampa / salva PDF</button>
+  </div>
+
+  <div id="anteprima"></div>
+</div>
 
 <script>
 var IMG_MAESTRA = "https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/055f4e9caf74c856ae2f59926ae544fc0e493e33/logoconkalimba.png";
+var IMG_KALIMBA = IMG_MAESTRA;
 
-/*
-  Trenta carte fisse. Ogni carta è [maiali, sporchi, carote, ravanelli]:
-  - maiali  -> bambine
-  - sporchi -> bambine con il grembiule (le prime del gruppo)
-  - carote  -> cifre, ciascuna 1 oppure 2 (scelta a caso a ogni partita)
-  - ravanelli -> figure geometriche, ciascuna cerchio oppure triangolo (scelta a caso)
-*/
+/* Le trenta carte: [maiali, sporchi, carote, ravanelli]
+   maiali -> bambine; sporchi -> bambine con il grembiule;
+   carote -> cifre 1 o 2; ravanelli -> figure geometriche cerchio o triangolo. */
 var DATI_CARTE = [
   [3,0,0,6],[3,0,0,0],[3,1,3,6],[3,3,4,2],[3,0,2,0],[3,2,1,3],
   [2,2,0,0],[2,0,2,4],[2,2,0,1],[2,2,4,0],[2,2,3,6],[2,0,0,0],
@@ -84,7 +201,19 @@ var FORME = ['cerchio', 'triangolo'];
 
 var mazzo = [], aperta = [], nascosta = -1, fase = 'scelta';
 
+/* ---------- utilità ---------- */
+
 function casuale(n) { return Math.floor(Math.random() * n); }
+
+function mescola(a) {
+  var b = a.slice();
+  for (var i = b.length - 1; i > 0; i--) {
+    var j = casuale(i + 1), t = b[i]; b[i] = b[j]; b[j] = t;
+  }
+  return b;
+}
+
+function pesca(m, n) { return mescola(m).slice(0, n); }
 
 function creaCarta(d) {
   var m = d[0], s = d[1], c = d[2], r = d[3], i, bambine = [], cifre = [], figure = [];
@@ -94,7 +223,12 @@ function creaCarta(d) {
   return { bambine: bambine, cifre: cifre, figure: figure };
 }
 
-/* ---------- disegni ---------- */
+function cardKey(c) {
+  return c.bambine.map(function (b) { return b.grembiule ? 'g' : 'p'; }).join('') + '|' +
+         c.cifre.join('') + '|' + c.figure.map(function (f) { return f[0]; }).join('');
+}
+
+/* ---------- disegni delle carte ---------- */
 
 // Le tre bambine: tipo 0 = quella del simbolo (provvisoria: capelli con fiocco),
 // tipo 1 = capelli con codini, tipo 2 = caschetto.
@@ -121,7 +255,6 @@ function ragazza(b, cx, base, sc) {
   return s;
 }
 
-// Un elemento della nuvoletta: cifra (testo) o figura geometrica.
 function elemento(it, x, y) {
   if (typeof it === 'number') {
     return '<text x="' + x + '" y="' + y + '" font-size="15" font-weight="700" fill="#2b2b2b" text-anchor="middle" dominant-baseline="central" font-family="Arial">' + it + '</text>';
@@ -130,7 +263,6 @@ function elemento(it, x, y) {
   return '<polygon points="' + x + ',' + (y - 6) + ' ' + (x + 6) + ',' + (y + 5) + ' ' + (x - 6) + ',' + (y + 5) + '" fill="#3d8fa8"/>';
 }
 
-// Posizioni nella nuvoletta: righe da tre elementi, centrate.
 function posizioni(n) {
   var righe = [], rimasti = n;
   while (rimasti > 0) { var k = Math.min(3, rimasti); righe.push(k); rimasti -= k; }
@@ -150,20 +282,27 @@ function disegnaCarta(c) {
   s += '<rect x="1" y="1" width="118" height="158" fill="#fff" stroke="#2b2b2b" stroke-width="2"/>';
   s += '<ellipse cx="60" cy="48" rx="50" ry="34" fill="#fff" stroke="#3d8fa8" stroke-width="2"/>';
   s += '<circle cx="46" cy="90" r="4" fill="#3d8fa8"/><circle cx="38" cy="100" r="2.5" fill="#3d8fa8"/>';
-
   var items = c.cifre.concat(c.figure);
   var pos = posizioni(items.length);
   for (var i = 0; i < items.length; i++) s += elemento(items[i], pos[i][0], pos[i][1]);
-
   var n = c.bambine.length;
   var sc = n === 1 ? 1.25 : (n === 2 ? 1 : 0.85);
   var xs = n === 1 ? [60] : n === 2 ? [38, 82] : [26, 60, 94];
   for (var j = 0; j < n; j++) s += ragazza(c.bambine[j], xs[j], 152, sc);
-
   return s + '</svg>';
 }
 
-/* ---------- stato del gioco ---------- */
+function cornice() {
+  return '<svg viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="118" height="158" fill="#fff" stroke="#2b2b2b" stroke-width="2"/></svg>';
+}
+
+function gruppoHtml(cards) {
+  return '<div class="gruppo">' + cards.map(function (c, i) {
+    return '<div><div class="mini">' + disegnaCarta(c) + '</div><div class="num-carta">' + (i + 1) + '</div></div>';
+  }).join('') + '</div>';
+}
+
+/* ---------- gioco: stato e interazione ---------- */
 
 function rimaste() {
   var n = 0;
@@ -173,8 +312,7 @@ function rimaste() {
 
 function aggiornaStato() {
   var testo, n = rimaste();
-  var inizia = document.getElementById('btn-inizia');
-  inizia.hidden = (fase !== 'scelta');
+  document.getElementById('btn-inizia').hidden = (fase !== 'scelta');
 
   if (fase === 'scelta') {
     testo = nascosta < 0
@@ -239,6 +377,251 @@ document.getElementById('griglia').addEventListener('click', function (e) {
 });
 document.getElementById('btn-inizia').addEventListener('click', inizia);
 document.getElementById('btn-nuova').addEventListener('click', nuovaPartita);
+
+/* ---------- passaggio tra gioco e generatore ---------- */
+
+function mostraSchede(vedi) {
+  document.getElementById('vista-gioco').hidden = vedi;
+  document.getElementById('vista-schede').hidden = !vedi;
+  window.scrollTo(0, 0);
+}
+document.getElementById('btn-schede').addEventListener('click', function () { mostraSchede(true); });
+document.getElementById('btn-torna').addEventListener('click', function () { mostraSchede(false); });
+
+/* ---------- generatore: affermazioni vero/falso ---------- */
+
+function oggettiDi(g) {
+  var o = { b: [], c: [], f: [] };
+  g.forEach(function (card) {
+    card.bambine.forEach(function (x) { o.b.push(x); });
+    card.cifre.forEach(function (v) { o.c.push(v); });
+    card.figure.forEach(function (x) { o.f.push(x); });
+  });
+  return o;
+}
+
+// Con una sola carta si scrive "Questa carta"; con più carte "Qualche carta".
+function affermazioni(g) {
+  var o = oggettiDi(g), out = [], singola = (g.length === 1);
+  function add(t, v) { out.push({ testo: t, vero: !!v }); }
+  if (o.b.length) {
+    add("Tutte le bambine hanno il grembiule", o.b.every(function (x) { return x.grembiule; }));
+    add("Nessuna bambina ha il grembiule", !o.b.some(function (x) { return x.grembiule; }));
+    add("Qualche bambina ha il grembiule", o.b.some(function (x) { return x.grembiule; }));
+    add("Qualche bambina non ha il grembiule", o.b.some(function (x) { return !x.grembiule; }));
+  }
+  if (o.c.length) {
+    add("Ogni cifra è 1", o.c.every(function (v) { return v === 1; }));
+    add("Nessuna cifra è 2", !o.c.some(function (v) { return v === 2; }));
+    add("Qualche cifra è 2", o.c.some(function (v) { return v === 2; }));
+    add("Qualche cifra non è 1", o.c.some(function (v) { return v !== 1; }));
+  }
+  if (o.f.length) {
+    add("Ogni figura geometrica è un cerchio", o.f.every(function (x) { return x === 'cerchio'; }));
+    add("Nessuna figura geometrica è un triangolo", !o.f.some(function (x) { return x === 'triangolo'; }));
+    add("Qualche figura geometrica è un triangolo", o.f.some(function (x) { return x === 'triangolo'; }));
+  }
+  if (singola) {
+    var c = g[0];
+    add("Questa carta non ha figure geometriche", c.figure.length === 0);
+    add("Questa carta ha almeno una cifra", c.cifre.length > 0);
+  } else {
+    add("Qualche carta non ha figure geometriche", g.some(function (c) { return c.figure.length === 0; }));
+    add("Ogni carta ha almeno una cifra", g.every(function (c) { return c.cifre.length > 0; }));
+  }
+  return out;
+}
+
+function sceltaVF(g, n) {
+  var c = affermazioni(g);
+  var v = mescola(c.filter(function (x) { return x.vero; }));
+  var f = mescola(c.filter(function (x) { return !x.vero; }));
+  var nv = Math.ceil(n / 2), nf = n - nv;
+  var out = v.slice(0, nv).concat(f.slice(0, nf));
+  if (out.length < n) {
+    var resto = mescola(c.filter(function (x) { return out.indexOf(x) < 0; }));
+    out = out.concat(resto.slice(0, n - out.length));
+  }
+  return mescola(out);
+}
+
+/* ---------- generatore: tipi di esercizio ---------- */
+
+function esVeroFalso(m) {
+  var g = pesca(m, 4), sc = sceltaVF(g, 6);
+  var html = '<p>Osserva le carte e rispondi al vero o falso. Metti una crocetta nel quadratino giusto.</p>' + gruppoHtml(g) +
+    '<table class="vf">' + sc.map(function (s, i) {
+      return '<tr><td>' + (i + 1) + '. ' + s.testo + '</td>' +
+        '<td class="opz"><span class="quadr"></span>V</td>' +
+        '<td class="opz"><span class="quadr"></span>F</td></tr>';
+    }).join('') + '</table>';
+  var sol = sc.map(function (s, i) { return (i + 1) + ') ' + (s.vero ? 'V' : 'F'); }).join(' &middot; ');
+  return { html: html, sol: sol, chiave: 'vf:' + sc.map(function (s) { return s.testo; }).join('|') + '#' + g.map(cardKey).join(';') };
+}
+
+function esDescrivi(m) {
+  var c = pesca(m, 1)[0];
+  var veri = mescola(affermazioni([c]).filter(function (x) { return x.vero; })).slice(0, 4);
+  var html = '<p>Descrivi la carta usando le parole <em>almeno, nessuno, ogni, qualche, tutti, non tutti</em>.</p>' +
+    '<div class="descrivi"><div class="mini">' + disegnaCarta(c) + '</div>' +
+    '<div class="righe"><div class="riga"></div><div class="riga"></div><div class="riga"></div><div class="riga"></div></div></div>';
+  var sol = veri.map(function (s) { return '&bull; ' + s.testo; }).join('<br>');
+  return { html: html, sol: sol, chiave: 'ds:' + cardKey(c) };
+}
+
+var VINCOLI = [
+  { t: "C'è almeno una bambina con il grembiule", p: function (c) { return c.bambine.some(function (b) { return b.grembiule; }); } },
+  { t: "Ogni bambina ha il grembiule", p: function (c) { return c.bambine.every(function (b) { return b.grembiule; }); } },
+  { t: "Nessuna bambina ha il grembiule", p: function (c) { return !c.bambine.some(function (b) { return b.grembiule; }); } },
+  { t: "Non c'è nessuna cifra", p: function (c) { return c.cifre.length === 0; } },
+  { t: "C'è qualche cifra 2", p: function (c) { return c.cifre.indexOf(2) > -1; } },
+  { t: "C'è qualche cifra 1", p: function (c) { return c.cifre.indexOf(1) > -1; } },
+  { t: "C'è qualche figura geometrica", p: function (c) { return c.figure.length > 0; } },
+  { t: "Non c'è nessun triangolo", p: function (c) { return c.figure.indexOf('triangolo') < 0; } },
+  { t: "C'è almeno un cerchio", p: function (c) { return c.figure.indexOf('cerchio') > -1; } },
+  { t: "Ci sono più cifre che figure geometriche", p: function (c) { return c.cifre.length > c.figure.length; } }
+];
+
+function esDisegna(m) {
+  for (var t = 0; t < 200; t++) {
+    var vincoli = mescola(VINCOLI).slice(0, 3);
+    var cand = m.filter(function (c) {
+      return vincoli.every(function (v) { return v.p(c); });
+    });
+    if (cand.length) {
+      var sol = cand[casuale(cand.length)];
+      var html = '<p>Disegna una carta che abbia le seguenti caratteristiche:</p>' +
+        '<div class="disegna"><ul>' + vincoli.map(function (v) { return '<li>' + v.t + '</li>'; }).join('') + '</ul>' +
+        '<div class="mini grande">' + cornice() + '</div></div>';
+      return { html: html, sol: '<div class="mini" style="width:110px">' + disegnaCarta(sol) + '</div>',
+               chiave: 'dg:' + vincoli.map(function (v) { return v.t; }).join('|') };
+    }
+  }
+  return null;
+}
+
+var PREDICATI = [
+  { frase: "c'è un cerchio", p: function (c) { return c.figure.indexOf('cerchio') > -1; } },
+  { frase: "c'è un triangolo", p: function (c) { return c.figure.indexOf('triangolo') > -1; } },
+  { frase: "c'è una cifra pari", p: function (c) { return c.cifre.some(function (v) { return v % 2 === 0; }); } },
+  { frase: "c'è una cifra dispari", p: function (c) { return c.cifre.some(function (v) { return v % 2 === 1; }); } },
+  { frase: "c'è una ragazza con il grembiule", p: function (c) { return c.bambine.some(function (b) { return b.grembiule; }); } },
+  { frase: "ci sono solo ragazze con il grembiule", p: function (c) { return c.bambine.length > 0 && c.bambine.every(function (b) { return b.grembiule; }); } },
+  { frase: "ci sono delle cifre", p: function (c) { return c.cifre.length > 0; } },
+  { frase: "ci sono delle figure geometriche", p: function (c) { return c.figure.length > 0; } },
+  { frase: "ci sono più cifre che figure geometriche", p: function (c) { return c.cifre.length > c.figure.length; } }
+];
+
+function esDomanda(m) {
+  for (var t = 0; t < 300; t++) {
+    var g = pesca(m, 3);
+    for (var k = 0; k < PREDICATI.length; k++) {
+      var pr = PREDICATI[k];
+      var vere = [], false_ = [];
+      g.forEach(function (c, i) { (pr.p(c) ? vere : false_).push(i); });
+      var sol = null;
+      if (vere.length === 1) {
+        sol = 'Ad esempio: «Sotto una carta ' + pr.frase + '?» Risposta sì: restano solo le carte per cui la domanda è vera, cioè la carta ' + (vere[0] + 1) + '.';
+      } else if (false_.length === 1) {
+        sol = 'Ad esempio: «Sotto una carta ' + pr.frase + '?» Risposta no: restano solo le carte per cui la domanda è falsa, cioè la carta ' + (false_[0] + 1) + '.';
+      }
+      if (sol) {
+        var html = '<p>Osserva le tre carte. Scrivi una domanda a cui si può rispondere sì o no, che permetta di eliminare tutte le carte tranne una.</p>' +
+          '<p style="font-size:12px">Se la risposta è sì, restano le carte per cui la domanda è vera. Se la risposta è no, restano quelle per cui è falsa. La domanda non può contenere parole-numero, eccetto un, uno, una.</p>' +
+          gruppoHtml(g) + '<div class="riga"></div><div class="riga"></div>';
+        return { html: html, sol: sol, chiave: 'dm:' + g.map(cardKey).join(';') + '#' + pr.frase };
+      }
+    }
+  }
+  return null;
+}
+
+function esStrisce(m) {
+  var righe = '', sol = [], chiavi = [];
+  for (var k = 0; k < 4; k++) {
+    var c = pesca(m, 1)[0];
+    var a = mescola(affermazioni([c]))[0];
+    chiavi.push(cardKey(c) + a.testo);
+    righe += '<div class="striscia"><div class="mini sm">' + disegnaCarta(c) + '</div>' +
+      '<div class="testo">' + a.testo + '</div>' +
+      '<div class="opz"><span class="quadr"></span>V</div>' +
+      '<div class="opz"><span class="quadr"></span>F</div></div>';
+    sol.push((k + 1) + ') ' + (a.vero ? 'V' : 'F'));
+  }
+  return {
+    html: '<p>Vero o falso. Metti una crocetta nel quadratino giusto. Ritaglia le strisce lungo le linee tratteggiate.</p>' + righe,
+    sol: sol.join(' &middot; '),
+    chiave: 'st:' + chiavi.join('|')
+  };
+}
+
+var GEN = { vf: esVeroFalso, descrivi: esDescrivi, disegna: esDisegna, domanda: esDomanda, strisce: esStrisce };
+
+function pieDiPagina() {
+  return '<div class="pie"><img src="' + IMG_KALIMBA + '" alt="Bambina con kalimba">' +
+    '<span>© 2026 Rita Di Ianni · matematichenonsinasce · idee e materiali per la scuola primaria</span></div>';
+}
+
+/* ---------- generatore: costruzione della scheda ---------- */
+
+function costruisci() {
+  var msg = document.getElementById('msg');
+  msg.textContent = '';
+  var titolo = document.getElementById('titolo').value.trim() || 'Scheda';
+  var quanti = Math.max(1, Math.min(20, parseInt(document.getElementById('quanti').value, 10) || 4));
+  var modo = document.querySelector('input[name=modo]:checked').value;
+  var tipi;
+
+  if (modo === 'ripeti') {
+    tipi = [document.getElementById('tipo-unico').value];
+  } else {
+    tipi = Array.prototype.filter.call(document.querySelectorAll('.tipo-check'), function (c) { return c.checked; })
+      .map(function (c) { return c.value; });
+  }
+  if (!tipi.length) {
+    msg.textContent = 'Seleziona almeno un tipo di esercizio.';
+    document.getElementById('stampa').disabled = true;
+    return;
+  }
+
+  var deck = DATI_CARTE.map(creaCarta);
+  var ordine = mescola(tipi);
+  var lista = [], viste = {}, tent = 0;
+  while (lista.length < quanti && tent < quanti * 40) {
+    tent++;
+    var tipo = ordine[lista.length % ordine.length];
+    var ex = GEN[tipo](deck);
+    if (!ex || viste[ex.chiave]) continue;
+    viste[ex.chiave] = true;
+    lista.push(ex);
+  }
+  if (lista.length < quanti) {
+    msg.textContent = 'Ho potuto costruire solo ' + lista.length + ' esercizi diversi.';
+  }
+
+  var h = '<div class="foglio">' +
+    '<img class="logo-s" src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="">' +
+    '<p class="riga-nome">NOME E COGNOME: ______________________________________</p>' +
+    '<h2>' + titolo + '</h2>';
+  lista.forEach(function (ex, k) {
+    h += '<section class="es"><div class="numero">' + (k + 1) + '.</div><div class="corpo">' + ex.html + '</div></section>';
+  });
+  h += '</div>';
+
+  if (document.getElementById('sol').checked) {
+    h += '<div class="foglio sol"><h2>Soluzioni: ' + titolo + '</h2>' +
+      lista.map(function (ex, k) {
+        return '<div class="sol-riga"><strong>' + (k + 1) + '.</strong> ' + ex.sol + '</div>';
+      }).join('') + '</div>';
+  }
+
+  h += pieDiPagina();
+  document.getElementById('anteprima').innerHTML = h;
+  document.getElementById('stampa').disabled = false;
+}
+
+document.getElementById('costruisci').addEventListener('click', costruisci);
+document.getElementById('stampa').addEventListener('click', function () { window.print(); });
 
 nuovaPartita();
 </script>
