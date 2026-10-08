@@ -16,14 +16,12 @@ canvas{border-radius:16px;cursor:pointer;border:2px solid #c8b89a;width:100%;max
 #counts{display:flex;justify-content:space-around;width:100%;max-width:520px;margin:18px auto 0;font-size:1rem;font-weight:bold;min-height:24px;font-variant:small-caps}
 .info{margin-top:14px;font-size:1rem;min-height:28px;color:#7a5c2e;text-align:center;font-variant:small-caps}
 .question{margin-top:8px;font-size:1.2rem;color:#3a2e1e;text-align:center;min-height:28px;font-variant:small-caps}
-.answer-row{display:flex;gap:8px;margin-top:10px;align-items:center;justify-content:center}
-.answer-row input{width:70px;padding:6px 10px;border-radius:8px;border:1px solid #c8b89a;font-size:1.1rem;text-align:center;background:#fffdf7;color:#3a2e1e;font-family:Georgia,serif;font-variant:small-caps}
-.answer-row button{padding:6px 16px;border-radius:8px;border:1px solid #2e8a70;background:#4ab090;color:#fff;font-weight:bold;cursor:pointer;font-size:1rem;font-family:Georgia,serif;font-variant:small-caps}
-.answer-row button:hover{background:#3a9a80}
+.reveal-row{display:none;margin-top:10px;justify-content:center}
+.reveal-row button{padding:8px 22px;border-radius:8px;border:1px solid #2e8a70;background:#4ab090;color:#fff;font-weight:bold;cursor:pointer;font-size:1.05rem;font-family:Georgia,serif;font-variant:small-caps}
+.reveal-row button:hover{background:#3a9a80}
 .feedback{margin-top:8px;font-size:1.1rem;min-height:26px;text-align:center;font-variant:small-caps}
 .feedback.ok{color:#2e7a50}
 .feedback.no{color:#c03030}
-.score{margin-top:8px;font-size:0.9rem;color:#7a6040;font-variant:small-caps}
 .print-controls{display:flex;align-items:center;gap:10px;margin-top:18px;margin-bottom:22px;background:#e8dfc8;padding:10px 18px;border-radius:12px;border:1px solid #c8b89a}
 .print-controls label{font-size:14px;color:#5a4020;font-variant:small-caps}
 .print-controls input{width:60px;padding:4px 8px;border-radius:6px;border:1px solid #c8b89a;font-size:14px;text-align:center;background:#fffdf7;color:#3a2e1e;font-family:Georgia,serif;font-variant:small-caps}
@@ -73,15 +71,14 @@ canvas{border-radius:16px;cursor:pointer;border:2px solid #c8b89a;width:100%;max
 <div id="counts"></div>
 <div class="info" id="info">Premi "Scuoti" per iniziare!</div>
 <div class="question" id="question"></div>
-<div class="answer-row" id="answerRow" style="display:none">
-  <input type="number" id="answerInput" min="0" max="20" placeholder="?">
-  <button onclick="controlla()">Conferma</button>
+<div class="reveal-row" id="revealRow">
+  <button onclick="rivela()">👀 Mostra risposta</button>
 </div>
 <div class="feedback" id="feedback"></div>
-<div class="score" id="score">Risposte Corrette: 0 / 0</div>
+
 <div style="max-width:480px;width:100%;margin:24px auto 0;background:#e8dfc8;border:1px solid #c8b89a;border-radius:12px;padding:16px 20px;font-size:0.95rem;line-height:1.6;color:#4a3820;font-variant:small-caps;box-sizing:border-box">
   <strong style="font-size:1.05rem;color:#7a5c2e">Regole Del Gioco</strong><br><br>
-  Scuoti la scatolina, apri uno sportello e conta le palline visibili. Quante sono rimaste nell'altro lato? Un modo semplice per scoprire le decomposizioni del numero: gli amici del 10, del 20, o di qualsiasi numero scelto.
+  Scuoti la scatolina, apri uno sportello e conta le palline visibili. Quante sono rimaste nell'altro lato? Dillo ad alta voce, poi premi "Mostra risposta" per controllare. Un modo semplice per scoprire le decomposizioni del numero: gli amici del 10, del 20, o di qualsiasi numero scelto.
 </div>
 
 <div id="printSheet" class="print-grid"></div>
@@ -101,16 +98,16 @@ const ROOM_R_COLOR = '#fff8e8';
 const BALL_COLOR = '#e53935';
 const BALL_SHINE = '#ff8a80';
 
-let totalBalls=20,ballsLeft=0,ballsRight=0,rightOpen=false,leftOpen=false,shaking=false,balls=[],phase='idle',correct=0,total=0,openSide='';
+let totalBalls=20,ballsLeft=0,ballsRight=0,rightOpen=false,leftOpen=false,shaking=false,balls=[],phase='idle',openSide='';
 
 function nuovaPartita(){
   let n=parseInt(document.getElementById('numInput').value);
   if(isNaN(n)||n<1)n=1; if(n>20)n=20;
-  totalBalls=n; correct=0; total=0; aggiornaPunteggio();
+  totalBalls=n;
   phase='idle'; rightOpen=false; leftOpen=false; shaking=false;
   document.getElementById('info').textContent='Premi "Scuoti" per iniziare!';
   document.getElementById('question').textContent='';
-  document.getElementById('answerRow').style.display='none';
+  document.getElementById('revealRow').style.display='none';
   document.getElementById('feedback').textContent='';
   document.getElementById('feedback').className='feedback';
   distribBalls(Math.floor(Math.random()*(totalBalls+1)));
@@ -194,7 +191,7 @@ function roundRect(ctx,x,y,w,h,r){
 function scuoti(){
   if(shaking)return;
   phase='shaking';rightOpen=false;leftOpen=false;
-  document.getElementById('answerRow').style.display='none';
+  document.getElementById('revealRow').style.display='none';
   document.getElementById('question').textContent='';
   document.getElementById('feedback').textContent='';
   document.getElementById('feedback').className='feedback';
@@ -212,27 +209,27 @@ canvas.addEventListener('click',e=>{
   if(mx<DIVIDER){leftOpen=true;rightOpen=false;openSide='left';}
   else{rightOpen=true;leftOpen=false;openSide='right';}
   const visibili=openSide==='left'?ballsLeft:ballsRight;
-  document.getElementById('info').textContent=`Vedi ${visibili} pallina${visibili!==1?'e':''} → Quante sono nell'altro lato?`;
+  document.getElementById('info').textContent=`Vedi ${visibili} pallina${visibili!==1?'e':''} → Dillo ad alta voce: quante sono nell'altro lato?`;
   document.getElementById('question').textContent=`${visibili} + ? = ${totalBalls}`;
-  document.getElementById('answerRow').style.display='flex';
-  document.getElementById('answerInput').value='';
-  document.getElementById('answerInput').focus();
+  document.getElementById('feedback').textContent='';
+  document.getElementById('feedback').className='feedback';
+  document.getElementById('revealRow').style.display='flex';
   phase='answer';draw();
 });
 
-function controlla(){
-  const ans=parseInt(document.getElementById('answerInput').value);
+function rivela(){
+  if(phase!=='answer')return;
+  const visibili=openSide==='left'?ballsLeft:ballsRight;
   const nascoste=openSide==='left'?ballsRight:ballsLeft;
-  total++;
+  leftOpen=true;rightOpen=true;draw();
+  document.getElementById('question').textContent=`${visibili} + ${nascoste} = ${totalBalls}`;
   const fb=document.getElementById('feedback');
-  if(ans===nascoste){correct++;fb.textContent=`✅ Esatto! ${nascoste} palline nell'altro lato.`;fb.className='feedback ok';}
-  else{fb.textContent=`❌ Sbagliato! Erano ${nascoste}. (${openSide==='left'?ballsLeft:ballsRight} + ${nascoste} = ${totalBalls})`;fb.className='feedback no';}
-  aggiornaPunteggio();leftOpen=true;rightOpen=true;draw();phase='idle';
-  document.getElementById('answerRow').style.display='none';
+  fb.textContent=`Nell'altro lato ci sono ${nascoste} palline.`;
+  fb.className='feedback ok';
+  document.getElementById('revealRow').style.display='none';
   document.getElementById('info').textContent='Premi "Scuoti" per un nuovo turno!';
+  phase='idle';
 }
-
-function aggiornaPunteggio(){document.getElementById('score').textContent=`Risposte Corrette: ${correct} / ${total}`;}
 
 function ballRadiusForTotal(total){
   return total>14?6:total>8?8:10;
