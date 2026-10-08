@@ -1,407 +1,438 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cannucce</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quante cannucce?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700&family=Lexend:wght@300;400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Georgia', serif; background: #f0ebe0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 16px 10px; }
-
-  a.logo-wrap { display: flex; flex-direction: column; align-items: center; gap: 5px; text-decoration: none; margin-bottom: 10px; }
-  a.logo-wrap img { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; }
-  a.logo-wrap span { font-family: 'Georgia', serif; font-style: italic; font-size: 14px; color: #555; }
-
-  h1 { font-size: 20px; font-weight: 600; color: #333; margin-bottom: 3px; }
-  .subtitle { font-size: 13px; color: #888; margin-bottom: 14px; text-align: center; }
-
-  .level-btns { display: flex; gap: 10px; margin-bottom: 14px; }
-  .level-btn {
-    padding: 8px 20px; border: 2px solid #bbb; border-radius: 20px;
-    font-size: 14px; font-family: 'Georgia', serif; cursor: pointer;
-    background: #fff; color: #555; transition: all 0.2s;
+:root{
+  --bg:#ffffff; --panel:#fbfcf7; --ink:#1f2a22; --muted:#5a6758; --line:#d3dac6;
+  --accent:#1c7c90; --accent-ink:#ffffff; --soft:#dfe9c4; --warn:#a33a2a; --ok:#2f7d32;
+  --display:"Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --body:"Lexend", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#141915; --panel:#1c231e; --ink:#e6ece2; --muted:#9dab9c; --line:#303b32;
+    --accent:#5bbfd2; --accent-ink:#0d1a1d; --soft:#2a3526; --warn:#ff8f7a; --ok:#8fd694;
   }
-  .level-btn.active { background: #4a90d9; border-color: #4a90d9; color: #fff; font-weight: 600; }
-
-  .card {
-    background: #faf8f3; border-radius: 14px;
-    box-shadow: 0 2px 14px rgba(0,0,0,0.09);
-    padding: 18px 14px 22px;
-    width: 100%; max-width: 560px;
-    display: flex; flex-direction: column; align-items: center; gap: 14px;
-  }
-
-  .grid { width: 100%; display: grid; }
-  .grid.with-hundreds { grid-template-columns: 1fr 1fr 1fr; }
-  .grid.no-hundreds   { grid-template-columns: 1fr 1fr; }
-
-  .col-label {
-    font-family: 'Georgia', serif; font-style: italic;
-    font-size: 22px; font-weight: normal; color: #222;
-    text-align: center; padding-bottom: 6px;
-    border-bottom: 2px solid #444;
-  }
-  .col-label.h  { border-right: 1.5px solid #555; }
-  .col-label.da { border-right: 1.5px solid #555; }
-
-  .col-content {
-    height: 110px;
-    display: flex; flex-direction: row;
-    align-items: flex-end; justify-content: center;
-    padding: 16px 4px 8px; gap: 4px;
-  }
-  .col-content.h  { border-right: 1.5px solid #555; }
-  .col-content.da { border-right: 1.5px solid #555; }
-
-  .input-row { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
-  input[type=number] {
-    width: 100px; height: 46px; font-size: 26px; font-weight: 700;
-    text-align: center; border: 2px solid #ccc; border-radius: 10px;
-    outline: none; color: #222; background: #fff; -moz-appearance: textfield;
-  }
-  input::-webkit-inner-spin-button, input::-webkit-outer-spin-button { -webkit-appearance: none; }
-  input:focus { border-color: #4a90d9; }
-
-  .btn-check {
-    background: #4a90d9; color: #fff; border: none; border-radius: 10px;
-    padding: 11px 22px; font-size: 15px; font-weight: 600; cursor: pointer;
-  }
-  .btn-check:hover { background: #357abd; }
-  .btn-next {
-    background: #5cb85c; color: #fff; border: none; border-radius: 10px;
-    padding: 11px 22px; font-size: 15px; font-weight: 600; cursor: pointer; display: none;
-  }
-  .btn-next:hover { background: #449d44; }
-
-  .feedback { font-size: 17px; font-weight: 600; min-height: 24px; text-align: center; }
-  .feedback.ok  { color: #2e7d2e; }
-  .feedback.err { color: #b02020; }
-  .score { font-size: 13px; color: #999; }
-
-  .print-controls { display: flex; align-items: center; gap: 10px; margin-top: 16px; font-size: 13px; color: #666; }
-  .print-controls label { display: flex; align-items: center; gap: 6px; }
-  .print-controls input[type=number] {
-    width: 54px; height: 30px; font-size: 14px; text-align: center;
-    border: 1.5px solid #ccc; border-radius: 6px; -moz-appearance: textfield;
-  }
-  .btn-print {
-    background: #333; color: #fff; border: none; border-radius: 10px;
-    padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer;
-  }
-  .btn-print:hover { background: #111; }
-
-  #print-sheet { display: none; }
-
-  @media print {
-    body * { visibility: hidden; }
-    #print-sheet, #print-sheet * { visibility: visible; }
-    #print-sheet {
-      display: block !important; position: absolute; left: 0; top: 0; width: 100%;
-      background: #fff;
-    }
-    body { background: #fff; }
-    @page { size: A4; margin: 12mm; }
-  }
-
-  .print-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .print-box {
-    border: 1.5px solid #999; border-radius: 8px; padding: 8px 10px 10px;
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
-    break-inside: avoid; page-break-inside: avoid;
-  }
-  .print-logo { width: 32px; height: 32px; border-radius: 50%; object-fit: contain; }
-  .print-content-row { display: flex; flex-direction: row; align-items: flex-end; gap: 6px; }
-  .print-col { display: flex; flex-direction: column; align-items: center; }
-  .print-col-label {
-    font-family: 'Georgia', serif; font-style: italic; font-size: 13px;
-    border-bottom: 1.5px solid #444; width: 100%; text-align: center;
-    padding-bottom: 2px; margin-bottom: 4px;
-  }
-  .print-col-content { display: flex; flex-direction: row; align-items: flex-end; gap: 2px; min-height: 46px; }
-  .print-line { font-size: 12.5px; color: #333; margin-top: 6px; }
-
-  @media (max-width: 480px) {
-    body { padding: 10px 6px; }
-    a.logo-wrap img { width: 48px; height: 48px; }
-    a.logo-wrap span { font-size: 12px; }
-    h1 { font-size: 16px; }
-    .subtitle { font-size: 11px; margin-bottom: 10px; }
-    .level-btn { padding: 6px 12px; font-size: 12px; }
-    .card { padding: 12px 8px 16px; gap: 10px; }
-    .col-label { font-size: 17px; }
-    .col-content { height: 80px; padding: 10px 2px 4px; gap: 2px; }
-    input[type=number] { width: 76px; height: 40px; font-size: 22px; }
-    .btn-check, .btn-next { padding: 9px 14px; font-size: 13px; }
-    .feedback { font-size: 14px; }
-  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#141915; --panel:#1c231e; --ink:#e6ece2; --muted:#9dab9c; --line:#303b32;
+  --accent:#5bbfd2; --accent-ink:#0d1a1d; --soft:#2a3526; --warn:#ff8f7a; --ok:#8fd694;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;margin:0}
+.logo{display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;align-self:center}
+.logo img{width:60px;height:60px;object-fit:contain;border-radius:50%}
+.logo span{font-size:14px;color:var(--text-secondary,#5f5e5a)}
+.logo:focus-visible{outline:3px solid var(--accent);outline-offset:4px;border-radius:8px}
+html,body{height:100%}
+/* la parte di gioco occupa esattamente lo schermo: PC, cellulare o LIM */
+.game{height:100vh;height:100dvh;display:flex;flex-direction:column;gap:clamp(4px,1.2vh,12px);padding-inline:16px;padding-block:clamp(6px,1.4vh,16px)}
+.game .logo{flex:0 0 auto}
+.game .logo img{width:clamp(36px,6vh,60px);height:clamp(36px,6vh,60px)}
+.top{flex:0 0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 20px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:22px 40px;display:flex;flex-direction:column;gap:14px}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(24px,4.2vh,44px);line-height:1;margin:0;color:var(--accent)}
+h2{font-family:var(--display);font-weight:700;font-size:24px;line-height:1.1;margin:0}
+.top p{margin:0;color:var(--muted);font-size:13px;flex:1 1 300px}
+@media (max-height:560px), (max-width:560px){ .top p{display:none} }
+.seg{display:flex;flex-wrap:wrap;border:2px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg)}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{padding:4px 14px;cursor:pointer;font-size:15px;color:var(--muted);display:flex;align-items:center;min-height:42px}
+.seg input:checked+label{background:var(--accent);color:var(--accent-ink)}
+.seg input:focus-visible+label{outline:3px solid var(--accent);outline-offset:-3px}
+.stage{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.canvasBox{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;background:#e3e1da}
+canvas{display:block;background:#e3e1da}
+.bar{flex:0 0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;padding:clamp(6px,1.2vh,12px) 16px;border-top:1px solid var(--line)}
+#bigNum{font-family:var(--display);font-weight:700;font-size:clamp(30px,5.5vh,56px);line-height:1;min-width:3.2ch;font-variant-numeric:tabular-nums;color:var(--accent)}
+#prompt{flex:1 1 260px;margin:0;font-size:clamp(14px,2.1vh,20px)}
+.more{flex:0 0 auto;text-align:center;font-size:13px;color:var(--muted);margin:0}
+.more a{color:var(--accent)}
+#score{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+button{font-family:var(--body);font-size:15px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--ink);padding:8px 16px;cursor:pointer;min-height:48px}
+button:hover:not(:disabled){border-color:var(--accent)}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+button:disabled{opacity:.45;cursor:default}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-family:var(--display);font-weight:700;font-size:22px;padding:4px 24px;min-height:54px}
+button.good{font-family:var(--display);font-weight:700;font-size:20px;border-color:var(--ok);color:var(--ok)}
+button.bad{font-family:var(--display);font-weight:700;font-size:20px;border-color:var(--warn);color:var(--warn)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:14px}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px}
+.lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.check{display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer}
+.check input{width:18px;height:18px;accent-color:var(--accent)}
+.note{color:var(--muted);font-size:13px;margin:0;max-width:75ch}
+#pdfStatus{margin:0;font-size:14px;color:var(--muted);min-height:1.3em}
+@media (max-width:560px){
+  button{min-height:40px;padding:6px 12px;font-size:14px}
+  button.primary{font-size:18px;min-height:44px;padding:4px 16px}
+  button.good,button.bad{font-size:16px}
+  #prompt{flex-basis:100%}
+}
 </style>
 </head>
 <body>
-
-<a class="logo-wrap" href="https://matematichenonsinasce.com/" target="_self">
-  <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="Logo">
-  <span>Matematiche non si nasce</span>
-</a>
-
-<h1>Quante cannucce?</h1>
-<p class="subtitle">Guarda la rappresentazione e scrivi il numero</p>
-
-<div class="level-btns">
-  <button class="level-btn active" onclick="setLevel(false, this)">Decine e unità</button>
-  <button class="level-btn" onclick="setLevel(true, this)">Con le centinaia</button>
-</div>
-
-<div class="card">
-  <div class="grid no-hundreds" id="grid">
-    <div class="col-label da">da</div>
-    <div class="col-label u">u</div>
-    <div class="col-content da" id="tens-area"></div>
-    <div class="col-content u"  id="units-area"></div>
+<main class="game">
+  <a class="logo" href="https://matematichenonsinasce.com/" target="_blank" rel="noopener">
+    <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Logo Matematiche non si nasce">
+    <span>Matematiche non si nasce</span>
+  </a>
+  <div class="top">
+    <h1>Quante cannucce?</h1>
+    <p>Dite a voce quante cannucce ci sono, poi premete «Mostra il numero». Sulla LIM basta la barra spaziatrice.</p>
+    <div class="seg" role="radiogroup" aria-label="Livello">
+      <input type="radio" name="level" id="lv-du" value="du" checked><label for="lv-du">Decine e unità</label>
+      <input type="radio" name="level" id="lv-h" value="h"><label for="lv-h">Con le centinaia</label>
+    </div>
   </div>
 
-  <div class="input-row">
-    <input type="number" id="answer" placeholder="?" min="1" max="999" />
-    <button class="btn-check" onclick="checkAnswer()">Verifica</button>
-    <button class="btn-next" id="btn-next" onclick="nextRound()">Avanti ▶</button>
-  </div>
-  <div class="feedback" id="feedback"></div>
-  <div class="score" id="score">Punti: 0 / 0</div>
-</div>
+  <section class="stage" aria-label="Tovaglietta">
+    <div class="canvasBox" id="canvasBox"><canvas id="scene" role="img" aria-label="Tovaglietta verde vista dall'alto con mazzi di cannucce"></canvas></div>
+    <div class="bar">
+      <div id="bigNum" aria-live="polite">?</div>
+      <p id="prompt" aria-live="polite">Quante cannucce ci sono sulla tovaglietta?</p>
+      <div class="actions">
+        <button type="button" id="reveal" class="primary">Mostra il numero</button>
+        <button type="button" id="good" class="good" hidden>Era giusto</button>
+        <button type="button" id="bad" class="bad" hidden>Era sbagliato</button>
+        <button type="button" id="skip" hidden>Avanti</button>
+      </div>
+      <span id="score">Giusti: 0 su 0</span>
+    </div>
+  </section>
+  <p class="more"><a href="#scheda">Scheda da stampare in PDF ↓</a></p>
+</main>
 
-<div class="print-controls">
-  <label>Numero riquadri: <input type="number" id="print-count" value="12" min="4" max="30"></label>
-  <button class="btn-print" onclick="generaPDF()">Stampa scheda</button>
+<div class="wrap">
+  <section class="card" id="scheda" aria-label="Scheda da stampare">
+    <h2>Scheda da stampare</h2>
+    <p class="note">Ogni riquadro ha una tovaglietta da contare e la riga «Quante cannucce?». Il livello è quello scelto in alto. I numeri cambiano ogni volta che premi il pulsante.</p>
+    <div class="row">
+      <div class="group">
+        <span class="lbl">Riquadri</span>
+        <div class="seg" role="radiogroup" aria-label="Numero di riquadri">
+          <input type="radio" name="pcount" id="pc-1" value="1"><label for="pc-1">1 pagina</label>
+          <input type="radio" name="pcount" id="pc-2" value="2" checked><label for="pc-2">2 pagine</label>
+          <input type="radio" name="pcount" id="pc-3" value="3"><label for="pc-3">3 pagine</label>
+        </div>
+      </div>
+      <label class="check" for="psol"><input type="checkbox" id="psol" checked> Aggiungi la pagina delle soluzioni</label>
+      <button type="button" id="pdfBtn" class="primary">Genera PDF</button>
+    </div>
+    <p id="pdfStatus" role="status"></p>
+  </section>
 </div>
-
-<div id="print-sheet"></div>
 
 <script>
-const H=90, HW=22, BW=10, UW=3;
-let target=0, hundreds=0, tens=0, units=0, correct=0, total=0, useHundreds=false;
+(()=>{
+/* ---------- misure ---------- */
+const BASE_W=940, HH=716, OXH=476;   // OXH: larghezza aggiunta dalla colonna delle centinaia
+const SL=220, SWD=13, PAD=10, SS=3;
+const sceneW=withH=>BASE_W+(withH?OXH:0);
+const hundSlot=j=>({x:138+(j%3)*155, y:154+Math.floor(j/3)*155});
+const tenSlot=(j,ox)=>({x:ox+130+(j%5)*84, y:j<5?184:426});
+const unitSlot=(i,ox)=>({x:ox+552+i*34+(i>=5?14:0), y:184});
 
-function rnd(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
-function makeCanvas(w,h){ const c=document.createElement('canvas'); c.width=w; c.height=h; c.style.display='block'; return c; }
+const rand=(a,b)=>a+Math.random()*(b-a);
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const rk=()=>Math.random()<.55?'nero':'avana';
 
-function drawHundred(parent){ 
-  const cv=makeCanvas(HW,H); const ctx=cv.getContext('2d');
-  ctx.fillStyle='#111'; ctx.fillRect(0,0,HW,H);
-  ctx.strokeStyle='rgba(255,255,255,0.18)'; ctx.lineWidth=0.8;
-  for(let i=1;i<10;i++){ const y=Math.round(H/10*i); ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(HW,y); ctx.stroke(); }
-  ctx.strokeStyle='#2e7d32'; ctx.lineWidth=1.8;
-  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(HW,H); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(HW,0); ctx.lineTo(0,H); ctx.stroke();
-  parent.appendChild(cv);
+/* ---------- cannucce sdraiate ---------- */
+function makeSprite(kind){
+  const c=document.createElement('canvas');
+  c.width=(SWD+PAD*2)*SS; c.height=(SL+PAD*2)*SS;
+  const g=c.getContext('2d'); g.scale(SS,SS); g.translate(PAD+SWD/2,PAD+SL/2);
+  const base=kind==='nero'?'#f6f6f2':'#f4f1e8';
+  const stripe=kind==='nero'?'#2a2b2e':'#c7b28c';
+  const shape=()=>{g.beginPath(); g.roundRect(-SWD/2,-SL/2,SWD,SL,2);};
+  g.save(); g.shadowColor='rgba(30,40,15,.33)'; g.shadowBlur=3; g.shadowOffsetX=2.5; g.shadowOffsetY=3.5;
+  shape(); g.fillStyle=base; g.fill(); g.restore();
+  g.save(); shape(); g.clip();
+  g.fillStyle=stripe;
+  for(let y=-SL/2-30;y<SL/2+30;y+=22){
+    g.beginPath(); g.moveTo(-SWD/2,y); g.lineTo(SWD/2,y-13); g.lineTo(SWD/2,y-2.5); g.lineTo(-SWD/2,y+10.5); g.closePath(); g.fill();
+  }
+  if(kind==='avana'){
+    for(let k=0;k<160;k++){ g.fillStyle=`rgba(110,85,50,${rand(.15,.4)})`; g.beginPath(); g.arc(rand(-SWD/2,SWD/2),rand(-SL/2,SL/2),rand(.2,.5),0,7); g.fill(); }
+  }
+  const gr=g.createLinearGradient(-SWD/2,0,SWD/2,0);
+  gr.addColorStop(0,'rgba(0,0,0,.30)'); gr.addColorStop(.32,'rgba(255,255,255,.28)');
+  gr.addColorStop(.55,'rgba(0,0,0,0)'); gr.addColorStop(1,'rgba(0,0,0,.34)');
+  g.fillStyle=gr; g.fillRect(-SWD/2,-SL/2,SWD,SL);
+  g.fillStyle='rgba(0,0,0,.18)'; g.fillRect(-SWD/2,-SL/2,SWD,1.3); g.fillRect(-SWD/2,SL/2-1.3,SWD,1.3);
+  g.restore();
+  return c;
+}
+const SPR={nero:makeSprite('nero'),avana:makeSprite('avana')};
+function drawStraw(g,kind,x,y,rot){
+  g.save(); g.translate(x,y); g.rotate(rot);
+  g.drawImage(SPR[kind],-SWD/2-PAD,-SL/2-PAD,SWD+2*PAD,SL+2*PAD);
+  g.restore();
+}
+function makeTen(){
+  const items=Array.from({length:10},(_,i)=>{const back=i<5,c=i%5;
+    return {kind:rk(),dx:(c-2)*13+(back?6.5:0),dy:(back?-5:4)+rand(-7,7),r:rand(-.025,.025)};});
+  return {rot:rand(-.02,.02),items};
+}
+function drawTen(g,b,x,y){
+  g.save(); g.translate(x,y); g.rotate(b.rot);
+  for(const it of b.items){
+    g.save(); g.translate(it.dx,it.dy); g.rotate(it.r);
+    g.drawImage(SPR[it.kind],-SWD/2-PAD,-SL/2-PAD,SWD+2*PAD,SL+2*PAD); g.restore();
+  }
+  // elastico
+  const yb=22; g.lineCap='round';
+  const path=()=>{g.beginPath(); for(let xx=-40;xx<=40;xx+=4){const yy=yb+3*(1-(xx/40)**2); xx===-40?g.moveTo(xx,yy):g.lineTo(xx,yy);}};
+  path(); g.strokeStyle='rgba(20,60,50,.35)'; g.lineWidth=7; g.stroke();
+  path(); g.strokeStyle='#4db8a7'; g.lineWidth=4.6; g.stroke();
+  g.translate(0,-1.2); path(); g.strokeStyle='rgba(225,255,248,.75)'; g.lineWidth=1.2; g.stroke();
+  g.restore();
 }
 
-function drawBundle(parent){
-  const cv=makeCanvas(BW,H); const ctx=cv.getContext('2d');
-  ctx.fillStyle='#111'; ctx.fillRect(0,0,BW,H);
-  ctx.strokeStyle='#c8860a'; ctx.lineWidth=1.5;
-  const by=Math.round(H*0.58);
-  ctx.beginPath(); ctx.moveTo(0,by); ctx.lineTo(BW,by); ctx.stroke();
-  parent.appendChild(cv);
+/* ---------- mazzo da cento in piedi, visto dall'alto ---------- */
+const HS_SP=12, HS_R=5.8;
+const HEX=(()=>{const pts=[];
+  for(let r=-12;r<=12;r++) for(let c=-12;c<=12;c++){
+    const x=(c+((r&1)?.5:0))*HS_SP, y=r*HS_SP*0.866; pts.push({x,y,d:Math.hypot(x,y)});
+  }
+  pts.sort((a,b)=>a.d-b.d); return pts.slice(0,100);})();
+const HUND_R=HEX[HEX.length-1].d+HS_R;
+const HUND_SIZE=(HUND_R+14)*2;
+function makeHundredSprite(){
+  const S=2.5, c=document.createElement('canvas');
+  c.width=c.height=Math.ceil(HUND_SIZE*S);
+  const g=c.getContext('2d'); g.scale(S,S); g.translate(HUND_SIZE/2,HUND_SIZE/2);
+  g.save(); g.shadowColor='rgba(25,35,10,.5)'; g.shadowBlur=12; g.shadowOffsetX=6; g.shadowOffsetY=8;
+  g.beginPath(); g.arc(0,0,HUND_R+1,0,7); g.fillStyle='#4a4636'; g.fill(); g.restore();
+  for(const p of HEX){
+    const kind=rk();
+    g.beginPath(); g.arc(p.x,p.y,HS_R,0,7); g.fillStyle=kind==='nero'?'#f4f4f0':'#f0eadc'; g.fill();
+    const a0=rand(0,6.28);
+    g.strokeStyle=kind==='nero'?'#2a2b2e':'#bea67c'; g.lineWidth=1.9;
+    g.beginPath(); g.arc(p.x,p.y,HS_R-0.95,a0,a0+rand(1.3,2.3)); g.stroke();
+    g.beginPath(); g.arc(p.x,p.y,HS_R-0.95,a0+3.14,a0+3.14+rand(.6,1.4)); g.stroke();
+    const hg=g.createRadialGradient(p.x-.9,p.y-.9,.4,p.x,p.y,HS_R-1.7);
+    hg.addColorStop(0,'#15130f'); hg.addColorStop(1,'#5b5546');
+    g.beginPath(); g.arc(p.x,p.y,HS_R-1.8,0,7); g.fillStyle=hg; g.fill();
+  }
+  g.lineWidth=5.5; g.strokeStyle='#3d9f90'; g.beginPath(); g.arc(0,0,HUND_R+2.4,0,7); g.stroke();
+  g.lineWidth=1.3; g.strokeStyle='rgba(200,250,240,.8)'; g.beginPath(); g.arc(0,0,HUND_R+1.4,-2.6,-0.6); g.stroke();
+  return c;
+}
+const HSPR=[makeHundredSprite(),makeHundredSprite(),makeHundredSprite(),makeHundredSprite()];
+function drawHundred(g,v,x,y,rot){
+  g.save(); g.translate(x,y); g.rotate(rot);
+  g.drawImage(HSPR[v],-HUND_SIZE/2,-HUND_SIZE/2,HUND_SIZE,HUND_SIZE);
+  g.restore();
 }
 
-function drawLoose(parent){
-  const cv=makeCanvas(UW+2,H); const ctx=cv.getContext('2d');
-  ctx.fillStyle='#111'; ctx.fillRect(1,0,UW,H);
-  parent.appendChild(cv);
+/* ---------- tovaglietta ---------- */
+function rr(g,x,y,w,h,r,fill){g.beginPath(); g.roundRect(x,y,w,h,r); g.fillStyle=fill; g.fill();}
+function makeRound(withH,h,t,u){
+  return {withH,h,t,u,n:h*100+t*10+u,
+    hund:Array.from({length:h},()=>({v:rnd(0,HSPR.length-1),rot:rand(-3.14,3.14),dx:rand(-4,4),dy:rand(-4,4)})),
+    tens:Array.from({length:t},makeTen),
+    units:Array.from({length:u},()=>({kind:rk(),r:rand(-.035,.035)}))};
 }
-
-// Spacer div for subitizing gap after 5th element
-function addSpacer(parent, w){
-  const s=document.createElement('div');
-  s.style.cssText='width:'+w+'px;height:1px;flex-shrink:0;';
-  parent.appendChild(s);
-}
-
-function fillArea(area, count, drawFn, spacerW){
-  for(let i=0;i<count;i++){
-    if(i===5) addSpacer(area, spacerW);
-    drawFn(area);
+function drawScene(g,r,reveal){
+  const ox=r.withH?OXH:0, W=sceneW(r.withH);
+  g.fillStyle='#e3e1da'; g.fillRect(0,0,W,HH);
+  const vg=g.createRadialGradient(W/2,HH/2,200,W/2,HH/2,W*.75);
+  vg.addColorStop(0,'rgba(255,255,255,.18)'); vg.addColorStop(1,'rgba(90,80,60,.14)');
+  g.fillStyle=vg; g.fillRect(0,0,W,HH);
+  g.save(); g.shadowColor='rgba(50,45,30,.22)'; g.shadowBlur=14; g.shadowOffsetY=5;
+  rr(g,30,14,882+ox,688,8,'#fbfbf6'); g.restore();
+  g.fillStyle='#1f8aa3'; g.font='700 25px "Baloo 2", "Trebuchet MS", sans-serif'; g.textBaseline='middle'; g.textAlign='left';
+  g.fillText(r.withH?'ABACO  CENTINAIA,  DECINE  E  UNITÀ':'ABACO  DECINE  E  UNITÀ',58,39);
+  if(r.withH){
+    rr(g,58,62,470,500,3,'#7fa645');
+    rr(g,58,566,470,40,3,'#6a9234');
+    rr(g,58,610,470,68,3,'#8fb558');
+  }
+  rr(g,58+ox,62,466,500,3,'#b7d263');
+  rr(g,530+ox,62,352,500,3,'#d2e39e');
+  rr(g,58+ox,566,466,40,3,'#a4c34a');
+  rr(g,530+ox,566,352,40,3,'#bdd57c');
+  rr(g,58+ox,610,466,68,3,'#c6dd84');
+  rr(g,530+ox,610,352,68,3,'#dbe9b3');
+  g.font='500 25px "Baloo 2", "Trebuchet MS", sans-serif'; g.textAlign='center';
+  if(r.withH){ g.fillStyle='#f3f8e8'; g.fillText('centinaia',293,587); }
+  g.fillStyle='#2b3818';
+  g.fillText('decine',291+ox,587); g.fillText('unità',706+ox,587);
+  // lucido della plastificazione
+  g.save(); g.beginPath(); g.roundRect(30,14,882+ox,688,8); g.clip();
+  const gl=g.createLinearGradient(100,0,100+W*.65,700);
+  gl.addColorStop(0,'rgba(255,255,255,0)'); gl.addColorStop(.42,'rgba(255,255,255,0)');
+  gl.addColorStop(.47,'rgba(255,255,255,.15)'); gl.addColorStop(.52,'rgba(255,255,255,0)'); gl.addColorStop(1,'rgba(255,255,255,0)');
+  g.fillStyle=gl; g.fillRect(30,14,882+ox,688); g.restore();
+  // contenuto
+  r.hund.forEach((m,j)=>{const s=hundSlot(j); drawHundred(g,m.v,s.x+m.dx,s.y+m.dy,m.rot);});
+  r.tens.forEach((b,j)=>{const s=tenSlot(j,ox); drawTen(g,b,s.x,s.y);});
+  r.units.forEach((s,i)=>{const p=unitSlot(i,ox); drawStraw(g,s.kind,p.x,p.y,s.r);});
+  if(reveal){
+    g.font='700 48px "Baloo 2", "Trebuchet MS", sans-serif'; g.textAlign='center'; g.textBaseline='middle';
+    if(r.withH){ g.fillStyle='#ffffff'; g.fillText(String(r.h),293,647); }
+    g.fillStyle='#14606f';
+    g.fillText(String(r.t),291+ox,647); g.fillText(String(r.u),706+ox,647);
   }
 }
 
-function setLevel(withH, btn){
-  useHundreds = withH;
-  document.querySelectorAll('.level-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  const grid = document.getElementById('grid');
-  if(withH){
-    grid.className='grid with-hundreds';
-    if(!document.getElementById('hundreds-area')){
-      const lbl=document.createElement('div'); lbl.className='col-label h'; lbl.textContent='h';
-      const area=document.createElement('div'); area.className='col-content h'; area.id='hundreds-area';
-      grid.insertBefore(area, grid.children[2]);
-      grid.insertBefore(lbl, grid.children[0]);
-    }
-  } else {
-    grid.className='grid no-hundreds';
-    const hl=grid.querySelector('.col-label.h');
-    const ha=document.getElementById('hundreds-area');
-    if(hl) hl.remove();
-    if(ha) ha.remove();
-  }
-  correct=0; total=0;
-  document.getElementById('score').textContent='Punti: 0 / 0';
-  nextRound();
+/* ---------- gioco ---------- */
+const $=id=>document.getElementById(id);
+const cv=$('scene'), ctx=cv.getContext('2d');
+const bigEl=$('bigNum'), promptEl=$('prompt'), scoreEl=$('score');
+const revealEl=$('reveal'), goodEl=$('good'), badEl=$('bad'), skipEl=$('skip');
+let round=null, revealed=false, right=0, total=0;
+const withHundreds=()=>document.querySelector('input[name="level"]:checked').value==='h';
+
+function randomDigits(withH){
+  const h=withH?rnd(0,9):0, t=rnd(0,9); let u=rnd(0,9);
+  if(h===0&&t===0&&u===0) u=rnd(1,9);
+  return [h,t,u];
 }
-
-function generateRound(){
-  hundreds = useHundreds ? rnd(0,9) : 0;
-  tens  = rnd(0,9);
-  units = rnd(0,9);
-  if(hundreds===0 && tens===0 && units===0) units=rnd(1,9);
-  target = hundreds*100 + tens*10 + units;
-
-  const tA=document.getElementById('tens-area');
-  const uA=document.getElementById('units-area');
-  tA.innerHTML=''; uA.innerHTML='';
-  fillArea(tA, tens,  drawBundle, 8);
-  fillArea(uA, units, drawLoose,  6);
-
-  if(useHundreds){
-    const hA=document.getElementById('hundreds-area');
-    hA.innerHTML='';
-    fillArea(hA, hundreds, drawHundred, 8);
-  }
+const boxEl=$('canvasBox');
+function render(){
+  if(!round) return;
+  const W=sceneW(round.withH);
+  // la tovaglietta si adatta allo spazio libero, senza mai uscire dallo schermo
+  const bw=boxEl.clientWidth, bh=boxEl.clientHeight; if(!bw||!bh) return;
+  const w=Math.floor(Math.min(bw,bh*W/HH)), h=Math.floor(w*HH/W);
+  cv.style.width=w+'px'; cv.style.height=h+'px';
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr);
+  const s=cv.width/W;
+  ctx.setTransform(s,0,0,s,0,0);
+  drawScene(ctx,round,revealed);
 }
-
-function checkAnswer(){
-  const val=parseInt(document.getElementById('answer').value);
-  const fb=document.getElementById('feedback');
-  if(isNaN(val)){ fb.textContent='Inserisci un numero!'; fb.className='feedback err'; return; }
-  total++;
-  if(val===target){
-    correct++;
-    fb.textContent='✓ Esatto! Era '+target;
-    fb.className='feedback ok';
-  } else {
-    let msg='✗ Era '+target;
-    if(useHundreds) msg+=' — '+hundreds+' cent., ';
-    else msg+=' — ';
-    msg+=tens+' dec., '+units+' unità';
-    fb.textContent=msg; fb.className='feedback err';
-  }
-  document.getElementById('score').textContent='Punti: '+correct+' / '+total;
-  document.querySelector('.btn-check').style.display='none';
-  document.getElementById('btn-next').style.display='inline-block';
+function parts(r){
+  const p=[];
+  if(r.withH) p.push(r.h===1?'1 centinaio':`${r.h} centinaia`);
+  p.push(r.t===1?'1 decina':`${r.t} decine`);
+  p.push(r.u===1?'1 unità':`${r.u} unità`);
+  return p.length===3?`${p[0]}, ${p[1]} e ${p[2]}`:`${p[0]} e ${p[1]}`;
 }
-
-function nextRound(){
-  document.getElementById('answer').value='';
-  document.getElementById('feedback').textContent='';
-  document.querySelector('.btn-check').style.display='inline-block';
-  document.getElementById('btn-next').style.display='none';
-  document.getElementById('answer').focus();
-  generateRound();
+function newRound(){
+  const withH=withHundreds();
+  let d; do{ d=randomDigits(withH); }while(round && round.withH===withH && d[0]===round.h && d[1]===round.t && d[2]===round.u);
+  round=makeRound(withH,d[0],d[1],d[2]);
+  revealed=false;
+  bigEl.textContent='?';
+  promptEl.textContent='Quante cannucce ci sono sulla tovaglietta? Ditelo a voce.';
+  revealEl.hidden=false; goodEl.hidden=true; badEl.hidden=true; skipEl.hidden=true;
+  render();
 }
-
-document.getElementById('answer').addEventListener('keydown', e=>{
-  if(e.key!=='Enter') return;
-  if(document.getElementById('btn-next').style.display==='inline-block') nextRound();
-  else checkAnswer();
+function reveal(){
+  if(revealed) return;
+  revealed=true;
+  bigEl.textContent=String(round.n);
+  promptEl.textContent=`Sono ${round.n} cannucce: ${parts(round)}. Era giusto?`;
+  revealEl.hidden=true; goodEl.hidden=false; badEl.hidden=false; skipEl.hidden=false;
+  render();
+  if(document.activeElement) document.activeElement.blur();
+}
+function mark(ok){ total++; if(ok) right++; scoreEl.textContent=`Giusti: ${right} su ${total}`; newRound(); revealEl.focus(); }
+revealEl.addEventListener('click',reveal);
+goodEl.addEventListener('click',()=>mark(true));
+badEl.addEventListener('click',()=>mark(false));
+skipEl.addEventListener('click',()=>{ newRound(); revealEl.focus(); });
+document.querySelectorAll('input[name="level"]').forEach(r=>r.addEventListener('change',()=>{
+  right=0; total=0; scoreEl.textContent='Giusti: 0 su 0'; newRound();
+}));
+document.addEventListener('keydown',e=>{
+  if(e.target.matches('input,button,textarea')) return;
+  if(e.code==='Space'||e.key==='Enter'){ e.preventDefault(); revealed?newRound():reveal(); }
 });
+new ResizeObserver(render).observe(boxEl);
 
-const LOGO_SRC = 'https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png';
-
-function drawHundredAt(parent,h){
-  const w=22;
-  const cv=makeCanvas(w,h); const ctx=cv.getContext('2d');
-  ctx.fillStyle='#111'; ctx.fillRect(0,0,w,h);
-  ctx.strokeStyle='rgba(255,255,255,0.18)'; ctx.lineWidth=0.8;
-  for(let i=1;i<10;i++){ const y=Math.round(h/10*i); ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
-  ctx.strokeStyle='#2e7d32'; ctx.lineWidth=1.5;
-  ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(w,h); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(w,0); ctx.lineTo(0,h); ctx.stroke();
-  parent.appendChild(cv);
+/* ---------- PDF ---------- */
+const pdfStatus=$('pdfStatus');
+function sceneImage(r){
+  const W=sceneW(r.withH), k=0.9;
+  const c=document.createElement('canvas'); c.width=Math.round(W*k); c.height=Math.round(HH*k);
+  const g=c.getContext('2d'); g.scale(k,k);
+  drawScene(g,r,false);
+  return c.toDataURL('image/jpeg',0.85);
 }
-function drawBundleAt(parent,h){
-  const w=10;
-  const cv=makeCanvas(w,h); const ctx=cv.getContext('2d');
-  ctx.fillStyle='#111'; ctx.fillRect(0,0,w,h);
-  ctx.strokeStyle='#c8860a'; ctx.lineWidth=1.3;
-  const by=Math.round(h*0.58);
-  ctx.beginPath(); ctx.moveTo(0,by); ctx.lineTo(w,by); ctx.stroke();
-  parent.appendChild(cv);
+function loadLogo(){
+  return new Promise(res=>{
+    const img=new Image(); img.crossOrigin='anonymous';
+    img.onload=()=>{ try{
+      const c=document.createElement('canvas'); c.width=c.height=200; const g=c.getContext('2d');
+      g.beginPath(); g.arc(100,100,100,0,7); g.clip(); g.fillStyle='#fff'; g.fillRect(0,0,200,200);
+      const s=Math.min(200/img.width,200/img.height); g.drawImage(img,100-img.width*s/2,100-img.height*s/2,img.width*s,img.height*s);
+      res(c.toDataURL('image/png')); }catch(e){ res(null); } };
+    img.onerror=()=>res(null);
+    img.src=document.querySelector('.logo img').src;
+    setTimeout(()=>res(null),4000);
+  });
 }
-function drawLooseAt(parent,h){
-  const w=3;
-  const cv=makeCanvas(w+2,h); const ctx=cv.getContext('2d');
-  ctx.fillStyle='#111'; ctx.fillRect(1,0,w,h);
-  parent.appendChild(cv);
-}
-function fillAreaAt(area,count,drawFn,h,spacerW){
-  for(let i=0;i<count;i++){
-    if(i===5){ const s=document.createElement('div'); s.style.cssText='width:'+spacerW+'px;height:1px;flex-shrink:0;'; area.appendChild(s); }
-    drawFn(area,h);
+async function genPdf(){
+  if(!window.jspdf){ pdfStatus.textContent='Non riesco a caricare lo strumento per il PDF: controlla la connessione a internet e ricarica la pagina.'; return; }
+  const btn=$('pdfBtn'); btn.disabled=true; pdfStatus.textContent='Preparo il PDF…';
+  try{
+    await document.fonts.ready;
+    const withH=withHundreds();
+    const pages=parseInt(document.querySelector('input[name="pcount"]:checked').value,10);
+    const W=sceneW(withH);
+    const M=12, PW=210, COLW=93, GAP=8;
+    const IW=86, IH=IW*HH/W, BOXH=2+9+2+IH+3;
+    const rows=withH?4:3, perPage=rows*2, count=pages*perPage;
+    const seen=new Set(), list=[];
+    for(let i=0;i<count;i++){
+      let d,key,k=0; do{ d=randomDigits(withH); key=d.join('-'); k++; }while(seen.has(key)&&k<300);
+      seen.add(key); list.push(makeRound(withH,d[0],d[1],d[2]));
+    }
+    const logo=await loadLogo();
+    const { jsPDF }=window.jspdf;
+    const doc=new jsPDF({unit:'mm',format:'a4'});
+    list.forEach((r,i)=>{
+      const pi=i%perPage;
+      if(pi===0&&i>0) doc.addPage();
+      const col=pi%2, row=Math.floor(pi/2);
+      const x=M+col*COLW, y=M+row*(BOXH+GAP), bw=COLW-3;
+      doc.setDrawColor(190,198,180); doc.setLineWidth(.35); doc.roundedRect(x,y,bw,BOXH,2,2,'S');
+      if(logo) doc.addImage(logo,'PNG',x+2,y+2,9,9);
+      else { doc.setFillColor(28,124,144); doc.circle(x+6.5,y+6.5,4,'F'); doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(255,255,255); doc.text(String(i+1),x+6.5,y+7.8,{align:'center'}); }
+      doc.setFont('helvetica','normal'); doc.setFontSize(12.5); doc.setTextColor(30,30,30);
+      doc.text('Quante cannucce? __________',x+14,y+8.3);
+      doc.addImage(sceneImage(r),'JPEG',x+(bw-IW)/2,y+13,IW,IH);
+    });
+    if($('psol').checked){
+      doc.addPage();
+      doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.setTextColor(28,124,144);
+      doc.text('Soluzioni',M,20);
+      doc.setFont('helvetica','normal'); doc.setFontSize(12); doc.setTextColor(30,30,30);
+      list.forEach((r,i)=>{
+        const p=Math.floor(i/perPage)+1, pos=i%perPage+1;
+        const colX=M+(i%3)*62, y=32+Math.floor(i/3)*8;
+        doc.text(`Pag. ${p}, riquadro ${pos}: ${r.n}`,colX,y);
+      });
+    }
+    doc.save(`quante-cannucce-${withH?'centinaia':'decine-unita'}.pdf`);
+    pdfStatus.textContent=`PDF pronto: ${count} riquadri su ${pages} ${pages===1?'pagina':'pagine'}${$('psol').checked?', più la pagina delle soluzioni':''}. Se premi di nuovo, i numeri cambiano.`;
+  }catch(e){
+    console.error(e);
+    pdfStatus.textContent='Il PDF non è stato creato. Riprova; se succede ancora, apri la pagina dal file scaricato sul computer.';
   }
+  btn.disabled=false;
 }
+$('pdfBtn').addEventListener('click',genPdf);
 
-function buildPrintBox(h,t,u){
-  const box=document.createElement('div'); box.className='print-box';
-
-  const logo=document.createElement('img'); logo.className='print-logo'; logo.src=LOGO_SRC;
-  box.appendChild(logo);
-
-  const row=document.createElement('div'); row.className='print-content-row';
-  const miniH=46;
-
-  if(useHundreds){
-    const colH=document.createElement('div'); colH.className='print-col';
-    const lblH=document.createElement('div'); lblH.className='print-col-label'; lblH.textContent='h';
-    const contH=document.createElement('div'); contH.className='print-col-content';
-    fillAreaAt(contH,h,drawHundredAt,miniH,6);
-    colH.appendChild(lblH); colH.appendChild(contH); row.appendChild(colH);
-  }
-
-  const colT=document.createElement('div'); colT.className='print-col';
-  const lblT=document.createElement('div'); lblT.className='print-col-label'; lblT.textContent='da';
-  const contT=document.createElement('div'); contT.className='print-col-content';
-  fillAreaAt(contT,t,drawBundleAt,miniH,6);
-  colT.appendChild(lblT); colT.appendChild(contT); row.appendChild(colT);
-
-  const colU=document.createElement('div'); colU.className='print-col';
-  const lblU=document.createElement('div'); lblU.className='print-col-label'; lblU.textContent='u';
-  const contU=document.createElement('div'); contU.className='print-col-content';
-  fillAreaAt(contU,u,drawLooseAt,miniH,4);
-  colU.appendChild(lblU); colU.appendChild(contU); row.appendChild(colU);
-
-  box.appendChild(row);
-
-  const line=document.createElement('div'); line.className='print-line';
-  line.textContent='Quante cannucce? ____________';
-  box.appendChild(line);
-
-  return box;
-}
-
-function generaPDF(){
-  const n=parseInt(document.getElementById('print-count').value)||12;
-  const sheet=document.getElementById('print-sheet');
-  sheet.innerHTML='';
-  const grid=document.createElement('div'); grid.className='print-grid';
-
-  const maxCombinazioni = useHundreds ? 10*10*10 : 10*10;
-  const usati = new Set();
-
-  for(let i=0;i<n;i++){
-    let h,t,u,chiave,tentativi=0;
-    do{
-      h=useHundreds?rnd(0,9):0; t=rnd(0,9); u=rnd(0,9);
-      if(h===0 && t===0 && u===0) u=rnd(1,9);
-      chiave=h+'-'+t+'-'+u;
-      tentativi++;
-    } while(usati.has(chiave) && usati.size<maxCombinazioni && tentativi<200);
-    usati.add(chiave);
-    grid.appendChild(buildPrintBox(h,t,u));
-  }
-
-  sheet.appendChild(grid);
-  setTimeout(()=>window.print(), 150);
-}
-
-generateRound();
+/* ---------- avvio ---------- */
+newRound();
+Promise.all([document.fonts.load('700 25px "Baloo 2"'),document.fonts.load('500 25px "Baloo 2"')]).then(render).catch(()=>{});
+})();
 </script>
 </body>
 </html>
