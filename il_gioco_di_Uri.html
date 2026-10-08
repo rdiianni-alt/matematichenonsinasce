@@ -14,102 +14,101 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding-bottom: 14px;
   }
 
-  /* HEADER */
   header {
     width: 100%;
     background: #c19a6b;
-    padding: 14px 20px;
+    padding: 8px 16px;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
   }
-
   .logo {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     text-decoration: none;
   }
-
   .logo img {
-    width: 60px;
-    height: 60px;
+    width: 40px;
+    height: 40px;
     object-fit: contain;
     border-radius: 50%;
     border: 2px solid #f5c97a;
   }
-
   .logo-name {
     color: #4a2e10;
-    font-size: 13px;
+    font-size: 12px;
     font-style: italic;
-    letter-spacing: 0.5px;
-    text-align: center;
   }
-
   h1 {
     color: #4a2e10;
-    font-size: 22px;
-    text-align: center;
-    margin-top: 4px;
+    font-size: 20px;
   }
 
-  /* LEGGENDA */
   .legend {
-    background: #fff8ec;
-    border: 2px solid #c8832a;
-    border-radius: 12px;
-    padding: 12px 24px;
-    margin: 18px auto 0;
+    margin-top: 10px;
     display: flex;
-    gap: 32px;
+    gap: 24px;
     align-items: center;
     justify-content: center;
-    font-size: 15px;
+    font-size: 14px;
     color: #5a2e0a;
-    max-width: 340px;
+    font-weight: bold;
   }
-
   .legend-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-weight: bold;
+    gap: 6px;
   }
 
-  /* CARD */
+  /* RIGA: carta + Uri affiancati, fissi */
+  .gioco-row {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    width: min(96vw, 800px);
+  }
+  .uri-img {
+    width: min(30vw, 240px);
+    height: auto;
+    flex-shrink: 0;
+    object-fit: contain;
+  }
+
+  /* AREA CARTA: fissa, tutto nello stesso spazio */
   .card-area {
-    margin: 22px auto 0;
-    width: 280px;
-    height: 340px;
+    margin-top: 0;
+    width: min(92vw, 520px);
+    height: min(44vh, 330px);
     background: #fffdf5;
     border: 3px solid #c8832a;
     border-radius: 18px;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    gap: 28px;
+    padding: 12px;
     box-shadow: 0 4px 18px rgba(120,60,10,0.13);
-    position: relative;
-    overflow-y: auto;
   }
-
-  .shapes-row {
+  .group {
     display: flex;
     flex-wrap: wrap;
+    align-content: center;
     justify-content: center;
-    align-items: flex-end;
-    gap: 10px;
+    gap: 8px;
+    max-height: 100%;
   }
-
-  canvas.shape {
-    display: block;
-  }
+  .group.coni { max-width: 45%; }
+  .group.palline { max-width: 45%; }
+  canvas.shape { display: block; }
 
   .start-msg {
     color: #c8832a;
@@ -118,104 +117,78 @@
     text-align: center;
   }
 
-  /* INPUT RISPOSTA */
-  .answer-area {
-    margin: 18px auto 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    width: 280px;
-  }
-
-  .answer-area label {
-    color: #5a2e0a;
-    font-size: 15px;
+  /* SOTTO LA CARTA */
+  .prompt {
+    margin-top: 12px;
+    font-size: 20px;
     font-weight: bold;
-  }
-
-  .answer-area input {
-    width: 100px;
-    padding: 10px;
-    font-size: 22px;
+    color: #5a2e0a;
     text-align: center;
-    border: 2px solid #c8832a;
-    border-radius: 8px;
-    background: #fffdf5;
-    color: #3a1a00;
-    outline: none;
+    min-height: 28px;
+  }
+  .reveal {
+    font-size: 44px;
+    font-weight: bold;
+    color: #4a2e10;
+    text-align: center;
+    min-height: 52px;
+    line-height: 1.1;
   }
 
+  .actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 8px;
+  }
   .btn {
-    padding: 10px 28px;
+    padding: 10px 24px;
     font-size: 16px;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     font-family: 'Georgia', serif;
+    color: white;
     transition: background 0.2s;
   }
-
-  .btn-check {
-    background: #c8832a;
-    color: white;
-  }
+  .btn-new   { background: #4a7c3a; }
+  .btn-new:hover   { background: #345a28; }
+  .btn-check { background: #c8832a; }
   .btn-check:hover { background: #a0621a; }
+  .btn-ok    { background: #2e7d32; }
+  .btn-ok:hover    { background: #1b5e20; }
+  .btn-no    { background: #c62828; }
+  .btn-no:hover    { background: #8e1c1c; }
+  .btn-print { background: #5a7a9e; font-size: 14px; }
+  .btn-print:hover { background: #45607d; }
+  .hidden { display: none !important; }
 
-  .btn-next {
-    background: #4a7c3a;
-    color: white;
-  }
-  .btn-next:hover { background: #345a28; }
-
-  /* FEEDBACK */
-  .feedback {
-    font-size: 18px;
-    font-weight: bold;
-    min-height: 28px;
-    text-align: center;
-  }
-  .ok { color: #2e7d32; }
-  .no { color: #c62828; }
-
-  /* SCORE */
   .score-bar {
-    margin: 14px auto 0;
-    width: 280px;
+    margin-top: 12px;
+    width: min(92vw, 520px);
     display: flex;
     justify-content: space-between;
     font-size: 14px;
     color: #7a3e1a;
   }
 
-  /* TABLET DI ARGILLA decorativo */
-  @media (max-width: 480px) {
-    h1 { font-size: 17px; }
-    .legend { font-size: 13px; gap: 20px; padding: 10px 14px; }
-    .card-area { width: 95vw; height: 280px; padding: 14px; }
-    .answer-area { width: 95vw; }
-    .score-bar { width: 95vw; }
-    .btn { padding: 8px 18px; font-size: 14px; }
-    .answer-area input { font-size: 18px; width: 80px; }
-  }
-
   .tablet-deco {
     font-size: 11px;
     color: #b08050;
-    margin-top: 18px;
+    margin-top: 12px;
     font-style: italic;
     text-align: center;
   }
 
-  /* PULSANTE STAMPA */
-  .btn-print {
-    background: #5a7a9e;
-    color: white;
-    margin-top: 6px;
+  @media (max-width: 480px) {
+    h1 { font-size: 16px; }
+    .prompt { font-size: 17px; }
+    .reveal { font-size: 36px; }
+    .btn { padding: 8px 16px; font-size: 14px; }
   }
-  .btn-print:hover { background: #45607d; }
 
-  /* FOGLIO STAMPABILE (nascosto a schermo, visibile solo in stampa) */
+  /* FOGLIO STAMPABILE (nascosto a schermo) */
   #print-sheet { display: none; }
 
   @media print {
@@ -237,21 +210,44 @@
     }
     .print-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
       padding: 0 10px;
     }
     .print-card {
       border: 2px solid #c8832a;
-      border-radius: 10px;
-      min-height: 110px;
+      border-radius: 12px;
+      min-height: 215px;
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-wrap: wrap;
-      gap: 4px;
-      padding: 8px;
+      gap: 12px;
+      padding: 12px;
       page-break-inside: avoid;
+    }
+    .print-card img.uri-print {
+      width: 110px;
+      height: auto;
+      flex-shrink: 0;
+      object-fit: contain;
+    }
+    .print-card img.logo-print {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      width: 30px;
+      height: 30px;
+      object-fit: contain;
+      border-radius: 50%;
+    }
+    .print-shapes {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
     .print-footer {
       display: flex;
@@ -278,82 +274,78 @@
 <body>
 
 <header>
-  <a class="logo" href="https://matematichenonsinasce.com/" >
-    <img          src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png"
-         onerror="this.style.display='none'"
-         alt="Logo">
+  <a class="logo" href="https://matematichenonsinasce.com/">
+    <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png"
+         onerror="this.style.display='none'" alt="Logo">
     <span class="logo-name">Matematiche non si nasce</span>
   </a>
   <h1>🏺 Il Gioco di Uri</h1>
 </header>
 
-<!-- LEGGENDA -->
 <div class="legend">
   <div class="legend-item">
-    <canvas id="leg-ball" width="32" height="32"></canvas>
+    <canvas id="leg-ball" width="28" height="28"></canvas>
     <span>= 10</span>
   </div>
   <div class="legend-item">
-    <canvas id="leg-cone" width="32" height="44"></canvas>
+    <canvas id="leg-cone" width="26" height="38"></canvas>
     <span>= 1</span>
   </div>
 </div>
 
-<!-- CARD con le forme -->
-<div class="card-area" id="card">
-  <p class="start-msg">Premi "Nuova carta" per iniziare!</p>
-</div>
-
-<!-- AREA RISPOSTA -->
-<div class="answer-area">
-  <label for="ans">Che numero è?</label>
-  <input type="number" id="ans" min="1" max="99" placeholder="?" disabled>
-  <div class="feedback" id="feedback"></div>
-  <div style="display:flex;gap:12px;">
-    <button class="btn btn-check" id="btnCheck" onclick="checkAnswer()" disabled>✔ Controlla</button>
-    <button class="btn btn-next" onclick="newCard()">🎲 Nuova carta</button>
+<div class="gioco-row">
+  <div class="card-area" id="card">
+    <p class="start-msg">Premi "Nuova carta" per iniziare!</p>
   </div>
+  <img class="uri-img" src="https://raw.githubusercontent.com/rdiianni-alt/archivio_privato/7409da0cf9bd7eba166e273bf5cf03e484ac980c/Uri.png" alt="Uri" onerror="this.style.display='none'">
 </div>
 
-<!-- PUNTEGGIO -->
+<div class="prompt" id="prompt"></div>
+<div class="reveal hidden" id="reveal"></div>
+
+<div class="actions" id="actions-question">
+  <button class="btn btn-new" id="btnNew" onclick="newCard()">🎲 Nuova carta</button>
+  <button class="btn btn-check hidden" id="btnCheck" onclick="reveal()">👀 Controlla</button>
+</div>
+
+<div class="actions hidden" id="actions-answer">
+  <button class="btn btn-ok" onclick="segna(true)">✔ Giusto</button>
+  <button class="btn btn-no" onclick="segna(false)">✘ Sbagliato</button>
+</div>
+
 <div class="score-bar">
   <span id="scoreGood">✅ Corrette: 0</span>
   <span id="scoreTotal">Carte: 0</span>
 </div>
 
-<button class="btn btn-print" onclick="stampaSchede()">🖨️ Stampa schede (senza soluzioni)</button>
+<button class="btn btn-print" style="margin-top:12px" onclick="stampaSchede()">🖨️ Stampa schede (senza soluzioni)</button>
 
 <p class="tablet-deco">Sistema numerico dei Sumeri — palline e coni di argilla</p>
 
-<!-- FOGLIO STAMPABILE -->
 <div id="print-sheet">
   <div class="print-title">🏺 Il Gioco di Uri</div>
   <div class="print-grid" id="printGrid"></div>
-  <div class="print-footer">
-    <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="Logo">
-    <span>Matematiche non si nasce</span>
-  </div>
 </div>
 
 <script>
-  // Disegna pallina nella leggenda
+  // Pallina (10)
   function drawBall(canvas, size) {
     const ctx = canvas.getContext('2d');
-    const cx = size/2, cy = size/2, r = size/2 - 3;
-    const g = ctx.createRadialGradient(cx-r*0.3, cy-r*0.3, r*0.1, cx, cy, r);
+    const cx = size / 2, cy = size / 2, r = size / 2 - 3;
+    const g = ctx.createRadialGradient(cx - r * 0.3, cy - r * 0.3, r * 0.1, cx, cy, r);
     g.addColorStop(0, '#d4855a');
     g.addColorStop(1, '#7a3010');
     ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI*2);
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
     ctx.fillStyle = g;
     ctx.fill();
   }
 
-  // Disegna cono nella leggenda
+  // Cono (1)
   function drawCone(canvas, w, h) {
     const ctx = canvas.getContext('2d');
-    const tipX = w/2, tipY = 3;
-    const baseY = h - 3, baseR = w/2 - 2;
+    const tipX = w / 2, tipY = 3;
+    const baseY = h - 3, baseR = w / 2 - 2;
     const g = ctx.createLinearGradient(0, tipY, w, baseY);
     g.addColorStop(0, '#c8722a');
     g.addColorStop(0.5, '#a0561a');
@@ -361,35 +353,48 @@
     ctx.beginPath();
     ctx.moveTo(tipX, tipY);
     ctx.lineTo(tipX - baseR, baseY);
-    // ellisse base
-    ctx.ellipse(tipX, baseY, baseR, baseR*0.28, 0, Math.PI, 0);
+    ctx.ellipse(tipX, baseY, baseR, baseR * 0.28, 0, Math.PI, 0);
     ctx.closePath();
     ctx.fillStyle = g;
     ctx.fill();
-    // ellisse base fronte
     ctx.beginPath();
-    ctx.ellipse(tipX, baseY, baseR, baseR*0.28, 0, 0, Math.PI*2);
+    ctx.ellipse(tipX, baseY, baseR, baseR * 0.28, 0, 0, Math.PI * 2);
     ctx.fillStyle = '#8b4010';
     ctx.fill();
   }
 
-  drawBall(document.getElementById('leg-ball'), 32);
-  drawCone(document.getElementById('leg-cone'), 32, 44);
+  drawBall(document.getElementById('leg-ball'), 28);
+  drawCone(document.getElementById('leg-cone'), 26, 38);
 
   // ------- GIOCO -------
-  let correct = 0, total = 0, currentNum = 0, answered = false;
+  let correct = 0, total = 0, currentNum = 0;
+
+  function mostraAzioni(stato) {
+    // stato: 'vuoto' | 'domanda' | 'risposta'
+    const q = document.getElementById('actions-question');
+    const a = document.getElementById('actions-answer');
+    const check = document.getElementById('btnCheck');
+    const rev = document.getElementById('reveal');
+    const prompt = document.getElementById('prompt');
+
+    if (stato === 'domanda') {
+      q.classList.remove('hidden');
+      check.classList.remove('hidden');
+      a.classList.add('hidden');
+      rev.classList.add('hidden');
+      rev.textContent = '';
+      prompt.textContent = 'Che numero è? Dillo ad alta voce!';
+    } else if (stato === 'risposta') {
+      q.classList.remove('hidden');
+      check.classList.add('hidden');
+      a.classList.remove('hidden');
+      rev.classList.remove('hidden');
+      rev.textContent = currentNum;
+      prompt.textContent = 'Giusto o sbagliato?';
+    }
+  }
 
   function newCard() {
-    answered = false;
-    document.getElementById('feedback').textContent = '';
-    document.getElementById('feedback').className = 'feedback';
-    const ans = document.getElementById('ans');
-    ans.value = '';
-    ans.disabled = false;
-    document.getElementById('btnCheck').disabled = false;
-    ans.focus();
-
-    // genera numero da 1 a 99 (max 9 coni + max 9 palline = 99)
     currentNum = Math.floor(Math.random() * 99) + 1;
     const balls = Math.floor(currentNum / 10);
     const cones = currentNum % 10;
@@ -397,57 +402,51 @@
     const card = document.getElementById('card');
     card.innerHTML = '';
 
-    const row = document.createElement('div');
-    row.className = 'shapes-row';
-
+    const gBalls = document.createElement('div');
+    gBalls.className = 'group palline';
     for (let i = 0; i < balls; i++) {
       const c = document.createElement('canvas');
       c.className = 'shape';
-      c.width = 44; c.height = 44;
-      drawBall(c, 44);
-      row.appendChild(c);
+      c.width = 40; c.height = 40;
+      drawBall(c, 40);
+      gBalls.appendChild(c);
     }
+
+    const gCones = document.createElement('div');
+    gCones.className = 'group coni';
     for (let i = 0; i < cones; i++) {
       const c = document.createElement('canvas');
       c.className = 'shape';
-      c.width = 38; c.height = 56;
-      drawCone(c, 38, 56);
-      row.appendChild(c);
+      c.width = 34; c.height = 50;
+      drawCone(c, 34, 50);
+      gCones.appendChild(c);
     }
 
-    card.appendChild(row);
+    card.appendChild(gBalls);
+    card.appendChild(gCones);
+
     total++;
     document.getElementById('scoreTotal').textContent = `Carte: ${total}`;
+    mostraAzioni('domanda');
   }
 
-  function checkAnswer() {
-    if (answered) return;
-    const val = parseInt(document.getElementById('ans').value);
-    const fb = document.getElementById('feedback');
-    if (isNaN(val)) { fb.textContent = 'Scrivi un numero!'; fb.className='feedback no'; return; }
-    answered = true;
-    document.getElementById('ans').disabled = true;
-    document.getElementById('btnCheck').disabled = true;
-    if (val === currentNum) {
-      fb.textContent = '🌟 Esatto!';
-      fb.className = 'feedback ok';
+  function reveal() {
+    mostraAzioni('risposta');
+  }
+
+  function segna(giusto) {
+    if (giusto) {
       correct++;
       document.getElementById('scoreGood').textContent = `✅ Corrette: ${correct}`;
-    } else {
-      fb.textContent = `❌ Era ${currentNum}. Riprova!`;
-      fb.className = 'feedback no';
     }
+    newCard();
   }
 
-  // Enter per controllare
-  document.getElementById('ans').addEventListener('keydown', e => {
-    if (e.key === 'Enter') checkAnswer();
-  });
-
   // ------- STAMPA SCHEDE (senza soluzioni) -------
-  function stampaSchede(numCarte = 21) {
+  function stampaSchede(numCarte = 8) {
     const grid = document.getElementById('printGrid');
     grid.innerHTML = '';
+    const imgs = [];
 
     for (let i = 0; i < numCarte; i++) {
       const num = Math.floor(Math.random() * 99) + 1;
@@ -457,23 +456,47 @@
       const card = document.createElement('div');
       card.className = 'print-card';
 
+      const logo = document.createElement('img');
+      logo.className = 'logo-print';
+      logo.alt = 'Logo';
+      logo.src = 'https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png';
+      logo.onerror = () => { logo.style.display = 'none'; };
+      imgs.push(logo);
+      card.appendChild(logo);
+
+      const uri = document.createElement('img');
+      uri.className = 'uri-print';
+      uri.alt = 'Uri';
+      uri.src = 'https://raw.githubusercontent.com/rdiianni-alt/archivio_privato/7409da0cf9bd7eba166e273bf5cf03e484ac980c/Uri.png';
+      uri.onerror = () => { uri.style.display = 'none'; };
+      imgs.push(uri);
+      card.appendChild(uri);
+
+      const shapes = document.createElement('div');
+      shapes.className = 'print-shapes';
+
       for (let j = 0; j < balls; j++) {
         const c = document.createElement('canvas');
-        c.width = 26; c.height = 26;
-        drawBall(c, 26);
-        card.appendChild(c);
+        c.width = 36; c.height = 36;
+        drawBall(c, 36);
+        shapes.appendChild(c);
       }
       for (let j = 0; j < cones; j++) {
         const c = document.createElement('canvas');
-        c.width = 22; c.height = 32;
-        drawCone(c, 22, 32);
-        card.appendChild(c);
+        c.width = 30; c.height = 44;
+        drawCone(c, 30, 44);
+        shapes.appendChild(c);
       }
 
+      card.appendChild(shapes);
       grid.appendChild(card);
     }
 
-    window.print();
+    // Attende il caricamento di Uri prima di stampare (max 3 secondi)
+    const attesa = imgs.map(im => im.complete ? Promise.resolve() :
+      new Promise(res => { im.onload = res; im.onerror = res; }));
+    Promise.race([Promise.all(attesa), new Promise(res => setTimeout(res, 3000))])
+      .then(() => window.print());
   }
 </script>
 </body>
