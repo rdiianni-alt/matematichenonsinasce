@@ -109,6 +109,10 @@ html,body{ width:100%; height:100%; overflow:hidden; background:var(--bg); font-
   position:absolute; color:var(--accent); font-weight:700; font-size:clamp(0.85rem,2vmin,1.1rem);
   pointer-events:none; animation:sale-e-svanisce 0.7s ease-out forwards;
 }
+.meno-flottante{
+  position:absolute; color:#7a7468; font-weight:700; font-size:clamp(0.85rem,2vmin,1.1rem);
+  pointer-events:none; animation:sale-e-svanisce 0.7s ease-out forwards;
+}
 @keyframes sale-e-svanisce{
   0%{ transform:translateY(0); opacity:1; } 100%{ transform:translateY(-40px); opacity:0; }
 }
@@ -181,6 +185,7 @@ html,body{ width:100%; height:100%; overflow:hidden; background:var(--bg); font-
       <select id="tipo-1">
         <option value="add">Addizione</option>
         <option value="sub">Sottrazione</option>
+        <option value="mix_as">Addizione e sottrazione miste</option>
         <option value="mul">Moltiplicazione</option>
         <option value="div">Divisione</option>
       </select>
@@ -193,6 +198,7 @@ html,body{ width:100%; height:100%; overflow:hidden; background:var(--bg); font-
       <select id="tipo-2">
         <option value="add">Addizione</option>
         <option value="sub">Sottrazione</option>
+        <option value="mix_as">Addizione e sottrazione miste</option>
         <option value="mul">Moltiplicazione</option>
         <option value="div">Divisione</option>
       </select>
@@ -218,7 +224,7 @@ html,body{ width:100%; height:100%; overflow:hidden; background:var(--bg); font-
       <div class="operazione" id="op-testo-1">–</div>
     </div>
     <div class="area-palloncini" id="area-1"></div>
-    <div class="punteggio" id="punteggio-1">RISPOSTE ESATTE: 0</div>
+    <div class="punteggio" id="punteggio-1">PUNTI: 0</div>
   </div>
   <div class="colonna" id="colonna-2">
     <div class="pannello-op">
@@ -226,7 +232,7 @@ html,body{ width:100%; height:100%; overflow:hidden; background:var(--bg); font-
       <div class="operazione" id="op-testo-2">–</div>
     </div>
     <div class="area-palloncini" id="area-2"></div>
-    <div class="punteggio" id="punteggio-2">RISPOSTE ESATTE: 0</div>
+    <div class="punteggio" id="punteggio-2">PUNTI: 0</div>
   </div>
 </div>
 
@@ -255,10 +261,10 @@ html,body{ width:100%; height:100%; overflow:hidden; background:var(--bg); font-
   <div id="info-box">
     <button id="info-chiudi">✕</button>
     <h2>🎈 Come si gioca</h2>
-    <p>Per ciascuna squadra si sceglie il tipo di operazione (addizione, sottrazione, moltiplicazione o divisione) e il livello di difficoltà, oltre a una velocità comune per i palloncini.</p>
-    <p>Sopra ogni metà dello schermo compare un'operazione. Dai palloncini che salgono bisogna toccare quello con il risultato esatto: se è corretto il palloncino scoppia e ne parte subito una nuova; se è sbagliato il palloncino trema e resta in gioco, così si può riprovare.</p>
-    <p>Il cerchietto accanto all'operazione indica il tempo a disposizione: se scade senza risposta corretta, parte comunque una nuova operazione, senza punto.</p>
-    <p>In basso, per ogni squadra, viene tenuto il conto delle risposte esatte.</p>
+    <p>Per ciascuna squadra si sceglie il tipo di operazione (addizione, sottrazione, addizione e sottrazione miste, moltiplicazione o divisione) e il livello di difficoltà, oltre a una velocità comune per i palloncini.</p>
+    <p>Sopra ogni metà dello schermo compare un'operazione. Dai palloncini che salgono bisogna toccare quello con il risultato esatto: se è corretto il palloncino scoppia e ne parte subito una nuova; se è sbagliato il palloncino trema, la squadra perde un punto (il punteggio non scende mai sotto zero) e il palloncino resta in gioco.</p>
+    <p>Il cerchietto accanto all'operazione indica il tempo a disposizione: se scade senza risposta corretta, parte comunque una nuova operazione, senza punti né penalità.</p>
+    <p>In basso, per ogni squadra, viene tenuto il conto dei punti.</p>
   </div>
 </div>
 
@@ -302,15 +308,19 @@ function generaDistrattori(corretto, quanti, minVal){
 /* ---------- generazione operazioni ---------- */
 function generaOperazione(cfg){
   let a,b,f1,f2,divisore,quoziente,dividendo,testo,risultato;
-  if(cfg.tipo==='add'){
+  // nella modalità mista, ogni operazione è a caso addizione o sottrazione
+  let tipo = cfg.tipo;
+  if(tipo==='mix_as') tipo = Math.random()<0.5 ? 'add' : 'sub';
+
+  if(tipo==='add'){
     const R=cfg.range;
     a=randInt(1,R-1); b=randInt(1,R-a);
     risultato=a+b; testo=`${a} + ${b} =`;
-  } else if(cfg.tipo==='sub'){
+  } else if(tipo==='sub'){
     const R=cfg.range;
     a=randInt(2,R); b=randInt(1,a-1);
     risultato=a-b; testo=`${a} - ${b} =`;
-  } else if(cfg.tipo==='mul'){
+  } else if(tipo==='mul'){
     if(cfg.range==='mix'){ f1=randInt(2,10); } else { f1=cfg.range; }
     f2=randInt(1,10);
     if(Math.random()<0.5){ const t=f1; f1=f2; f2=t; }
@@ -329,7 +339,7 @@ function popolaRange(indice){
   const tipo = document.getElementById('tipo-'+indice).value;
   const sel = document.getElementById('range-'+indice);
   sel.innerHTML='';
-  if(tipo==='add'||tipo==='sub'){
+  if(tipo==='add'||tipo==='sub'||tipo==='mix_as'){
     [20,50,100].forEach(v=>{
       const o=document.createElement('option'); o.value=v; o.textContent='Entro il '+v; sel.appendChild(o);
     });
@@ -356,6 +366,10 @@ function creaStato(indice, tipo, range){
     tempoTotale: 0,
     tempoRimanente: 0
   };
+}
+
+function aggiornaPunteggio(st){
+  st.punteggioEl.textContent='PUNTI: '+st.punteggio;
 }
 
 function pulisciPalloncini(st){
@@ -386,7 +400,15 @@ function creaPalloncinoEl(st,val,indice,totale){
 
 function mostraEsatto(st,x,y){
   const d=document.createElement('div');
-  d.className='esatto-flottante'; d.textContent='Esatto!';
+  d.className='esatto-flottante'; d.textContent='+1';
+  d.style.left=x+'px'; d.style.top=y+'px';
+  st.areaEl.appendChild(d);
+  setTimeout(()=>d.remove(),700);
+}
+
+function mostraMeno(st,x,y){
+  const d=document.createElement('div');
+  d.className='meno-flottante'; d.textContent='−1';
   d.style.left=x+'px'; d.style.top=y+'px';
   st.areaEl.appendChild(d);
   setTimeout(()=>d.remove(),700);
@@ -397,9 +419,16 @@ function gestisciClickPalloncino(st,obj){
   if(obj.val===st.operazione.risultato){
     obj.popped=true;
     obj.el.classList.add('scoppia');
+    st.punteggio++;
+    aggiornaPunteggio(st);
     mostraEsatto(st, obj.x+obj.size/2-20, obj.y);
     setTimeout(()=>nuovaOperazione(st,true), 350);
   } else {
+    if(st.punteggio>0){
+      st.punteggio--;
+      aggiornaPunteggio(st);
+    }
+    mostraMeno(st, obj.x+obj.size/2-20, obj.y);
     obj.el.classList.remove('trema');
     void obj.el.offsetWidth;
     obj.el.classList.add('trema');
@@ -408,10 +437,6 @@ function gestisciClickPalloncino(st,obj){
 }
 
 function nuovaOperazione(st, corretto){
-  if(corretto){
-    st.punteggio++;
-    st.punteggioEl.textContent='RISPOSTE ESATTE: '+st.punteggio;
-  }
   pulisciPalloncini(st);
   st.operazione = generaOperazione({ tipo:st.tipo, range:st.range });
   st.testoEl.textContent = st.operazione.testo;
@@ -464,6 +489,7 @@ document.getElementById('btn-inizia').addEventListener('click',()=>{
   velocitaGlobale = document.getElementById('velocita').value;
   statoA = creaStato(1, document.getElementById('tipo-1').value, leggiRange(1));
   statoB = creaStato(2, document.getElementById('tipo-2').value, leggiRange(2));
+  aggiornaPunteggio(statoA); aggiornaPunteggio(statoB);
   document.getElementById('setup').style.display='none';
   document.getElementById('gioco').style.display='block';
   document.getElementById('barra-gioco').style.display='flex';
@@ -489,7 +515,7 @@ function mostraRisultati(){
   document.getElementById('finale-2').classList.toggle('vincitrice', p2>p1);
   const esitoEl = document.getElementById('risultati-esito');
   if(p1===p2) esitoEl.textContent = 'Pareggio!';
-  else esitoEl.textContent = (p1>p2 ? 'Squadra 1' : 'Squadra 2') + ' ha totalizzato più risposte esatte!';
+  else esitoEl.textContent = (p1>p2 ? 'Squadra 1' : 'Squadra 2') + ' ha totalizzato più punti!';
   document.getElementById('risultati').style.display='flex';
 }
 
