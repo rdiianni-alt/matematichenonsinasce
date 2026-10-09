@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tavola delle Divisioni</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,600;1,6..72,600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; min-height: 100vh; }
@@ -16,19 +18,35 @@ body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; min-height: 100
 .setup input { width: 110px; padding: 6px 10px; border: 2px solid #9b72d8; border-radius: 8px; font-size: 15px; text-align: center; }
 .setup button { padding: 7px 18px; background: #5c3d9e; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; }
 .setup button:hover { background: #7b52c4; }
-.landing { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 16px 20px 20px; text-align: center; }
-.landing h1 { font-size: 18px; color: #333; margin: 6px 0 18px; }
-.landing-choices { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
-.landing-card { background: #fff; border: 2px solid #9b72d8; border-radius: 14px; padding: 18px 26px; cursor: pointer; width: 220px; transition: background 0.15s, transform 0.15s; }
-.landing-card:hover { background: #f3ecff; transform: translateY(-2px); }
-.landing-card h2 { font-size: 16px; color: #5c3d9e; margin-bottom: 6px; }
-.landing-card p { font-size: 12px; color: #666; }
-@media (max-width: 480px) {
-  .landing h1 { font-size: 15px; }
-  .landing-card { width: 150px; padding: 14px 16px; }
-  .landing-card h2 { font-size: 13px; }
-  .landing-card p { font-size: 10px; }
-}
+.landing { height: 100vh; height: 100dvh; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: clamp(10px, 2.5vh, 28px) 16px; background: #F4F1EC; font-family: 'Poppins', system-ui, sans-serif; color: #1A1A1A; }
+.l-wrap { width: 100%; max-width: min(760px, 110vh); display: flex; flex-direction: column; align-items: center; text-align: center; }
+.l-brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: #1A1A1A; font-weight: 600; font-size: 13px; }
+.l-brand img { width: clamp(28px, 4.5vh, 40px); height: clamp(28px, 4.5vh, 40px); border-radius: 50%; object-fit: contain; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+.l-pill { margin-top: clamp(8px, 2.5vh, 22px); background: #C81D25; color: #fff; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 6px 14px; border-radius: 999px; }
+.l-title { font-family: 'Newsreader', Georgia, serif; font-weight: 600; font-size: clamp(24px, min(5vw, 5.5vh), 44px); line-height: 1.05; margin: clamp(6px, 1.5vh, 12px) 0 clamp(4px, 1vh, 8px); letter-spacing: -0.3px; text-wrap: balance; }
+.l-title em { font-style: italic; color: #C81D25; }
+.l-sub { font-size: clamp(12px, 1.8vh, 15px); line-height: 1.5; color: #5A5A5A; max-width: 520px; font-weight: 300; text-wrap: pretty; }
+.l-tokens { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; margin-top: clamp(6px, 1.8vh, 16px); }
+.l-tok { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #444; font-weight: 500; }
+.l-tok i { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-style: normal; font-size: 9px; font-weight: 800; color: #fff; }
+.l-ask { margin-top: clamp(10px, 3vh, 28px); font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #9A9A9A; }
+.l-choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: clamp(10px, 2vh, 18px); margin-top: clamp(6px, 1.5vh, 12px); width: 100%; }
+.l-card { background: #fff; border: 1px solid #E6E1D8; border-radius: 18px; padding: 0; cursor: pointer; text-align: left; overflow: hidden; display: flex; flex-direction: column; font-family: inherit; transition: transform .2s, box-shadow .2s, border-color .2s; }
+.l-card:hover { transform: translateY(-4px); box-shadow: 0 16px 36px rgba(60,40,20,.12); border-color: #C81D25; }
+.l-prev { background: #FAF8F4; padding: clamp(8px, 2vh, 18px) clamp(12px, 2vh, 18px); border-bottom: 3px solid #C81D25; }
+.l-grid { display: grid; gap: 2px; max-width: min(100%, 36vh); margin: 0 auto; }
+#prev20 { max-width: min(100%, 60vh); }
+.l-grid b { aspect-ratio: 1; border-radius: 3px; background: #EAE5DC; }
+.l-grid b.h { background: #1A1A1A; }
+.l-grid b.u { background: #5bc0de; border-radius: 50%; } .l-grid b.d { background: #e87fb8; border-radius: 50%; } .l-grid b.c { background: #3a9e5c; border-radius: 50%; }
+.l-body { padding: clamp(8px, 1.6vh, 16px) 18px clamp(10px, 1.8vh, 16px); display: flex; flex-direction: column; gap: 4px; }
+.l-body h2 { font-family: 'Newsreader', Georgia, serif; font-weight: 600; font-size: clamp(17px, 2.6vh, 22px); line-height: 1.1; }
+.l-body p { font-size: clamp(11px, 1.6vh, 13px); color: #6A6A6A; line-height: 1.5; }
+.l-go { margin-top: 2px; color: #C81D25; font-weight: 600; font-size: 14px; display: inline-flex; gap: 8px; align-items: center; }
+.l-card:hover .l-go span { transform: translateX(4px); } .l-go span { transition: transform .2s; }
+.l-back { margin-top: clamp(8px, 2.5vh, 24px); font-size: 13px; color: #6A6A6A; text-decoration: none; border-bottom: 1px solid #CFC8BC; padding-bottom: 2px; }
+.l-back:hover { color: #C81D25; border-color: #C81D25; }
+@media (max-width: 560px) { .l-choices { grid-template-columns: 1fr 1fr; } .l-body p { display: none; } .l-body { padding: 8px 12px 10px; } .l-sub { font-size: 12px; } .l-tokens { gap: 10px; } .l-tok { font-size: 11px; } }
 .main { display: flex; gap: 14px; padding: 8px 14px; align-items: flex-start; justify-content: center; flex-wrap: wrap; }
 .grid-wrap { flex: 1; min-width: 300px; overflow-x: auto; }
 #grid { display: grid; grid-template-columns: repeat(var(--cols, 20), 1fr); border: 2px solid #9b72d8; border-radius: 10px; overflow: hidden; }
@@ -107,23 +125,28 @@ body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; min-height: 100
 <body>
 
 <div class="landing" id="landing">
-  <div class="header" style="padding:0 0 6px;">
-    <a href="https://matematichenonsinasce.com/" target="_blank">
-      <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="Logo">
-      <span class="blog-name">Matematiche non si nasce</span>
-      <span style="font-size:16px;font-weight:800;color:#333;letter-spacing:0.5px;">La Tavola delle Divisioni</span>
-    </a>
-  </div>
-  <h1>Scegli la griglia da usare</h1>
-  <div class="landing-choices">
-    <div class="landing-card" onclick="scegliGriglia(10)">
-      <h2>Griglia a 10 colonne</h2>
-      <p>Divisore fino a 10</p>
+  <div class="l-wrap">
+    <a class="l-brand" href="https://matematichenonsinasce.com/" target="_top"><img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="Logo">Matematiche non si nasce</a>
+    <span class="l-pill">Gioco interattivo</span>
+    <h1 class="l-title">La Tavola<br>delle <em>Divisioni</em></h1>
+    <p class="l-sub">Scomponi il dividendo in gettoni, distribuiscili riga per riga e scopri quoziente e resto con le tue mani.</p>
+    <div class="l-tokens">
+      <span class="l-tok"><i style="background:#5bc0de">1</i>Unità</span>
+      <span class="l-tok"><i style="background:#e87fb8">10</i>Decine</span>
+      <span class="l-tok"><i style="background:#3a9e5c">100</i>Centinaia</span>
     </div>
-    <div class="landing-card" onclick="scegliGriglia(20)">
-      <h2>Griglia a 20 colonne</h2>
-      <p>Divisore fino a 20</p>
+    <div class="l-ask">Scegli la tua griglia</div>
+    <div class="l-choices">
+      <button class="l-card" onclick="scegliGriglia(10)">
+        <div class="l-prev"><div class="l-grid" id="prev10" style="grid-template-columns:repeat(10,1fr)"></div></div>
+        <div class="l-body"><h2>10 colonne</h2><p>Divisore fino a 10. Gettoni visibili uno per uno: cliccane uno per cambiarlo in 10 più piccoli.</p><span class="l-go">Inizia a giocare <span>→</span></span></div>
+      </button>
+      <button class="l-card" onclick="scegliGriglia(20)">
+        <div class="l-prev"><div class="l-grid" id="prev20" style="grid-template-columns:repeat(20,1fr)"></div></div>
+        <div class="l-body"><h2>20 colonne</h2><p>Divisore fino a 20. Banca compatta con le frecce per cambiare i gettoni.</p><span class="l-go">Inizia a giocare <span>→</span></span></div>
+      </button>
     </div>
+    <a class="l-back" href="https://matematichenonsinasce.com/" target="_top">← Torna al sito</a>
   </div>
 </div>
 
@@ -171,7 +194,7 @@ body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; min-height: 100
   <button class="btn btn-red" onclick="reset()">🔄 Ricomincia</button>
   <button class="btn btn-green" onclick="mostraRisultato()">✅ Risultato</button>
   <button class="btn" style="background:#e08800;" onclick="apriStampa()">🖨️ Versione stampabile</button>
-  <button class="btn" style="background:#5c3d9e;" onclick="window.location.href='https://rdiianni-alt.github.io/matematichenonsinasce/'">🏠 Torna alla pagina iniziale</button>
+  <button class="btn" style="background:#5c3d9e;" onclick="tornaHome()">🏠 Torna alla pagina iniziale</button>
 </div>
 
 </div>
@@ -667,6 +690,23 @@ function reset() {
   document.getElementById('sel-box').innerHTML='<div class="sub">Nessun gettone selezionato</div>';
   buildGrid();
 }
+
+function tornaHome() {
+  const u = 'https://matematichenonsinasce.com/';
+  try { window.top.location.href = u; } catch (e) { window.open(u, '_blank'); }
+}
+
+(function anteprime() {
+  // 10 col: divisore 4, 3 righe piene. 20 col: divisore 7, 2 righe piene.
+  [[10, 4, ['c','d','u']], [20, 7, ['d','u']]].forEach(([n, div, rows]) => {
+    let s = '';
+    for (let r = 0; r < 5; r++) for (let c = 0; c < n; c++) {
+      if (r === 0) s += '<b class="h"></b>';
+      else s += '<b' + (c < div && rows[r-1] ? ' class="' + rows[r-1] + '"' : '') + '></b>';
+    }
+    document.getElementById('prev' + n).innerHTML = s;
+  });
+})();
 
 function scegliGriglia(n) {
   COLS = n;
