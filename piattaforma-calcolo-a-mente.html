@@ -53,8 +53,9 @@ body { min-height: 100vh; }
 #g-zona { grid-area: zona; }
 #mat { display: block; width: 100%; aspect-ratio: 1180 / 760; background: #e3e1da; border-radius: 14px; border: 2px solid #efefef; }
 @media (min-width: 900px) and (min-aspect-ratio: 1/1) {
-  #gioco { grid-template-columns: minmax(300px, 0.8fr) 1.7fr; grid-template-areas: "head head" "carta mat" "zona mat"; align-items: start; }
-  #mat { width: min(100%, calc((100vh - 170px) * 1180 / 760)); }
+  #gioco { grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.5fr); grid-template-areas: "head head" "carta mat" "zona mat"; align-items: start; }
+  .mat-wrap { min-width: 0; }
+  #mat { width: min(100%, 58vw, calc((100vh - 170px) * 1180 / 760)); }
 }
 
 .tessera { background: #ffffff; border: 6px solid; border-radius: 18px; text-align: center; padding: clamp(6px, 1.5vh, 12px) 12px; width: 100%; max-width: 440px; margin: 0 auto; }
