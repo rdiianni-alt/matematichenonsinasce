@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calcolo a mente entro il 20</title>
+<style>
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #f5f4ef; font-family: Arial, sans-serif; color: #222; }
+body { min-height: 100vh; }
+
+.logo { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: #222; padding-top: 10px; }
+.logo img { width: clamp(44px, 9vmin, 60px); height: clamp(44px, 9vmin, 60px); border-radius: 50%; object-fit: contain; }
+.logo span { font-size: 0.7rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; }
+
+#app { max-width: 880px; margin: 0 auto; padding: 12px 14px 40px; }
+
+.titolo { text-align: center; font-size: clamp(1.1rem, 3.5vmin, 1.6rem); text-transform: uppercase; letter-spacing: 0.04em; margin: 8px 0 4px; }
+.sub { text-align: center; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #666; margin: 0 0 16px; }
+.etichetta { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #555; margin: 0; }
+
+.btn { background: #ebe8dd; border: 1px solid #b9b3a0; color: #333; border-radius: 0; padding: 10px 14px; font-family: Arial, sans-serif; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.04em; cursor: pointer; }
+.btn:hover { background: #e2dfd0; }
+.btn.piccolo { padding: 6px 10px; font-size: 0.7rem; }
+.btn.attivo { background: #555; color: #fff; border-color: #555; }
+.btn.rosso { background: #e10600; color: #fff; border-color: #e10600; }
+.btn.rosso:hover { background: #c20500; }
+.btn.grande { font-size: 1.1rem; padding: 18px 26px; min-width: 150px; color: #fff; border: none; }
+.btn.giusta { background: #4f7f4f; }
+.btn.giusta:hover { background: #426b42; }
+.btn.sbagliata { background: #9c4a4a; }
+.btn.sbagliata:hover { background: #843d3d; }
+.btn.avanti { background: #444; }
+.btn.avanti:hover { background: #333; }
+
+.barra { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.gruppo { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: center; }
+
+.griglia { display: grid; grid-template-columns: repeat(auto-fit, minmax(clamp(170px, 28vw, 230px), 1fr)); gap: 12px; }
+.carta-gioco { background: #fff; border: 1px solid #d6d2c4; border-top: 8px solid #888; border-radius: 0; padding: 14px 12px; text-align: left; cursor: pointer; font-family: Arial, sans-serif; color: #222; display: flex; flex-direction: column; gap: 6px; min-height: 96px; }
+.carta-gioco:hover { background: #fbfaf6; }
+.carta-gioco .nome { font-size: 0.9rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.03em; }
+.carta-gioco .desc { font-size: 0.8rem; color: #666; }
+
+.tessera { background: #fff; border: 10px solid #888; border-radius: 0; text-align: center; padding: 18px 12px 14px; margin: 6px auto 14px; max-width: 520px; }
+.tessera .op { font-size: clamp(2.6rem, 10vmin, 4.2rem); font-weight: bold; line-height: 1.1; }
+.tessera .tip { font-size: 0.85rem; color: #555; margin-top: 10px; line-height: 1.4; }
+
+.linea { background: #fff; border: 1px solid #d6d2c4; padding: 8px 6px 4px; margin-bottom: 14px; }
+
+.zona { text-align: center; min-height: 130px; }
+.opzioni { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-width: 560px; margin: 10px auto 0; }
+.opzioni .btn { font-size: 0.72rem; text-align: left; }
+.azioni { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 10px; }
+
+.risposta { font-size: 2.2rem; font-weight: bold; min-height: 56px; border-bottom: 3px solid #222; width: 160px; margin: 10px auto 6px; line-height: 1.2; }
+.messaggio { font-size: 1rem; margin: 6px 0 4px; min-height: 1.4em; }
+.messaggio.ok { color: #2e6b2e; font-weight: bold; }
+.messaggio.ko { color: #e10600; font-weight: bold; }
+.strategia { font-size: 0.85rem; color: #555; max-width: 560px; margin: 4px auto 0; line-height: 1.4; }
+
+.tastiera { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-width: 300px; margin: 8px auto 0; }
+.tastiera button { background: #fff; border: 1px solid #b9b3a0; border-radius: 0; font-family: Arial, sans-serif; font-size: 1.5rem; font-weight: bold; padding: 12px 0; min-height: 58px; cursor: pointer; color: #222; }
+.tastiera button:hover { background: #ebe8dd; }
+.tastiera button.azione { font-size: 0.85rem; text-transform: uppercase; }
+.tastiera button.verifica { background: #e10600; color: #fff; border-color: #e10600; }
+.tastiera button.verifica:hover { background: #c20500; }
+
+.fine { text-align: center; padding-top: 10px; }
+.medaglia { width: clamp(150px, 30vmin, 210px); height: clamp(150px, 30vmin, 210px); border-radius: 50%; border: 10px solid #b9965a; background: #fff; margin: 10px auto 14px; display: flex; align-items: center; justify-content: center; }
+.medaglia span { font-size: 0.85rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.08em; color: #7a5c2e; text-align: center; padding: 0 10px; }
+.fine p { margin: 6px 0; }
+.fine .btn { margin: 4px; }
+</style>
+</head>
+<body>
+
+<a class="logo" href="https://matematichenonsinasce.com/" target="_self">
+  <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Logo" />
+  <span>Matematiche non si nasce</span>
+</a>
+
+<div id="app"></div>
+
+<script>
+/* ---------- STRATEGIE ---------- */
+const STR = {
+  uno:   { nome: 'Aggiungi o togli 1', colore: '#8a6d3b', tip: 'Aggiungere 1 significa andare al numero successivo sulla linea; togliere 1 significa tornare al numero precedente.' },
+  zero:  { nome: 'Aggiungi o togli 0', colore: '#5b7f5b', tip: 'Aggiungere o togliere 0 non cambia il numero: si resta fermi sulla linea.' },
+  due:   { nome: 'Aggiungi o togli 2', colore: '#4a6c8c', tip: 'Aggiungere 2 significa fare due salti in avanti; togliere 2 significa fare due salti indietro.' },
+  doppi: { nome: 'Raddoppiamento', colore: '#9c5b5b', tip: 'Un doppio è la somma di due numeri uguali. Dai doppi si arriva ai numeri vicini.' },
+  c5:    { nome: 'Combinazioni con il 5', colore: '#7a5c8a', tip: 'Ci sono coppie di numeri che fanno 5: 1 e 4, 2 e 3, e così via.' },
+  c6:    { nome: 'Combinazioni con il 6', colore: '#5f6f8a', tip: 'Ci sono coppie di numeri che fanno 6: 1 e 5, 2 e 4, 3 e 3.' },
+  c7:    { nome: 'Combinazioni con il 7', colore: '#6b7a4a', tip: 'Ci sono coppie di numeri che fanno 7: 1 e 6, 2 e 5, 3 e 4.' },
+  c8:    { nome: 'Combinazioni con il 8', colore: '#8a5f6b', tip: 'Ci sono coppie di numeri che fanno 8: 1 e 7, 2 e 6, 3 e 5, 4 e 4.' },
+  c9:    { nome: 'Combinazioni con il 9', colore: '#5a7a7a', tip: 'Ci sono coppie di numeri che fanno 9: 1 e 8, 2 e 7, 3 e 6, 4 e 5.' },
+  p5:    { nome: 'Passaggio al 5 e ritorno al 5', colore: '#b07a3c', tip: 'Si fa un salto fino al 5 (o al 10) e poi si aggiunge quello che resta.' },
+  pd:    { nome: 'Passaggio alla decina e ritorno alla decina', colore: '#3f7f7a', tip: 'Si arriva alla decina (10) e poi si aggiunge quello che resta.' }
+};
+
+/* ---------- TESSERE ---------- */
+function f(a, op, b, s, step) {
+  const res = op === '+' ? a + b : a - b;
+  return { a, op, b, res, s, step: step || 0, key: a + op + b };
+}
+function combN(n, s) {
+  const r = [];
+  for (let a = 0; a <= n; a++) { r.push(f(a, '+', n - a, s)); r.push(f(n, '-', a, s)); }
+  return r;
+}
+function uniq(arr) {
+  const seen = new Set();
+  return arr.filter(c => { if (seen.has(c.key)) return false; seen.add(c.key); return true; });
+}
+const P5 = [[6,8],[5,6],[7,5],[7,8],[9,6],[3,4],[7,4],[1,6],[6,2],[7,6],[7,2],[2,6],[6,7],[8,7]];
+const PD = [[6,8],[7,8],[8,6],[8,7],[9,6],[9,5],[3,8],[2,9],[9,8],[9,7],[5,9],[5,7],[14,4],[6,9],[12,7],[5,15],[8,2],[8,4],[2,15],[8,5],[11,3],[4,13],[2,11],[11,5]];
+
+const GIOCHI = [
+  { id: 'uno', nome: 'Aggiungi o togli 1', desc: 'Il numero successivo o precedente', col: STR.uno.colore,
+    deck: () => { const r = []; for (let a = 0; a <= 9; a++) r.push(f(a, '+', 1, 'uno')); for (let a = 1; a <= 10; a++) r.push(f(a, '-', 1, 'uno')); return r; } },
+  { id: 'zero', nome: 'Aggiungi o togli 0', desc: 'Il numero non cambia', col: STR.zero.colore,
+    deck: () => { const r = []; for (let a = 0; a <= 9; a++) { r.push(f(a, '+', 0, 'zero')); r.push(f(a, '-', 0, 'zero')); } return r; } },
+  { id: 'due', nome: 'Aggiungi o togli 2', desc: 'Due salti avanti o indietro', col: STR.due.colore,
+    deck: () => { const r = []; for (let a = 0; a <= 9; a++) r.push(f(a, '+', 2, 'due')); for (let a = 2; a <= 10; a++) r.push(f(a, '-', 2, 'due')); return r; } },
+  { id: 'doppi', nome: 'Raddoppiamento', desc: 'Il doppio e i numeri vicini', col: STR.doppi.colore,
+    deck: () => { const r = []; for (let a = 0; a <= 9; a++) r.push(f(a, '+', a, 'doppi')); for (let a = 1; a <= 9; a++) r.push(f(2 * a, '-', a, 'doppi')); return r; } },
+  { id: 'c5', nome: 'Combinazioni con il 5', desc: 'Coppie che fanno 5', col: STR.c5.colore, deck: () => combN(5, 'c5') },
+  { id: 'c6', nome: 'Combinazioni con il 6', desc: 'Coppie che fanno 6', col: STR.c6.colore, deck: () => combN(6, 'c6') },
+  { id: 'c7', nome: 'Combinazioni con il 7', desc: 'Coppie che fanno 7', col: STR.c7.colore, deck: () => combN(7, 'c7') },
+  { id: 'c8', nome: 'Combinazioni con il 8', desc: 'Coppie che fanno 8', col: STR.c8.colore, deck: () => combN(8, 'c8') },
+  { id: 'c9', nome: 'Combinazioni con il 9', desc: 'Coppie che fanno 9', col: STR.c9.colore, deck: () => combN(9, 'c9') },
+  { id: 'p5', nome: 'Passaggio al 5 e ritorno al 5', desc: 'Si arriva al 5, poi si prosegue', col: STR.p5.colore,
+    deck: () => P5.map(([a, b]) => f(a, '+', b, 'p5', 5)) },
+  { id: 'pd', nome: 'Passaggio alla decina e ritorno alla decina', desc: 'Si arriva alla decina, poi si prosegue', col: STR.pd.colore,
+    deck: () => PD.map(([a, b]) => f(a, '+', b, 'pd', 10)) },
+  { id: 'misto', nome: 'Riepilogo', desc: 'Scegli tu la strategia più adatta', col: '#444', misto: true,
+    deck: () => uniq([].concat(...GIOCHI.filter(g => !g.misto).map(g => g.deck()))) }
+];
+
+/* ---------- STATO ---------- */
+let stato = { schermo: 'menu', gioco: null, deck: [], i: 0, tent: 0, primi: 0, fase: 'calc', input: '', msg: '', msgCls: '', opzioni: [], casuale: true, suggerimento: false, modo: 'voce' };
+const app = document.getElementById('app');
+
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function sg(op) { return op === '+' ? '+' : '−'; }
+
+/* ---------- LINEA DEI NUMERI ---------- */
+function arcsFor(c) {
+  if (c.op === '-') return [{ from: c.a, to: c.res, label: '−' + c.b }];
+  if (c.step) {
+    const m = (Math.floor(c.a / c.step) + 1) * c.step;
+    if (m < c.res) return [{ from: c.a, to: m, label: '+' + (m - c.a) }, { from: m, to: c.res, label: '+' + (c.res - m) }];
+  }
+  return [{ from: c.a, to: c.res, label: '+' + c.b }];
+}
+function linea(c, archi) {
+  const W = 1000, H = 210, Y = 150, X = n => 40 + n * 46;
+  let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Linea dei numeri da 0 a 20" style="width:100%;height:auto;display:block">`;
+  s += `<line x1="${X(0) - 24}" y1="${Y}" x2="${X(20) + 24}" y2="${Y}" stroke="#222" stroke-width="3"/>`;
+  for (let n = 0; n <= 20; n++) {
+    const big = n % 5 === 0;
+    s += `<line x1="${X(n)}" y1="${Y - (big ? 14 : 8)}" x2="${X(n)}" y2="${Y + (big ? 14 : 8)}" stroke="#222" stroke-width="${big ? 3 : 1.5}"/>`;
+    s += `<text x="${X(n)}" y="${Y + 42}" text-anchor="middle" font-size="${big ? 26 : 20}" font-weight="${big ? 'bold' : 'normal'}" fill="#222">${n}</text>`;
+  }
+  if (c) {
+    if (archi) {
+      for (const ar of arcsFor(c)) {
+        const x1 = X(ar.from), x2 = X(ar.to);
+        if (ar.from === ar.to) {
+          s += `<text x="${x1}" y="${Y - 30}" text-anchor="middle" font-size="24" font-weight="bold" fill="#e10600">${ar.label}</text>`;
+          continue;
+        }
+        const h = Math.min(105, 28 + Math.abs(ar.to - ar.from) * 9);
+        s += `<path d="M${x1} ${Y} Q ${(x1 + x2) / 2} ${Y - 2 * h} ${x2} ${Y}" fill="none" stroke="#e10600" stroke-width="4"/>`;
+        s += `<text x="${(x1 + x2) / 2}" y="${Y - h - 8}" text-anchor="middle" font-size="24" font-weight="bold" fill="#e10600">${ar.label}</text>`;
+      }
+      s += `<circle cx="${X(c.res)}" cy="${Y}" r="15" fill="#e10600"/>`;
+    }
+    s += `<circle cx="${X(c.a)}" cy="${Y}" r="15" fill="#222"/>`;
+  }
+  s += '</svg>';
+  return s;
+}
+
+/* ---------- STAMPA / DOWNLOAD TESSERE ---------- */
+/* Logo con bambina e kalimba, usato nella firma di ogni tessera stampata */
+const LOGO_TESSERE = 'https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/055f4e9caf74c856ae2f59926ae544fc0e493e33/logoconkalimba.png';
+
+function htmlTessere(titolo, carte, misto) {
+  const tessere = carte.map(c => `<div class="t" style="border-color:${STR[c.s].colore}"><div class="corpo"><div class="op">${c.a} ${sg(c.op)} ${c.b}</div>${linea(null, false)}</div><div class="firma"><img src="${LOGO_TESSERE}" alt=""><span>matematichenonsinasce.com</span></div></div>`).join('');
+  const soluzioni = carte.map(c => `<li>${c.a} ${sg(c.op)} ${c.b} = ${c.res}</li>`).join('');
+  return `<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><title>Tessere – ${titolo}</title><style>
+@page { size: A4; margin: 10mm; }
+html, body { background: #fff !important; margin: 0; padding: 0; font-family: Arial, sans-serif; color: #222; }
+h1 { font-size: 13pt; text-transform: uppercase; margin: 0 0 6mm; letter-spacing: 0.04em; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }
+.t { height: 60mm; border: 4mm solid; box-sizing: border-box; display: flex; flex-direction: column; align-items: stretch; padding: 0; page-break-inside: avoid; background: #fff; position: relative; }
+.firma { position: absolute; right: 2mm; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; gap: 1.5mm; }
+.firma img { height: 6mm; width: auto; }
+.firma span { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 6pt; color: #b8b8b8; white-space: nowrap; }
+.corpo { flex: 1; width: 100%; min-width: 0; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2mm 13mm 2mm 2mm; }
+.op { font-size: 34pt; font-weight: bold; height: 24mm; display: flex; align-items: center; }
+.corpo svg { width: 100%; max-width: 100%; height: auto; }
+.sol { page-break-before: always; }
+.sol ol { columns: 3; font-size: 12pt; line-height: 1.8; }
+.sol li { break-inside: avoid; }
+</style></head><body>
+<h1>${titolo}</h1>
+<div class="grid">${tessere}</div>
+${misto ? '' : `<div class="sol"><h1>Soluzioni</h1><ol>${soluzioni}</ol></div>`}
+</body></html>`;
+}
+
+function scarica() {
+  const g = stato.gioco;
+  const carte = g.misto ? stato.deck : g.deck();
+  const blob = new Blob([htmlTessere(g.nome, carte, g.misto)], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'tessere-' + g.id + '.html';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+/* ---------- FLUSSO ---------- */
+function prepara() {
+  const c = stato.deck[stato.i];
+  stato.tent = 0; stato.input = ''; stato.msg = ''; stato.msgCls = '';
+  stato.fase = stato.gioco.misto ? 'scelta' : 'calc';
+  if (stato.gioco.misto) {
+    const altre = shuffle(Object.keys(STR).filter(k => k !== c.s)).slice(0, 3);
+    stato.opzioni = shuffle([c.s, ...altre]);
+  }
+}
+function avvia(id) {
+  const g = GIOCHI.find(x => x.id === id);
+  let d = g.deck();
+  if (g.misto) d = shuffle(d).slice(0, 20);
+  else if (stato.casuale) d = shuffle(d);
+  stato.gioco = g; stato.deck = d; stato.i = 0; stato.primi = 0;
+  stato.schermo = 'gioco';
+  prepara();
+  render();
+}
+function vaiMenu() { stato.schermo = 'menu'; render(); }
+function toggleOrdine() { stato.casuale = !stato.casuale; render(); }
+function toggleSugg() { stato.suggerimento = !stato.suggerimento; render(); }
+function impostaModo(m) { stato.modo = m; stato.input = ''; render(); }
+
+function scegli(k) {
+  const c = stato.deck[stato.i];
+  if (k === c.s) { stato.msg = 'Esatto!'; stato.msgCls = 'ok'; }
+  else { stato.msg = 'Per questa operazione la strategia più adatta è: ' + STR[c.s].nome + '.'; stato.msgCls = ''; }
+  stato.fase = 'calc';
+  render();
+}
+function tasto(t) {
+  if (stato.fase !== 'calc') return;
+  if (t === 'CANC') stato.input = stato.input.slice(0, -1);
+  else if (t === 'OK') { verifica(); return; }
+  else if (stato.input.length < 2) stato.input += t;
+  render();
+}
+function verifica() {
+  if (stato.fase !== 'calc' || stato.input === '') return;
+  const c = stato.deck[stato.i];
+  const v = parseInt(stato.input, 10);
+  if (v === c.res) {
+    stato.fase = 'ok';
+    if (stato.tent === 0) stato.primi++;
+    stato.msg = 'Esatto!'; stato.msgCls = 'ok';
+  } else {
+    stato.tent++;
+    if (stato.tent < 2) { stato.msg = 'Non ancora. Riprova.'; stato.msgCls = ''; stato.input = ''; }
+    else { stato.fase = 'ko'; stato.msg = 'Il risultato è ' + c.res + '.'; stato.msgCls = 'ko'; }
+  }
+  render();
+}
+/* Giudizio a voce (LIM): il bambino risponde ad alta voce, l'adulto segna giusta o sbagliata */
+function giudica(giusta) {
+  if (stato.fase !== 'calc') return;
+  const c = stato.deck[stato.i];
+  if (giusta) {
+    stato.fase = 'ok';
+    if (stato.tent === 0) stato.primi++;
+    stato.msg = 'Esatto!'; stato.msgCls = 'ok';
+  } else {
+    stato.fase = 'ko';
+    stato.msg = 'Il risultato è ' + c.res + '.'; stato.msgCls = 'ko';
+  }
+  render();
+}
+/* Avanti: passa alla tessera successiva, con o senza giudizio */
+function avanti() {
+  stato.i++;
+  if (stato.i >= stato.deck.length) stato.schermo = 'fine';
+  else prepara();
+  render();
+}
+
+document.addEventListener('keydown', e => {
+  if (stato.schermo !== 'gioco') return;
+  const avantiKey = e.key === ' ' || e.key === 'ArrowRight' || e.key === 'Enter';
+  if (stato.fase === 'calc') {
+    if (stato.modo === 'voce') {
+      if (e.key === 'g' || e.key === 'G') giudica(true);
+      else if (e.key === 's' || e.key === 'S') giudica(false);
+      else if (avantiKey) avanti();
+    } else {
+      if (/^[0-9]$/.test(e.key)) tasto(e.key);
+      else if (e.key === 'Backspace') tasto('CANC');
+      else if (e.key === 'Enter') verifica();
+      else if (e.key === 'ArrowRight') avanti();
+    }
+  } else if (stato.fase === 'ok' || stato.fase === 'ko') {
+    if (avantiKey) avanti();
+  }
+});
+
+/* ---------- VISTE ---------- */
+function vistaMenu() {
+  return `
+    <h1 class="titolo">Calcolo a mente entro il 20</h1>
+    <p class="sub">Scegli un gioco</p>
+    <div class="barra">
+      <div class="gruppo">
+        <span class="etichetta">Ordine:</span>
+        <button class="btn piccolo ${stato.casuale ? 'attivo' : ''}" onclick="toggleOrdine()">Casuale</button>
+        <button class="btn piccolo ${!stato.casuale ? 'attivo' : ''}" onclick="toggleOrdine()">In sequenza</button>
+      </div>
+      <div class="gruppo">
+        <span class="etichetta">Risposta:</span>
+        <button class="btn piccolo ${stato.modo === 'voce' ? 'attivo' : ''}" onclick="impostaModo('voce')">A voce</button>
+        <button class="btn piccolo ${stato.modo === 'scritta' ? 'attivo' : ''}" onclick="impostaModo('scritta')">Scritta</button>
+      </div>
+      <div class="gruppo">
+        <span class="etichetta">Suggerimento:</span>
+        <button class="btn piccolo ${stato.suggerimento ? 'attivo' : ''}" onclick="toggleSugg()">${stato.suggerimento ? 'Attivo' : 'Non attivo'}</button>
+      </div>
+    </div>
+    <div class="griglia">
+      ${GIOCHI.map(g => `<button class="carta-gioco" style="border-top-color:${g.col}" onclick="avvia('${g.id}')"><span class="nome">${g.nome}</span><span class="desc">${g.desc}</span></button>`).join('')}
+    </div>`;
+}
+
+function vistaGioco() {
+  const c = stato.deck[stato.i];
+  const g = stato.gioco;
+  const archi = stato.fase === 'ok' || stato.fase === 'ko';
+  let zona = '';
+  if (stato.fase === 'scelta') {
+    zona = `<p class="etichetta">Quale strategia usi?</p>
+      <div class="opzioni">${stato.opzioni.map(k => `<button class="btn" onclick="scegli('${k}')">${STR[k].nome}</button>`).join('')}</div>
+      <div class="azioni"><button class="btn piccolo" onclick="avanti()">Avanti senza risposta</button></div>`;
+  } else if (stato.fase === 'calc' && stato.modo === 'voce') {
+    zona = `<p class="etichetta">Risposta a voce</p>
+      <div class="azioni">
+        <button class="btn grande giusta" onclick="giudica(true)">Giusta</button>
+        <button class="btn grande sbagliata" onclick="giudica(false)">Sbagliata</button>
+      </div>
+      <div class="azioni"><button class="btn grande avanti" onclick="avanti()">Avanti</button></div>`;
+  } else if (stato.fase === 'calc') {
+    zona = `<div class="risposta">${stato.input || '&nbsp;'}</div>
+      <div class="messaggio ${stato.msgCls}">${stato.msg}</div>
+      <div class="tastiera">
+        ${['1','2','3','4','5','6','7','8','9'].map(t => `<button onclick="tasto('${t}')">${t}</button>`).join('')}
+        <button class="azione" onclick="tasto('CANC')">Canc</button>
+        <button onclick="tasto('0')">0</button>
+        <button class="azione verifica" onclick="tasto('OK')">OK</button>
+      </div>
+      <div class="azioni"><button class="btn piccolo" onclick="avanti()">Avanti senza risposta</button></div>`;
+  } else {
+    zona = `<div class="risposta">${c.res}</div>
+      <div class="messaggio ${stato.msgCls}">${stato.msg}</div>
+      <p class="strategia">Strategia: ${STR[c.s].nome}. ${STR[c.s].tip}</p>
+      <div class="azioni"><button class="btn grande avanti" onclick="avanti()">Avanti</button></div>`;
+  }
+  return `
+    <div class="barra">
+      <button class="btn piccolo" onclick="vaiMenu()">Menu</button>
+      <span class="etichetta">${g.nome}</span>
+      <span class="etichetta">${stato.i + 1} / ${stato.deck.length}</span>
+    </div>
+    <div class="barra">
+      <div class="gruppo">
+        <button class="btn piccolo" onclick="toggleOrdine()">Ordine: ${stato.casuale ? 'casuale' : 'in sequenza'}</button>
+        <button class="btn piccolo ${stato.modo === 'voce' ? 'attivo' : ''}" onclick="impostaModo('voce')">A voce</button>
+        <button class="btn piccolo ${stato.modo === 'scritta' ? 'attivo' : ''}" onclick="impostaModo('scritta')">Scritta</button>
+        <button class="btn piccolo ${stato.suggerimento ? 'attivo' : ''}" onclick="toggleSugg()">Suggerimento: ${stato.suggerimento ? 'sì' : 'no'}</button>
+      </div>
+      <div class="gruppo">
+        <button class="btn piccolo" onclick="scarica()">Scarica tessere</button>
+      </div>
+    </div>
+    <div class="tessera" style="border-color:${STR[c.s].colore}">
+      <div class="op">${c.a} ${sg(c.op)} ${c.b}</div>
+      ${stato.suggerimento && stato.fase === 'calc' && !g.misto ? `<div class="tip">${STR[c.s].tip}</div>` : ''}
+    </div>
+    <div class="linea">${linea(c, archi)}</div>
+    <div class="zona">${zona}</div>`;
+}
+
+function vistaFine() {
+  const g = stato.gioco;
+  const misto = g.misto;
+  return `
+    <div class="fine">
+      <div class="medaglia"><span>${misto ? 'Coppa del calcolo a mente' : 'Brevetto'}</span></div>
+      <h1 class="titolo">${misto ? 'Coppa conquistata' : 'Brevetto conquistato'}</h1>
+      <p>${g.nome}</p>
+      <p>Risposte giuste al primo tentativo: ${stato.primi} su ${stato.deck.length}</p>
+      <div style="margin-top:14px">
+        <button class="btn" onclick="avvia('${g.id}')">Ricomincia</button>
+        <button class="btn" onclick="scarica()">Scarica tessere</button>
+        <button class="btn" onclick="vaiMenu()">Menu</button>
+      </div>
+    </div>`;
+}
+
+function render() {
+  if (stato.schermo === 'menu') app.innerHTML = vistaMenu();
+  else if (stato.schermo === 'gioco') app.innerHTML = vistaGioco();
+  else app.innerHTML = vistaFine();
+}
+
+render();
+</script>
+</body>
+</html>
