@@ -43,11 +43,15 @@
   .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 10px; }
   .toolbar .titolo { font-weight: 600; color: var(--accent); }
   .hint { color: var(--muted); font-size: 0.9rem; text-align: center; margin-top: 10px; }
+  /* gioco: tutto dentro la finestra, senza scorrimento */
+  body.gioco-attivo { overflow: hidden; height: 100vh; height: 100dvh; }
+  body.gioco-attivo #gioco { padding-top: 4px; padding-bottom: 4px; }
+  @media (max-height: 600px) { .hint { display: none; } }
 
   /* ---------- scheda da gioco: occupa lo spazio disponibile ---------- */
   .card {
     position: relative; background: #fff; margin: 0 auto;
-    width: min(100%, max(300px, calc((100vh - 210px) * 4 / 3)));
+    width: min(calc(100vw - 32px), max(240px, calc((100vh - 190px) * 4 / 3)));
     aspect-ratio: 4 / 3;
     border: 8px solid var(--c, #4a6a8a); border-radius: 18px;
     overflow: hidden; user-select: none; touch-action: none;
@@ -329,6 +333,7 @@
     $("menu").classList.toggle("hidden", nome !== "menu");
     $("gioco").classList.toggle("hidden", nome !== "gioco");
     $("pagina").classList.toggle("hidden", nome !== "pagina");
+    document.body.classList.toggle("gioco-attivo", nome === "gioco");
   }
 
   // ---------- pagina di schede ----------
