@@ -599,14 +599,64 @@ h1 { font-size: 13pt; text-transform: uppercase; margin: 0 0 6mm; letter-spacing
 ${misto ? '' : `<div class="sol"><h1>Soluzioni</h1><ol>${soluzioni}</ol></div>`}
 </body></html>`;
 }
-function scarica() {
+/* una tessera in PDF: bordo colorato, operazione, linea dei numeri da 0 a 20 */
+function disegnaTessera(doc, c, x, y, w, h, logo) {
+  const B = 4, rgb = hexRGB(STR[c.s].colore);
+  doc.setFillColor(rgb[0], rgb[1], rgb[2]); doc.rect(x, y, w, h, 'F');
+  doc.setFillColor(255, 255, 255); doc.rect(x + B, y + B, w - 2 * B, h - 2 * B, 'F');
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(30); doc.setTextColor(34, 34, 34);
+  doc.text(`${c.a} ${opPdf(c)} ${c.b}`, x + w / 2, y + 22, { align: 'center' });
+  const lx0 = x + 12, lx1 = x + w - 12, ly = y + 38;
+  const sx = n => lx0 + n * (lx1 - lx0) / 20;
+  doc.setDrawColor(34, 34, 34); doc.setLineWidth(0.5); doc.line(lx0 - 2, ly, lx1 + 2, ly);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(6);
+  for (let n = 0; n <= 20; n++) {
+    const big = n % 5 === 0;
+    doc.setLineWidth(big ? 0.5 : 0.25);
+    doc.line(sx(n), ly - (big ? 2 : 1.2), sx(n), ly + (big ? 2 : 1.2));
+    doc.text(String(n), sx(n), ly + 5, { align: 'center' });
+  }
+  /* bambina e scritta, centrate in basso, sopra la cornice colorata */
+  const testo = 'matematichenonsinasce.com';
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(7);
+  const lw = logo ? 8 * logo.w / logo.h : 0;
+  const tot = lw + (logo ? 2 : 0) + doc.getTextWidth(testo);
+  let px = x + w / 2 - tot / 2;
+  const cy = y + h - 9;
+  if (logo) { doc.addImage(logo.data, 'PNG', px, cy - 4, lw, 8); px += lw + 2; }
+  doc.setTextColor(120, 120, 120);
+  doc.text(testo, px, cy + 1.2);
+}
+const opPdf = c => c.op === '+' ? '+' : '-';
+
+/* scarica le tessere del gioco come PDF, due colonne per pagina */
+async function scarica() {
+  if (!window.jspdf) { alert('Non riesco a caricare lo strumento per il PDF: controlla la connessione a internet e ricarica la pagina.'); return; }
   const g = stato.gioco;
   const carte = g.misto ? stato.deck : g.deck();
-  const blob = new Blob([htmlTessere(g.nome, carte, g.misto)], { type: 'text/html' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'tessere-' + g.id + '.html';
-  document.body.appendChild(a); a.click(); a.remove();
+  const { jsPDF } = window.jspdf;
+  const logo = await caricaImg(LOGO_TESSERE);
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const M = 8, GAP = 6, CW = (210 - 2 * M - GAP) / 2, CH = 60, PER = 8;
+  const pagine = Math.max(1, Math.ceil(carte.length / PER));
+  for (let p = 0; p < pagine; p++) {
+    if (p > 0) doc.addPage();
+    carte.slice(p * PER, (p + 1) * PER).forEach((c, i) => {
+      disegnaTessera(doc, c, M + (i % 2) * (CW + GAP), M + Math.floor(i / 2) * (CH + GAP), CW, CH, logo);
+    });
+  }
+  if (!g.misto) {
+    const SOL = 45;
+    for (let p = 0; p < Math.ceil(carte.length / SOL); p++) {
+      doc.addPage();
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.setTextColor(34, 34, 34); doc.text('Soluzioni', M, 16);
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(11);
+      carte.slice(p * SOL, (p + 1) * SOL).forEach((c, i) => {
+        doc.text(`${c.a} ${opPdf(c)} ${c.b} = ${c.res}`, M + (i % 3) * 62, 28 + Math.floor(i / 3) * 12);
+      });
+    }
+  }
+  doc.save(`tessere-${g.id}.pdf`);
 }
 
 /* ---------- flusso del gioco ---------- */
@@ -871,10 +921,6 @@ function intestazionePdf(doc, logo, M, PW) {
   doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.setTextColor(34, 34, 34);
   doc.text('Matematiche non si nasce', M + 17, 18);
   doc.setDrawColor(225, 6, 0); doc.setLineWidth(0.6); doc.line(M, 26, PW - M, 26);
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(34, 34, 34);
-  doc.text('Scrivi il risultato.', M, 36);
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(90, 90, 90);
-  doc.text('Non contare uno alla volta: usa la strategia che abbiamo imparato in classe.', M, 43);
   doc.setTextColor(34, 34, 34);
 }
 function piePdf(doc, logoF, M) {
@@ -902,7 +948,7 @@ async function creaSchedaPdf() {
   if (!scelti.length && !mix) { st.textContent = 'Seleziona almeno una tipologia di esercizi.'; return; }
   let carte = [];
   scelti.forEach(g => carte.push(...g.deck()));
-  if (mix) carte.push(...shuffle(GIOCHI.find(g => g.misto).deck()).slice(0, 44));
+  if (mix) carte.push(...shuffle(GIOCHI.find(g => g.misto).deck()).slice(0, 48));
   carte = shuffle(uniq(carte));
   await generaPdf(carte, st);
 }
@@ -912,7 +958,7 @@ async function generaPdf(carte, st) {
   const { jsPDF } = window.jspdf;
   const [logoTop, logoFondo] = await Promise.all([caricaImg(document.querySelector('.logo img').src), caricaImg(LOGO_TESSERE)]);
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-  const PW = 210, M = 14, COLS = 4, colW = (PW - 2 * M) / COLS, ROWH = 19.5, Y0 = 58, PER = 44;
+  const PW = 210, M = 14, COLS = 4, colW = (PW - 2 * M) / COLS, ROWH = 19.5, Y0 = 42, PER = 48;
   const pagine = Math.max(1, Math.ceil(carte.length / PER));
   for (let p = 0; p < pagine; p++) {
     if (p > 0) doc.addPage();
