@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le pecorelle</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4f1ea;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+  header {
+    width: 100%;
+    padding: 10px 12px;
+    text-align: center;
+    background: #dfe9d3;
+  }
+  #logo-wrap {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    text-decoration: none;
+    margin-bottom: 6px;
+  }
+  #logo-wrap img {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    border-radius: 50%;
+  }
+  #logo-wrap span {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #1a5276;
+    white-space: nowrap;
+  }
+  h1 { margin: 0; font-size: 1.6rem; }
+  .controlli {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    padding: 12px;
+  }
+  button {
+    font-size: 1.1rem;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    background: #5a7d3a;
+    color: #fff;
+    cursor: pointer;
+  }
+  button.attivo { background: #2f4a1d; }
+  button.secondario { background: #8a6d4b; }
+  select, input {
+    font-size: 1.1rem;
+    padding: 8px;
+    border-radius: 8px;
+    border: 2px solid #8a6d4b;
+  }
+  #codice { width: 110px; text-transform: uppercase; text-align: center; }
+  #contenitore {
+    position: relative;
+    width: min(96vw, 1000px);
+    aspect-ratio: 800 / 500;
+    background: #fff;
+    border: 2px solid #999;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  #recinto, #lavagna {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  #lavagna { touch-action: none; cursor: crosshair; }
+  .info { font-size: 1.1rem; color: #555; min-height: 1.5em; padding: 6px; text-align: center; }
+  #print-sheet { display: none; }
+
+  @media print {
+    @page { size: A4 portrait; margin: 8mm; }
+    body > *:not(#print-sheet) { display: none !important; }
+    #print-sheet {
+      display: grid !important;
+      width: 194mm;
+      height: 281mm;
+      gap: 4mm;
+    }
+    /* 2 recinti: uno sopra e uno sotto, a metà foglio */
+    #print-sheet.p2 { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+    /* 6 recinti: 2 colonne e 3 righe */
+    #print-sheet.p6 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; }
+    #print-sheet > div { border: 1px solid #000; overflow: hidden; }
+    #print-sheet svg { width: 100%; height: 100%; display: block; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a id="logo-wrap" href="https://matematicaconlemani.wordpress.com/" target="_blank">
+    <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="Logo" />
+    <span>Matematiche non si nasce</span>
+  </a>
+  <h1>Le pecorelle</h1>
+</header>
+
+<div class="controlli">
+  <button class="scelta" data-max="20">Fino a 20</button>
+  <button class="scelta" data-max="50">Fino a 50</button>
+  <button class="scelta attivo" data-max="100">Fino a 100</button>
+  <button id="nuovo" class="secondario">Nuova immagine</button>
+  <button id="cancella" class="secondario">Cancella segni</button>
+  <button id="conta" class="secondario">Mostra conteggio</button>
+</div>
+
+<div class="controlli">
+  <select id="perFoglio" aria-label="Recinti per foglio">
+    <option value="2">2 recinti per foglio</option>
+    <option value="6">6 recinti per foglio</option>
+  </select>
+  <button id="stampa">Stampa PDF</button>
+  <input id="codice" type="text" maxlength="6" placeholder="es. A2" aria-label="Codice da caricare">
+  <button id="carica" class="secondario">Carica codice</button>
+</div>
+
+<div id="contenitore">
+  <svg id="recinto" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid meet"></svg>
+  <canvas id="lavagna" width="800" height="500"></canvas>
+</div>
+
+<div class="info" id="testoConteggio"></div>
+<div class="info" id="testoStampa"></div>
+
+<div id="print-sheet"></div>
+
+<script>
+  let maxPecore = 100;
+  let mostraConteggio = false;
+  let corrente = null;
+
+  const recinto = document.getElementById('recinto');
+  const lavagna = document.getElementById('lavagna');
+  const ctx = lavagna.getContext('2d');
+  const testoConteggio = document.getElementById('testoConteggio');
+  const testoStampa = document.getElementById('testoStampa');
+  const printSheet = document.getElementById('print-sheet');
+
+  const W = 800, H = 500, M = 40;
+
+  // ---------- Memoria dei recinti (per ritrovarli con il codice) ----------
+  const CHIAVE = 'pecorelleDati';
+  function caricaDati() {
+    try {
+      const d = JSON.parse(localStorage.getItem(CHIAVE));
+      if (d && d.registro) return d;
+    } catch (e) {}
+    return { registro: {}, fogli: 0, schermo: 0 };
+  }
+  let dati = caricaDati();
+  function salvaDati() {
+    try { localStorage.setItem(CHIAVE, JSON.stringify(dati)); } catch (e) {}
+  }
+  // 0 -> A, 1 -> B, ... 25 -> Z, 26 -> A1 ... (sequenza di fogli)
+  function letteraFoglio(i) {
+    return String.fromCharCode(65 + (i % 26)) + (i >= 26 ? Math.floor(i / 26) : '');
+  }
+
+  // ---------- Disegno ----------
+  // Una pecora: le gambe partono dentro il corpo, le orecchie dentro la testa.
+  // Coordinate locali: centro della pecora in (32, 25).
+  function pecoraSVG(x, y, scala, verso) {
+    return `
+      <g transform="translate(${x},${y}) scale(${scala * verso},${scala}) translate(-32,-25)">
+        <g stroke="#444" stroke-width="3.5" stroke-linecap="round">
+          <line x1="18" y1="28" x2="18" y2="43"/>
+          <line x1="26" y1="30" x2="26" y2="44"/>
+          <line x1="38" y1="30" x2="38" y2="44"/>
+          <line x1="46" y1="28" x2="46" y2="43"/>
+        </g>
+        <g fill="#fafafa" stroke="#999" stroke-width="1.5">
+          <circle cx="16" cy="20" r="9"/>
+          <circle cx="28" cy="16" r="10"/>
+          <circle cx="40" cy="20" r="9"/>
+          <circle cx="28" cy="27" r="9"/>
+        </g>
+        <ellipse cx="48" cy="13" rx="2.5" ry="4.5" fill="#444" transform="rotate(-25 48 13)"/>
+        <ellipse cx="51" cy="19" rx="6" ry="5" fill="#444"/>
+        <circle cx="50" cy="17" r="1" fill="#fff"/>
+      </g>`;
+  }
+
+  // Etichetta in alto a destra
+  function etichetta(codice) {
+    return `
+      <rect x="${W - 108}" y="8" width="100" height="40" rx="8" fill="#fff" stroke="#333" stroke-width="2"/>
+      <text x="${W - 58}" y="37" text-anchor="middle" font-family="Arial" font-size="28" font-weight="bold" fill="#222">${codice}</text>`;
+  }
+
+  // Disegna un recinto a partire dai dati salvati (sempre uguale)
+  function disegnaRecinto(l, codice) {
+    let out = `<rect x="0" y="0" width="${W}" height="${H}" fill="#bfe3a0"/>`;
+    out += `<rect x="${M - 8}" y="${M - 8}" width="${W - 2 * M + 16}" height="${H - 2 * M + 16}" fill="none" stroke="#7a5230" stroke-width="10"/>`;
+    for (let i = 0; i <= 10; i++) {
+      const x = M - 8 + i * (W - 2 * M + 16) / 10;
+      out += `<rect x="${x - 5}" y="${M - 22}" width="10" height="22" fill="#7a5230"/>`;
+      out += `<rect x="${x - 5}" y="${H - M}" width="10" height="22" fill="#7a5230"/>`;
+    }
+    const scala = Math.min(1.25, l.R / 24);
+    l.pts.forEach((p, i) => { out += pecoraSVG(p[0], p[1], scala, l.verso[i]); });
+    out += etichetta(codice);
+    return out;
+  }
+
+  // Posizioni sparse: non si sovrappongono e non sono allineate.
+  function posizionaPecore(n) {
+    const xMin = M + 4, xMax = W - M - 4, yMin = M + 4, yMax = H - M - 4;
+    let R = Math.min(30, Math.sqrt(0.35 * (W - 2 * M) * (H - 2 * M) / (n * Math.PI)));
+    while (true) {
+      const pts = [];
+      let ok = true;
+      for (let i = 0; i < n && ok; i++) {
+        let piazzata = false;
+        for (let t = 0; t < 800 && !piazzata; t++) {
+          const x = xMin + R + Math.random() * (xMax - xMin - 2 * R);
+          const y = yMin + R + Math.random() * (yMax - yMin - 2 * R);
+          if (pts.every(p => Math.hypot(p[0] - x, p[1] - y) >= 2.3 * R)) {
+            pts.push([Math.round(x * 10) / 10, Math.round(y * 10) / 10]);
+            piazzata = true;
+          }
+        }
+        if (!piazzata) ok = false;
+      }
+      if (ok) return { pts, R };
+      R *= 0.93;
+    }
+  }
+
+  function creaLayout(n) {
+    const { pts, R } = posizionaPecore(n);
+    return {
+      n,
+      R,
+      pts,
+      verso: pts.map(() => (Math.random() < 0.5 ? -1 : 1))
+    };
+  }
+
+  function numeroCasuale() {
+    return 1 + Math.floor(Math.random() * maxPecore);
+  }
+
+  function pulisciLavagna() {
+    ctx.clearRect(0, 0, lavagna.width, lavagna.height);
+  }
+
+  function aggiornaConteggio() {
+    testoConteggio.textContent = mostraConteggio && corrente ? `Pecorelle: ${corrente.n}` : '';
+  }
+
+  // Mostra sullo schermo un recinto salvato, dato il suo codice
+  function mostra(codice) {
+    corrente = dati.registro[codice];
+    recinto.innerHTML = disegnaRecinto(corrente, codice);
+    pulisciLavagna();
+    aggiornaConteggio();
+  }
+
+  function nuovaImmagine() {
+    const codice = 'S' + (++dati.schermo);
+    dati.registro[codice] = creaLayout(numeroCasuale());
+    salvaDati();
+    mostra(codice);
+  }
+
+  function caricaCodice() {
+    const codice = document.getElementById('codice').value.trim().toUpperCase();
+    if (!dati.registro[codice]) {
+      alert('Codice non trovato: ' + (codice || 'vuoto'));
+      return;
+    }
+    mostra(codice);
+  }
+
+  // ---------- Pennarello sulla LIM (mouse, pennino o dito) ----------
+  ctx.lineWidth = 6;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = 'rgba(224, 36, 94, 0.85)';
+  ctx.fillStyle = 'rgba(224, 36, 94, 0.85)';
+
+  let disegnando = false;
+  let ultimo = null;
+
+  function posizione(e) {
+    const r = lavagna.getBoundingClientRect();
+    return {
+      x: (e.clientX - r.left) * lavagna.width / r.width,
+      y: (e.clientY - r.top) * lavagna.height / r.height
+    };
+  }
+
+  lavagna.addEventListener('pointerdown', e => {
+    disegnando = true;
+    ultimo = posizione(e);
+    ctx.beginPath();
+    ctx.arc(ultimo.x, ultimo.y, ctx.lineWidth / 2, 0, Math.PI * 2);
+    ctx.fill();
+    lavagna.setPointerCapture(e.pointerId);
+  });
+
+  lavagna.addEventListener('pointermove', e => {
+    if (!disegnando) return;
+    const p = posizione(e);
+    ctx.beginPath();
+    ctx.moveTo(ultimo.x, ultimo.y);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    ultimo = p;
+  });
+
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev =>
+    lavagna.addEventListener(ev, () => { disegnando = false; })
+  );
+
+  // ---------- Controlli ----------
+  document.querySelectorAll('.scelta').forEach(btn => {
+    btn.addEventListener('click', () => {
+      maxPecore = parseInt(btn.dataset.max, 10);
+      document.querySelectorAll('.scelta').forEach(b => b.classList.remove('attivo'));
+      btn.classList.add('attivo');
+      nuovaImmagine();
+    });
+  });
+
+  document.getElementById('nuovo').addEventListener('click', nuovaImmagine);
+  document.getElementById('cancella').addEventListener('click', pulisciLavagna);
+  document.getElementById('carica').addEventListener('click', caricaCodice);
+  document.getElementById('codice').addEventListener('keydown', e => {
+    if (e.key === 'Enter') caricaCodice();
+  });
+
+  document.getElementById('conta').addEventListener('click', e => {
+    mostraConteggio = !mostraConteggio;
+    e.target.textContent = mostraConteggio ? 'Nascondi conteggio' : 'Mostra conteggio';
+    aggiornaConteggio();
+  });
+
+  // Stampa: ogni recinto del foglio ha un codice (es. A1, A2 oppure A1–A6)
+  document.getElementById('stampa').addEventListener('click', () => {
+    const perFoglio = parseInt(document.getElementById('perFoglio').value, 10);
+    const lettera = letteraFoglio(dati.fogli);
+    dati.fogli++;
+    printSheet.className = 'p' + perFoglio;
+    printSheet.innerHTML = '';
+    const codici = [];
+    for (let k = 1; k <= perFoglio; k++) {
+      const codice = lettera + k;
+      dati.registro[codice] = creaLayout(numeroCasuale());
+      codici.push(codice);
+      const div = document.createElement('div');
+      div.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${disegnaRecinto(dati.registro[codice], codice)}</svg>`;
+      printSheet.appendChild(div);
+    }
+    salvaDati();
+    testoStampa.textContent = 'Foglio stampato: ' + codici.join(', ');
+    window.print();
+  });
+
+  // Avvio: primo recinto sullo schermo
+  nuovaImmagine();
+</script>
+
+</body>
+</html>
