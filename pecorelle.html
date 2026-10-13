@@ -68,7 +68,7 @@
     border-radius: 8px;
     border: 2px solid #8a6d4b;
   }
-  #codice { width: 110px; text-transform: uppercase; text-align: center; }
+  #codice { width: 130px; text-transform: uppercase; text-align: center; letter-spacing: 2px; }
   #contenitore {
     position: relative;
     width: min(96vw, 1000px);
@@ -131,8 +131,8 @@
     <option value="6">6 recinti per foglio</option>
   </select>
   <button id="stampa">Stampa PDF</button>
-  <input id="codice" type="text" maxlength="6" placeholder="es. A2" aria-label="Codice da caricare">
-  <button id="carica" class="secondario">Carica codice</button>
+  <input id="codice" type="text" maxlength="6" placeholder="es. K7QX4M" aria-label="Sigla da caricare">
+  <button id="carica" class="secondario">Carica sigla</button>
 </div>
 
 <div id="contenitore">
@@ -159,22 +159,79 @@
 
   const W = 800, H = 500, M = 40;
 
-  // ---------- Memoria dei recinti (per ritrovarli con il codice) ----------
-  const CHIAVE = 'pecorelleDati';
-  function caricaDati() {
-    try {
-      const d = JSON.parse(localStorage.getItem(CHIAVE));
-      if (d && d.registro) return d;
-    } catch (e) {}
-    return { registro: {}, fogli: 0, schermo: 0 };
+  // ---------- Sigle ----------
+  // Ogni sigla è di 6 caratteri: 4 per il "seme" del disegno, 2 per il numero di pecore.
+  // Così la sigla contiene tutto ciò che serve a ricostruire il recinto:
+  // non serve nessun dato salvato nel browser.
+  // Caratteri senza ambiguità (niente 0, O, 1, I, L).
+  const ALFA = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
+
+  function nuovaSigla(n) {
+    const seme = Math.floor(Math.random() * 1048576); // 20 bit
+    let s = seme, parteSeme = '';
+    for (let i = 0; i < 4; i++) {
+      parteSeme = ALFA[s % 32] + parteSeme;
+      s = Math.floor(s / 32);
+    }
+    return parteSeme + ALFA[(n >> 5) & 31] + ALFA[n & 31];
   }
-  let dati = caricaDati();
-  function salvaDati() {
-    try { localStorage.setItem(CHIAVE, JSON.stringify(dati)); } catch (e) {}
+
+  function decodificaSigla(sigla) {
+    if (!/^[23456789ABCDEFGHJKMNPQRSTUVWXYZ]{6}$/.test(sigla)) return null;
+    let seme = 0;
+    for (let i = 0; i < 4; i++) seme = seme * 32 + ALFA.indexOf(sigla[i]);
+    const n = ALFA.indexOf(sigla[4]) * 32 + ALFA.indexOf(sigla[5]);
+    if (n < 1) return null;
+    return { seme, n };
   }
-  // 0 -> A, 1 -> B, ... 25 -> Z, 26 -> A1 ... (sequenza di fogli)
-  function letteraFoglio(i) {
-    return String.fromCharCode(65 + (i % 26)) + (i >= 26 ? Math.floor(i / 26) : '');
+
+  // Generatore pseudocasuale deterministico: stesso seme, stesso disegno
+  function generatore(seme) {
+    let a = seme >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  // Posizioni sparse e deterministiche: non si sovrappongono e non sono allineate.
+  function posizionaPecore(n, rnd) {
+    const xMin = M + 4, xMax = W - M - 4, yMin = M + 4, yMax = H - M - 4;
+    let R = Math.min(30, Math.sqrt(0.35 * (W - 2 * M) * (H - 2 * M) / (n * Math.PI)));
+    while (true) {
+      const pts = [];
+      let ok = true;
+      for (let i = 0; i < n && ok; i++) {
+        let piazzata = false;
+        for (let t = 0; t < 800 && !piazzata; t++) {
+          const x = xMin + R + rnd() * (xMax - xMin - 2 * R);
+          const y = yMin + R + rnd() * (yMax - yMin - 2 * R);
+          const libera = pts.every(p => {
+            const dx = p[0] - x, dy = p[1] - y;
+            return Math.sqrt(dx * dx + dy * dy) >= 2.3 * R;
+          });
+          if (libera) {
+            pts.push([x, y]);
+            piazzata = true;
+          }
+        }
+        if (!piazzata) ok = false;
+      }
+      if (ok) return { pts, R };
+      R *= 0.93;
+    }
+  }
+
+  // Ricostruisce il recinto a partire dalla sigla
+  function recintoDaSigla(sigla) {
+    const d = decodificaSigla(sigla);
+    if (!d) return null;
+    const rnd = generatore(d.seme);
+    const { pts, R } = posizionaPecore(d.n, rnd);
+    const verso = pts.map(() => (rnd() < 0.5 ? -1 : 1));
+    return { n: d.n, R, pts, verso };
   }
 
   // ---------- Disegno ----------
@@ -201,15 +258,17 @@
       </g>`;
   }
 
-  // Etichetta in alto a destra
-  function etichetta(codice) {
+  // Etichetta con la sigla in alto a destra
+  function etichetta(sigla) {
     return `
-      <rect x="${W - 108}" y="8" width="100" height="40" rx="8" fill="#fff" stroke="#333" stroke-width="2"/>
-      <text x="${W - 58}" y="37" text-anchor="middle" font-family="Arial" font-size="28" font-weight="bold" fill="#222">${codice}</text>`;
+      <rect x="${W - 168}" y="8" width="160" height="40" rx="8" fill="#fff" stroke="#333" stroke-width="2"/>
+      <text x="${W - 88}" y="37" text-anchor="middle" font-family="Arial" font-size="26" font-weight="bold" fill="#222">${sigla}</text>`;
   }
 
-  // Disegna un recinto a partire dai dati salvati (sempre uguale)
-  function disegnaRecinto(l, codice) {
+  // Disegna un recinto a partire dalla sigla
+  function disegnaRecinto(sigla) {
+    const l = recintoDaSigla(sigla);
+    if (!l) return '';
     let out = `<rect x="0" y="0" width="${W}" height="${H}" fill="#bfe3a0"/>`;
     out += `<rect x="${M - 8}" y="${M - 8}" width="${W - 2 * M + 16}" height="${H - 2 * M + 16}" fill="none" stroke="#7a5230" stroke-width="10"/>`;
     for (let i = 0; i <= 10; i++) {
@@ -219,42 +278,8 @@
     }
     const scala = Math.min(1.25, l.R / 24);
     l.pts.forEach((p, i) => { out += pecoraSVG(p[0], p[1], scala, l.verso[i]); });
-    out += etichetta(codice);
+    out += etichetta(sigla);
     return out;
-  }
-
-  // Posizioni sparse: non si sovrappongono e non sono allineate.
-  function posizionaPecore(n) {
-    const xMin = M + 4, xMax = W - M - 4, yMin = M + 4, yMax = H - M - 4;
-    let R = Math.min(30, Math.sqrt(0.35 * (W - 2 * M) * (H - 2 * M) / (n * Math.PI)));
-    while (true) {
-      const pts = [];
-      let ok = true;
-      for (let i = 0; i < n && ok; i++) {
-        let piazzata = false;
-        for (let t = 0; t < 800 && !piazzata; t++) {
-          const x = xMin + R + Math.random() * (xMax - xMin - 2 * R);
-          const y = yMin + R + Math.random() * (yMax - yMin - 2 * R);
-          if (pts.every(p => Math.hypot(p[0] - x, p[1] - y) >= 2.3 * R)) {
-            pts.push([Math.round(x * 10) / 10, Math.round(y * 10) / 10]);
-            piazzata = true;
-          }
-        }
-        if (!piazzata) ok = false;
-      }
-      if (ok) return { pts, R };
-      R *= 0.93;
-    }
-  }
-
-  function creaLayout(n) {
-    const { pts, R } = posizionaPecore(n);
-    return {
-      n,
-      R,
-      pts,
-      verso: pts.map(() => (Math.random() < 0.5 ? -1 : 1))
-    };
   }
 
   function numeroCasuale() {
@@ -269,28 +294,26 @@
     testoConteggio.textContent = mostraConteggio && corrente ? `Pecorelle: ${corrente.n}` : '';
   }
 
-  // Mostra sullo schermo un recinto salvato, dato il suo codice
-  function mostra(codice) {
-    corrente = dati.registro[codice];
-    recinto.innerHTML = disegnaRecinto(corrente, codice);
+  // Mostra sullo schermo un recinto dato la sigla
+  function mostra(sigla) {
+    const l = recintoDaSigla(sigla);
+    if (!l) return false;
+    corrente = { n: l.n };
+    recinto.innerHTML = disegnaRecinto(sigla);
     pulisciLavagna();
     aggiornaConteggio();
+    return true;
   }
 
   function nuovaImmagine() {
-    const codice = 'S' + (++dati.schermo);
-    dati.registro[codice] = creaLayout(numeroCasuale());
-    salvaDati();
-    mostra(codice);
+    mostra(nuovaSigla(numeroCasuale()));
   }
 
-  function caricaCodice() {
-    const codice = document.getElementById('codice').value.trim().toUpperCase();
-    if (!dati.registro[codice]) {
-      alert('Codice non trovato: ' + (codice || 'vuoto'));
-      return;
+  function caricaSigla() {
+    const sigla = document.getElementById('codice').value.trim().toUpperCase();
+    if (!mostra(sigla)) {
+      alert('Sigla non valida: ' + (sigla || 'vuota'));
     }
-    mostra(codice);
   }
 
   // ---------- Pennarello sulla LIM (mouse, pennino o dito) ----------
@@ -346,9 +369,9 @@
 
   document.getElementById('nuovo').addEventListener('click', nuovaImmagine);
   document.getElementById('cancella').addEventListener('click', pulisciLavagna);
-  document.getElementById('carica').addEventListener('click', caricaCodice);
+  document.getElementById('carica').addEventListener('click', caricaSigla);
   document.getElementById('codice').addEventListener('keydown', e => {
-    if (e.key === 'Enter') caricaCodice();
+    if (e.key === 'Enter') caricaSigla();
   });
 
   document.getElementById('conta').addEventListener('click', e => {
@@ -357,24 +380,20 @@
     aggiornaConteggio();
   });
 
-  // Stampa: ogni recinto del foglio ha un codice (es. A1, A2 oppure A1–A6)
+  // Stampa: ogni recinto ha la sua sigla, che non cambia mai
   document.getElementById('stampa').addEventListener('click', () => {
     const perFoglio = parseInt(document.getElementById('perFoglio').value, 10);
-    const lettera = letteraFoglio(dati.fogli);
-    dati.fogli++;
     printSheet.className = 'p' + perFoglio;
     printSheet.innerHTML = '';
-    const codici = [];
-    for (let k = 1; k <= perFoglio; k++) {
-      const codice = lettera + k;
-      dati.registro[codice] = creaLayout(numeroCasuale());
-      codici.push(codice);
+    const sigle = [];
+    for (let k = 0; k < perFoglio; k++) {
+      const sigla = nuovaSigla(numeroCasuale());
+      sigle.push(sigla);
       const div = document.createElement('div');
-      div.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${disegnaRecinto(dati.registro[codice], codice)}</svg>`;
+      div.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">${disegnaRecinto(sigla)}</svg>`;
       printSheet.appendChild(div);
     }
-    salvaDati();
-    testoStampa.textContent = 'Foglio stampato: ' + codici.join(', ');
+    testoStampa.textContent = 'Foglio stampato: ' + sigle.join(', ');
     window.print();
   });
 
