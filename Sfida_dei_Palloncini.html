@@ -277,6 +277,16 @@ const VELOCITA = {
 };
 const COLORI = ['#e07a5f','#3d5a80','#81b29a','#f2cc8f','#9b5de5'];
 
+/* ---------- Livelli di addizione e sottrazione ---------- */
+const LIVELLI_AS = [
+  { id:'l1', testo:'Livello 1 – entro 20, risultati da 0 a 20, con 0, 1 e 2' },
+  { id:'l2', testo:'Livello 2 – come il livello 1, con anche 5' },
+  { id:'l3', testo:'Livello 3 – combinazioni del 5, 6, 7, 8, 9 e passaggi alla decina (entro 20)' },
+  { id:'50',   testo:'Entro il 50' },
+  { id:'100',  testo:'Entro il 100' },
+  { id:'1000', testo:'Entro il 1000' }
+];
+
 let velocitaGlobale = 'media';
 let giocoAttivo = false;
 let statoA = null, statoB = null;
@@ -305,22 +315,47 @@ function generaDistrattori(corretto, quanti, minVal){
   return Array.from(risultati).slice(0,quanti);
 }
 
+/* ---------- addizione e sottrazione per livello ---------- */
+// verifica se una coppia (a, b, risultato) appartiene al livello scelto
+function appartiene(lv, tipo, a, b, r){
+  if(lv==='l1' || lv==='l2'){
+    const set = lv==='l1' ? [0,1,2] : [0,1,2,5];
+    if(tipo==='add') return set.includes(a) || set.includes(b);
+    return set.includes(b);
+  }
+  if(lv==='l3'){
+    if(tipo==='add') return (r>=5 && r<=9) || r>=11;
+    return (a>=5 && a<=9) || (a>=11 && r<=9);
+  }
+  return true;
+}
+
+function campionaAddSub(lv, tipo){
+  const R = (lv==='l1'||lv==='l2'||lv==='l3') ? 20 : Number(lv);
+  let ultimo = null;
+  for(let t=0; t<2000; t++){
+    let a,b,r;
+    if(tipo==='add'){ a=randInt(0,R); b=randInt(0,R-a); r=a+b; }
+    else            { a=randInt(0,R); b=randInt(0,a);   r=a-b; }
+    ultimo = {a,b,r};
+    if(appartiene(lv,tipo,a,b,r)) return ultimo;
+  }
+  return ultimo;
+}
+
 /* ---------- generazione operazioni ---------- */
 function generaOperazione(cfg){
-  let a,b,f1,f2,divisore,quoziente,dividendo,testo,risultato;
-  // nella modalità mista, ogni operazione è a caso addizione o sottrazione
   let tipo = cfg.tipo;
   if(tipo==='mix_as') tipo = Math.random()<0.5 ? 'add' : 'sub';
 
-  if(tipo==='add'){
-    const R=cfg.range;
-    a=randInt(1,R-1); b=randInt(1,R-a);
-    risultato=a+b; testo=`${a} + ${b} =`;
-  } else if(tipo==='sub'){
-    const R=cfg.range;
-    a=randInt(2,R); b=randInt(1,a-1);
-    risultato=a-b; testo=`${a} - ${b} =`;
-  } else if(tipo==='mul'){
+  if(tipo==='add' || tipo==='sub'){
+    const {a,b,r} = campionaAddSub(cfg.range, tipo);
+    const testo = tipo==='add' ? `${a} + ${b} =` : `${a} - ${b} =`;
+    return { testo, risultato: r };
+  }
+
+  let f1,f2,divisore,quoziente,dividendo,testo,risultato;
+  if(tipo==='mul'){
     if(cfg.range==='mix'){ f1=randInt(2,10); } else { f1=cfg.range; }
     f2=randInt(1,10);
     if(Math.random()<0.5){ const t=f1; f1=f2; f2=t; }
@@ -340,8 +375,8 @@ function popolaRange(indice){
   const sel = document.getElementById('range-'+indice);
   sel.innerHTML='';
   if(tipo==='add'||tipo==='sub'||tipo==='mix_as'){
-    [20,50,100].forEach(v=>{
-      const o=document.createElement('option'); o.value=v; o.textContent='Entro il '+v; sel.appendChild(o);
+    LIVELLI_AS.forEach(l=>{
+      const o=document.createElement('option'); o.value=l.id; o.textContent=l.testo; sel.appendChild(o);
     });
   } else {
     const oMix=document.createElement('option'); oMix.value='mix'; oMix.textContent='Tabelline miste (2–10)'; sel.appendChild(oMix);
@@ -482,7 +517,8 @@ requestAnimationFrame(loop);
 /* ---------- avvio / reset ---------- */
 function leggiRange(indice){
   const val = document.getElementById('range-'+indice).value;
-  return val==='mix' ? 'mix' : parseInt(val,10);
+  if(val==='mix' || isNaN(Number(val))) return val;   // 'mix' oppure livelli 'l1','l2','l3'
+  return Number(val);                                  // tabelline (2-10) o entro 50/100/1000
 }
 
 document.getElementById('btn-inizia').addEventListener('click',()=>{
