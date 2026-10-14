@@ -348,6 +348,13 @@ function generaOperazione(cfg){
   let tipo = cfg.tipo;
   if(tipo==='mix_as') tipo = Math.random()<0.5 ? 'add' : 'sub';
 
+  // solo raddoppiamenti: addizioni 0+0 … 11+11 e sottrazioni della metà 0 … 22
+  if(cfg.range==='doppi'){
+    const a = randInt(0,11);
+    if(tipo==='sub') return { testo: `${2*a} - ${a} =`, risultato: a };
+    return { testo: `${a} + ${a} =`, risultato: 2*a };
+  }
+
   if(tipo==='add' || tipo==='sub'){
     const {a,b,r} = campionaAddSub(cfg.range, tipo);
     const testo = tipo==='add' ? `${a} + ${b} =` : `${a} - ${b} =`;
@@ -378,6 +385,7 @@ function popolaRange(indice){
     LIVELLI_AS.forEach(l=>{
       const o=document.createElement('option'); o.value=l.id; o.textContent=l.testo; sel.appendChild(o);
     });
+    const oDoppi=document.createElement('option'); oDoppi.value='doppi'; oDoppi.textContent='Solo raddoppiamenti (es. 9+9, 18-9)'; sel.appendChild(oDoppi);
   } else {
     const oMix=document.createElement('option'); oMix.value='mix'; oMix.textContent='Tabelline miste (2–10)'; sel.appendChild(oMix);
     for(let n=2;n<=10;n++){ const o=document.createElement('option'); o.value=n; o.textContent='Tabellina del '+n; sel.appendChild(o); }
@@ -517,7 +525,7 @@ requestAnimationFrame(loop);
 /* ---------- avvio / reset ---------- */
 function leggiRange(indice){
   const val = document.getElementById('range-'+indice).value;
-  if(val==='mix' || isNaN(Number(val))) return val;   // 'mix' oppure livelli 'l1','l2','l3'
+  if(val==='mix' || isNaN(Number(val))) return val;   // 'mix', livelli 'l1','l2','l3' o 'doppi'
   return Number(val);                                  // tabelline (2-10) o entro 50/100/1000
 }
 
