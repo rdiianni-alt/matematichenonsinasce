@@ -214,6 +214,7 @@
     margin-top: 6px;
     flex-wrap: wrap;
     justify-content: center;
+    align-items: center;
   }
   button.azione.stampa {
     background: transparent;
@@ -223,6 +224,33 @@
     padding: 10px 16px;
   }
   button.azione.stampa:hover { color: var(--ink); border-color: var(--ink-soft); }
+
+  .campo-pagine {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  .campo-pagine input {
+    width: 44px;
+    padding: 6px 6px;
+    border-radius: 8px;
+    border: 1.5px solid var(--grid-line);
+    background: var(--surface);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    text-align: center;
+  }
+  .campo-versione {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    font-size: 13px;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
 
   /* --- schede stampabili: nascoste a schermo, visibili solo in stampa --- */
   .stampa-pagina { display: none; }
@@ -248,20 +276,27 @@
     .griglia-schede {
       display: grid;
       grid-template-columns: repeat(2, 82mm);
-      grid-auto-rows: 47mm;
+      grid-auto-rows: 44mm;
       gap: 3mm 6mm;
       justify-content: center;
+    }
+    .griglia-schede:not(:last-child) {
+      page-break-after: always;
+      break-after: page;
+    }
+    .griglia-schede.composizioni {
+      grid-auto-rows: 52mm;
     }
     .scheda-card {
       position: relative;
       border: 0.4mm solid #999;
       border-radius: 3mm;
-      padding: 2mm 2mm;
+      padding: 1.5mm 2mm;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      gap: 0.8mm;
+      gap: 0.5mm;
       break-inside: avoid;
     }
     .mini-logo {
@@ -279,28 +314,38 @@
     .mini-rod {
       position: relative;
       width: 8mm;
-      height: 30mm;
+      height: 34.2mm;
       display: flex;
       justify-content: center;
     }
     .mini-stanghetta {
-      width: 2mm;
+      width: 2px;
       height: 100%;
-      background: #7a4f2c;
-      border-radius: 1mm;
-      box-shadow: 0 0 0 0.2mm #5e3a1e;
+      background: #111;
     }
     .mini-base {
       width: calc(100% - 6mm);
-      height: 2.6mm;
-      margin-top: -0.5mm;
+      height: 1.4mm;
+      margin-top: -0.3mm;
       background: repeating-linear-gradient(
         90deg,
-        #b9814f 0mm, #b9814f 1.6mm,
-        #7a4f2c 1.6mm, #7a4f2c 2mm
+        #b9814f 0mm, #b9814f 1.2mm,
+        #7a4f2c 1.2mm, #7a4f2c 1.5mm
       );
-      border-radius: 1mm;
+      border-radius: 0.7mm;
       box-shadow: 0 0.4mm 0 #5e3a1e;
+    }
+    .mini-tacche {
+      position: absolute;
+      left: 0; right: 0; top: 0; bottom: 0;
+    }
+    .mini-tacca {
+      position: absolute;
+      left: 50%;
+      width: 6mm;
+      height: 1.5px;
+      background: #111;
+      transform: translateX(-50%);
     }
     .mini-palline {
       position: absolute;
@@ -308,15 +353,35 @@
       display: flex;
       flex-direction: column-reverse;
       align-items: center;
-      gap: 0.6mm;
+      gap: 0;
       z-index: 1;
     }
     .mini-pallina { flex-shrink: 0; border-radius: 50%; }
-    .mini-pallina.unita { width: 3mm; height: 3mm; background: #fff; border: 0.4mm solid #7a4f2c; }
-    .mini-pallina.decina { width: 3mm; height: 3mm; background: #fff; border: 0.4mm dashed #7a4f2c; }
-    .mini-etichette { display: flex; gap: 12mm; font-size: 6.5pt; font-weight: 600; color: #6b5c4a; margin-top: 0.5mm; }
+    .mini-pallina.unita { width: 3.8mm; height: 3.8mm; background: #fff; border: 0.35mm solid #7a4f2c; }
+    .mini-pallina.decina { width: 3.8mm; height: 3.8mm; background: #fff; border: 0.35mm dashed #7a4f2c; }
+    .mini-etichette { display: flex; gap: 12mm; font-size: 6.5pt; font-weight: 600; color: #6b5c4a; margin-top: 0.2mm; }
     .mini-etichette span { width: 14mm; text-align: center; }
-    .mini-riga-numero { font-size: 7pt; color: #2b2118; margin-top: 1mm; }
+    .mini-riga-numero { font-size: 7pt; color: #2b2118; margin-top: 0.5mm; }
+    .mini-riga-parola {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 1mm;
+      margin-top: 1mm;
+      max-width: 100%;
+      height: 5mm;
+    }
+    .mini-lettera-linea {
+      width: 4mm;
+      height: 100%;
+      border-bottom: 0.3mm solid #777;
+      flex-shrink: 0;
+    }
+    .mini-riga-libera {
+      width: 60mm;
+      border-bottom: 0.3mm solid #999;
+      height: 3mm;
+    }
   }
 </style>
 </head>
@@ -371,6 +436,18 @@
 
   <div class="stampa-controlli">
     <button class="azione stampa" id="stampa-vuota">🖨️ Scheda vuota (PDF)</button>
+  </div>
+
+  <div class="stampa-controlli">
+    <label class="campo-pagine">Pagine:
+      <input type="number" id="numero-pagine" value="1" min="1" max="9">
+    </label>
+    <label class="campo-versione">
+      <input type="radio" name="versione-parola" value="guidata" checked> parola guidata
+    </label>
+    <label class="campo-versione">
+      <input type="radio" name="versione-parola" value="libera"> parola libera
+    </label>
     <button class="azione stampa" id="stampa-composizioni">🖨️ Scheda con palline (PDF)</button>
   </div>
 </div>
@@ -513,13 +590,27 @@
   // --- schede stampabili ---
   var SCHEDE_PER_PAGINA = 10;
 
+  var UNITA_PAROLA = ['zero','uno','due','tre','quattro','cinque','sei','sette','otto','nove',
+    'dieci','undici','dodici','tredici','quattordici','quindici','sedici','diciassette','diciotto','diciannove'];
+  var DECINE_PAROLA = ['','','venti','trenta','quaranta','cinquanta','sessanta','settanta','ottanta','novanta'];
+
+  function numeroInLettere(n) {
+    if (n < 20) return UNITA_PAROLA[n];
+    var d = Math.floor(n / 10), u = n % 10;
+    var base = DECINE_PAROLA[d];
+    if (u === 0) return base;
+    if (u === 1 || u === 8) return base.slice(0, -1) + UNITA_PAROLA[u];
+    if (u === 3) return base + 'tré';
+    return base + UNITA_PAROLA[u];
+  }
+
   function miniPallina(tipo) {
     var d = document.createElement('div');
     d.className = 'mini-pallina ' + tipo;
     return d;
   }
 
-  function costruisciCard(comp) {
+  function costruisciCard(comp, versioneParola) {
     var card = document.createElement('div');
     card.className = 'scheda-card';
 
@@ -542,9 +633,18 @@
       rod.className = 'mini-rod';
       var stanghetta = document.createElement('div');
       stanghetta.className = 'mini-stanghetta';
+      var tacche = document.createElement('div');
+      tacche.className = 'mini-tacche';
+      for (var t = 0; t < 9; t++) {
+        var tacca = document.createElement('div');
+        tacca.className = 'mini-tacca';
+        tacca.style.bottom = 'calc(' + ((t + 1) / 9 * 100) + '% - 0.75px)';
+        tacche.appendChild(tacca);
+      }
       var palline = document.createElement('div');
       palline.className = 'mini-palline';
       rod.appendChild(stanghetta);
+      rod.appendChild(tacche);
       rod.appendChild(palline);
       colonna.appendChild(rod);
       colonne.appendChild(colonna);
@@ -571,12 +671,32 @@
       riga.className = 'mini-riga-numero';
       riga.textContent = 'Numero: ______';
       card.appendChild(riga);
+
+      var rigaParola = document.createElement('div');
+      rigaParola.className = 'mini-riga-parola';
+      if (versioneParola === 'guidata') {
+        var totale = comp.decine * 10 + comp.unita;
+        var parola = numeroInLettere(totale);
+        for (var p = 0; p < parola.length; p++) {
+          var box = document.createElement('div');
+          box.className = 'mini-lettera-linea';
+          rigaParola.appendChild(box);
+        }
+      } else {
+        var linea = document.createElement('div');
+        linea.className = 'mini-riga-libera';
+        rigaParola.appendChild(linea);
+      }
+      card.appendChild(rigaParola);
     }
 
     return card;
   }
 
+  var MAX_COMPOSIZIONI = 99; // coppie decine/unità possibili, escluso 0-0
+
   function generaComposizioni(n) {
+    n = Math.min(n, MAX_COMPOSIZIONI);
     var usati = {}, lista = [];
     while (lista.length < n) {
       var d = Math.floor(Math.random() * 10);
@@ -590,21 +710,46 @@
     return lista;
   }
 
-  function stampaScheda(conComposizioni) {
+  function stampaSchedaVuota() {
     var pagina = document.getElementById('print-area');
     pagina.innerHTML = '';
     var griglia = document.createElement('div');
     griglia.className = 'griglia-schede';
-    var lista = conComposizioni ? generaComposizioni(SCHEDE_PER_PAGINA) : null;
     for (var i = 0; i < SCHEDE_PER_PAGINA; i++) {
-      griglia.appendChild(costruisciCard(conComposizioni ? lista[i] : null));
+      griglia.appendChild(costruisciCard(null));
     }
     pagina.appendChild(griglia);
     setTimeout(function () { window.print(); }, 50);
   }
 
-  document.getElementById('stampa-vuota').addEventListener('click', function () { stampaScheda(false); });
-  document.getElementById('stampa-composizioni').addEventListener('click', function () { stampaScheda(true); });
+  function stampaSchedaComposizioni() {
+    var inputPagine = document.getElementById('numero-pagine');
+    var pagine = parseInt(inputPagine.value, 10);
+    if (!pagine || pagine < 1) pagine = 1;
+    var maxPagine = Math.floor(MAX_COMPOSIZIONI / SCHEDE_PER_PAGINA);
+    if (pagine > maxPagine) pagine = maxPagine;
+    inputPagine.value = pagine;
+
+    var versione = document.querySelector('input[name="versione-parola"]:checked').value;
+
+    var totaleSchede = pagine * SCHEDE_PER_PAGINA;
+    var lista = generaComposizioni(totaleSchede);
+
+    var pagina = document.getElementById('print-area');
+    pagina.innerHTML = '';
+    for (var p = 0; p < pagine; p++) {
+      var griglia = document.createElement('div');
+      griglia.className = 'griglia-schede composizioni';
+      for (var i = 0; i < SCHEDE_PER_PAGINA; i++) {
+        griglia.appendChild(costruisciCard(lista[p * SCHEDE_PER_PAGINA + i], versione));
+      }
+      pagina.appendChild(griglia);
+    }
+    setTimeout(function () { window.print(); }, 50);
+  }
+
+  document.getElementById('stampa-vuota').addEventListener('click', stampaSchedaVuota);
+  document.getElementById('stampa-composizioni').addEventListener('click', stampaSchedaComposizioni);
 
   btnAggiungi.addEventListener('click', aggiungi);
   btnTogli.addEventListener('click', togli);
