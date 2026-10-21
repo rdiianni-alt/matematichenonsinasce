@@ -62,10 +62,18 @@
     border-radius: 50%;
     border: 1.5px solid #5a3e1b;
     cursor: pointer;
+    transform: rotate(var(--rot, 0deg));
     transition: transform 0.1s, box-shadow 0.1s;
     user-select: none;
   }
-  .fagiolo:hover { transform: scale(1.15); box-shadow: 0 2px 6px #0004; }
+  .fagiolo:hover { transform: rotate(var(--rot, 0deg)) scale(1.15); box-shadow: 0 2px 6px #0004; }
+  /* Fagiolo che vola nel bicchierino */
+  .fagiolo-volo {
+    position: fixed;
+    z-index: 1000;
+    pointer-events: none;
+    transition: transform 0.6s cubic-bezier(.45,0,.25,1), opacity 0.6s ease-in;
+  }
   .fagiolo.sel-giallo {
     background: radial-gradient(ellipse at 35% 35%, #ffe066, #c8a030);
     border-color: #e6a000;
@@ -291,6 +299,7 @@
     totale = rnd(11, 99);
     fagioli = [];
     areaEl.innerHTML = '';
+    areaEl.style.height = '';
     bicchieriniEl.innerHTML = '';
     risultatoEl.style.display = 'none';
     btnMetti.disabled = true;
@@ -300,27 +309,44 @@
     posizionaFagioli(totale);
   }
 
+  // Posizioni sparse e senza sovrapposizioni: prima si prova a caso; se non c'è
+  // posto si cerca un buco libero; se il tavolo è pieno, il tavolo si allunga.
   function posizionaFagioli(n) {
     const W = areaEl.offsetWidth || 560;
-    const H = areaEl.offsetHeight || 180;
+    let H = areaEl.offsetHeight || 180;
     const fw = 30, fh = 22, margin = 4;
     const placed = [];
+    const libero = (x, y) => placed.every(p => Math.abs(p.x - x) >= fw || Math.abs(p.y - y) >= fh);
 
     for (let i = 0; i < n; i++) {
       let x, y, tries = 0, ok;
       do {
         x = rnd(margin, W - fw - margin);
         y = rnd(margin, H - fh - margin);
-        ok = placed.every(p => Math.abs(p.x - x) > fw - 2 || Math.abs(p.y - y) > fh - 2);
+        ok = libero(x, y);
         tries++;
-      } while (!ok && tries < 200);
+      } while (!ok && tries < 400);
+
+      while (!ok) {
+        const buchi = [];
+        for (let yy = margin; yy <= H - fh - margin; yy += 2)
+          for (let xx = margin; xx <= W - fw - margin; xx += 2)
+            if (libero(xx, yy)) buchi.push([xx, yy]);
+        if (buchi.length) {
+          [x, y] = buchi[rnd(0, buchi.length - 1)];
+          ok = true;
+        } else {
+          H += fh;
+          areaEl.style.height = H + 'px';
+        }
+      }
 
       placed.push({x, y});
       const el = document.createElement('div');
       el.className = 'fagiolo';
       el.style.left = x + 'px';
       el.style.top = y + 'px';
-      el.style.transform = `rotate(${rnd(-30,30)}deg)`;
+      el.style.setProperty('--rot', `${rnd(-30,30)}deg`);
       el.addEventListener('click', () => clickFagiolo(i));
       areaEl.appendChild(el);
       fagioli.push({el, id: i, selected: false});
@@ -349,7 +375,6 @@
   btnMetti.addEventListener('click', () => {
     const sel = fagioli.filter(f => f.selected);
     if (sel.length !== 10) return;
-    sel.forEach(f => { f.el.remove(); });
     fagioli = fagioli.filter(f => !f.selected);
     decine++;
     nDecinEl.textContent = decine;
@@ -357,8 +382,28 @@
     btnMetti.disabled = true;
     nSelEl.textContent = 0;
 
+    // I dieci fagioli volano, uno dopo l'altro, dentro il nuovo bicchierino
+    const bicchiere = bicchieriniEl.lastElementChild.querySelector('svg').getBoundingClientRect();
+    const bx = bicchiere.left + bicchiere.width / 2, by = bicchiere.top + bicchiere.height * 0.55;
+    sel.forEach((f, k) => {
+      const r = f.el.getBoundingClientRect();
+      const volo = f.el.cloneNode(true);
+      volo.classList.add('fagiolo-volo');
+      const w = f.el.offsetWidth, h = f.el.offsetHeight;
+      volo.style.left = (r.left + r.width / 2 - w / 2) + 'px';
+      volo.style.top = (r.top + r.height / 2 - h / 2) + 'px';
+      f.el.remove();
+      document.body.appendChild(volo);
+      const dx = bx - (r.left + r.width / 2), dy = by - (r.top + r.height / 2);
+      setTimeout(() => {
+        volo.style.transform = `translate(${dx}px, ${dy}px) scale(0.6)`;
+        volo.style.opacity = '0';
+      }, 30 + k * 60);
+      setTimeout(() => volo.remove(), 30 + k * 60 + 650);
+    });
+
     if (fagioli.length < 10) {
-      mostraRisultato();
+      setTimeout(mostraRisultato, 30 + 9 * 60 + 650);
     }
   });
 
