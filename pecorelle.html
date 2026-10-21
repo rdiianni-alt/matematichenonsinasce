@@ -163,8 +163,9 @@
   // Ogni sigla è di 6 caratteri: 4 per il "seme" del disegno, 2 per il numero di pecore.
   // Così la sigla contiene tutto ciò che serve a ricostruire il recinto:
   // non serve nessun dato salvato nel browser.
-  // Caratteri senza ambiguità (niente 0, O, 1, I, L).
-  const ALFA = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
+  // 32 caratteri, uno per ogni valore da 0 a 31 (niente 0, O, 1, I, che si confondono).
+  // La L è in fondo: le sigle già stampate restano valide.
+  const ALFA = '23456789ABCDEFGHJKMNPQRSTUVWXYZL';
 
   function nuovaSigla(n) {
     const seme = Math.floor(Math.random() * 1048576); // 20 bit
@@ -177,7 +178,7 @@
   }
 
   function decodificaSigla(sigla) {
-    if (!/^[23456789ABCDEFGHJKMNPQRSTUVWXYZ]{6}$/.test(sigla)) return null;
+    if (!/^[23456789ABCDEFGHJKMNPQRSTUVWXYZL]{6}$/.test(sigla)) return null;
     let seme = 0;
     for (let i = 0; i < 4; i++) seme = seme * 32 + ALFA.indexOf(sigla[i]);
     const n = ALFA.indexOf(sigla[4]) * 32 + ALFA.indexOf(sigla[5]);
