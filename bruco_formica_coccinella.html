@@ -79,6 +79,10 @@ h1 .b { color: var(--verde); } h1 .f { color: var(--marrone); } h1 .c { color: v
 .fagiolino { width: 30px; height: 22px; border-radius: 50%; background: radial-gradient(ellipse at 35% 30%, #a98157 0, var(--fagiolo) 55%, var(--fagiolo-dark) 100%); border: 1.5px solid var(--fagiolo-dark); cursor: pointer; transform: rotate(-12deg); transition: transform .1s; }
 .fagiolino:nth-child(even) { transform: rotate(10deg); }
 .fagiolino:hover { transform: scale(1.18); }
+.fagiolino { touch-action: none; }
+.fagiolino.preso { visibility: hidden; }
+.fagiolo-volante { position: fixed; z-index: 500; pointer-events: none; transform: scale(1.3) rotate(-12deg); box-shadow: 0 6px 12px rgba(0,0,0,.25); margin: 0; }
+.pers.bersaglio { outline: 4px dashed var(--ink); outline-offset: 3px; }
 .lato { flex: none; display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .contatore { min-width: 40px; height: 40px; border-radius: 12px; background: #fff; display: flex; align-items: center; justify-content: center; font: 800 22px var(--display); }
 .contatore:empty { visibility: hidden; }
@@ -116,7 +120,6 @@ h1 .b { color: var(--verde); } h1 .f { color: var(--marrone); } h1 .c { color: v
     <div class="livelli" id="livelli-gioco" role="group" aria-label="Livello">
       <button type="button" data-livello="classico" class="on">Classico</button>
       <button type="button" data-livello="avanzato">Avanzato</button>
-      <button type="button" data-livello="detective">Detective 🔍</button>
     </div>
   </div>
 
@@ -159,7 +162,7 @@ h1 .b { color: var(--verde); } h1 .f { color: var(--marrone); } h1 .c { color: v
         <div class="fagioli-area" id="area-2"></div>
         <div class="lato"><div class="contatore" id="cnt-2"></div><button type="button" class="rimuovi-btn" data-idx="2">− togli</button></div>
       </div>
-      <p class="istruzioni">Tocca la scheda di un personaggio per dargli un fagiolo; tocca un fagiolo per toglierlo. I fagioli si mettono in fila a gruppi di 5.</p>
+      <p class="istruzioni">Tocca la scheda di un personaggio per dargli un fagiolo; tocca un fagiolo per toglierlo. Trascina un fagiolo su un altro personaggio per prestarglielo. I fagioli si mettono in fila a gruppi di 5.</p>
     </div>
   </div>
 </div>
@@ -171,7 +174,6 @@ h1 .b { color: var(--verde); } h1 .f { color: var(--marrone); } h1 .c { color: v
     <div class="livelli" id="livelli-stampa" role="group" aria-label="Livello della scheda">
       <button type="button" data-livello="classico">Classico</button>
       <button type="button" data-livello="avanzato">Avanzato</button>
-      <button type="button" data-livello="detective">Detective 🔍</button>
     </div>
     <div class="pagine">
       <button type="button" onclick="pdfProblemi(1)">1</button>
@@ -266,48 +268,11 @@ function a5() {
   return S(n[0]) + ' ha ' + a + ' fagioli. ' + S(n[1]) + ' ne ha il doppio di ' + S(n[0]) + '. Quanti fagioli hanno in tutto?';
 }
 
-/* ----- Livello Detective: si ragiona sul testo più che sul calcolo ----- */
-// Un dato in più, che non serve
-function d1() {
-  var n = ns(), a = r(1, 9), b = r(1, 9), c = r(1, 9);
-  if (a + b > 20) return d1();
-  if (r(0, 1) === 0) return S(n[0]) + ' ha ' + a + ' fagioli, ' + S(n[1]) + ' ne ha ' + b + ' e ' + S(n[2]) + ' ne ha ' + c + '. Quanti fagioli hanno insieme ' + S(n[0]) + ' e ' + S(n[1]) + '? Attenzione: c\'è un numero che non serve. Quale?';
-  var cose = ['foglie', 'sassolini', 'fiori', 'briciole'], k = r(2, 6);
-  return S(n[0]) + ' ha ' + a + ' fagioli e ' + k + ' ' + cose[r(0, 3)] + '. ' + S(n[1]) + ' ne ha ' + b + '. Quanti fagioli hanno in tutto? Attenzione: c\'è un numero che non serve. Quale?';
-}
-// Si può rispondere? A volte manca un dato
-function d2() {
-  var n = ns(), a = r(2, 9), d = r(1, 4), t = r(8, 18), v = r(0, 2);
-  var dom = ' Si può rispondere? Perché?';
-  if (v === 0) return S(n[0]) + ' ha ' + a + ' fagioli. ' + S(n[1]) + ' ne ha qualcuno in più di ' + S(n[0]) + '. Quanti fagioli ha ' + S(n[1]) + '?' + dom;
-  if (v === 1) return S(n[0]) + ' e ' + S(n[1]) + ' hanno in tutto ' + t + ' fagioli. Quanti fagioli ha ' + S(n[0]) + '?' + dom;
-  return S(n[0]) + ' ha ' + a + ' fagioli. ' + S(n[1]) + ' ne ha ' + d + ' in più di ' + S(n[0]) + '. Quanti fagioli ha ' + S(n[1]) + '?' + dom;
-}
-// Inventa la domanda
-function d3() {
-  var n = ns(), a = r(2, 8), b = r(2, 8), c = r(1, 6);
-  if (a + b + c > 20) return d3();
-  if (r(0, 1) === 0) return S(n[0]) + ' ha ' + a + ' fagioli, ' + S(n[1]) + ' ne ha ' + b + ' e ' + S(n[2]) + ' ne ha ' + c + '. Inventa tu una domanda e poi rispondi!';
-  var g = r(1, a - 1);
-  return S(n[0]) + ' ha ' + a + ' fagioli e ' + S(n[1]) + ' ne ha ' + b + '. ' + S(n[0]) + ' ne regala ' + g + ' a ' + S(n[1]) + '. Inventa tu una domanda e poi rispondi!';
-}
-// Più soluzioni giuste
-function d4() {
-  var n = ns();
-  if (r(0, 1) === 0) {
-    var t = r(8, 15), m = r(1, 2);
-    return 'In tutto ' + S(n[0]) + ', ' + S(n[1]) + ' e ' + S(n[2]) + ' hanno ' + t + ' fagioli e ognuno ne ha almeno ' + m + '. Quanti fagioli può avere ciascuno? Trova più soluzioni!';
-  }
-  var t2 = r(7, 15);
-  return S(n[0]) + ' ha più fagioli di ' + S(n[1]) + ' e ' + S(n[1]) + ' ne ha più di ' + S(n[2]) + '. In tutto ne hanno ' + t2 + '. Quanti fagioli può avere ciascuno? Trova più soluzioni!';
-}
-
 var problemiClassico = [p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13];
 var problemiAvanzato = [p14, a1, a2, a3, a4, a5];
-var problemiDetective = [d1, d2, d3, d4];
 
 var LIVELLO = 'classico';
-var LISTE = { classico: problemiClassico, avanzato: problemiAvanzato, detective: problemiDetective };
+var LISTE = { classico: problemiClassico, avanzato: problemiAvanzato };
 function problemiAttuali() { return LISTE[LIVELLO]; }
 
 // Nomi colorati con il loro personaggio, come nelle schede dei protagonisti
@@ -338,13 +303,82 @@ function aggiorna(i) {
 function aggiungiFagiolino(idx) {
   var el = document.createElement('div');
   el.className = 'fagiolino';
-  el.addEventListener('click', function (e) {
-    e.stopPropagation();
-    el.parentNode.removeChild(el);
-    aggiorna(idx);
-  });
+  el.dataset.idx = String(idx);
+  el.addEventListener('pointerdown', inizioTrascina);
   document.getElementById('area-' + idx).appendChild(el);
   aggiorna(idx);
+}
+
+/* Trascinare un fagiolo da un personaggio a un altro (come quando se li prestano).
+   Un tocco senza spostare toglie il fagiolo; trascinandolo su un altro personaggio
+   va a mettersi in fila nei suoi gruppi da 5 e i numeri si aggiornano. */
+var drag = null;
+function inizioTrascina(e) {
+  if (e.button !== undefined && e.button !== 0) return;
+  e.preventDefault(); e.stopPropagation();
+  var el = e.currentTarget;
+  el.setPointerCapture(e.pointerId);
+  drag = { el: el, x0: e.clientX, y0: e.clientY, mosso: false, volante: null, sopra: null };
+  el.addEventListener('pointermove', muoviTrascina);
+  el.addEventListener('pointerup', fineTrascina);
+  el.addEventListener('pointercancel', fineTrascina);
+}
+function persSotto(x, y) {
+  var t = document.elementFromPoint(x, y);
+  return t && t.closest ? t.closest('.pers') : null;
+}
+function muoviTrascina(e) {
+  if (!drag) return;
+  if (!drag.mosso) {
+    if (Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) < 6) return;
+    drag.mosso = true;
+    var v = drag.el.cloneNode(false);
+    v.className = 'fagiolino fagiolo-volante';
+    document.body.appendChild(v);
+    drag.volante = v;
+    drag.el.classList.add('preso');
+  }
+  var w = drag.volante.offsetWidth, h = drag.volante.offsetHeight;
+  drag.volante.style.left = (e.clientX - w / 2) + 'px';
+  drag.volante.style.top = (e.clientY - h / 2) + 'px';
+  var p = persSotto(e.clientX, e.clientY);
+  if (p !== drag.sopra) {
+    if (drag.sopra) drag.sopra.classList.remove('bersaglio');
+    if (p && p.id !== 'zona-' + drag.el.dataset.idx) p.classList.add('bersaglio');
+    drag.sopra = p;
+  }
+}
+function fineTrascina(e) {
+  if (!drag) return;
+  var d = drag; drag = null;
+  d.el.removeEventListener('pointermove', muoviTrascina);
+  d.el.removeEventListener('pointerup', fineTrascina);
+  d.el.removeEventListener('pointercancel', fineTrascina);
+  if (d.sopra) d.sopra.classList.remove('bersaglio');
+  var da = Number(d.el.dataset.idx);
+  if (!d.mosso) { // tocco: toglie il fagiolo
+    d.el.parentNode.removeChild(d.el);
+    aggiorna(da);
+    return;
+  }
+  var p = e.type === 'pointerup' ? persSotto(e.clientX, e.clientY) : null;
+  var a = p ? Number(p.id.replace('zona-', '')) : da;
+  var partenza = d.volante.getBoundingClientRect();
+  if (a !== da) {
+    d.el.dataset.idx = String(a);
+    document.getElementById('area-' + a).appendChild(d.el);
+    aggiorna(da); aggiorna(a);
+  }
+  // il fagiolo vola al suo posto preciso nella fila
+  var arrivo = d.el.getBoundingClientRect();
+  d.volante.style.transition = 'left .25s ease, top .25s ease, transform .25s ease';
+  d.volante.style.left = arrivo.left + 'px';
+  d.volante.style.top = arrivo.top + 'px';
+  d.volante.style.transform = getComputedStyle(d.el).transform;
+  setTimeout(function () {
+    d.el.classList.remove('preso');
+    if (d.volante.parentNode) d.volante.parentNode.removeChild(d.volante);
+  }, 260);
 }
 
 function nuovoProblema() {
