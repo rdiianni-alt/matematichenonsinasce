@@ -99,7 +99,7 @@
   #btn-metti { background: #5a8a3a; color: white; }
   #btn-metti:disabled { background: #aaa; cursor: default; }
   #btn-nuovo { background: #5a3e1b; color: white; }
-  #btn-pdf { background: #4a90c4; color: white; }
+  #btn-pdf, #btn-pdf-bf { background: #4a90c4; color: white; }
 
   #risultato { display: none; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 8px; }
   #risposta-row { display: flex; align-items: center; gap: 8px; font-size: 1.1rem; color: #5a3e1b; }
@@ -144,6 +144,10 @@
     font-size: 0.95rem;
     color: #5a3e1b;
   }
+  .pdf-sep { width: 2px; align-self: stretch; background: #c8a97a; }
+  .pdf-check { display: flex; align-items: center; gap: 4px; }
+  #pdf-config .pdf-check input { width: auto; }
+  .pdf-nota { font-size: 0.8rem; color: #8a6a3a; }
   #pdf-config input {
     width: 56px; font-size: 1rem; text-align: center;
     border: 2px solid #c8a97a; border-radius: 8px; padding: 4px;
@@ -164,6 +168,8 @@
     #area-stampa { display: block; position: absolute; top: 0; left: 0; width: 100%; }
     .pagina { page-break-after: always; }
     .pagina:last-child { page-break-after: auto; }
+    .bf-pagina { page-break-after: always; }
+    .bf-pagina:last-child { page-break-after: auto; }
   }
 
   .pagina {
@@ -210,6 +216,24 @@
     border-bottom: 0.4mm solid #5a3e1b;
     height: 11mm;
   }
+  /* Scheda "bicchierini e fagioli": 12 riquadri per pagina A4.
+     Bicchierini e fagioli sono SVG, così si stampano anche in bianco e nero
+     e senza l'opzione "grafica di sfondo". */
+  .bf-pagina { width: 190mm; height: 275mm; margin: 0 auto; display: flex; flex-direction: column; font-family: sans-serif; color: #3a2a10; }
+  .bf-testa { display: flex; align-items: center; gap: 3mm; height: 11mm; border-bottom: 0.3mm solid #b07d3a; margin-bottom: 2mm; }
+  .bf-testa img { width: 8mm; height: 8mm; border-radius: 50%; }
+  .bf-testa .t { font-weight: bold; font-size: 0.95rem; color: #5a3e1b; }
+  .bf-testa .leg { margin-left: auto; display: flex; align-items: center; gap: 1.5mm; font-size: 0.75rem; }
+  .bf-griglia { flex: 1; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: repeat(8, 1fr); }
+  .bf-box { border: 0.3mm dashed #b07d3a; margin: -0.15mm; padding: 2mm 3mm; display: flex; flex-direction: column; gap: 1mm; overflow: hidden; }
+  .bf-num { font-size: 0.6rem; color: #8a6a3a; margin-right: 1mm; }
+  .bf-bicchieri { display: flex; gap: 1.2mm; height: 10mm; align-items: flex-end; }
+  .bf-bicchieri svg { width: 7.7mm; height: 10mm; flex: none; }
+  .bf-fagioli { position: relative; height: 10.5mm; }
+  .bf-fagioli svg { position: absolute; width: 6mm; height: 4.2mm; }
+  .bf-risposta { margin-top: auto; display: flex; align-items: baseline; gap: 2mm; font-size: 0.85rem; }
+  .bf-risposta .linea { width: 28mm; border-bottom: 0.35mm solid #5a3e1b; height: 5mm; }
+  .bf-sol { font-size: 0.85rem; columns: 4; line-height: 1.8; }
   .divisore {
     width: 100%;
     border: none;
@@ -242,6 +266,12 @@
   <span>Schermate nella scheda:</span>
   <input id="input-n-schede" type="number" min="1" max="8" value="3">
   <button id="btn-pdf">📄 Crea scheda PDF</button>
+  <span class="pdf-sep"></span>
+  <span>Bicchierini e fagioli — pagine:</span>
+  <input id="input-n-pagine-bf" type="number" min="1" max="5" value="1">
+  <label class="pdf-check"><input id="check-soluzioni-bf" type="checkbox"> soluzioni</label>
+  <button id="btn-pdf-bf">🥤 Crea PDF bicchierini e fagioli</button>
+  <span class="pdf-nota">16 riquadri per pagina</span>
 </div>
 
 <div id="info-bar">
@@ -539,6 +569,101 @@
     }
 
     // aspetta che l'immagine del logo sia pronta prima di stampare
+    setTimeout(() => window.print(), 200);
+  });
+
+  /* ========== SCHEDA PDF: SOLO BICCHIERINI E FAGIOLI ========== */
+  // Ogni riquadro ha fino a 9 bicchierini (una decina ciascuno) e fino a 9 fagioli sciolti:
+  // numeri da 1 a 99. 16 riquadri per pagina, per fare meno fotocopie.
+
+  const BF_PER_PAGINA = 16;
+  const SVG_BICCHIERE = '<svg viewBox="0 0 54 70"><polygon points="4,8 50,8 44,64 10,64" fill="white" stroke="#5a3e1b" stroke-width="3.5"/><line x1="2" y1="8" x2="52" y2="8" stroke="#5a3e1b" stroke-width="4.5"/></svg>';
+  const SVG_FAGIOLO = '<svg viewBox="0 0 60 42"><ellipse cx="30" cy="21" rx="27" ry="18" fill="#7a5a2a" stroke="#3a2a10" stroke-width="3.5"/><path d="M14 17 Q30 9 46 17" fill="none" stroke="#c9a46a" stroke-width="3" stroke-linecap="round"/></svg>';
+
+  // quantità da 1 a 99, tutte diverse finché possibile, con decine e unità ben mescolate
+  function quantitaBF(n) {
+    const tutte = [];
+    for (let q = 1; q <= 99; q++) tutte.push(q);
+    for (let i = tutte.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [tutte[i], tutte[j]] = [tutte[j], tutte[i]];
+    }
+    const out = [];
+    while (out.length < n) out.push(...tutte.slice(0, n - out.length));
+    return out;
+  }
+
+  function fagioliSparsi(container, n) {
+    // area in mm: larghezza del riquadro meno i margini, altezza di .bf-fagioli
+    const W = 84, H = 10.5, fw = 6, fh = 4.2;
+    const placed = [];
+    for (let i = 0; i < n; i++) {
+      let x, y, tries = 0, ok;
+      do {
+        x = Math.random() * (W - fw);
+        y = Math.random() * (H - fh);
+        ok = placed.every(p => Math.abs(p.x - x) > fw + 1 || Math.abs(p.y - y) > fh + 0.8);
+        tries++;
+      } while (!ok && tries < 400);
+      placed.push({ x, y });
+      const span = document.createElement('span');
+      span.innerHTML = SVG_FAGIOLO;
+      const svg = span.firstChild;
+      svg.style.left = x + 'mm';
+      svg.style.top = y + 'mm';
+      svg.style.transform = `rotate(${rnd(-35, 35)}deg)`;
+      container.appendChild(svg);
+    }
+  }
+
+  function riquadroBF(numero, q) {
+    const d = Math.floor(q / 10), u = q % 10;
+    const box = document.createElement('div');
+    box.className = 'bf-box';
+    box.innerHTML = `
+      <div class="bf-bicchieri">${SVG_BICCHIERE.repeat(d)}</div>
+      <div class="bf-fagioli"></div>
+      <div class="bf-risposta"><span class="bf-num">${numero}.</span> Quanti fagioli in tutto? <span class="linea"></span></div>
+    `;
+    fagioliSparsi(box.querySelector('.bf-fagioli'), u);
+    return box;
+  }
+
+  function testaBF(titolo) {
+    return `<div class="bf-testa">
+      <img src="${LOGO_URL}" alt="logo">
+      <span class="t">${titolo}</span>
+      <span class="leg">${SVG_BICCHIERE.replace('<svg ', '<svg style="width:5mm;height:6.5mm" ')} = 10 fagioli (una decina)</span>
+    </div>`;
+  }
+
+  document.getElementById('btn-pdf-bf').addEventListener('click', () => {
+    const nPagine = Math.min(5, Math.max(1, parseInt(document.getElementById('input-n-pagine-bf').value) || 1));
+    const conSoluzioni = document.getElementById('check-soluzioni-bf').checked;
+    const areaStampa = document.getElementById('area-stampa');
+    areaStampa.innerHTML = '';
+    const quantita = quantitaBF(nPagine * BF_PER_PAGINA);
+
+    for (let p = 0; p < nPagine; p++) {
+      const pagina = document.createElement('div');
+      pagina.className = 'bf-pagina';
+      pagina.innerHTML = testaBF('Il Contafagioli · Bicchierini e fagioli') + '<div class="bf-griglia"></div>';
+      const griglia = pagina.querySelector('.bf-griglia');
+      for (let i = 0; i < BF_PER_PAGINA; i++) {
+        const k = p * BF_PER_PAGINA + i;
+        griglia.appendChild(riquadroBF(k + 1, quantita[k]));
+      }
+      areaStampa.appendChild(pagina);
+    }
+
+    if (conSoluzioni) {
+      const pagina = document.createElement('div');
+      pagina.className = 'bf-pagina';
+      pagina.innerHTML = testaBF('Soluzioni · Bicchierini e fagioli') +
+        '<div class="bf-sol">' + quantita.map((q, i) => `${i + 1}. <b>${q}</b>`).join('<br>') + '</div>';
+      areaStampa.appendChild(pagina);
+    }
+
     setTimeout(() => window.print(), 200);
   });
 </script>
