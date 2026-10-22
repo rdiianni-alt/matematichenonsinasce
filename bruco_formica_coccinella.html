@@ -30,10 +30,10 @@ body {
 .head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--muted); font-size: 13px; font-weight: 600; }
 .logo img { width: 44px; height: 44px; object-fit: contain; border-radius: 50%; }
-h1 { font-family: var(--display); font-weight: 800; font-size: clamp(26px, 3.4vw, 42px); line-height: 1; flex: 1; text-align: center; }
+h1 { font-family: var(--display); font-weight: 800; font-size: clamp(24px, 2.7vw, 40px); line-height: 1; flex: 1; text-align: center; }
 h1 .b { color: var(--verde); } h1 .f { color: var(--marrone); } h1 .c { color: var(--rosso); }
 .livelli { display: flex; background: #fff; border: 2px solid #e2dccb; border-radius: 999px; padding: 3px; }
-.livelli button { border: 0; background: transparent; font: 600 14px var(--display); padding: 6px 16px; border-radius: 999px; cursor: pointer; color: var(--muted); }
+.livelli button { border: 0; background: transparent; font: 600 14px var(--display); padding: 6px 13px; border-radius: 999px; cursor: pointer; color: var(--muted); }
 .livelli button.on { background: var(--ink); color: #fff; }
 
 /* corpo: problema a sinistra, protagonisti a destra */
@@ -113,9 +113,10 @@ h1 .b { color: var(--verde); } h1 .f { color: var(--marrone); } h1 .c { color: v
       <span>Matematiche non si nasce</span>
     </a>
     <h1>🐛 <span class="b">Bruco</span>, 🐜 <span class="f">Formica</span> e 🐞 <span class="c">Coccinella</span></h1>
-    <div class="livelli" role="group" aria-label="Livello">
-      <button type="button" id="btn-livello-classico" class="on">Livello classico</button>
-      <button type="button" id="btn-livello-avanzato">Livello avanzato</button>
+    <div class="livelli" id="livelli-gioco" role="group" aria-label="Livello">
+      <button type="button" data-livello="classico" class="on">Classico</button>
+      <button type="button" data-livello="avanzato">Avanzato</button>
+      <button type="button" data-livello="detective">Detective 🔍</button>
     </div>
   </div>
 
@@ -166,7 +167,12 @@ h1 .b { color: var(--verde); } h1 .f { color: var(--marrone); } h1 .c { color: v
 <div id="stampaOverlay" onclick="if(event.target===this) chiudiStampa()">
   <div class="modal" role="dialog" aria-labelledby="stampaTitolo">
     <h3 id="stampaTitolo">Quante pagine vuoi stampare?</h3>
-    <div class="sub">3 problemi per pagina, del livello scelto · il PDF si scarica subito</div>
+    <div class="sub">3 problemi per pagina · il PDF si scarica subito</div>
+    <div class="livelli" id="livelli-stampa" role="group" aria-label="Livello della scheda">
+      <button type="button" data-livello="classico">Classico</button>
+      <button type="button" data-livello="avanzato">Avanzato</button>
+      <button type="button" data-livello="detective">Detective 🔍</button>
+    </div>
     <div class="pagine">
       <button type="button" onclick="pdfProblemi(1)">1</button>
       <button type="button" onclick="pdfProblemi(2)">2</button>
@@ -224,11 +230,85 @@ function p14() {
   return '<strong>' + n[0] + '</strong> ha ' + a + ' fagioli. <strong>' + n[1] + '</strong> ne ha ' + d1 + ' in ' + testo1 + ' di <strong>' + n[0] + '</strong>. <strong>' + n[2] + '</strong> ne ha ' + d2 + ' in ' + testo2 + ' di <strong>' + n[1] + '</strong>. Quanti fagioli ha <strong>' + n[2] + '</strong>?';
 }
 
+function S(n) { return '<strong>' + n + '</strong>'; }
+
+/* ----- Livello avanzato: tipi nuovi (numeri sempre entro il 20) ----- */
+// Relazione al contrario: "in più" ma si toglie, "in meno" ma si aggiunge
+function a1() {
+  var n = ns(), a = r(2, 9), d = r(1, 4), b = a + d;
+  if (r(0, 1) === 0) return S(n[1]) + ' ha ' + d + ' fagioli in più di ' + S(n[0]) + '. ' + S(n[1]) + ' ne ha ' + b + '. Quanti fagioli ha ' + S(n[0]) + '?';
+  return S(n[0]) + ' ha ' + d + ' fagioli in meno di ' + S(n[1]) + '. ' + S(n[0]) + ' ne ha ' + a + '. Quanti fagioli ha ' + S(n[1]) + '?';
+}
+// Pareggiare: quanti ne deve dare perché ne abbiano tanti uguali
+function a2() {
+  var n = ns(), x = r(5, 14), y = r(1, x - 2);
+  if ((x - y) % 2 !== 0 || x + y > 20) return a2();
+  return S(n[0]) + ' ha ' + x + ' fagioli e ' + S(n[1]) + ' ne ha ' + y + '. Quanti fagioli deve dare ' + S(n[0]) + ' a ' + S(n[1]) + ' perché ne abbiano tanti uguali?';
+}
+// Il totale è noto, manca una parte
+function a3() {
+  var n = ns(), a = r(2, 8), b = r(2, 8), c = r(1, 8), t = a + b + c;
+  if (t > 20) return a3();
+  return 'In tutto ' + S(n[0]) + ', ' + S(n[1]) + ' e ' + S(n[2]) + ' hanno ' + t + ' fagioli. ' + S(n[0]) + ' ne ha ' + a + ' e ' + S(n[1]) + ' ne ha ' + b + '. Quanti fagioli ha ' + S(n[2]) + '?';
+}
+// Regali a catena
+function a4() {
+  var n = ns(), a = r(6, 10), b = r(1, 4), c = r(1, 4), g1 = r(2, a - 2), g2 = r(1, b + g1);
+  if (a + b + c > 20 || g2 > 6) return a4();
+  return S(n[0]) + ' ha ' + a + ' fagioli, ' + S(n[1]) + ' ne ha ' + b + ' e ' + S(n[2]) + ' ne ha ' + c + '. ' + S(n[0]) + ' regala ' + g1 + ' fagioli a ' + S(n[1]) + ', poi ' + S(n[1]) + ' ne regala ' + g2 + ' a ' + S(n[2]) + '. Quanti fagioli ha adesso ciascuno?';
+}
+// Doppio e metà
+function a5() {
+  var n = ns(), v = r(0, 2), a;
+  if (v === 0) { a = r(2, 9); return S(n[0]) + ' ha ' + a + ' fagioli. ' + S(n[1]) + ' ne ha il doppio di ' + S(n[0]) + '. Quanti fagioli ha ' + S(n[1]) + '?'; }
+  if (v === 1) { a = 2 * r(2, 9); return S(n[0]) + ' ha ' + a + ' fagioli. ' + S(n[1]) + ' ne ha la metà di ' + S(n[0]) + '. Quanti fagioli ha ' + S(n[1]) + '?'; }
+  a = r(2, 6);
+  return S(n[0]) + ' ha ' + a + ' fagioli. ' + S(n[1]) + ' ne ha il doppio di ' + S(n[0]) + '. Quanti fagioli hanno in tutto?';
+}
+
+/* ----- Livello Detective: si ragiona sul testo più che sul calcolo ----- */
+// Un dato in più, che non serve
+function d1() {
+  var n = ns(), a = r(1, 9), b = r(1, 9), c = r(1, 9);
+  if (a + b > 20) return d1();
+  if (r(0, 1) === 0) return S(n[0]) + ' ha ' + a + ' fagioli, ' + S(n[1]) + ' ne ha ' + b + ' e ' + S(n[2]) + ' ne ha ' + c + '. Quanti fagioli hanno insieme ' + S(n[0]) + ' e ' + S(n[1]) + '? Attenzione: c\'è un numero che non serve. Quale?';
+  var cose = ['foglie', 'sassolini', 'fiori', 'briciole'], k = r(2, 6);
+  return S(n[0]) + ' ha ' + a + ' fagioli e ' + k + ' ' + cose[r(0, 3)] + '. ' + S(n[1]) + ' ne ha ' + b + '. Quanti fagioli hanno in tutto? Attenzione: c\'è un numero che non serve. Quale?';
+}
+// Si può rispondere? A volte manca un dato
+function d2() {
+  var n = ns(), a = r(2, 9), d = r(1, 4), t = r(8, 18), v = r(0, 2);
+  var dom = ' Si può rispondere? Perché?';
+  if (v === 0) return S(n[0]) + ' ha ' + a + ' fagioli. ' + S(n[1]) + ' ne ha qualcuno in più di ' + S(n[0]) + '. Quanti fagioli ha ' + S(n[1]) + '?' + dom;
+  if (v === 1) return S(n[0]) + ' e ' + S(n[1]) + ' hanno in tutto ' + t + ' fagioli. Quanti fagioli ha ' + S(n[0]) + '?' + dom;
+  return S(n[0]) + ' ha ' + a + ' fagioli. ' + S(n[1]) + ' ne ha ' + d + ' in più di ' + S(n[0]) + '. Quanti fagioli ha ' + S(n[1]) + '?' + dom;
+}
+// Inventa la domanda
+function d3() {
+  var n = ns(), a = r(2, 8), b = r(2, 8), c = r(1, 6);
+  if (a + b + c > 20) return d3();
+  if (r(0, 1) === 0) return S(n[0]) + ' ha ' + a + ' fagioli, ' + S(n[1]) + ' ne ha ' + b + ' e ' + S(n[2]) + ' ne ha ' + c + '. Inventa tu una domanda e poi rispondi!';
+  var g = r(1, a - 1);
+  return S(n[0]) + ' ha ' + a + ' fagioli e ' + S(n[1]) + ' ne ha ' + b + '. ' + S(n[0]) + ' ne regala ' + g + ' a ' + S(n[1]) + '. Inventa tu una domanda e poi rispondi!';
+}
+// Più soluzioni giuste
+function d4() {
+  var n = ns();
+  if (r(0, 1) === 0) {
+    var t = r(8, 15), m = r(1, 2);
+    return 'In tutto ' + S(n[0]) + ', ' + S(n[1]) + ' e ' + S(n[2]) + ' hanno ' + t + ' fagioli e ognuno ne ha almeno ' + m + '. Quanti fagioli può avere ciascuno? Trova più soluzioni!';
+  }
+  var t2 = r(7, 15);
+  return S(n[0]) + ' ha più fagioli di ' + S(n[1]) + ' e ' + S(n[1]) + ' ne ha più di ' + S(n[2]) + '. In tutto ne hanno ' + t2 + '. Quanti fagioli può avere ciascuno? Trova più soluzioni!';
+}
+
 var problemiClassico = [p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13];
-var problemiAvanzato = [p14];
+var problemiAvanzato = [p14, a1, a2, a3, a4, a5];
+var problemiDetective = [d1, d2, d3, d4];
 
 var LIVELLO = 'classico';
-function problemiAttuali() { return LIVELLO === 'avanzato' ? problemiAvanzato : problemiClassico; }
+var LISTE = { classico: problemiClassico, avanzato: problemiAvanzato, detective: problemiDetective };
+function problemiAttuali() { return LISTE[LIVELLO]; }
 
 // Nomi colorati con il loro personaggio, come nelle schede dei protagonisti
 var CLASSE = { Bruco: 'b', Formica: 'f', Coccinella: 'c' };
@@ -281,13 +361,15 @@ function nuovoProblema() {
 
 function impostaLivello(liv) {
   LIVELLO = liv;
-  document.getElementById('btn-livello-classico').className = liv === 'classico' ? 'on' : '';
-  document.getElementById('btn-livello-avanzato').className = liv === 'avanzato' ? 'on' : '';
+  document.querySelectorAll('.livelli [data-livello]').forEach(function (b) {
+    b.className = b.getAttribute('data-livello') === liv ? 'on' : '';
+  });
   nuovoProblema();
 }
 
-document.getElementById('btn-livello-classico').addEventListener('click', function () { impostaLivello('classico'); });
-document.getElementById('btn-livello-avanzato').addEventListener('click', function () { impostaLivello('avanzato'); });
+document.querySelectorAll('.livelli [data-livello]').forEach(function (b) {
+  b.addEventListener('click', function () { impostaLivello(b.getAttribute('data-livello')); });
+});
 
 for (var i = 0; i < 3; i++) {
   (function (idx) {
@@ -453,7 +535,18 @@ var logoData = null;
 })();
 
 /* ===== PDF dei problemi: 3 per pagina, con i protagonisti disegnati e lo spazio per i fagioli ===== */
+var LIVELLO_STAMPA = 'classico';
+function livelloStampa(liv) {
+  LIVELLO_STAMPA = liv;
+  document.querySelectorAll('#livelli-stampa [data-livello]').forEach(function (b) {
+    b.className = b.getAttribute('data-livello') === liv ? 'on' : '';
+  });
+}
+document.querySelectorAll('#livelli-stampa [data-livello]').forEach(function (b) {
+  b.addEventListener('click', function () { livelloStampa(b.getAttribute('data-livello')); });
+});
 function apriStampa() {
+  livelloStampa(LIVELLO); // si parte dal livello che si sta giocando
   document.getElementById('stampaStato').textContent = '';
   document.getElementById('stampaOverlay').classList.add('on');
 }
@@ -470,15 +563,18 @@ function pdfProblemi(pagine) {
   if (!window.jspdf) { stato.textContent = 'Non riesco a creare il PDF: controlla la connessione a internet e ricarica la pagina.'; return; }
   var doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
   var disegna = artista(doc);
-  var lista = problemiAttuali();
+  var lista = LISTE[LIVELLO_STAMPA];
   var W = 210, M = 12, G = 6, PER = 3;
   var tw = W - 2 * M, th = (297 - 2 * M - (PER - 1) * G) / PER;
 
+  // i tipi di problema si alternano: si usano tutti prima di ripeterne uno
+  var ordine = [];
+  while (ordine.length < pagine * PER) ordine = ordine.concat(shuffle(lista));
   for (var n = 0; n < pagine * PER; n++) {
     var k = n % PER;
     if (n > 0 && k === 0) doc.addPage();
     var x = M, y = M + k * (th + G);
-    var testo = singolare(lista[r(0, lista.length - 1)]()).replace(/<[^>]+>/g, '').toUpperCase();
+    var testo = singolare(ordine[n]()).replace(/<[^>]+>/g, '').toUpperCase();
 
     // cornice
     doc.setDrawColor('#F0C75E'); doc.setLineWidth(1.2);
@@ -488,7 +584,7 @@ function pdfProblemi(pagine) {
     doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(120);
     doc.text('Matematiche non si nasce', x + 14, y + 6.3);
     doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor('#5A4300');
-    doc.text('BRUCO, FORMICA E COCCINELLA', x + 14, y + 10);
+    doc.text('BRUCO, FORMICA E COCCINELLA · ' + LIVELLO_STAMPA.toUpperCase(), x + 14, y + 10);
     doc.setFillColor('#F0C75E'); doc.roundedRect(x + tw - 34, y + 3.5, 30, 6.5, 3.2, 3.2, 'F');
     doc.setFontSize(8.5); doc.setTextColor('#5A4300');
     doc.text('PROBLEMA ' + (n + 1), x + tw - 19, y + 8, { align: 'center' });
@@ -522,7 +618,7 @@ function pdfProblemi(pagine) {
     doc.setDrawColor(120); doc.setLineWidth(0.35);
     doc.line(x + 26, ya + 0.5, x + tw - 6, ya + 0.5);
   }
-  doc.save('problemi-bruco-formica-coccinella.pdf');
+  doc.save('problemi-bruco-formica-coccinella-' + LIVELLO_STAMPA + '.pdf');
   stato.textContent = 'PDF pronto: ' + pagine + (pagine === 1 ? ' pagina' : ' pagine') + '. Se lo crei di nuovo, i problemi cambiano.';
 }
 
