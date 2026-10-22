@@ -116,7 +116,7 @@
     </button>
     <button type="button" class="menu-card c4" onclick="startGame('semplice')">
       <svg class="mini" data-mini="semplice" viewBox="0 0 108 108" aria-hidden="true"></svg>
-      <span class="menu-txt"><h2>Pallini liberi</h2><p>Colora le palline che vuoi, senza domande. Poi scopri quante sono.</p><span class="gioca">Gioca →</span></span>
+      <span class="menu-txt"><h2>Pallini liberi</h2><p>Costruisci un percorso colorando i pallini: i bambini dicono quale numero c'è dietro ogni pallino colorato.</p><span class="gioca">Gioca →</span></span>
     </button>
   </div>
 </div>
@@ -449,7 +449,7 @@
 
   /* --- Disegnini del menu --- */
   (function drawMinis() {
-    var liberi = [12, 13, 22, 23, 24, 33, 47, 48, 57, 58, 66, 71, 72, 81, 82, 83, 91, 95, 96];
+    var liberi = [11, 12, 13, 23, 33, 34, 35, 45, 55, 56, 57, 67, 77]; // un percorso a scalini
     document.querySelectorAll('[data-mini]').forEach(function (svg) {
       var kind = svg.getAttribute('data-mini');
       var out = '';
@@ -506,12 +506,32 @@
   var QUESTIONS = {
     conta: 'Quante palline sono colorate?',
     indovina: 'Che numero è la pallina colorata?',
-    semplice: 'Colora le palline che vuoi. Quante sono?'
+    semplice: 'Che numeri sono i pallini colorati?'
   };
   var FILE_NAMES = { conta: 'quante-palline', trova: 'trova-la-pallina', indovina: 'che-numero-e', semplice: 'pallini-liberi' };
 
   // Un esercizio: riquadro con logo, domanda, griglia 10×10 e riga per la risposta.
   // Le palline sono cerchi vettoriali: rosso scuro pieno con bordo nero, ben visibili anche in bianco e nero.
+  // Percorso casuale di `len` pallini vicini (in orizzontale o in verticale), senza ripassare
+  function randomPath(len) {
+    for (var tries = 0; tries < 200; tries++) {
+      var cur = Math.floor(Math.random() * 100), path = [cur];
+      while (path.length < len) {
+        var r = Math.floor(cur / 10), c = cur % 10, next = [];
+        if (c < 9) next.push(cur + 1);
+        if (c > 0) next.push(cur - 1);
+        if (r < 9) next.push(cur + 10);
+        if (r > 0) next.push(cur - 10);
+        next = next.filter(function (n) { return path.indexOf(n) < 0; });
+        if (!next.length) break;
+        cur = next[Math.floor(Math.random() * next.length)];
+        path.push(cur);
+      }
+      if (path.length === len) return path;
+    }
+    return [0, 1, 2, 3, 4].slice(0, len);
+  }
+
   function drawTile(doc, x, y, w, h, game, num) {
     doc.setDrawColor(190); doc.setLineWidth(0.25); doc.setLineDashPattern([1.5, 1.2], 0);
     doc.roundedRect(x, y, w, h, 2, 2, 'S'); doc.setLineDashPattern([], 0);
@@ -526,16 +546,21 @@
     doc.text(q, cx, y + 17, { align: 'center' });
     var pitch = 6, d = 5.1, gap = 2.2;
     var gw = 10 * pitch + gap, gx = cx - gw / 2 + pitch / 2, gy = y + 22 + pitch / 2;
+    var path = game === 'semplice' ? randomPath(5) : [];
     for (var i = 0; i < 100; i++) {
       var r = Math.floor(i / 10), c = i % 10;
       var bx = gx + c * pitch + (c >= 5 ? gap : 0), by = gy + r * pitch + (r >= 5 ? gap : 0);
-      var on = (game === 'conta' && i < num) || (game === 'indovina' && i === num - 1);
+      var on = (game === 'conta' && i < num) || (game === 'indovina' && i === num - 1) || path.indexOf(i) >= 0;
       if (on) { doc.setFillColor(179, 38, 30); doc.setDrawColor(0); doc.setLineWidth(0.5); doc.circle(bx, by, d / 2, 'FD'); }
       else { doc.setFillColor(255, 255, 255); doc.setDrawColor(130); doc.setLineWidth(0.25); doc.circle(bx, by, d / 2, 'FD'); }
     }
-    if (game !== 'trova') {
-      var ly = gy + 10 * pitch + gap + 3;
-      doc.setDrawColor(90); doc.setLineWidth(0.35); doc.line(cx - 18, ly, cx + 18, ly);
+    var ly = gy + 10 * pitch + gap + 3;
+    doc.setDrawColor(90); doc.setLineWidth(0.35);
+    if (game === 'semplice') {
+      // una riga per ogni pallino del percorso
+      for (var k = 0; k < 5; k++) doc.line(cx - 32 + k * 13.2, ly, cx - 32 + k * 13.2 + 10, ly);
+    } else if (game !== 'trova') {
+      doc.line(cx - 18, ly, cx + 18, ly);
     }
   }
 
