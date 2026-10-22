@@ -28,25 +28,30 @@
   --accent:#5bbfd2; --accent-ink:#0d1a1d; --soft:#2a3526; --warn:#ff8f7a;
 }
 *{box-sizing:border-box}
-.logo{display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;align-self:center}
-.logo img{width:60px;height:60px;object-fit:contain;border-radius:50%}
-.logo span{font-size:14px;color:var(--text-secondary,#5f5e5a)}
+.logo{display:flex;flex-direction:column;align-items:center;gap:2px;text-decoration:none}
+.logo img{width:44px;height:44px;object-fit:contain;border-radius:50%}
+.logo span{font-size:11px;color:var(--text-secondary,#5f5e5a)}
 .logo:focus-visible{outline:3px solid var(--accent);outline-offset:4px;border-radius:8px}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;margin:0}
-.wrap{max-width:1120px;margin:0 auto;padding-inline:16px;padding-block:22px 40px;display:flex;flex-direction:column;gap:14px}
-header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 24px}
+.wrap{max-width:1600px;margin:0 auto;padding-inline:16px;padding-block:8px 40px;display:flex;flex-direction:column;gap:10px}
+header{display:flex;align-items:center;justify-content:center;gap:16px}
 h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,4vw,40px);line-height:1;margin:0;color:var(--accent);letter-spacing:.01em}
-header p{margin:0;color:var(--muted);max-width:60ch;font-size:14px}
+/* Tovaglietta a sinistra, comandi a destra: tutto in un solo schermo (LIM) */
+.main{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:12px;align-items:start}
+@media (max-width:900px){.main{grid-template-columns:1fr}}
 .stage{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-canvas{display:block;width:100%;aspect-ratio:1180/760;max-width:100%;background:#e3e1da}
-.bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px;padding:12px 16px;border-top:1px solid var(--line)}
+canvas{display:block;width:min(100%, calc((100vh - 150px) * 1180 / 760));min-width:min(100%, 480px);margin:0 auto;aspect-ratio:1180/760;background:#e3e1da}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 20px;padding:8px 16px;border-top:1px solid var(--line)}
 #eq{font-family:var(--display);font-weight:700;font-size:30px;line-height:1;font-variant-numeric:tabular-nums;min-width:7ch;color:var(--ink)}
 #eq .q{color:var(--accent)}
 #caption{flex:1 1 320px;margin:0;font-size:15px;color:var(--ink);min-height:1.5em}
 .pausebtn{font-family:var(--display);font-weight:700;font-size:20px;min-width:9ch;min-height:48px;border-color:var(--accent);color:var(--accent)}
 .pausebtn[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .stage.is-paused #caption{font-weight:500}
-form{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:14px}
+form{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:12px}
+form .primary,.side-actions button{width:100%}
+.side-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#reset{font-weight:600}
 .row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 16px}
 .fld{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .fld input{font-family:var(--display);font-size:28px;font-weight:600;width:4.2ch;padding:2px 8px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);text-align:center;font-variant-numeric:tabular-nums}
@@ -85,14 +90,15 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
 <body>
 
 <div class="wrap">
+  <header>
   <a class="logo" href="https://matematichenonsinasce.com/" target="_blank" rel="noopener">
     <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Logo Matematiche non si nasce">
     <span>Matematiche non si nasce</span>
   </a>
-  <header>
     <h1>Mazzetti di cannucce</h1>
-    <p>Dai un numero o un'operazione fino a 99. Le mani mettono le cannucce sulla tovaglietta, legano un mazzetto ogni dieci e lo slegano quando serve.</p>
   </header>
+
+  <div class="main">
 
   <section class="stage" aria-label="Tovaglietta decine e unità">
     <canvas id="scene" role="img" aria-label="Vista dall'alto di una tovaglietta verde divisa in decine e unità, con cannucce e mazzetti legati con l'elastico"></canvas>
@@ -112,37 +118,36 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
         <input type="radio" name="op" id="op-none" value="" checked><label for="op-none" class="word">solo il numero</label>
       </div>
       <label class="fld" for="second" id="secondWrap"><span>Cannucce</span><input id="second" type="text" value="" inputmode="numeric" maxlength="4" enterkeyhint="go"></label>
-      <button id="go" type="button" class="primary">Avvia</button>
     </div>
-    <div class="row">
-      <div class="group">
-        <span class="lbl">Velocità</span>
-        <div class="seg speed" role="radiogroup" aria-label="Velocità">
-          <input type="radio" name="speed" id="sp-1" value="0.6"><label for="sp-1">lenta</label>
-          <input type="radio" name="speed" id="sp-2" value="1" checked><label for="sp-2">normale</label>
-          <input type="radio" name="speed" id="sp-3" value="2.2"><label for="sp-3">veloce</label>
-          <input type="radio" name="speed" id="sp-4" value="4.5"><label for="sp-4">velocissima</label>
-        </div>
-      </div>
-      <label class="check" for="stopBefore"><input type="checkbox" id="stopBefore" checked> Fermati prima dell'operazione, per far prevedere il risultato</label>
-      <label class="check" for="ready"><input type="checkbox" id="ready"> Anche con «solo il numero» prendi i mazzetti già pronti</label>
-      <div class="group">
-        <button type="button" id="skip" disabled>Salta alla fine</button>
-        <button type="button" id="reset">Svuota la tovaglietta</button>
+    <button id="go" type="button" class="primary">Avvia</button>
+    <div class="side-actions">
+      <button type="button" id="reset">🧹 Svuota la tovaglietta</button>
+      <button type="button" id="skip" disabled>Salta alla fine</button>
+    </div>
+    <div class="group">
+      <span class="lbl">Velocità</span>
+      <div class="seg speed" role="radiogroup" aria-label="Velocità">
+        <input type="radio" name="speed" id="sp-1" value="0.6"><label for="sp-1">lenta</label>
+        <input type="radio" name="speed" id="sp-2" value="1" checked><label for="sp-2">normale</label>
+        <input type="radio" name="speed" id="sp-3" value="2.2"><label for="sp-3">veloce</label>
+        <input type="radio" name="speed" id="sp-4" value="4.5"><label for="sp-4">velocissima</label>
       </div>
     </div>
+    <label class="check" for="stopBefore"><input type="checkbox" id="stopBefore" checked> Fermati prima dell'operazione, per far prevedere il risultato</label>
+    <label class="check" for="ready"><input type="checkbox" id="ready"> Anche con «solo il numero» prendi i mazzetti già pronti</label>
     <p id="msg" class="msg" role="status"></p>
+    <div class="examples" aria-label="Esempi">
+      <span class="lbl">Prova</span>
+      <button type="button" data-ex="20,-,13">20 − 13</button>
+      <button type="button" data-ex="27,+,15">27 + 15</button>
+      <button type="button" data-ex="34,,0">34</button>
+      <button type="button" data-ex="40,-,1">40 − 1</button>
+      <button type="button" data-ex="58,+,7">58 + 7</button>
+      <button type="button" data-ex="63,-,28">63 − 28</button>
+    </div>
   </form>
-
-  <div class="examples" aria-label="Esempi">
-    <span class="lbl">Prova</span>
-    <button type="button" data-ex="20,-,13">20 − 13</button>
-    <button type="button" data-ex="27,+,15">27 + 15</button>
-    <button type="button" data-ex="34,,0">34</button>
-    <button type="button" data-ex="40,-,1">40 − 1</button>
-    <button type="button" data-ex="58,+,7">58 + 7</button>
-    <button type="button" data-ex="63,-,28">63 − 28</button>
   </div>
+
   <p class="note">Se il numero di partenza è già sulla tovaglietta, le mani fanno solo l'operazione; altrimenti prima svuotano e ricompongono. Dopo ogni operazione il risultato diventa il nuovo numero di partenza, così puoi continuare.</p>
 
   <section class="pdfcard" aria-label="Scheda da stampare">
@@ -589,7 +594,7 @@ async function add(m){
   if(unitsList.length>=10){
     await Promise.all([home(L),home(R)]);
     // ci si ferma prima di legare: i bambini anticipano il nuovo mazzetto e il risultato
-    await checkpoint('UN NUOVO MAZZETTO!',`Nella prima riga ci sono 10 cannucce: formano un nuovo mazzetto da 10. Secondo voi, quanto farà? Quando siete pronti, premete Riprendi.`);
+    await checkpoint('UN NUOVO MAZZETTO!',`Nella prima riga ci sono 10 cannucce: formano un nuovo mazzetto da 10. Secondo voi, quante cannucce ci sono adesso? Quando siete pronti, premete Riprendi.`);
     await tieTen();
   }
   await Promise.all([home(L),home(R)]);
@@ -675,7 +680,7 @@ document.addEventListener('keydown',e=>{
   if(e.target.matches('input,button,select,textarea')) return;
   if(e.code==='Space'||e.key==='p'||e.key==='P'){ e.preventDefault(); setPaused(!paused); }
 });
-function setBusy(b){running=b; pauseEl.disabled=!b; if(!b) setPaused(false); goEl.disabled=b; resetEl.disabled=b; skipEl.disabled=!b; startEl.disabled=b; secondEl.disabled=b;
+function setBusy(b){running=b; pauseEl.disabled=!b; if(!b) setPaused(false); goEl.disabled=b; skipEl.disabled=!b; startEl.disabled=b; secondEl.disabled=b;
   document.querySelectorAll('.examples button').forEach(x=>x.disabled=b);}
 function readInt(el){const v=el.value.trim(); if(v===''||!/^\d+$/.test(v)) return null; return parseInt(v,10);}
 
@@ -685,7 +690,7 @@ async function run(A,op,B){
   if(A===null||A>99){fail('Il numero di partenza deve essere un numero intero da 0 a 99.'); return;}
   if(op&&(B===null||B>99)){fail('Il secondo numero deve essere un numero intero da 0 a 99.'); return;}
   const target=op==='+'?A+B:op==='-'?A-B:A;
-  if(target>99){fail(`${A} + ${B} fa ${target}: sulla tovaglietta ci sono solo decine e unità, quindi il risultato deve arrivare al massimo a 99.`); return;}
+  if(target>99){fail(`${A} + ${B} è uguale a ${target}: sulla tovaglietta ci sono solo decine e unità, quindi il risultato deve arrivare al massimo a 99.`); return;}
   if(target<0){fail(`Da ${A} cannucce non posso toglierne ${B}: ne mancherebbero ${-target}.`); return;}
   setBusy(true);
   eqEl.innerHTML=op?`${A} ${opSym(op)} ${B} = <span class="q">?</span>`:`${A}`;
@@ -698,14 +703,16 @@ async function run(A,op,B){
       say(`Sulla tovaglietta c'è ${describe(A)}`); await pause(op?1100:0);
     }
     if(op&&B>0&&stopBeforeEl.checked){
-      await checkpoint('QUANTO FARÀ?',`Sulla tovaglietta c'è ${A}. Secondo voi, quanto farà ${A} ${opSym(op)} ${B}? Quando siete pronti, premete Riprendi.`);
+      await checkpoint('A QUANTO È UGUALE?',`Sulla tovaglietta c'è ${A}. Secondo voi, ${A} ${opSym(op)} ${B} è uguale a…? Quando siete pronti, premete Riprendi.`);
     }
     if(op==='+'&&B>0) await add(B);
     if(op==='-'&&B>0) await sub(B);
     say(op?`${A} ${opSym(op)} ${B} = ${target}. Sulla tovaglietta: ${dec(Math.floor(target/10))} e ${target%10} unità.`:`Ecco ${describe(target)}`);
   }catch(e){
     if(e!==ABORT) console.error(e);
-    abortFlag=false; setInstant(target); homeInstant();
+    abortFlag=false;
+    if(clearReq){ clearReq=false; setBusy(false); clearMat(); return; }
+    setInstant(target); homeInstant();
     say(op?`${A} ${opSym(op)} ${B} = ${target}. Sulla tovaglietta: ${dec(Math.floor(target/10))} e ${target%10} unità.`:`Ecco ${describe(target)}`);
   }
   eqEl.innerHTML=op?`${A} ${opSym(op)} ${B} = <span class="q">${target}</span>`:`${target}`;
@@ -736,7 +743,10 @@ function start(){
   run(A,op,op?B:0);
 }
 skipEl.addEventListener('click',()=>{ if(running){ abortFlag=true; setPaused(false); } });
-resetEl.addEventListener('click',()=>{ if(running) return; setInstant(0); homeInstant(); eqEl.textContent='0'; startEl.value=''; secondEl.value=''; say('La tovaglietta è vuota. Scrivi un numero e premi Avvia.'); msgEl.textContent=''; startEl.focus(); });
+let clearReq=false;
+function clearMat(){ setInstant(0); homeInstant(); eqEl.textContent='0'; startEl.value=''; secondEl.value=''; say('La tovaglietta è vuota. Scrivi un numero e premi Avvia.'); msgEl.textContent=''; startEl.focus(); }
+// si può svuotare in qualsiasi momento: se le mani stanno lavorando, si interrompe e si svuota
+resetEl.addEventListener('click',()=>{ if(running){ clearReq=true; abortFlag=true; setPaused(false); } else clearMat(); });
 document.querySelectorAll('.examples button').forEach(btn=>btn.addEventListener('click',()=>{
   if(running) return;
   const [a,o,b]=btn.dataset.ex.split(',');
