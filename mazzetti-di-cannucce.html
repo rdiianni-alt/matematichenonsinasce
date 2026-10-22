@@ -75,8 +75,6 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
 .lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-right:4px}
 .group{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .msg{margin:0;color:var(--warn);font-size:14px;min-height:1.2em}
-.examples{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
-.examples button{font-family:var(--display);font-size:18px;font-weight:600;padding:2px 12px;min-height:36px;border-radius:20px;background:var(--soft);border-color:transparent;font-variant-numeric:tabular-nums}
 .note{color:var(--muted);font-size:13px;margin:0;max-width:75ch}
 .pdfcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:14px;margin-top:10px}
 .pdfcard h2{font-family:var(--display);font-weight:700;font-size:24px;line-height:1.1;margin:0;color:var(--ink)}
@@ -136,15 +134,6 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
     <label class="check" for="stopBefore"><input type="checkbox" id="stopBefore" checked> Fermati prima dell'operazione, per far prevedere il risultato</label>
     <label class="check" for="ready"><input type="checkbox" id="ready"> Anche con «solo il numero» prendi i mazzetti già pronti</label>
     <p id="msg" class="msg" role="status"></p>
-    <div class="examples" aria-label="Esempi">
-      <span class="lbl">Prova</span>
-      <button type="button" data-ex="20,-,13">20 − 13</button>
-      <button type="button" data-ex="27,+,15">27 + 15</button>
-      <button type="button" data-ex="34,,0">34</button>
-      <button type="button" data-ex="40,-,1">40 − 1</button>
-      <button type="button" data-ex="58,+,7">58 + 7</button>
-      <button type="button" data-ex="63,-,28">63 − 28</button>
-    </div>
   </form>
   </div>
 
@@ -152,7 +141,7 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
 
   <section class="pdfcard" aria-label="Scheda da stampare">
     <h2>Scheda da stampare: a quanto arrivo?</h2>
-    <p class="note">Ogni esercizio ha una tovaglietta già pronta, senza numeri scritti: il bambino conta le cannucce e poi risponde a tre domande «Se aggiungo…, arrivo a…» oppure «Se tolgo…, arrivo a…». Sempre senza cambio: aggiungendo non si lega un nuovo mazzetto, togliendo non si slega nessun mazzetto. I numeri cambiano ogni volta che premi il pulsante.</p>
+    <p class="note">Ogni esercizio ha una tovaglietta già pronta, senza numeri scritti: il bambino conta le cannucce e poi risponde a tre domande «Se aggiungo…, arrivo a…» oppure «Se tolgo…, arrivo a…». Puoi scegliere se le operazioni richiedono il cambio (legare cannucce sciolte in un nuovo mazzetto, o slegare un mazzetto) oppure no. I numeri cambiano ogni volta che premi il pulsante.</p>
     <div class="row">
       <div class="group">
         <span class="lbl">Operazione</span>
@@ -169,6 +158,14 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:var
           <input type="radio" name="pmode" id="pm-tens" value="tens"><label for="pm-tens">solo decine</label>
           <input type="radio" name="pmode" id="pm-units" value="units"><label for="pm-units">solo unità</label>
           <input type="radio" name="pmode" id="pm-any" value="any"><label for="pm-any">di tutto un po'</label>
+        </div>
+      </div>
+      <div class="group">
+        <span class="lbl">Cambio</span>
+        <div class="seg speed" role="radiogroup" aria-label="Cambio">
+          <input type="radio" name="pcarry" id="pk-no" value="no" checked><label for="pk-no">senza cambio</label>
+          <input type="radio" name="pcarry" id="pk-yes" value="yes"><label for="pk-yes">con cambio</label>
+          <input type="radio" name="pcarry" id="pk-mix" value="mix"><label for="pk-mix">un po' e un po'</label>
         </div>
       </div>
       <div class="group">
@@ -680,8 +677,7 @@ document.addEventListener('keydown',e=>{
   if(e.target.matches('input,button,select,textarea')) return;
   if(e.code==='Space'||e.key==='p'||e.key==='P'){ e.preventDefault(); setPaused(!paused); }
 });
-function setBusy(b){running=b; pauseEl.disabled=!b; if(!b) setPaused(false); goEl.disabled=b; skipEl.disabled=!b; startEl.disabled=b; secondEl.disabled=b;
-  document.querySelectorAll('.examples button').forEach(x=>x.disabled=b);}
+function setBusy(b){running=b; pauseEl.disabled=!b; if(!b) setPaused(false); goEl.disabled=b; skipEl.disabled=!b; startEl.disabled=b; secondEl.disabled=b;}
 function readInt(el){const v=el.value.trim(); if(v===''||!/^\d+$/.test(v)) return null; return parseInt(v,10);}
 
 async function run(A,op,B){
@@ -747,49 +743,50 @@ let clearReq=false;
 function clearMat(){ setInstant(0); homeInstant(); eqEl.textContent='0'; startEl.value=''; secondEl.value=''; say('La tovaglietta è vuota. Scrivi un numero e premi Avvia.'); msgEl.textContent=''; startEl.focus(); }
 // si può svuotare in qualsiasi momento: se le mani stanno lavorando, si interrompe e si svuota
 resetEl.addEventListener('click',()=>{ if(running){ clearReq=true; abortFlag=true; setPaused(false); } else clearMat(); });
-document.querySelectorAll('.examples button').forEach(btn=>btn.addEventListener('click',()=>{
-  if(running) return;
-  const [a,o,b]=btn.dataset.ex.split(',');
-  startEl.value=a; secondEl.value=b||0;
-  form.querySelector(`input[name="op"][value="${o}"]`).checked=true; syncOp();
-  run(parseInt(a,10),o,o?parseInt(b,10):0);
-}));
 
 /* ---------- scheda PDF: a quanto arrivo? ---------- */
 const pdfStatus=document.getElementById('pdfStatus');
 const pRandInt=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
 const CROP={x:20,y:6,w:902,h:754};
-// decine e unità del numero di partenza, scelte in modo che ci siano sempre almeno 3 domande diverse senza cambio
-const START_RANGE={add:[1,6,0,6], sub:[3,9,3,9], mix:[3,6,3,6]};
-function pNewStart(op,prev){
-  const [a0,a1,b0,b1]=START_RANGE[op];
-  let s; do{ s=pRandInt(a0,a1)*10+pRandInt(b0,b1); }while(s===prev); return s;
-}
+// carry: 'no' = senza cambio (non si lega né si slega nessun mazzetto)
+//        'yes' = con cambio (aggiungendo si lega un nuovo mazzetto, togliendo se ne slega uno)
 // op: '+' o '-'; used: elenco di domande già fatte ("+23", "-12")
-function pNumber(S,mode,op,used){
+function pNumber(S,mode,op,used,carry){
   const a=Math.floor(S/10), b=S%10;
   for(let k=0;k<300;k++){
     let m=mode; if(m==='any') m=['mix','tens','units'][pRandInt(0,2)];
+    const cy=carry==='mix'?(Math.random()<.5?'yes':'no'):carry;
+    if(cy==='yes'&&m==='tens') m='units'; // il cambio si fa sempre con le unità
     let c=0,d=0;
     if(op==='+'){
-      if(m!=='units'){ if(a>=9) continue; c=pRandInt(1,9-a); }
-      if(m!=='tens'){ if(b>=9) continue; d=pRandInt(1,9-b); }
+      if(cy==='no'){
+        if(m!=='units'){ if(a>=9) continue; c=pRandInt(1,9-a); }
+        if(m!=='tens'){ if(b>=9) continue; d=pRandInt(1,9-b); }
+      } else {
+        if(b<1) continue; d=pRandInt(10-b,9);          // unità che superano la decina
+        if(m==='mix'){ if(a>=8) continue; c=pRandInt(1,8-a); } else if(a>=9) continue;
+      }
     } else {
-      if(m!=='units'){ if(a<1) continue; c=pRandInt(1,a); }
-      if(m!=='tens'){ if(b<1) continue; d=pRandInt(1,b); }
+      if(cy==='no'){
+        if(m!=='units'){ if(a<1) continue; c=pRandInt(1,a); }
+        if(m!=='tens'){ if(b<1) continue; d=pRandInt(1,b); }
+      } else {
+        if(b>=9||a<1) continue; d=pRandInt(b+1,9);      // più unità di quelle sciolte: si slega un mazzetto
+        if(m==='mix'){ if(a<2) continue; c=pRandInt(1,a-1); }
+      }
     }
     const x=c*10+d;
     if(x>0 && !used.includes(op+x)) return x;
   }
   return null;
 }
-function pQuestions(S,mode,op){
+function pQuestions(S,mode,op,carry){
   let ops;
   if(op==='add') ops=['+','+','+'];
   else if(op==='sub') ops=['-','-','-'];
   else { ops=['+','-',pRandInt(0,1)?'+':'-']; ops.sort(()=>Math.random()-.5); }
   const used=[], qs=[];
-  for(const o of ops){ const x=pNumber(S,mode,o,used); if(x!==null){ used.push(o+x); qs.push({op:o,x}); } }
+  for(const o of ops){ const x=pNumber(S,mode,o,used,carry); if(x!==null){ used.push(o+x); qs.push({op:o,x}); } }
   return qs;
 }
 function matImage(n){
@@ -827,10 +824,13 @@ async function genPdf(){
     const mode=document.querySelector('input[name="pmode"]:checked').value;
     const withSol=document.getElementById('psol').checked;
     const pop=document.querySelector('input[name="pop"]:checked').value;
+    const carry=document.querySelector('input[name="pcarry"]:checked').value;
     const sheet=[]; let prev=0;
     for(let i=0;i<count;i++){
-      const s=pNewStart(pop,prev); prev=s;
-      sheet.push({s,qs:pQuestions(s,mode,pop)});
+      // si cerca un numero di partenza che permetta tre domande diverse con le scelte fatte
+      let s,qs;
+      for(let t=0;t<500;t++){ s=pRandInt(11,89); if(s===prev) continue; qs=pQuestions(s,mode,pop,carry); if(qs.length===3) break; }
+      prev=s; sheet.push({s,qs});
     }
     const logo=await loadLogo();
     const { jsPDF }=window.jspdf;
@@ -893,6 +893,13 @@ async function genPdf(){
   btn.disabled=false;
 }
 document.getElementById('pdfBtn').addEventListener('click',genPdf);
+function syncCarry(){
+  const yes=!document.getElementById('pk-no').checked, tens=document.getElementById('pm-tens');
+  tens.disabled=yes; tens.nextElementSibling.style.opacity=yes?.4:'';
+  tens.nextElementSibling.title=yes?'Con le sole decine non si lega né si slega nessun mazzetto':'';
+  if(yes&&tens.checked) document.getElementById('pm-mix').checked=true;
+}
+document.querySelectorAll('input[name="pcarry"]').forEach(r=>r.addEventListener('change',syncCarry));
 
 /* ---------- start ---------- */
 setInstant(0); syncOp();
