@@ -4,97 +4,179 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bruco, Formica e Coccinella</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
+:root {
+  --ink: #2b2a22; --muted: #6b6a5c;
+  --verde: #4f8f1e; --verde-soft: #eef6e2; --verde-line: #c5dfa3;
+  --marrone: #6d4c41; --marrone-soft: #f3ece8; --marrone-line: #dccbc3;
+  --rosso: #d32f2f; --rosso-soft: #fdecea; --rosso-line: #f5c2bd;
+  --fagiolo: #7c5c3a; --fagiolo-dark: #4e3620;
+  --display: "Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+}
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: system-ui, sans-serif; background: #f5f4f0; color: #1a1a18; padding: 1.5rem; max-width: 680px; margin: 0 auto; }
-.logo { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-bottom: 1.25rem; text-decoration: none; }
-.logo img { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; }
-.logo span { font-size: 15px; font-weight: 500; color: #1a1a18; text-align: center; }
-#problema-box { background: #ebebeb; border: 0.5px solid #ccc; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1rem; font-size: 15px; line-height: 1.7; min-height: 60px; text-transform: uppercase; }
-#problema-box strong { font-weight: 500; }
-#btn-nuovo { margin-bottom: 1.25rem; font-size: 13px; padding: 6px 14px; cursor: pointer; border: 0.5px solid #aaa; border-radius: 8px; background: transparent; }
-#btn-nuovo:hover { background: #e8e8e8; }
-.personaggi { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1rem; }
-.riga-personaggio { display: flex; align-items: flex-start; gap: 10px; background: #fff; border: 0.5px solid #ccc; border-radius: 12px; padding: 10px 14px; min-height: 64px; cursor: pointer; }
-.persona-label { font-size: 22px; line-height: 1; user-select: none; flex-shrink: 0; padding-top: 4px; }
-.persona-nome { font-size: 13px; color: #666; font-weight: 500; flex-shrink: 0; width: 64px; padding-top: 6px; }
-.fagioli-area { display: flex; flex-wrap: nowrap; flex: 1; min-height: 40px; align-items: flex-start; padding-top: 4px; overflow-x: auto; }
-.gruppo-5 { display: flex; gap: 5px; flex-shrink: 0; margin-right: 10px; }
-.rimuovi-btn { font-size: 11px; color: #666; cursor: pointer; align-self: flex-start; padding: 4px 8px; border: 0.5px solid #ccc; border-radius: 8px; flex-shrink: 0; background: transparent; margin-top: 2px; }
-.rimuovi-btn:hover { background: #f0f0f0; }
-.fagiolino { width: 22px; height: 22px; border-radius: 50%; background: #7c5c3a; cursor: pointer; flex-shrink: 0; border: 0.5px solid #5a3e22; user-select: none; transition: transform 0.1s; position: relative; }
-.fagiolino:hover { transform: scale(1.15); }
-.fagiolino::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.22); position: absolute; top: 4px; left: 5px; }
-.contatore { font-size: 12px; color: #888; align-self: flex-start; padding-top: 8px; flex-shrink: 0; min-width: 20px; text-align: right; }
-.istruzioni { font-size: 12px; color: #999; margin-top: 0.5rem; line-height: 1.5; }
-@media (max-width: 480px) {
-  body { padding: 0.75rem; }
-  #problema-box { font-size: 13px; padding: 0.75rem 1rem; }
-  .persona-label { font-size: 18px; }
-  .persona-nome { font-size: 12px; width: 52px; }
-  .fagiolino { width: 18px; height: 18px; }
-  .fagiolino::after { width: 4px; height: 4px; top: 3px; left: 4px; }
-  .gruppo-5 { margin-right: 7px; gap: 4px; }
-  .rimuovi-btn { font-size: 10px; padding: 3px 6px; }
-  .contatore { font-size: 11px; }
-  #btn-nuovo, #btn-risposta, #btn-si, #btn-no { font-size: 12px; padding: 6px 12px; }
+html, body { min-height: 100%; }
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink);
+  background: radial-gradient(circle at 12% 8%, #fff7d6 0, transparent 38%), radial-gradient(circle at 92% 92%, #e3f1d0 0, transparent 40%), #fbf8ef;
+  padding: 14px 20px 24px;
+}
+.wrap { max-width: 1280px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+
+/* intestazione */
+.head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.logo { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--muted); font-size: 13px; font-weight: 600; }
+.logo img { width: 44px; height: 44px; object-fit: contain; border-radius: 50%; }
+h1 { font-family: var(--display); font-weight: 800; font-size: clamp(26px, 3.4vw, 42px); line-height: 1; flex: 1; text-align: center; }
+h1 .b { color: var(--verde); } h1 .f { color: var(--marrone); } h1 .c { color: var(--rosso); }
+.livelli { display: flex; background: #fff; border: 2px solid #e2dccb; border-radius: 999px; padding: 3px; }
+.livelli button { border: 0; background: transparent; font: 600 14px var(--display); padding: 6px 16px; border-radius: 999px; cursor: pointer; color: var(--muted); }
+.livelli button.on { background: var(--ink); color: #fff; }
+
+/* corpo: problema a sinistra, protagonisti a destra */
+.main { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 18px; align-items: start; }
+@media (max-width: 900px) { .main { grid-template-columns: 1fr; } }
+.col { display: flex; flex-direction: column; gap: 14px; }
+
+.problema {
+  position: relative; background: #fff; border-radius: 22px; padding: 22px 24px 20px;
+  border: 3px solid #f0c75e; box-shadow: 0 6px 0 #f0c75e;
+  font-size: clamp(18px, 1.9vw, 26px); line-height: 1.55; text-transform: uppercase; font-weight: 600; min-height: 150px;
+}
+.problema::before { content: "📜 IL PROBLEMA"; position: absolute; top: -14px; left: 18px; background: #f0c75e; color: #5a4300; font: 700 13px var(--display); letter-spacing: .06em; padding: 3px 12px; border-radius: 999px; }
+.nome { font-weight: 800; white-space: nowrap; }
+.nome.b { color: var(--verde); } .nome.f { color: var(--marrone); } .nome.c { color: var(--rosso); }
+
+.btn { font: 700 17px var(--display); border-radius: 14px; padding: 10px 18px; cursor: pointer; border: 2px solid var(--ink); background: #fff; color: var(--ink); }
+.btn:hover { background: #f4f1e6; }
+.btn.pieno { background: var(--ink); color: #fff; }
+.btn.pieno:hover { background: #47463b; }
+.riga-btn { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+.risposta { background: #fff; border-radius: 18px; padding: 14px 16px; border: 2px dashed #e2dccb; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.feedback { font-size: 3rem; line-height: 1; display: none; align-items: center; gap: 14px; }
+.nuvoletta { background: #fff; border: 2px solid #e2dccb; border-radius: 14px; padding: 8px 12px; font-size: 15px; color: #444; }
+
+.stampa { display: flex; gap: 10px; flex-wrap: wrap; }
+.stampa .btn { font-size: 15px; border-color: transparent; color: #fff; }
+.stampa .p1 { background: var(--verde); } .stampa .p1:hover { background: #3e7316; }
+.stampa .p2 { background: var(--rosso); } .stampa .p2:hover { background: #b71c1c; }
+
+/* protagonisti */
+.pers { display: flex; align-items: center; gap: 14px; border-radius: 20px; padding: 12px 14px; min-height: 104px; cursor: pointer; border: 3px solid; user-select: none; transition: transform .1s; }
+.pers:active { transform: scale(.995); }
+.pers.b { background: var(--verde-soft); border-color: var(--verde-line); }
+.pers.f { background: var(--marrone-soft); border-color: var(--marrone-line); }
+.pers.c { background: var(--rosso-soft); border-color: var(--rosso-line); }
+.avatar { flex: none; width: 74px; height: 74px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 44px; box-shadow: 0 3px 0 rgba(0,0,0,.08); }
+.pers-nome { flex: none; width: 96px; font: 800 20px var(--display); }
+.pers.b .pers-nome { color: var(--verde); } .pers.f .pers-nome { color: var(--marrone); } .pers.c .pers-nome { color: var(--rosso); }
+.fagioli-area { flex: 1; display: flex; flex-wrap: wrap; gap: 8px 14px; align-content: center; min-height: 48px; }
+.gruppo-5 { display: flex; gap: 5px; }
+.fagiolino { width: 30px; height: 22px; border-radius: 50%; background: radial-gradient(ellipse at 35% 30%, #a98157 0, var(--fagiolo) 55%, var(--fagiolo-dark) 100%); border: 1.5px solid var(--fagiolo-dark); cursor: pointer; transform: rotate(-12deg); transition: transform .1s; }
+.fagiolino:nth-child(even) { transform: rotate(10deg); }
+.fagiolino:hover { transform: scale(1.18); }
+.lato { flex: none; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.contatore { min-width: 40px; height: 40px; border-radius: 12px; background: #fff; display: flex; align-items: center; justify-content: center; font: 800 22px var(--display); }
+.contatore:empty { visibility: hidden; }
+.rimuovi-btn { font: 600 12px system-ui, sans-serif; color: var(--muted); cursor: pointer; padding: 4px 8px; border: 1.5px solid rgba(0,0,0,.15); border-radius: 8px; background: rgba(255,255,255,.7); }
+.rimuovi-btn:hover { background: #fff; }
+.istruzioni { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+/* finestra di stampa */
+#stampaOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1000; align-items: center; justify-content: center; padding: 16px; }
+#stampaOverlay.on { display: flex; }
+.modal { background: #fff; border-radius: 20px; padding: 24px 28px; max-width: 480px; width: 100%; display: flex; flex-direction: column; gap: 14px; align-items: center; text-align: center; }
+.modal h3 { font: 800 24px var(--display); }
+.modal .sub { font-size: 14px; color: var(--muted); margin-top: -8px; }
+.pagine { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.pagine button { width: 64px; height: 64px; border-radius: 16px; border: 3px solid var(--verde); background: #fff; color: var(--verde); font: 800 28px var(--display); cursor: pointer; }
+.pagine button:hover { background: var(--verde); color: #fff; }
+.stato { font-size: 14px; color: var(--muted); min-height: 1.2em; }
+
+@media (max-width: 560px) {
+  body { padding: 10px; }
+  .avatar { width: 52px; height: 52px; font-size: 30px; }
+  .pers-nome { width: 74px; font-size: 16px; }
+  .fagiolino { width: 24px; height: 18px; }
 }
 </style>
 </head>
 <body>
+<div class="wrap">
+  <div class="head">
+    <a href="https://matematichenonsinasce.com/" target="_blank" rel="noopener" class="logo">
+      <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Logo Matematiche non si nasce">
+      <span>Matematiche non si nasce</span>
+    </a>
+    <h1>🐛 <span class="b">Bruco</span>, 🐜 <span class="f">Formica</span> e 🐞 <span class="c">Coccinella</span></h1>
+    <div class="livelli" role="group" aria-label="Livello">
+      <button type="button" id="btn-livello-classico" class="on">Livello classico</button>
+      <button type="button" id="btn-livello-avanzato">Livello avanzato</button>
+    </div>
+  </div>
 
-<a href="https://matematichenonsinasce.com/" target="_blank" class="logo">
-  <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Logo Matematiche non si nasce">
-  <span>Matematiche non si nasce</span>
-</a>
+  <div class="main">
+    <div class="col">
+      <div class="problema" id="problema-box" aria-live="polite">Caricamento...</div>
+      <div class="riga-btn">
+        <button type="button" class="btn pieno" id="btn-nuovo">🎲 Nuovo problema</button>
+      </div>
+      <div class="risposta">
+        <button type="button" class="btn" id="btn-risposta">Ho trovato la risposta?</button>
+        <div id="sn-box" class="riga-btn" style="display:none;">
+          <button type="button" class="btn" id="btn-si">👍 Sì</button>
+          <button type="button" class="btn" id="btn-no">🤔 No</button>
+        </div>
+        <div id="feedback-box" class="feedback"></div>
+      </div>
+      <div class="stampa">
+        <button type="button" class="btn p1" id="btn-pdf">🖨️ Schede dei problemi</button>
+        <button type="button" class="btn p2" id="btn-pdf-protagonisti">✂️ Protagonisti da ritagliare</button>
+      </div>
+    </div>
 
-<div id="livello-selettore" style="display:flex;gap:8px;margin-bottom:1rem;">
-  <button id="btn-livello-classico" class="btn-livello" style="flex:1;font-size:13px;padding:8px 10px;cursor:pointer;border:0.5px solid #aaa;border-radius:8px;background:#1a1a18;color:#fff;">Livello classico</button>
-  <button id="btn-livello-avanzato" class="btn-livello" style="flex:1;font-size:13px;padding:8px 10px;cursor:pointer;border:0.5px solid #aaa;border-radius:8px;background:transparent;color:#1a1a18;">Livello avanzato</button>
+    <div class="col">
+      <div class="pers b" id="zona-0">
+        <div class="avatar">🐛</div>
+        <div class="pers-nome">Bruco</div>
+        <div class="fagioli-area" id="area-0"></div>
+        <div class="lato"><div class="contatore" id="cnt-0"></div><button type="button" class="rimuovi-btn" data-idx="0">− togli</button></div>
+      </div>
+      <div class="pers f" id="zona-1">
+        <div class="avatar">🐜</div>
+        <div class="pers-nome">Formica</div>
+        <div class="fagioli-area" id="area-1"></div>
+        <div class="lato"><div class="contatore" id="cnt-1"></div><button type="button" class="rimuovi-btn" data-idx="1">− togli</button></div>
+      </div>
+      <div class="pers c" id="zona-2">
+        <div class="avatar">🐞</div>
+        <div class="pers-nome">Coccinella</div>
+        <div class="fagioli-area" id="area-2"></div>
+        <div class="lato"><div class="contatore" id="cnt-2"></div><button type="button" class="rimuovi-btn" data-idx="2">− togli</button></div>
+      </div>
+      <p class="istruzioni">Tocca la scheda di un personaggio per dargli un fagiolo; tocca un fagiolo per toglierlo. I fagioli si mettono in fila a gruppi di 5.</p>
+    </div>
+  </div>
 </div>
 
-<div id="problema-box">Caricamento...</div>
-<button id="btn-nuovo">Nuovo problema ↺</button>
-
-<div class="personaggi">
-  <div class="riga-personaggio" id="zona-0">
-    <div class="persona-label">🐛</div>
-    <div class="persona-nome">Bruco</div>
-    <div class="fagioli-area" id="area-0"></div>
-    <div class="contatore" id="cnt-0"></div>
-    <button class="rimuovi-btn" data-idx="0">Rimuovi uno</button>
+<div id="stampaOverlay" onclick="if(event.target===this) chiudiStampa()">
+  <div class="modal" role="dialog" aria-labelledby="stampaTitolo">
+    <h3 id="stampaTitolo">Quante pagine vuoi stampare?</h3>
+    <div class="sub">3 problemi per pagina, del livello scelto · il PDF si scarica subito</div>
+    <div class="pagine">
+      <button type="button" onclick="pdfProblemi(1)">1</button>
+      <button type="button" onclick="pdfProblemi(2)">2</button>
+      <button type="button" onclick="pdfProblemi(3)">3</button>
+      <button type="button" onclick="pdfProblemi(4)">4</button>
+      <button type="button" onclick="pdfProblemi(5)">5</button>
+    </div>
+    <div class="stato" id="stampaStato"></div>
+    <button type="button" class="btn" onclick="chiudiStampa()">Annulla</button>
   </div>
-  <div class="riga-personaggio" id="zona-1">
-    <div class="persona-label">🐜</div>
-    <div class="persona-nome">Formica</div>
-    <div class="fagioli-area" id="area-1"></div>
-    <div class="contatore" id="cnt-1"></div>
-    <button class="rimuovi-btn" data-idx="1">Rimuovi uno</button>
-  </div>
-  <div class="riga-personaggio" id="zona-2">
-    <div class="persona-label">🐞</div>
-    <div class="persona-nome">Coccinella</div>
-    <div class="fagioli-area" id="area-2"></div>
-    <div class="contatore" id="cnt-2"></div>
-    <button class="rimuovi-btn" data-idx="2">Rimuovi uno</button>
-  </div>
-</div>
-
-<p class="istruzioni">Clicca il riquadro di un personaggio per aggiungere un fagiolo. Clicca un fagiolo per toglierlo. I fagioli sono raggruppati a 5 a 5.</p>
-
-<div id="risposta-area" style="margin-top:1.5rem;">
-  <button id="btn-risposta" style="font-size:14px;padding:8px 18px;cursor:pointer;border:0.5px solid #aaa;border-radius:8px;background:transparent;">Ho trovato la risposta?</button>
-  <div id="sn-box" style="display:none;margin-top:0.75rem;gap:10px;flex-direction:row;">
-    <button id="btn-si" style="font-size:14px;padding:8px 20px;cursor:pointer;border:0.5px solid #aaa;border-radius:8px;background:transparent;">Sì</button>
-    <button id="btn-no" style="font-size:14px;padding:8px 20px;cursor:pointer;border:0.5px solid #aaa;border-radius:8px;background:transparent;">No</button>
-  </div>
-  <div id="feedback-box" style="display:none;margin-top:1rem;font-size:2.5rem;text-align:center;"></div>
-</div>
-
-<div style="margin-top:2rem;text-align:center;padding-bottom:1rem;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-  <button id="btn-pdf" style="font-size:13px;padding:8px 18px;cursor:pointer;border:none;border-radius:8px;background:#3b6d11;color:#fff;">🐛🐜🐞 Stampa problemi</button>
-  <button id="btn-pdf-protagonisti" style="font-size:13px;padding:8px 18px;cursor:pointer;border:none;border-radius:8px;background:#c62828;color:#fff;">🐛🐜🐞 PDF protagonisti</button>
 </div>
 
 <script>
@@ -144,43 +226,54 @@ function p14() {
 
 var problemiClassico = [p0,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13];
 var problemiAvanzato = [p14];
+
 var LIVELLO = 'classico';
 function problemiAttuali() { return LIVELLO === 'avanzato' ? problemiAvanzato : problemiClassico; }
 
+// Nomi colorati con il loro personaggio, come nelle schede dei protagonisti
+var CLASSE = { Bruco: 'b', Formica: 'f', Coccinella: 'c' };
+var EMOJI = { Bruco: '🐛', Formica: '🐜', Coccinella: '🐞' };
+// "1 fagioli" → "1 fagiolo"
+function singolare(html) { return html.replace(/\b1 fagioli\b/g, '1 fagiolo'); }
+function abbellisci(html) {
+  return singolare(html).replace(/<strong>(Bruco|Formica|Coccinella)<\/strong>/g, function (m, n) {
+    return '<span class="nome ' + CLASSE[n] + '">' + EMOJI[n] + ' ' + n + '</span>';
+  });
+}
+
 function aggiorna(i) {
-  var area = document.getElementById('area-'+i);
+  var area = document.getElementById('area-' + i);
   var tutti = Array.prototype.slice.call(area.querySelectorAll('.fagiolino'));
   area.innerHTML = '';
-  for (var g = 0; g < Math.ceil(tutti.length/5); g++) {
+  for (var g = 0; g < Math.ceil(tutti.length / 5); g++) {
     var grp = document.createElement('div');
     grp.className = 'gruppo-5';
-    var sl = tutti.slice(g*5,(g+1)*5);
+    var sl = tutti.slice(g * 5, (g + 1) * 5);
     for (var k = 0; k < sl.length; k++) grp.appendChild(sl[k]);
     area.appendChild(grp);
   }
-  document.getElementById('cnt-'+i).textContent = tutti.length || '';
+  document.getElementById('cnt-' + i).textContent = tutti.length || '';
 }
 
 function aggiungiFagiolino(idx) {
   var el = document.createElement('div');
   el.className = 'fagiolino';
-  el.dataset.idx = String(idx);
-  el.addEventListener('click', function(e) {
+  el.addEventListener('click', function (e) {
     e.stopPropagation();
     el.parentNode.removeChild(el);
     aggiorna(idx);
   });
-  document.getElementById('area-'+idx).appendChild(el);
+  document.getElementById('area-' + idx).appendChild(el);
   aggiorna(idx);
 }
 
 function nuovoProblema() {
   var lista = problemiAttuali();
-  var fn = lista[r(0, lista.length-1)];
-  document.getElementById('problema-box').innerHTML = fn();
+  var fn = lista[r(0, lista.length - 1)];
+  document.getElementById('problema-box').innerHTML = abbellisci(fn());
   for (var i = 0; i < 3; i++) {
-    document.getElementById('area-'+i).innerHTML = '';
-    document.getElementById('cnt-'+i).textContent = '';
+    document.getElementById('area-' + i).innerHTML = '';
+    document.getElementById('cnt-' + i).textContent = '';
   }
   document.getElementById('sn-box').style.display = 'none';
   document.getElementById('feedback-box').style.display = 'none';
@@ -188,23 +281,20 @@ function nuovoProblema() {
 
 function impostaLivello(liv) {
   LIVELLO = liv;
-  document.getElementById('btn-livello-classico').style.background = liv === 'classico' ? '#1a1a18' : 'transparent';
-  document.getElementById('btn-livello-classico').style.color = liv === 'classico' ? '#fff' : '#1a1a18';
-  document.getElementById('btn-livello-avanzato').style.background = liv === 'avanzato' ? '#1a1a18' : 'transparent';
-  document.getElementById('btn-livello-avanzato').style.color = liv === 'avanzato' ? '#fff' : '#1a1a18';
+  document.getElementById('btn-livello-classico').className = liv === 'classico' ? 'on' : '';
+  document.getElementById('btn-livello-avanzato').className = liv === 'avanzato' ? 'on' : '';
   nuovoProblema();
 }
 
-document.getElementById('btn-livello-classico').addEventListener('click', function() { impostaLivello('classico'); });
-document.getElementById('btn-livello-avanzato').addEventListener('click', function() { impostaLivello('avanzato'); });
+document.getElementById('btn-livello-classico').addEventListener('click', function () { impostaLivello('classico'); });
+document.getElementById('btn-livello-avanzato').addEventListener('click', function () { impostaLivello('avanzato'); });
 
 for (var i = 0; i < 3; i++) {
-  (function(idx) {
-    document.getElementById('zona-'+idx).addEventListener('click', function(e) {
+  (function (idx) {
+    document.getElementById('zona-' + idx).addEventListener('click', function (e) {
       if (e.target.classList.contains('rimuovi-btn')) {
-        var area = document.getElementById('area-'+idx);
-        var ff = area.querySelectorAll('.fagiolino');
-        if (ff.length) { ff[ff.length-1].parentNode.removeChild(ff[ff.length-1]); aggiorna(idx); }
+        var ff = document.getElementById('area-' + idx).querySelectorAll('.fagiolino');
+        if (ff.length) { ff[ff.length - 1].parentNode.removeChild(ff[ff.length - 1]); aggiorna(idx); }
         return;
       }
       if (e.target.classList.contains('fagiolino')) return;
@@ -215,141 +305,32 @@ for (var i = 0; i < 3; i++) {
 
 document.getElementById('btn-nuovo').addEventListener('click', nuovoProblema);
 
-document.getElementById('btn-risposta').addEventListener('click', function() {
+document.getElementById('btn-risposta').addEventListener('click', function () {
   var snb = document.getElementById('sn-box');
   snb.style.display = snb.style.display === 'flex' ? 'none' : 'flex';
   document.getElementById('feedback-box').style.display = 'none';
 });
 
-document.getElementById('btn-si').addEventListener('click', function() {
+document.getElementById('btn-si').addEventListener('click', function () {
   var fb = document.getElementById('feedback-box');
-  fb.style.display = 'block';
-  fb.innerHTML = '<div style="font-size:3rem;">🏆</div>';
+  fb.style.display = 'flex';
+  fb.innerHTML = '<span>🏆</span><span class="nuvoletta">Bravissimi!</span>';
   document.getElementById('sn-box').style.display = 'none';
 });
 
-document.getElementById('btn-no').addEventListener('click', function() {
+document.getElementById('btn-no').addEventListener('click', function () {
   var fb = document.getElementById('feedback-box');
-  fb.style.display = 'block';
-  fb.innerHTML = '<div style="position:relative;display:inline-block;text-align:center;">'
-    + '<div style="font-size:3rem;">🧠</div>'
-    + '<div style="margin-top:0.5rem;background:#fff;border:0.5px solid #ccc;border-radius:12px;padding:0.6rem 1rem;font-size:13px;color:#444;max-width:260px;">'
-    + 'Pappappero! Avrai pur imparato qualcosa!'
-    + '</div></div>';
+  fb.style.display = 'flex';
+  fb.innerHTML = '<span>🧠</span><span class="nuvoletta">Pappappero! Avrai pur imparato qualcosa!</span>';
   document.getElementById('sn-box').style.display = 'none';
 });
 
-var GAME_TITLE = 'Bruco, Formica e Coccinella';
-var BLOG_NAME = 'Matematiche non si nasce';
-var BLOG_URL = 'matematichenonsinasce.com';
-var LOGO_URL = 'https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png';
-
-function loadImageAsDataURL(url) {
-  return new Promise(function(resolve, reject) {
-    var img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = function() {
-      try {
-        var canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
-        canvas.getContext('2d').drawImage(img, 0, 0);
-        resolve(canvas.toDataURL('image/png'));
-      } catch (e) { reject(e); }
-    };
-    img.onerror = reject;
-    img.src = url;
-  });
-}
-
-document.getElementById('btn-pdf').addEventListener('click', async function() {
-  var input = window.prompt('Quanti problemi vuoi generare?', '3');
-  if (input === null) return;
-  var numProblemi = parseInt(input, 10);
-  if (isNaN(numProblemi) || numProblemi < 1) numProblemi = 3;
-
-  var jsPDF = window.jspdf.jsPDF;
-  var doc = new jsPDF({ unit: 'mm', format: 'a4' });
-  var pageW = 210, pageH = 297;
-  var marginL = 15, marginR = 15, marginBottom = 15;
-  var contentW = pageW - marginL - marginR;
-  var sideStripW = 12;
-  var innerPad = 5;
-  var textW = contentW - innerPad * 2 - sideStripW;
-
-  var logoData = null;
-  try { logoData = await loadImageAsDataURL(LOGO_URL); } catch (e) {}
-
-  function stripHtml(html) { return html.replace(/<[^>]+>/g, '').toUpperCase(); }
-
-  function drawPersonaggi(x, yStart, w) {
-    var nomi = ['BRUCO', 'FORMICA', 'COCCINELLA'];
-    var boxH = 10.5, gap = 2.5;
-    for (var i = 0; i < 3; i++) {
-      var by = yStart + i * (boxH + gap);
-      doc.setDrawColor(180); doc.setLineWidth(0.3);
-      doc.roundedRect(x, by, w, boxH, 2.5, 2.5, 'S');
-      doc.setFontSize(8); doc.setTextColor(120); doc.setFont('helvetica', 'normal');
-      doc.text(nomi[i], x + 3, by + 7);
-    }
-    return 3 * boxH + 2 * gap;
-  }
-
-  var y = 18;
-  var listaPdf = problemiAttuali();
-
-  for (var p = 0; p < numProblemi; p++) {
-    var fn = listaPdf[r(0, listaPdf.length - 1)];
-    var testo = stripHtml(fn());
-    doc.setFontSize(11); doc.setFont('helvetica', 'bold');
-    var lines = doc.splitTextToSize(testo, textW);
-    var lineH = 5;
-    var textBlockH = lines.length * lineH;
-    var personaggiH = 3 * 10.5 + 2 * 2.5;
-    var boxH = innerPad + textBlockH + 5 + personaggiH + 5 + 6 + innerPad;
-
-    if (y + boxH > pageH - marginBottom) {
-      doc.addPage();
-      y = 18;
-    }
-
-    var boxTop = y;
-    doc.setDrawColor(150); doc.setLineWidth(0.4);
-    doc.roundedRect(marginL, boxTop, contentW, boxH, 3, 3, 'S');
-
-    var innerX = marginL + innerPad;
-    var textY = boxTop + innerPad + lineH * 0.7;
-    doc.setFontSize(11); doc.setTextColor(25); doc.setFont('helvetica', 'bold');
-    doc.text(lines, innerX, textY);
-
-    var persY = boxTop + innerPad + textBlockH + 5;
-    drawPersonaggi(innerX, persY, contentW - innerPad * 2 - sideStripW);
-
-    var afterPersY = persY + personaggiH + 6;
-    doc.setFontSize(8); doc.setTextColor(130); doc.setFont('helvetica', 'normal');
-    doc.text('Risposta:', innerX, afterPersY);
-    doc.setDrawColor(190); doc.setLineWidth(0.3); doc.setLineDash([1, 1.3]);
-    doc.line(innerX + 18, afterPersY, marginL + contentW - innerPad - sideStripW, afterPersY);
-    doc.setLineDash([]);
-
-    if (logoData) {
-      var logoSize = 9;
-      doc.addImage(logoData, 'PNG', marginL + contentW - innerPad - logoSize, boxTop + 3, logoSize, logoSize);
-    }
-
-    y = boxTop + boxH + 10;
-  }
-
-  doc.save('bruco-formica-coccinella.pdf');
-});
-
-/* ===== PDF PROTAGONISTI: 20 strisce ritagliabili (bruco, formica, coccinella) ===== */
-function generaPdfProtagonisti() {
-  var jsPDF = window.jspdf.jsPDF;
-  var doc = new jsPDF({ unit: 'mm', format: 'a4' });
-  var W = 210, H = 297, M = 8, COLS = 5, ROWS = 4;
-  var sw = (W - 2 * M) / COLS, sh = (H - 2 * M) / ROWS, ch = sh / 3;
-  var u = 0.95; // unità di disegno in mm
-
+/* ===== Disegni dei protagonisti per i PDF (bruco, formica, coccinella) ===== */
+// artista(doc) restituisce disegna(k, cx, cy, scala): k = 0 bruco, 1 formica, 2 coccinella;
+// (cx, cy) è il centro in mm, scala = mm per unità di disegno
+function artista(doc) {
+  var u = 0.95;
+  var CX = 0, CY = 0;
   // coordinate locali (y verso l'alto) -> coordinate pagina
   var CX = 0, CY = 0;
   function X(x) { return CX + x * u; }
@@ -450,7 +431,108 @@ function generaPdfProtagonisti() {
   }
 
   var animali = [bruco, formica, coccinella];
-  var sfondi = ['#F1F8E9', '#EFEBE9', '#FFEBEE'];
+  return function (k, cx, cy, scala) { CX = cx; CY = cy; u = scala; animali[k](); };
+}
+
+var LOGO_URL = 'https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png';
+var logoData = null;
+(function caricaLogo() {
+  var img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = function () {
+    try {
+      var cv = document.createElement('canvas'); cv.width = cv.height = 160;
+      var g = cv.getContext('2d');
+      g.beginPath(); g.arc(80, 80, 80, 0, 7); g.clip(); g.fillStyle = '#fff'; g.fillRect(0, 0, 160, 160);
+      var k = Math.min(160 / img.width, 160 / img.height);
+      g.drawImage(img, 80 - img.width * k / 2, 80 - img.height * k / 2, img.width * k, img.height * k);
+      logoData = cv.toDataURL('image/png');
+    } catch (e) { logoData = null; }
+  };
+  img.src = LOGO_URL;
+})();
+
+/* ===== PDF dei problemi: 3 per pagina, con i protagonisti disegnati e lo spazio per i fagioli ===== */
+function apriStampa() {
+  document.getElementById('stampaStato').textContent = '';
+  document.getElementById('stampaOverlay').classList.add('on');
+}
+function chiudiStampa() { document.getElementById('stampaOverlay').classList.remove('on'); }
+document.getElementById('btn-pdf').addEventListener('click', apriStampa);
+
+var PDF_NOMI = ['BRUCO', 'FORMICA', 'COCCINELLA'];
+var PDF_COLORI = ['#4F8F1E', '#6D4C41', '#D32F2F'];
+var PDF_SFONDI = ['#F1F8E9', '#EFEBE9', '#FFEBEE'];
+var PDF_BORDI = ['#C5DFA3', '#DCCBC3', '#F5C2BD'];
+
+function pdfProblemi(pagine) {
+  var stato = document.getElementById('stampaStato');
+  if (!window.jspdf) { stato.textContent = 'Non riesco a creare il PDF: controlla la connessione a internet e ricarica la pagina.'; return; }
+  var doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
+  var disegna = artista(doc);
+  var lista = problemiAttuali();
+  var W = 210, M = 12, G = 6, PER = 3;
+  var tw = W - 2 * M, th = (297 - 2 * M - (PER - 1) * G) / PER;
+
+  for (var n = 0; n < pagine * PER; n++) {
+    var k = n % PER;
+    if (n > 0 && k === 0) doc.addPage();
+    var x = M, y = M + k * (th + G);
+    var testo = singolare(lista[r(0, lista.length - 1)]()).replace(/<[^>]+>/g, '').toUpperCase();
+
+    // cornice
+    doc.setDrawColor('#F0C75E'); doc.setLineWidth(1.2);
+    doc.roundedRect(x, y, tw, th, 4, 4, 'S');
+    // intestazione
+    if (logoData) doc.addImage(logoData, 'PNG', x + 4, y + 3, 8, 8);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(120);
+    doc.text('Matematiche non si nasce', x + 14, y + 6.3);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor('#5A4300');
+    doc.text('BRUCO, FORMICA E COCCINELLA', x + 14, y + 10);
+    doc.setFillColor('#F0C75E'); doc.roundedRect(x + tw - 34, y + 3.5, 30, 6.5, 3.2, 3.2, 'F');
+    doc.setFontSize(8.5); doc.setTextColor('#5A4300');
+    doc.text('PROBLEMA ' + (n + 1), x + tw - 19, y + 8, { align: 'center' });
+
+    // testo del problema
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11.5); doc.setTextColor(30);
+    var righe = doc.splitTextToSize(testo, tw - 10);
+    doc.text(righe, x + 5, y + 18, { lineHeightFactor: 1.35 });
+    var yRighe = y + 18 + (righe.length - 1) * 5.5 + 4;
+
+    // tre righe: protagonista disegnato a sinistra, spazio per disegnare i fagioli
+    var rh = 14, rg = 1.8;
+    var yP = Math.max(yRighe, y + 28);
+    for (var p = 0; p < 3; p++) {
+      var ry = yP + p * (rh + rg);
+      doc.setFillColor(PDF_SFONDI[p]); doc.setDrawColor(PDF_BORDI[p]); doc.setLineWidth(0.5);
+      doc.roundedRect(x + 4, ry, tw - 8, rh, 3, 3, 'FD');
+      doc.setFillColor('#FFFFFF'); doc.roundedRect(x + 6, ry + 1.5, 30, rh - 3, 2.5, 2.5, 'F');
+      disegna(p, x + 21, ry + rh / 2, 0.62);
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(PDF_COLORI[p]);
+      doc.text(PDF_NOMI[p], x + 39, ry + 5.2);
+      doc.setDrawColor(PDF_BORDI[p]); doc.setLineWidth(0.3); doc.setLineDashPattern([1, 1.2], 0);
+      doc.line(x + 39, ry + rh - 3, x + tw - 8, ry + rh - 3);
+      doc.setLineDashPattern([], 0);
+    }
+
+    // risposta
+    var ya = yP + 3 * rh + 2 * rg + 6;
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(60);
+    doc.text('RISPOSTA:', x + 5, ya);
+    doc.setDrawColor(120); doc.setLineWidth(0.35);
+    doc.line(x + 26, ya + 0.5, x + tw - 6, ya + 0.5);
+  }
+  doc.save('problemi-bruco-formica-coccinella.pdf');
+  stato.textContent = 'PDF pronto: ' + pagine + (pagine === 1 ? ' pagina' : ' pagine') + '. Se lo crei di nuovo, i problemi cambiano.';
+}
+
+/* ===== PDF PROTAGONISTI: 20 strisce ritagliabili (bruco, formica, coccinella) ===== */
+function generaPdfProtagonisti() {
+  if (!window.jspdf) { alert('Non riesco a creare il PDF: controlla la connessione a internet e ricarica la pagina.'); return; }
+  var doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
+  var disegna = artista(doc);
+  var W = 210, H = 297, M = 8, COLS = 5, ROWS = 4;
+  var sw = (W - 2 * M) / COLS, sh = (H - 2 * M) / ROWS, ch = sh / 3;
   var spost = [-1, 1, 1];
 
   for (var rr = 0; rr < ROWS; rr++) {
@@ -458,10 +540,9 @@ function generaPdfProtagonisti() {
       var x0 = M + cc * sw, yTop = M + rr * sh;
       for (var k = 0; k < 3; k++) {
         var cy = yTop + (k + 0.5) * ch;
-        fill(sfondi[k]);
+        doc.setFillColor(PDF_SFONDI[k]);
         doc.roundedRect(x0 + 1.5, cy - ch / 2 + 1, sw - 3, ch - 2, 2.5, 2.5, 'F');
-        CX = x0 + sw / 2 + spost[k]; CY = cy;
-        animali[k]();
+        disegna(k, x0 + sw / 2 + spost[k], cy, 0.95);
       }
     }
   }
