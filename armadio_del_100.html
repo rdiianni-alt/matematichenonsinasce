@@ -4,20 +4,35 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>I pallini del 100</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: Arial, sans-serif; background: #f5f5f5; min-height: 100vh; }
-  .menu { display: flex; flex-direction: column; align-items: center; padding: 20px 16px; gap: 12px; }
-  .menu h1 { font-size: 26px; color: #222; }
-  .menu-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; width: 100%; max-width: 1000px; }
-  @media (max-width: 820px) { .menu-cards { grid-template-columns: repeat(2, 1fr); } }
-  .logo-link { display: flex; flex-direction: column; align-items: center; text-decoration: none; gap: 6px; margin-bottom: 4px; }
-  .logo img { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; }
-  .blog-name { font-size: 15px; font-weight: 600; color: #555; }
-  .menu-card { background: #fff; border: 1.5px solid #ddd; border-radius: 14px; padding: 14px 16px; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s; }
-  .menu-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.10); border-color: #E24B4A; }
-  .menu-card h2 { font-size: 17px; font-weight: 600; color: #E24B4A; margin-bottom: 6px; }
-  .menu-card p { font-size: 13px; color: #666; line-height: 1.5; }
+  /* Menu iniziale: riempie tutto lo schermo, quattro grandi schede 2×2 */
+  .menu { min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 14px 24px 22px; gap: 14px; background: #f7f3ee; }
+  .menu-head { width: 100%; max-width: 1500px; display: flex; align-items: center; justify-content: center; position: relative; min-height: 56px; }
+  .logo-link { position: absolute; left: 0; top: 50%; transform: translateY(-50%); display: flex; align-items: center; text-decoration: none; gap: 10px; }
+  .logo img { width: 48px; height: 48px; object-fit: contain; border-radius: 50%; }
+  .blog-name { font-size: 14px; font-weight: 600; color: #555; }
+  .menu h1 { font-size: clamp(30px, 4.2vw, 54px); color: #222; letter-spacing: .01em; }
+  .menu h1 span { color: #E24B4A; }
+  .menu-cards { flex: 1; width: 100%; max-width: 1500px; display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; gap: 20px; }
+  .menu-card { --c: #E24B4A; --soft: #fdeceb; display: flex; align-items: center; gap: clamp(16px, 2.5vw, 36px); padding: clamp(16px, 2.4vw, 34px); background: #fff; border: 3px solid var(--soft); border-radius: 24px; cursor: pointer; text-align: left; font: inherit; color: inherit; transition: transform .12s, box-shadow .15s, border-color .15s; }
+  .menu-card:hover, .menu-card:focus-visible { border-color: var(--c); box-shadow: 0 10px 28px rgba(0,0,0,.10); transform: translateY(-2px); outline: none; }
+  .menu-card.c2 { --c: #E07B1F; --soft: #fdf0e3; }
+  .menu-card.c3 { --c: #2F74C8; --soft: #e8f0fb; }
+  .menu-card.c4 { --c: #3B9358; --soft: #e7f4ea; }
+  .mini { flex: none; width: clamp(110px, 24vh, 240px); height: auto; background: var(--soft); border-radius: 18px; padding: 10px; }
+  .menu-txt { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .menu-card h2 { font-size: clamp(22px, 2.7vw, 40px); font-weight: 700; color: var(--c); line-height: 1.1; }
+  .menu-card p { font-size: clamp(15px, 1.5vw, 21px); color: #555; line-height: 1.4; }
+  .gioca { align-self: flex-start; margin-top: 4px; padding: 8px 20px; border-radius: 999px; background: var(--c); color: #fff; font-weight: 700; font-size: clamp(14px, 1.3vw, 18px); }
+  @media (max-width: 760px) {
+    .menu-cards { grid-template-columns: 1fr; grid-auto-rows: auto; }
+    .logo-link { position: static; transform: none; }
+    .menu-head { flex-direction: column; gap: 6px; }
+    .mini { width: 96px; }
+  }
   .screen { display: none; flex-direction: column; align-items: center; padding: 12px 16px; min-height: 100vh; }
   .screen.active { display: flex; }
   .back-btn { align-self: flex-start; font-size: 14px; color: #888; background: none; border: none; cursor: pointer; margin-bottom: 4px; padding: 4px 0; }
@@ -64,70 +79,45 @@
   .feedback.ok { color: #2E7D32; }
   .feedback.no { color: #E24B4A; }
 
-  /* --- Stampa scheda PDF --- */
-  #printModalOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+  /* --- Stampa scheda PDF: si sceglie quante pagine e il PDF si scarica subito --- */
+  #printModalOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; padding: 16px; }
   #printModalOverlay.active { display: flex; }
-  .print-modal { background: #fff; border-radius: 12px; padding: 26px 28px; width: 280px; display: flex; flex-direction: column; gap: 14px; align-items: center; }
-  .print-modal h3 { font-size: 16px; color: #222; font-weight: 600; text-align: center; }
-  .print-modal input { font-size: 22px; text-align: center; width: 90px; padding: 6px; border: 2px solid #bbb; border-radius: 8px; }
-  .print-modal-buttons { display: flex; gap: 10px; }
-
-  #printSheet { display: none; }
-
-  @media print {
-    body > *:not(#printSheet) { display: none !important; }
-    #printSheet { display: block !important; }
-    .print-page { page-break-after: always; }
-    .print-page:last-child { page-break-after: auto; }
-    @page { size: A4 landscape; margin: 10mm; }
-  }
-
-  .print-page { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr); gap: 5mm; width: 277mm; height: 190mm; background: #fff; }
-  .print-tile { border: 1px dashed #ccc; border-radius: 4px; padding: 3mm; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 2.5mm; background: #fff; overflow: hidden; }
-  .p-logo { display: flex; flex-direction: column; align-items: center; gap: 1px; text-decoration: none; }
-  .p-logo img { width: 20px; height: 20px; border-radius: 50%; object-fit: contain; }
-  .p-logo span { font-size: 7px; color: #777; }
-  .p-title { font-size: 9px; font-weight: 700; color: #222; }
-  .p-question { font-size: 11px; font-weight: 600; color: #222; text-align: center; }
-  .print-grid { display: flex; flex-direction: column; gap: 1.5px; }
-  .print-row { display: flex; gap: 1.5px; align-items: center; justify-content: center; }
-  .print-row-gap { height: 5px; }
-  .print-col-gap { width: 5px; }
-  /* Palline in SVG: il riempimento si stampa sempre (anche senza "grafica di sfondo")
-     e il rosso scuro con bordo nero resta ben distinguibile in bianco e nero. */
-  .print-ball { display: block; width: 18px; height: 18px; }
-  #printSheet { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .print-answer-line { margin-top: 1.5mm; border-bottom: 1px solid #999; width: 55%; height: 12px; }
+  .print-modal { background: #fff; border-radius: 16px; padding: 26px 30px; max-width: 460px; width: 100%; display: flex; flex-direction: column; gap: 16px; align-items: center; }
+  .print-modal h3 { font-size: 20px; color: #222; font-weight: 700; text-align: center; }
+  .print-modal .sub { font-size: 14px; color: #666; text-align: center; margin-top: -8px; }
+  .pages-choice { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .pages-choice button { width: 64px; height: 64px; font-size: 26px; font-weight: 700; border-radius: 14px; border: 2px solid #A32D2D; background: #fff; color: #A32D2D; cursor: pointer; }
+  .pages-choice button:hover { background: #E24B4A; color: #fff; }
+  .print-status { font-size: 14px; color: #555; min-height: 1.2em; text-align: center; }
 </style>
 </head>
 <body>
 
 <div id="menuScreen" class="menu">
-  <a href="https://matematichenonsinasce.com/" class="logo-link">
-    <div class="logo"><img src="https://raw.githubusercontent.com/rdiianni-alt/archivio_privato/988498e303d047e2e04caa80073d184ee4d392c7/logo.png" alt="Matematiche non si nasce"></div>
-    <div class="blog-name">Matematiche non si nasce</div>
-  </a>
-  <h1>I pallini del 100</h1>
-  <svg width="80" height="80" viewBox="0 0 100 100" aria-hidden="true">
-    <g stroke="#A32D2D" stroke-width="0.9"><circle cx="10" cy="10" r="3.6" fill="#E24B4A"/><circle cx="18.6" cy="10" r="3.6" fill="#E24B4A"/><circle cx="27.2" cy="10" r="3.6" fill="#E24B4A"/><circle cx="35.8" cy="10" r="3.6" fill="#E24B4A"/><circle cx="44.4" cy="10" r="3.6" fill="#E24B4A"/><circle cx="57" cy="10" r="3.6" fill="#E24B4A"/><circle cx="65.6" cy="10" r="3.6" fill="#E24B4A"/><circle cx="74.2" cy="10" r="3.6" fill="#E24B4A"/><circle cx="82.8" cy="10" r="3.6" fill="#E24B4A"/><circle cx="91.4" cy="10" r="3.6" fill="#E24B4A"/><circle cx="10" cy="18.6" r="3.6" fill="#E24B4A"/><circle cx="18.6" cy="18.6" r="3.6" fill="#E24B4A"/><circle cx="27.2" cy="18.6" r="3.6" fill="#E24B4A"/><circle cx="35.8" cy="18.6" r="3.6" fill="#E24B4A"/><circle cx="44.4" cy="18.6" r="3.6" fill="#E24B4A"/><circle cx="57" cy="18.6" r="3.6" fill="#E24B4A"/><circle cx="65.6" cy="18.6" r="3.6" fill="#E24B4A"/><circle cx="74.2" cy="18.6" r="3.6" fill="#E24B4A"/><circle cx="82.8" cy="18.6" r="3.6" fill="#E24B4A"/><circle cx="91.4" cy="18.6" r="3.6" fill="#E24B4A"/><circle cx="10" cy="27.2" r="3.6" fill="#E24B4A"/><circle cx="18.6" cy="27.2" r="3.6" fill="#E24B4A"/><circle cx="27.2" cy="27.2" r="3.6" fill="#E24B4A"/><circle cx="35.8" cy="27.2" r="3.6" fill="#fff"/><circle cx="44.4" cy="27.2" r="3.6" fill="#fff"/><circle cx="57" cy="27.2" r="3.6" fill="#fff"/><circle cx="65.6" cy="27.2" r="3.6" fill="#fff"/><circle cx="74.2" cy="27.2" r="3.6" fill="#fff"/><circle cx="82.8" cy="27.2" r="3.6" fill="#fff"/><circle cx="91.4" cy="27.2" r="3.6" fill="#fff"/><circle cx="10" cy="35.8" r="3.6" fill="#fff"/><circle cx="18.6" cy="35.8" r="3.6" fill="#fff"/><circle cx="27.2" cy="35.8" r="3.6" fill="#fff"/><circle cx="35.8" cy="35.8" r="3.6" fill="#fff"/><circle cx="44.4" cy="35.8" r="3.6" fill="#fff"/><circle cx="57" cy="35.8" r="3.6" fill="#fff"/><circle cx="65.6" cy="35.8" r="3.6" fill="#fff"/><circle cx="74.2" cy="35.8" r="3.6" fill="#fff"/><circle cx="82.8" cy="35.8" r="3.6" fill="#fff"/><circle cx="91.4" cy="35.8" r="3.6" fill="#fff"/><circle cx="10" cy="44.4" r="3.6" fill="#fff"/><circle cx="18.6" cy="44.4" r="3.6" fill="#fff"/><circle cx="27.2" cy="44.4" r="3.6" fill="#fff"/><circle cx="35.8" cy="44.4" r="3.6" fill="#fff"/><circle cx="44.4" cy="44.4" r="3.6" fill="#fff"/><circle cx="57" cy="44.4" r="3.6" fill="#fff"/><circle cx="65.6" cy="44.4" r="3.6" fill="#fff"/><circle cx="74.2" cy="44.4" r="3.6" fill="#fff"/><circle cx="82.8" cy="44.4" r="3.6" fill="#fff"/><circle cx="91.4" cy="44.4" r="3.6" fill="#fff"/><circle cx="10" cy="57" r="3.6" fill="#fff"/><circle cx="18.6" cy="57" r="3.6" fill="#fff"/><circle cx="27.2" cy="57" r="3.6" fill="#fff"/><circle cx="35.8" cy="57" r="3.6" fill="#fff"/><circle cx="44.4" cy="57" r="3.6" fill="#fff"/><circle cx="57" cy="57" r="3.6" fill="#fff"/><circle cx="65.6" cy="57" r="3.6" fill="#fff"/><circle cx="74.2" cy="57" r="3.6" fill="#fff"/><circle cx="82.8" cy="57" r="3.6" fill="#fff"/><circle cx="91.4" cy="57" r="3.6" fill="#fff"/><circle cx="10" cy="65.6" r="3.6" fill="#fff"/><circle cx="18.6" cy="65.6" r="3.6" fill="#fff"/><circle cx="27.2" cy="65.6" r="3.6" fill="#fff"/><circle cx="35.8" cy="65.6" r="3.6" fill="#fff"/><circle cx="44.4" cy="65.6" r="3.6" fill="#fff"/><circle cx="57" cy="65.6" r="3.6" fill="#fff"/><circle cx="65.6" cy="65.6" r="3.6" fill="#fff"/><circle cx="74.2" cy="65.6" r="3.6" fill="#fff"/><circle cx="82.8" cy="65.6" r="3.6" fill="#fff"/><circle cx="91.4" cy="65.6" r="3.6" fill="#fff"/><circle cx="10" cy="74.2" r="3.6" fill="#fff"/><circle cx="18.6" cy="74.2" r="3.6" fill="#fff"/><circle cx="27.2" cy="74.2" r="3.6" fill="#fff"/><circle cx="35.8" cy="74.2" r="3.6" fill="#fff"/><circle cx="44.4" cy="74.2" r="3.6" fill="#fff"/><circle cx="57" cy="74.2" r="3.6" fill="#fff"/><circle cx="65.6" cy="74.2" r="3.6" fill="#fff"/><circle cx="74.2" cy="74.2" r="3.6" fill="#fff"/><circle cx="82.8" cy="74.2" r="3.6" fill="#fff"/><circle cx="91.4" cy="74.2" r="3.6" fill="#fff"/><circle cx="10" cy="82.8" r="3.6" fill="#fff"/><circle cx="18.6" cy="82.8" r="3.6" fill="#fff"/><circle cx="27.2" cy="82.8" r="3.6" fill="#fff"/><circle cx="35.8" cy="82.8" r="3.6" fill="#fff"/><circle cx="44.4" cy="82.8" r="3.6" fill="#fff"/><circle cx="57" cy="82.8" r="3.6" fill="#fff"/><circle cx="65.6" cy="82.8" r="3.6" fill="#fff"/><circle cx="74.2" cy="82.8" r="3.6" fill="#fff"/><circle cx="82.8" cy="82.8" r="3.6" fill="#fff"/><circle cx="91.4" cy="82.8" r="3.6" fill="#fff"/><circle cx="10" cy="91.4" r="3.6" fill="#fff"/><circle cx="18.6" cy="91.4" r="3.6" fill="#fff"/><circle cx="27.2" cy="91.4" r="3.6" fill="#fff"/><circle cx="35.8" cy="91.4" r="3.6" fill="#fff"/><circle cx="44.4" cy="91.4" r="3.6" fill="#fff"/><circle cx="57" cy="91.4" r="3.6" fill="#fff"/><circle cx="65.6" cy="91.4" r="3.6" fill="#fff"/><circle cx="74.2" cy="91.4" r="3.6" fill="#fff"/><circle cx="82.8" cy="91.4" r="3.6" fill="#fff"/><circle cx="91.4" cy="91.4" r="3.6" fill="#fff"/></g>
-  </svg>
+  <div class="menu-head">
+    <a href="https://matematichenonsinasce.com/" class="logo-link" target="_blank" rel="noopener">
+      <div class="logo"><img src="https://raw.githubusercontent.com/rdiianni-alt/archivio_privato/988498e303d047e2e04caa80073d184ee4d392c7/logo.png" alt="Matematiche non si nasce"></div>
+      <div class="blog-name">Matematiche non si nasce</div>
+    </a>
+    <h1>I pallini del <span>100</span></h1>
+  </div>
   <div class="menu-cards">
-  <div class="menu-card" onclick="startGame('conta')">
-    <h2>🔴 Quante palline?</h2>
-    <p>Si colorano alcune palline. Quante sono?</p>
-  </div>
-  <div class="menu-card" onclick="startGame('trova')">
-    <h2>🎯 Trova la pallina</h2>
-    <p>Viene indicato un numero. Qual è la pallina corrispondente?</p>
-  </div>
-  <div class="menu-card" onclick="startGame('indovina')">
-    <h2>❓ Che numero è?</h2>
-    <p>Si accende una pallina. Che numero è?</p>
-  </div>
-  <div class="menu-card" onclick="startGame('semplice')">
-    <h2>⚪ Pallini liberi</h2>
-    <p>Colora le palline che vuoi, senza domande. Poi scopri quante sono.</p>
-  </div>
+    <button type="button" class="menu-card c1" onclick="startGame('conta')">
+      <svg class="mini" data-mini="conta" viewBox="0 0 108 108" aria-hidden="true"></svg>
+      <span class="menu-txt"><h2>Quante palline?</h2><p>Si colorano alcune palline. Quante sono?</p><span class="gioca">Gioca →</span></span>
+    </button>
+    <button type="button" class="menu-card c2" onclick="startGame('trova')">
+      <svg class="mini" data-mini="trova" viewBox="0 0 108 108" aria-hidden="true"></svg>
+      <span class="menu-txt"><h2>Trova la pallina</h2><p>Viene indicato un numero. Qual è la pallina corrispondente?</p><span class="gioca">Gioca →</span></span>
+    </button>
+    <button type="button" class="menu-card c3" onclick="startGame('indovina')">
+      <svg class="mini" data-mini="indovina" viewBox="0 0 108 108" aria-hidden="true"></svg>
+      <span class="menu-txt"><h2>Che numero è?</h2><p>Si accende una pallina. Che numero è?</p><span class="gioca">Gioca →</span></span>
+    </button>
+    <button type="button" class="menu-card c4" onclick="startGame('semplice')">
+      <svg class="mini" data-mini="semplice" viewBox="0 0 108 108" aria-hidden="true"></svg>
+      <span class="menu-txt"><h2>Pallini liberi</h2><p>Colora le palline che vuoi, senza domande. Poi scopri quante sono.</p><span class="gioca">Gioca →</span></span>
+    </button>
   </div>
 </div>
 
@@ -202,17 +192,21 @@
   </div>
 </div>
 
-<div id="printModalOverlay">
-  <div class="print-modal">
-    <h3>Quanti esercizi vuoi stampare?</h3>
-    <input type="number" id="printCount" value="6" min="1" max="100">
-    <div class="print-modal-buttons">
-      <button class="btn" onclick="closePrintModal()">Annulla</button>
-      <button class="btn primary" onclick="confirmPrint()">Genera PDF</button>
+<div id="printModalOverlay" onclick="if(event.target===this) closePrintModal()">
+  <div class="print-modal" role="dialog" aria-labelledby="printTitle">
+    <h3 id="printTitle">Quante pagine vuoi stampare?</h3>
+    <div class="sub">6 esercizi per pagina · il PDF si scarica subito</div>
+    <div class="pages-choice">
+      <button type="button" onclick="makePdf(1)">1</button>
+      <button type="button" onclick="makePdf(2)">2</button>
+      <button type="button" onclick="makePdf(3)">3</button>
+      <button type="button" onclick="makePdf(4)">4</button>
+      <button type="button" onclick="makePdf(5)">5</button>
     </div>
+    <div class="print-status" id="printStatus"></div>
+    <button class="btn" onclick="closePrintModal()">Annulla</button>
   </div>
 </div>
-<div id="printSheet"></div>
 
 <script>
   var contaCurrent = 0;
@@ -453,10 +447,27 @@
     document.getElementById('sempliceRevBtn').textContent = sempliceNumeriVisibili ? 'Nascondi i numeri' : 'Mostra i numeri';
   }
 
+  /* --- Disegnini del menu --- */
+  (function drawMinis() {
+    var liberi = [12, 13, 22, 23, 24, 33, 47, 48, 57, 58, 66, 71, 72, 81, 82, 83, 91, 95, 96];
+    document.querySelectorAll('[data-mini]').forEach(function (svg) {
+      var kind = svg.getAttribute('data-mini');
+      var out = '';
+      for (var i = 0; i < 100; i++) {
+        var r = Math.floor(i / 10), c = i % 10;
+        var x = 9 + c * 9.6 + (c >= 5 ? 3 : 0), y = 9 + r * 9.6 + (r >= 5 ? 3 : 0);
+        var on = kind === 'conta' ? i < 37 : kind === 'indovina' ? i === 57 : kind === 'semplice' ? liberi.indexOf(i) >= 0 : false;
+        out += '<circle cx="' + x + '" cy="' + y + '" r="3.7" fill="' + (on ? 'var(--c)' : '#fff') + '" stroke="' + (on ? 'rgba(0,0,0,.35)' : '#bbb') + '" stroke-width="0.8"/>';
+        if (kind === 'trova' && i === 64) out += '<circle cx="' + x + '" cy="' + y + '" r="6.2" fill="none" stroke="var(--c)" stroke-width="2"/>';
+      }
+      svg.innerHTML = out;
+    });
+  })();
+
   /* --- Stampa scheda PDF --- */
 
   function openPrintModal() {
-    document.getElementById('printCount').value = 6;
+    document.getElementById('printStatus').textContent = '';
     document.getElementById('printModalOverlay').classList.add('active');
   }
 
@@ -474,79 +485,80 @@
     return arr;
   }
 
-  var BALL_ON = '<svg class="print-ball" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8.6" fill="#B3261E" stroke="#000" stroke-width="2.2"/></svg>';
-  var BALL_OFF = '<svg class="print-ball" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" fill="#fff" stroke="#888" stroke-width="1.2"/></svg>';
+  // Logo come immagine per il PDF (se non si carica, il PDF esce senza logo)
+  var logoData = null;
+  (function loadLogo() {
+    var img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = function () {
+      try {
+        var cv = document.createElement('canvas'); cv.width = cv.height = 160;
+        var g = cv.getContext('2d');
+        g.beginPath(); g.arc(80, 80, 80, 0, 7); g.clip(); g.fillStyle = '#fff'; g.fillRect(0, 0, 160, 160);
+        var k = Math.min(160 / img.width, 160 / img.height);
+        g.drawImage(img, 80 - img.width * k / 2, 80 - img.height * k / 2, img.width * k, img.height * k);
+        logoData = cv.toDataURL('image/png');
+      } catch (e) { logoData = null; }
+    };
+    img.src = LOGO_URL;
+  })();
 
-  function makeGridHTML(classFor) {
-    var html = '';
-    for (var r = 0; r < 10; r++) {
-      if (r === 5) html += '<div class="print-row-gap"></div>';
-      html += '<div class="print-row">';
-      for (var c = 0; c < 10; c++) {
-        if (c === 5) html += '<div class="print-col-gap"></div>';
-        var idx = r * 10 + c;
-        var extra = classFor(idx);
-        html += extra ? BALL_ON : BALL_OFF;
+  var QUESTIONS = {
+    conta: 'Quante palline sono colorate?',
+    indovina: 'Che numero è la pallina colorata?',
+    semplice: 'Colora le palline che vuoi. Quante sono?'
+  };
+  var FILE_NAMES = { conta: 'quante-palline', trova: 'trova-la-pallina', indovina: 'che-numero-e', semplice: 'pallini-liberi' };
+
+  // Un esercizio: riquadro con logo, domanda, griglia 10×10 e riga per la risposta.
+  // Le palline sono cerchi vettoriali: rosso scuro pieno con bordo nero, ben visibili anche in bianco e nero.
+  function drawTile(doc, x, y, w, h, game, num) {
+    doc.setDrawColor(190); doc.setLineWidth(0.25); doc.setLineDashPattern([1.5, 1.2], 0);
+    doc.roundedRect(x, y, w, h, 2, 2, 'S'); doc.setLineDashPattern([], 0);
+    var cx = x + w / 2;
+    if (logoData) doc.addImage(logoData, 'PNG', x + 3, y + 3, 7, 7);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); doc.setTextColor(120);
+    doc.text('Matematiche non si nasce', x + 11.5, y + 6);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(226, 75, 74);
+    doc.text('I pallini del 100', x + 11.5, y + 9.3);
+    doc.setFontSize(11); doc.setTextColor(30);
+    var q = game === 'trova' ? 'Colora la pallina numero ' + num : QUESTIONS[game];
+    doc.text(q, cx, y + 17, { align: 'center' });
+    var pitch = 6, d = 5.1, gap = 2.2;
+    var gw = 10 * pitch + gap, gx = cx - gw / 2 + pitch / 2, gy = y + 22 + pitch / 2;
+    for (var i = 0; i < 100; i++) {
+      var r = Math.floor(i / 10), c = i % 10;
+      var bx = gx + c * pitch + (c >= 5 ? gap : 0), by = gy + r * pitch + (r >= 5 ? gap : 0);
+      var on = (game === 'conta' && i < num) || (game === 'indovina' && i === num - 1);
+      if (on) { doc.setFillColor(179, 38, 30); doc.setDrawColor(0); doc.setLineWidth(0.5); doc.circle(bx, by, d / 2, 'FD'); }
+      else { doc.setFillColor(255, 255, 255); doc.setDrawColor(130); doc.setLineWidth(0.25); doc.circle(bx, by, d / 2, 'FD'); }
+    }
+    if (game !== 'trova') {
+      var ly = gy + 10 * pitch + gap + 3;
+      doc.setDrawColor(90); doc.setLineWidth(0.35); doc.line(cx - 18, ly, cx + 18, ly);
+    }
+  }
+
+  function makePdf(pages) {
+    var status = document.getElementById('printStatus');
+    if (!window.jspdf || !activeGame) {
+      status.textContent = 'Non riesco a creare il PDF: controlla la connessione a internet e ricarica la pagina.';
+      return;
+    }
+    var doc = new window.jspdf.jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    var count = pages * 6, nums = [];
+    while (nums.length < count) nums = nums.concat(shuffledNumbers(100));
+    // Margini 10 mm, 3 colonne × 2 righe per pagina
+    var M = 10, G = 5, tw = (297 - 2 * M - 2 * G) / 3, th = (210 - 2 * M - G) / 2;
+    for (var p = 0; p < pages; p++) {
+      if (p > 0) doc.addPage();
+      for (var k = 0; k < 6; k++) {
+        var col = k % 3, row = Math.floor(k / 3);
+        drawTile(doc, M + col * (tw + G), M + row * (th + G), tw, th, activeGame, nums[p * 6 + k]);
       }
-      html += '</div>';
     }
-    return html;
-  }
-
-  function buildPrintTile(gameType, num) {
-    var logoHtml = '<div class="p-logo"><img src="' + LOGO_URL + '" alt="Matematiche non si nasce"><span>Matematiche non si nasce</span></div><div class="p-title">I pallini del 100</div>';
-    var gridHtml = '', questionHtml = '', answerHtml = '';
-
-    if (gameType === 'conta') {
-      gridHtml = makeGridHTML(function (i) { return i < num ? 'on' : ''; });
-      questionHtml = 'Quante palline colorate?';
-      answerHtml = '<div class="print-answer-line"></div>';
-    } else if (gameType === 'trova') {
-      gridHtml = makeGridHTML(function () { return ''; });
-      questionHtml = 'Colora la pallina numero ' + num;
-    } else if (gameType === 'indovina') {
-      gridHtml = makeGridHTML(function (i) { return i === num - 1 ? 'single' : ''; });
-      questionHtml = 'Che numero è?';
-      answerHtml = '<div class="print-answer-line"></div>';
-    } else if (gameType === 'semplice') {
-      gridHtml = makeGridHTML(function () { return ''; });
-      questionHtml = 'Colora le palline che vuoi. Quante sono?';
-      answerHtml = '<div class="print-answer-line"></div>';
-    }
-
-    return '<div class="print-tile">' + logoHtml +
-      '<div class="p-question">' + questionHtml + '</div>' +
-      '<div class="print-grid">' + gridHtml + '</div>' +
-      answerHtml + '</div>';
-  }
-
-  function generatePrintSheet(gameType, count) {
-    var numbers = shuffledNumbers(100).slice(0, count);
-    var sheet = document.getElementById('printSheet');
-    var out = '';
-    for (var i = 0; i < numbers.length; i += 6) {
-      var pageNums = numbers.slice(i, i + 6);
-      out += '<div class="print-page">';
-      for (var j = 0; j < 6; j++) {
-        if (j < pageNums.length) {
-          out += buildPrintTile(gameType, pageNums[j]);
-        } else {
-          out += '<div class="print-tile" style="visibility:hidden;"></div>';
-        }
-      }
-      out += '</div>';
-    }
-    sheet.innerHTML = out;
-  }
-
-  function confirmPrint() {
-    if (!activeGame) return;
-    var n = parseInt(document.getElementById('printCount').value, 10);
-    if (!n || n < 1) n = 1;
-    if (n > 100) n = 100;
-    generatePrintSheet(activeGame, n);
-    closePrintModal();
-    setTimeout(function () { window.print(); }, 150);
+    doc.save('i-pallini-del-100-' + FILE_NAMES[activeGame] + '.pdf');
+    status.textContent = 'PDF pronto: ' + pages + (pages === 1 ? ' pagina' : ' pagine') + '. Se lo crei di nuovo, i numeri cambiano.';
   }
 </script>
 </body>
