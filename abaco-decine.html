@@ -23,6 +23,7 @@
     --surface: #fffdf8;
     --grid-line: rgba(43, 33, 24, 0.07);
     --danger: #b23a2e;
+    --b: clamp(24px, 4.6vh, 34px); /* diametro pallina, si adatta all'altezza dello schermo */
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
@@ -38,8 +39,10 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 28px 16px 40px;
+    padding: 14px 16px 20px;
   }
+
+  .testata { display: flex; align-items: center; gap: 16px; justify-content: center; }
 
   #logo-wrap {
     display: flex;
@@ -47,11 +50,10 @@
     align-items: center;
     gap: 2px;
     text-decoration: none;
-    margin-bottom: 12px;
   }
   #logo-wrap img {
-    width: 60px;
-    height: 60px;
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
     object-fit: contain;
   }
@@ -63,28 +65,82 @@
     white-space: nowrap;
   }
 
-  header { text-align: center; max-width: 480px; margin-bottom: 4px; }
+  header { text-align: left; max-width: 480px; }
   h1 {
     font-family: 'Baloo 2', sans-serif;
     font-weight: 700;
     font-size: clamp(22px, 5vw, 30px);
-    margin: 0 0 6px;
+    margin: 0 0 2px;
+    line-height: 1.1;
   }
   .sottotitolo { color: var(--ink-soft); font-size: 14px; line-height: 1.5; margin: 0; }
 
   .palco {
     background: var(--surface);
     border-radius: 22px;
-    padding: 30px 26px 20px;
-    margin-top: 20px;
+    padding: 22px 26px 18px;
+    margin-top: 14px;
     box-shadow: 0 10px 30px rgba(43, 33, 24, 0.10);
     border: 1px solid var(--grid-line);
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 18px;
+    justify-content: center;
+    gap: 30px;
     width: 100%;
-    max-width: 420px;
+    max-width: 780px;
+  }
+  .lato-abaco { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .pannello {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    width: 280px;
+    flex-shrink: 0;
+  }
+  .pannello .controlli { justify-content: stretch; margin-top: 0; }
+  .pannello .controlli button.azione { flex: 1; justify-content: center; }
+  .pannello #reset { align-self: center; padding: 6px 14px; }
+  .suggerimento {
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--ink-soft);
+    background: rgba(217, 164, 65, 0.12);
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin: 0;
+  }
+  .imposta { display: flex; gap: 8px; align-items: center; }
+  .imposta label { font-size: 13px; font-weight: 600; color: var(--ink-soft); }
+  .imposta input {
+    width: 64px;
+    padding: 10px 8px;
+    border-radius: 12px;
+    border: 1.5px solid var(--grid-line);
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    text-align: center;
+  }
+  .imposta input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  #metti { background: var(--ink); color: var(--surface); padding: 11px 16px; }
+  #metti:not(:disabled):hover { filter: brightness(1.25); }
+  .sezione-stampa {
+    border-top: 1.5px dashed var(--grid-line);
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .sezione-stampa .stampa-controlli { margin-top: 0; justify-content: flex-start; gap: 8px; }
+
+  @media (max-width: 680px) {
+    .palco { flex-direction: column; gap: 18px; padding: 20px 14px 16px; }
+    .pannello { width: 100%; max-width: 340px; }
+    .testata { gap: 10px; }
   }
 
   /* --- il telaio in legno: due stanghette verticali, una traversa in alto e una base in basso --- */
@@ -96,7 +152,7 @@
   }
   .colonne {
     display: flex;
-    gap: 64px;
+    gap: 0;
     align-items: flex-end;
     padding: 0 18px;
   }
@@ -105,7 +161,7 @@
   .rod-area {
     position: relative;
     width: 86px;
-    height: calc(34px * 9 + 5px * 8 + 14px);
+    height: calc(var(--b) * 9 + 5px * 8 + 14px);
     display: flex;
     justify-content: center;
   }
@@ -127,21 +183,56 @@
 
   .pallina { flex-shrink: 0; display: flex; align-items: center; justify-content: center; animation: comparsa 260ms cubic-bezier(.34,1.56,.64,1); }
   .pallina.unita {
-    width: 34px; height: 34px; border-radius: 50%;
+    width: var(--b); height: var(--b); border-radius: 50%;
     background: radial-gradient(circle at 32% 28%, var(--unita-shine), var(--unita) 62%);
     box-shadow: 0 2px 4px rgba(0,0,0,0.18);
   }
   .pallina.decina {
-    width: 34px; height: 34px; border-radius: 50%;
+    width: var(--b); height: var(--b); border-radius: 50%;
     background: rgba(255, 255, 255, 0.3);
     border: 2px solid var(--decina-bordo);
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(5, 1fr);
     gap: 1.5px;
-    padding: 4px;
+    padding: calc(var(--b) * 0.12);
     box-shadow: 0 2px 4px rgba(0,0,0,0.12);
   }
+
+  .pallina.senza-comparsa { animation: none; }
+
+  /* --- palline cliccabili --- */
+  .cliccabile .pallina { cursor: pointer; transition: filter 120ms ease, box-shadow 120ms ease; }
+  .cliccabile .pallina:hover { filter: brightness(1.08); box-shadow: 0 0 0 3px rgba(217, 164, 65, 0.55); }
+  .pallina.esce { animation: esce 220ms ease-in forwards; pointer-events: none; }
+  @keyframes esce {
+    0% { transform: scale(1); opacity: 1; }
+    40% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(0) translateY(-10px); opacity: 0; }
+  }
+
+  /* --- le dieci palline sospese tra le due stecche --- */
+  .sospese {
+    width: 64px;
+    height: calc(var(--b) * 9 + 5px * 8 + 14px);
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 2px;
+  }
+  .pallina.sospesa {
+    width: var(--b); height: var(--b); border-radius: 50%;
+    background: radial-gradient(circle at 32% 28%, var(--unita-shine), var(--unita) 62%);
+    box-shadow: 0 6px 10px rgba(43,33,24,0.22);
+    cursor: pointer;
+    animation:
+      comparsa 300ms cubic-bezier(.34,1.56,.64,1) backwards,
+      fluttua 1.3s ease-in-out infinite alternate;
+  }
+  .pallina.sospesa:hover { filter: brightness(1.1); box-shadow: 0 0 0 3px rgba(217, 164, 65, 0.7), 0 6px 10px rgba(43,33,24,0.22); }
+  .pallina.sospesa.esce { animation: esce 220ms ease-in forwards; }
+  @keyframes fluttua { from { transform: translate(-3px, -2px); } to { transform: translate(3px, 2px); } }
   .pallina.decina .puntino { width: 100%; height: 100%; border-radius: 50%; background: var(--unita); }
 
   @keyframes comparsa { from { transform: scale(0.15); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -176,13 +267,14 @@
     display: flex;
     gap: 64px;
     padding: 0 18px;
-    margin-top: -6px;
+    margin-top: -4px;
   }
   .etichette .colonna-info { width: 86px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
   .etichette span { font-size: 13px; font-weight: 600; color: var(--ink-soft); }
   .etichette .cifra { font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 24px; color: var(--ink); }
+  .etichette .cifra.cambio { color: var(--unita); }
 
-  .stato { min-height: 18px; font-size: 13px; color: var(--ink-soft); text-align: center; }
+  .stato { min-height: 36px; max-width: 300px; font-size: 13px; color: var(--ink-soft); text-align: center; }
   .stato.pieno { color: var(--danger); font-weight: 600; }
 
   .controlli { display: flex; gap: 12px; margin-top: 2px; flex-wrap: wrap; justify-content: center; }
@@ -205,7 +297,7 @@
   #reset:hover { color: var(--ink); }
 
   @media (prefers-reduced-motion: reduce) {
-    .pallina, .pallina.raggruppa, .pallina.sbriciola { animation: none !important; }
+    .pallina, .pallina.raggruppa, .pallina.sbriciola, .pallina.sospesa, .pallina.esce { animation: none !important; }
   }
 
   .stampa-controlli {
@@ -387,6 +479,7 @@
 </head>
 <body>
 
+<div class="testata">
 <a id="logo-wrap" href="https://matematichenonsinasce.com/">
   <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Logo" />
   <span>Matematiche non si nasce</span>
@@ -396,59 +489,75 @@
   <h1>L'abaco trasparente</h1>
   <p class="sottotitolo">Ogni volta che le unità arrivano a dieci, si trasformano in una decina.</p>
 </header>
+</div>
 
 <div class="palco">
-  <div class="telaio">
-    <div class="colonne">
-      <div class="colonna">
-        <div class="rod-area">
-          <div class="stanghetta"></div>
-          <div class="palline-container" id="decine-palline"></div>
+  <div class="lato-abaco">
+    <div class="telaio">
+      <div class="colonne">
+        <div class="colonna">
+          <div class="rod-area cliccabile">
+            <div class="stanghetta"></div>
+            <div class="palline-container" id="decine-palline"></div>
+          </div>
+        </div>
+        <div class="sospese" id="sospese" aria-live="polite"></div>
+        <div class="colonna">
+          <div class="rod-area cliccabile">
+            <div class="stanghetta"></div>
+            <div class="palline-container" id="unita-palline"></div>
+          </div>
         </div>
       </div>
-      <div class="colonna">
-        <div class="rod-area">
-          <div class="stanghetta"></div>
-          <div class="palline-container" id="unita-palline"></div>
-        </div>
+      <div class="base-legno"></div>
+    </div>
+    <div class="etichette">
+      <div class="colonna-info">
+        <span>decine</span>
+        <b class="cifra" id="decine-numero">0</b>
+      </div>
+      <div class="colonna-info">
+        <span>unità</span>
+        <b class="cifra" id="unita-numero">0</b>
       </div>
     </div>
-    <div class="base-legno"></div>
+    <div class="stato" id="stato" aria-live="polite">Il numero formato è 0.</div>
   </div>
-  <div class="etichette">
-    <div class="colonna-info">
-      <span>decine</span>
-      <b class="cifra" id="decine-numero">0</b>
+
+  <div class="pannello">
+    <form class="imposta" id="form-imposta">
+      <label for="numero-iniziale">Numero</label>
+      <input type="number" id="numero-iniziale" min="0" max="99" inputmode="numeric" placeholder="0–99">
+      <button type="submit" class="azione" id="metti">Metti</button>
+    </form>
+
+    <div class="controlli">
+      <button class="azione" id="togli" aria-label="Togli una pallina">− Togli</button>
+      <button class="azione" id="aggiungi" aria-label="Aggiungi una pallina">+ Aggiungi</button>
     </div>
-    <div class="colonna-info">
-      <span>unità</span>
-      <b class="cifra" id="unita-numero">0</b>
+    <button class="azione" id="reset">Ricomincia</button>
+
+    <p class="suggerimento">Clicca una pallina per toglierla. Se le unità sono vuote e clicchi una decina, si scioglie in dieci palline sospese: toglierne una e le altre scendono nelle unità.</p>
+
+    <div class="sezione-stampa">
+      <div class="stampa-controlli">
+        <button class="azione stampa" id="stampa-vuota">🖨️ Scheda vuota (PDF)</button>
+      </div>
+      <div class="stampa-controlli">
+        <label class="campo-pagine">Pagine:
+          <input type="number" id="numero-pagine" value="1" min="1" max="9">
+        </label>
+        <label class="campo-versione">
+          <input type="radio" name="versione-parola" value="guidata" checked> parola guidata
+        </label>
+        <label class="campo-versione">
+          <input type="radio" name="versione-parola" value="libera"> parola libera
+        </label>
+      </div>
+      <div class="stampa-controlli">
+        <button class="azione stampa" id="stampa-composizioni">🖨️ Scheda con palline (PDF)</button>
+      </div>
     </div>
-  </div>
-
-  <div class="stato" id="stato" aria-live="polite">Il numero formato è 0.</div>
-
-  <div class="controlli">
-    <button class="azione" id="togli" aria-label="Togli una pallina">− Togli</button>
-    <button class="azione" id="aggiungi" aria-label="Aggiungi una pallina">+ Aggiungi</button>
-  </div>
-  <button class="azione" id="reset">Ricomincia</button>
-
-  <div class="stampa-controlli">
-    <button class="azione stampa" id="stampa-vuota">🖨️ Scheda vuota (PDF)</button>
-  </div>
-
-  <div class="stampa-controlli">
-    <label class="campo-pagine">Pagine:
-      <input type="number" id="numero-pagine" value="1" min="1" max="9">
-    </label>
-    <label class="campo-versione">
-      <input type="radio" name="versione-parola" value="guidata" checked> parola guidata
-    </label>
-    <label class="campo-versione">
-      <input type="radio" name="versione-parola" value="libera"> parola libera
-    </label>
-    <button class="azione stampa" id="stampa-composizioni">🖨️ Scheda con palline (PDF)</button>
   </div>
 </div>
 
@@ -457,17 +566,22 @@
 <script>
 (function () {
   var decine = 0, unita = 0;
+  var sospese = 0; // palline di una decina sciolta, sospese tra le stecche
   var animando = false;
   var MAX_DECINE = 9;
 
   var elDecinePalline = document.getElementById('decine-palline');
   var elUnitaPalline = document.getElementById('unita-palline');
+  var elSospese = document.getElementById('sospese');
   var elDecineNumero = document.getElementById('decine-numero');
   var elUnitaNumero = document.getElementById('unita-numero');
   var elStato = document.getElementById('stato');
   var btnAggiungi = document.getElementById('aggiungi');
   var btnTogli = document.getElementById('togli');
   var btnReset = document.getElementById('reset');
+  var btnMetti = document.getElementById('metti');
+  var formImposta = document.getElementById('form-imposta');
+  var inputNumero = document.getElementById('numero-iniziale');
 
   function creaBundle() {
     var bundle = document.createElement('div');
@@ -477,13 +591,35 @@
       dot.className = 'puntino';
       bundle.appendChild(dot);
     }
+    bundle.addEventListener('click', function () { clickDecina(bundle); });
     return bundle;
   }
 
   function creaUnitaria() {
     var b = document.createElement('div');
     b.className = 'pallina unita';
+    b.addEventListener('click', function () { clickUnita(b); });
     return b;
+  }
+
+  function creaSospesa(i) {
+    var b = document.createElement('div');
+    b.className = 'pallina sospesa';
+    b.style.animationDelay = (i * 45) + 'ms, ' + (i * 130) + 'ms';
+    b.setAttribute('role', 'button');
+    b.setAttribute('aria-label', 'Togli questa pallina');
+    b.addEventListener('click', function () { clickSospesa(b); });
+    return b;
+  }
+
+  // palline ancora "vive" (esclude quelle che stanno uscendo)
+  function vive(container) {
+    return container.querySelectorAll('.pallina:not(.esce)');
+  }
+
+  function faiUscire(el) {
+    el.classList.add('esce');
+    setTimeout(function () { el.remove(); }, 220);
   }
 
   function renderCompleto() {
@@ -491,25 +627,32 @@
     for (var i = 0; i < decine; i++) elDecinePalline.appendChild(creaBundle());
     elUnitaPalline.innerHTML = '';
     for (var j = 0; j < unita; j++) elUnitaPalline.appendChild(creaUnitaria());
+    elSospese.innerHTML = '';
+    for (var k = 0; k < sospese; k++) elSospese.appendChild(creaSospesa(k));
     aggiornaNumeri();
   }
 
   function aggiornaNumeri() {
     elDecineNumero.textContent = decine;
-    elUnitaNumero.textContent = unita;
-    var totale = decine * 10 + unita;
+    elUnitaNumero.textContent = sospese ? 10 : unita;
+    elUnitaNumero.classList.toggle('cambio', sospese > 0);
+    var totale = decine * 10 + unita + sospese;
+    var pieno = decine === MAX_DECINE && unita === 9;
     elStato.textContent = 'Il numero formato è ' + totale + '.';
     elStato.classList.remove('pieno');
-    btnAggiungi.disabled = animando || (decine === MAX_DECINE && unita === 9);
-    btnTogli.disabled = animando || (decine === 0 && unita === 0);
-    if (decine === MAX_DECINE && unita === 9) {
+    btnAggiungi.disabled = animando || sospese > 0 || pieno;
+    btnTogli.disabled = animando || totale === 0;
+    btnMetti.disabled = animando;
+    if (sospese) {
+      elStato.textContent = 'Una decina si è sciolta in 10 unità! Clicca una pallina sospesa per toglierla.';
+    } else if (pieno) {
       elStato.textContent = 'Abaco pieno a ' + totale + '. Prova a togliere una pallina.';
       elStato.classList.add('pieno');
     }
   }
 
   function aggiungi() {
-    if (animando) return;
+    if (animando || sospese) return;
     if (decine === MAX_DECINE && unita === 9) return;
 
     if (unita < 9) {
@@ -542,14 +685,16 @@
 
   function togli() {
     if (animando) return;
+    if (sospese) {
+      var s = vive(elSospese);
+      if (s.length) clickSospesa(s[s.length - 1]);
+      return;
+    }
     if (decine === 0 && unita === 0) return;
 
     if (unita > 0) {
-      unita--;
-      var palline = elUnitaPalline.querySelectorAll('.pallina');
-      var ultima = palline[palline.length - 1];
-      if (ultima) ultima.remove();
-      aggiornaNumeri();
+      var u = vive(elUnitaPalline);
+      if (u.length) clickUnita(u[u.length - 1]);
       return;
     }
 
@@ -580,10 +725,105 @@
     }, 420);
   }
 
+  // --- clic diretto sulle palline ---
+  function clickUnita(el) {
+    if (animando || sospese || el.classList.contains('esce')) return;
+    unita--;
+    faiUscire(el);
+    aggiornaNumeri();
+  }
+
+  function clickDecina(el) {
+    if (animando || sospese || el.classList.contains('esce')) return;
+    decine--;
+
+    // ci sono unità: la decina si toglie e basta
+    if (unita > 0) {
+      faiUscire(el);
+      aggiornaNumeri();
+      return;
+    }
+
+    // unità vuote: la decina si scioglie in 10 palline sospese
+    animando = true;
+    sospese = 10;
+    el.classList.add('sbriciola');
+    aggiornaNumeri();
+    setTimeout(function () {
+      el.remove();
+      elSospese.innerHTML = '';
+      for (var i = 0; i < 10; i++) elSospese.appendChild(creaSospesa(i));
+      animando = false;
+      aggiornaNumeri();
+    }, 380);
+  }
+
+  function clickSospesa(el) {
+    if (animando || !sospese || el.classList.contains('esce')) return;
+    animando = true;
+    sospese = 0;
+    unita = 9;
+    el.style.animationDelay = '0ms';
+    el.classList.add('esce');
+    elStato.textContent = 'Ne hai tolta una: le altre 9 scendono nelle unità!';
+    btnAggiungi.disabled = true;
+    btnTogli.disabled = true;
+
+    setTimeout(function () {
+      el.remove();
+      // posizioni di partenza (dal basso verso l'alto, come nella stecca)
+      var rimaste = Array.prototype.slice.call(elSospese.querySelectorAll('.pallina'));
+      var partenze = rimaste.map(function (p) { return p.getBoundingClientRect(); });
+
+      elUnitaPalline.innerHTML = '';
+      var nuove = [];
+      for (var i = 0; i < rimaste.length; i++) {
+        var u = creaUnitaria();
+        u.classList.add('senza-comparsa');
+        elUnitaPalline.appendChild(u);
+        nuove.push(u);
+      }
+      elSospese.innerHTML = '';
+
+      var durata = 520, passo = 45;
+      nuove.forEach(function (u, i) {
+        var arrivo = u.getBoundingClientRect();
+        var dx = partenze[i].left - arrivo.left;
+        var dy = partenze[i].top - arrivo.top;
+        if (u.animate) {
+          u.animate(
+            [{ transform: 'translate(' + dx + 'px,' + dy + 'px)' }, { transform: 'translate(0,0)' }],
+            { duration: durata, delay: i * passo, easing: 'cubic-bezier(.5,0,.3,1.25)', fill: 'backwards' }
+          );
+        }
+      });
+
+      setTimeout(function () {
+        animando = false;
+        aggiornaNumeri();
+      }, durata + passo * nuove.length);
+    }, 220);
+  }
+
+  function imposta(e) {
+    e.preventDefault();
+    if (animando) return;
+    var n = parseInt(inputNumero.value, 10);
+    if (isNaN(n)) return;
+    n = Math.max(0, Math.min(99, n));
+    inputNumero.value = n;
+    decine = Math.floor(n / 10);
+    unita = n % 10;
+    sospese = 0;
+    renderCompleto();
+  }
+
   function reset() {
     if (animando) return;
     decine = 0;
     unita = 0;
+    sospese = 0;
+    inputNumero.value = '';
     renderCompleto();
   }
 
@@ -754,6 +994,7 @@
   btnAggiungi.addEventListener('click', aggiungi);
   btnTogli.addEventListener('click', togli);
   btnReset.addEventListener('click', reset);
+  formImposta.addEventListener('submit', imposta);
 
   renderCompleto();
 })();
