@@ -146,6 +146,8 @@
   /* --- il telaio in legno: due stanghette verticali, una traversa in alto e una base in basso --- */
   .telaio {
     position: relative;
+    /* spazio sopra per le palline sospese, che sporgono oltre le stecche */
+    padding-top: max(0px, calc(var(--b) * 2 - 36px));
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -220,6 +222,7 @@
     align-items: center;
     justify-content: flex-start;
     gap: 2px;
+    padding-bottom: var(--b); /* staccate dalla base: volano */
   }
   .pallina.sospesa {
     width: var(--b); height: var(--b); border-radius: 50%;
