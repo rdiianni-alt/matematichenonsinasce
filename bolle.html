@@ -213,6 +213,14 @@ function taglia(val) { const s = bollaSize(); return val > 10 ? s.grande : s.pic
 function scomponiValori(v) {
   if (v <= 1) return null;
   if (v <= 10) return [1, v - 1];
+  if (v >= 100) {
+    // separa prima l'ordine più grande (migliaia, centinaia...) dal resto
+    const p = Math.pow(10, String(v).length - 1);
+    const alto = Math.floor(v / p) * p;
+    if (alto !== v) return [alto, v - alto];
+    if (v > p) return [p, v - p];
+    return [p / 10, v - p / 10];
+  }
   const u = v % 10, d = v - u;
   if (u !== 0) return [d, u];
   return [10, v - 10];
