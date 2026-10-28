@@ -2,6 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
+<title>Gioco delle Bolle · LIM</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -35,7 +36,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #dff0fb; f
   font-size: clamp(0.85rem, 2vmin, 1rem); font-weight: 600; cursor: pointer;
 }
 
-#arena { position: relative; width: 100%; height: 100%; display: none; }
+#arena { touch-action: none; -webkit-user-select: none; user-select: none; position: relative; width: 100%; height: 100%; display: none; }
 
 #tubo-wrap {
   display: none; position: fixed; right: 0; top: 0; bottom: 0;
@@ -95,7 +96,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #dff0fb; f
 .btn-modo.attivo { background: #1a5276; border-color: #1a5276; color: white; }
 
 .bolla {
-  position: absolute; border-radius: 50%;
+  touch-action: none; -webkit-user-select: none; position: absolute; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-weight: 700; color: #1a5276; user-select: none; cursor: pointer;
   border: 3px solid rgba(100,180,255,0.7);
@@ -147,7 +148,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #dff0fb; f
   <h1>🫧 Gioco delle Bolle</h1>
   <label>Scrivi i numeri separati da spazio o virgola:</label>
   <input id="campo-numeri" type="text" placeholder="es. 72 27 8 45" />
-  <p class="hint">Puoi inserire anche un solo numero</p>
+  <p class="hint">Puoi inserire anche un solo numero · Trascina con il dito o la penna</p>
   <button id="btn-vai">Inizia ▶</button>
 </div>
 
@@ -168,6 +169,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #dff0fb; f
   <button class="btn-modo" id="modo-unisci">🔗 Unisci</button>
   <button class="btn-modo" id="modo-sposta">✋ Sposta</button>
   <button class="btn-modo" id="modo-tubo">🧪 Tubo</button>
+  <button class="btn-ui" id="btn-centra">◎ Centra bolle</button>
   <button class="btn-ui" id="btn-ricomincia">↺</button>
   <button class="btn-ui" id="btn-menu">☰</button>
   <button class="btn-ui" id="btn-info">ℹ️</button>
@@ -183,11 +185,11 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #dff0fb; f
     <h3>Unisci 🔗</h3>
     <p>Tocca una bolla per selezionarla (pulsa), poi toccane un'altra: si fondono nella loro somma. Puoi anche trascinarle una sull'altra.</p>
     <h3>Sposta ✋</h3>
-    <p>Trascina le bolle liberamente. Se ne sovrapponi due, si fondono. Il tap non fa nulla.</p>
+    <p>Trascina le bolle con il dito, la penna o il mouse. Se ne sovrapponi due, si fondono. In alternativa, tocca una bolla e poi un punto libero per spostarla.</p>
     <h3>Tubo 🧪</h3>
     <p>Tocca una bolla per toglierla dalla scena. Il tubo tiene il conto. Clicca una bolla nel tubo per riportarla in campo. Con svuota si azzera tutto.</p>
     <h3>Sulla LIM</h3>
-    <p>Usa i quattro pulsanti in basso per scegliere la modalità: non è necessario trascinare.</p>
+    <p>In modalità Sposta puoi toccare una bolla e poi il punto libero in cui vuoi metterla, senza trascinare. Con «Centra bolle» riporti le bolle nella zona centrale, mantenendo i numeri.</p>
   </div>
 </div>
 
@@ -202,7 +204,7 @@ const flashEl = document.getElementById('flash');
 
 let bolle = [], numeriScelti = [], tuboContenuto = [];
 let modo = 'scomponi', selezionata = null;
-let drag = null, offX = 0, offY = 0, dragMoved = false;
+let drag = null, offX = 0, offY = 0, dragMoved = false, activePointer = null, startX = 0, startY = 0;
 
 function bollaSize() {
   const base = Math.min(window.innerWidth, window.innerHeight);
@@ -241,6 +243,8 @@ function crea(val, x, y) {
 
 function bindBolla(b) {
   b.el.addEventListener('pointerdown', e => {
+    if (drag || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    activePointer = e.pointerId; startX = e.clientX; startY = e.clientY;
     drag = b; dragMoved = false;
     const r = b.el.getBoundingClientRect();
     offX = e.clientX - r.left; offY = e.clientY - r.top;
@@ -251,9 +255,10 @@ function bindBolla(b) {
 }
 
 arena.addEventListener('pointermove', e => {
-  if (!drag) return;
-  if (Math.hypot(e.clientX-offX-drag.x, e.clientY-offY-drag.y) > 10) dragMoved = true;
-  drag.x = e.clientX - offX; drag.y = e.clientY - offY;
+  if (!drag || e.pointerId !== activePointer) return;
+  if (Math.hypot(e.clientX-startX, e.clientY-startY) > 10) dragMoved = true;
+  if (!dragMoved) return;
+  drag.x = Math.max(0, Math.min(e.clientX - offX, innerWidth-drag.size)); drag.y = clampY(e.clientY - offY, drag.size);
   drag.el.style.left = drag.x+'px'; drag.el.style.top = drag.y+'px';
   const suTubo = sopraTubo(drag);
   tuboEl.classList.toggle('highlight', suTubo);
@@ -261,8 +266,8 @@ arena.addEventListener('pointermove', e => {
   bolle.forEach(b => { if (b!==drag) b.el.classList.toggle('over', !suTubo && overlap(drag,b)); });
 });
 
-arena.addEventListener('pointerup', () => {
-  if (!drag) return;
+arena.addEventListener('pointerup', e => {
+  if (!drag || e.pointerId !== activePointer) return;
   tuboEl.classList.remove('highlight');
   drag.el.classList.remove('in-tubo-preview');
   if (dragMoved) {
@@ -277,8 +282,19 @@ arena.addEventListener('pointerup', () => {
     gestisciClick(drag);
   }
   bolle.forEach(b => b.el.classList.remove('over'));
-  drag = null;
+  drag = null; activePointer = null;
 });
+
+function annullaTrascinamento(e) {
+  if (!drag || (e && e.pointerId !== activePointer)) return;
+  drag.el.style.zIndex = '';
+  drag.el.classList.remove('in-tubo-preview');
+  tuboEl.classList.remove('highlight');
+  bolle.forEach(b => b.el.classList.remove('over'));
+  drag = null; activePointer = null;
+}
+arena.addEventListener('pointercancel', annullaTrascinamento);
+arena.addEventListener('lostpointercapture', annullaTrascinamento);
 
 function sopraTubo(b) {
   const r = tuboWrap.getBoundingClientRect();
@@ -295,8 +311,21 @@ function gestisciClick(b) {
     else if (selezionata===b) deseleziona();
     else fondi(selezionata, b);
   } else if (modo==='tubo') mettiInTubo(b);
-  // sposta: tap non fa nulla
+  else if (modo==='sposta') {
+    if (selezionata === b) deseleziona();
+    else { deseleziona(); selezionata=b; b.el.classList.add('selezionata'); }
+  }
 }
+arena.addEventListener('pointerdown', e => {
+  if (e.target !== arena || modo !== 'sposta' || !selezionata || drag) return;
+  const b = selezionata;
+  b.x = clampX(e.clientX-b.size/2, b.size);
+  b.y = clampY(e.clientY-b.size/2, b.size);
+  b.el.style.left = b.x+'px'; b.el.style.top = b.y+'px';
+  deseleziona();
+  e.preventDefault();
+});
+
 function deseleziona() {
   if (selezionata) { selezionata.el.classList.remove('selezionata'); selezionata=null; }
 }
@@ -363,13 +392,18 @@ function clampY(v,s) { return Math.max(window.innerHeight*0.1,Math.min(v,barraTo
 function rimuovi(b) { bolle=bolle.filter(x=>x!==b); b.el.remove(); }
 
 function posiziona(numeri) {
+  annullaTrascinamento();
   bolle.forEach(b=>b.el.remove()); bolle=[]; deseleziona();
   const tw=tuboLarghezza(), W=window.innerWidth-tw-16;
   const topM=window.innerHeight*0.1, botM=barraTop()-8;
   numeri.forEach(v=>{
     const s=taglia(v); let x,y,ok=false,tries=0;
     while(!ok&&tries++<400){
-      x=8+Math.random()*(W-s-8); y=topM+Math.random()*(botM-topM-s);
+      // Prefer the central part; expand only when many bubbles need room.
+      const spread = tries < 160 ? 0.56 : tries < 300 ? 0.8 : 1;
+      const usableX=Math.max(0,W-s-8), usableY=Math.max(0,botM-topM-s);
+      x=8+usableX*((1-spread)/2+Math.random()*spread);
+      y=topM+usableY*((1-spread)/2+Math.random()*spread);
       ok=bolle.every(b=>Math.hypot(x+s/2-b.x-b.size/2,y+s/2-b.y-b.size/2)>(s/2+b.size/2)+12);
     }
     crea(v,x,y);
@@ -383,6 +417,7 @@ function setModo(m) {
 }
 
 function mostraMenu() {
+  annullaTrascinamento(); deseleziona();
   schermata.style.display='flex'; arena.style.display='none';
   barra.style.display='none'; tuboWrap.style.display='none';
   bolle.forEach(b=>b.el.remove()); bolle=[];
@@ -403,6 +438,7 @@ document.getElementById('btn-vai').addEventListener('click',()=>{
   numeriScelti=nums; avvia(nums);
 });
 document.getElementById('campo-numeri').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('btn-vai').click(); });
+document.getElementById('btn-centra').addEventListener('click',()=>posiziona(bolle.map(b=>b.val)));
 document.getElementById('btn-ricomincia').addEventListener('click',mostraMenu);
 document.getElementById('btn-menu').addEventListener('click',mostraMenu);
 document.getElementById('modo-scomponi').addEventListener('click',()=>setModo('scomponi'));
