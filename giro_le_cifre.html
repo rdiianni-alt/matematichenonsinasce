@@ -3,250 +3,436 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Abaco Girevole</title>
+<title>Giro le cifre · Matematiche non si nasce</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+:root{
+  --ink:#1e1e1e; --muted:#5f5e5a; --line:#e6e2dc; --soft:#faf8f5;
+  --red:#e10600;
+  /* tutte le posizioni in nero: nessun colore associato al valore posizionale */
+  --c:#1e1e1e; --cbg:#f4f2ee;
+  --cw:96px; --gap:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Source Sans 3',-apple-system,'Segoe UI',Arial,sans-serif;
+  color:var(--ink); background:#fff;
+  display:flex; flex-direction:column; align-items:center;
+  min-height:100vh; padding:12px 16px 16px; gap:clamp(8px,1.8vh,20px);
+  -webkit-user-select:none; user-select:none;
+}
 
-  body {
-    font-family: 'Segoe UI', sans-serif;
-    background: #f0fce8;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
+/* logo standard */
+.logo{display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none}
+.logo img{width:60px;height:60px;object-fit:contain;border-radius:50%}
+.logo span{font-size:14px;color:var(--text-secondary,#5f5e5a)}
 
-  .logo {
-    margin-bottom: 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-  }
-  .logo img {
-    width: 60px;
-    height: 60px;
-    object-fit: contain;
-    border-radius: 50%;
-  }
-  .logo span {
-    font-size: 1rem;
-    color: #555;
-    letter-spacing: 0.03em;
-    font-style: italic;
-  }
+/* ---------- abaco ---------- */
+.abaco{
+  display:flex; align-items:flex-end; justify-content:center;
+  gap:var(--gap); flex-wrap:nowrap;
+  margin-top:auto;
+}
+.classe{display:flex;flex-direction:column;align-items:center;gap:8px}
+.classe-nome{
+  font-size:clamp(11px,1.6vmin,14px); font-weight:700; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--muted);
+  width:100%; text-align:center; padding-bottom:6px; border-bottom:2px solid var(--line);
+}
+.classe-col{display:flex;gap:calc(var(--gap) * .7)}
+.sep{
+  align-self:center; font-size:calc(var(--cw) * .8); font-weight:900; color:#b9b3aa;
+  line-height:1; margin:0 calc(var(--gap) * -.4); padding-top:calc(var(--cw) * .5);
+}
 
-  .abaco {
-    display: flex;
-    gap: 12px;
-    background: white;
-    border: 4px solid #7bc67e;
-    border-radius: 20px;
-    padding: 28px 24px 24px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-  }
+.col{display:flex;flex-direction:column;align-items:center;gap:calc(var(--cw) * .09)}
+.btn-giro{
+  width:var(--cw); height:max(34px, calc(var(--cw) * .55));
+  border:2px solid currentColor; border-radius:10px; background:#fff;
+  color:var(--c); cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition:background .12s, transform .08s;
+  touch-action:manipulation;
+}
+.btn-giro svg{width:max(18px, calc(var(--cw) * .32));height:max(18px, calc(var(--cw) * .32))}
+.btn-giro:hover{background:var(--cbg)}
+.btn-giro:active{transform:scale(.94);background:var(--c);color:#fff}
+.btn-giro:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 
-  .colonna {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-  }
+.finestra{
+  position:relative; overflow:hidden;
+  width:var(--cw); height:calc(var(--cw) * 1.25);
+  border-radius:calc(var(--cw) * .14); background:var(--cbg);
+  border:3px solid var(--c);
+  box-shadow: inset 0 10px 14px -10px rgba(0,0,0,.25), inset 0 -10px 14px -10px rgba(0,0,0,.25);
+}
+/* linea centrale come nei contachilometri */
+.finestra::after{
+  content:""; position:absolute; left:8%; right:8%; top:50%; height:1px;
+  background:rgba(0,0,0,.08); pointer-events:none;
+}
+.cifra{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-size:calc(var(--cw) * .9); font-weight:900; line-height:1;
+  color:var(--c); font-variant-numeric:tabular-nums;
+}
+.cifra.entra-su{animation:entraSu .26s cubic-bezier(.2,.8,.3,1) both}
+.cifra.esce-su{animation:esceSu .26s cubic-bezier(.2,.8,.3,1) both}
+.cifra.entra-giu{animation:entraGiu .26s cubic-bezier(.2,.8,.3,1) both}
+.cifra.esce-giu{animation:esceGiu .26s cubic-bezier(.2,.8,.3,1) both}
+@keyframes entraSu{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes esceSu{from{transform:translateY(0)}to{transform:translateY(-100%)}}
+@keyframes entraGiu{from{transform:translateY(-100%)}to{transform:translateY(0)}}
+@keyframes esceGiu{from{transform:translateY(0)}to{transform:translateY(100%)}}
 
-  .label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: #888;
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    line-height: 1.2;
-    min-height: 30px;
-    display: flex;
-    align-items: center;
-  }
+.etichetta{display:flex;flex-direction:column;align-items:center;gap:2px}
+.sigla{font-size:max(14px, calc(var(--cw) * .3));font-weight:900;color:var(--c);line-height:1}
+.nome{font-size:clamp(11px,1.6vmin,14px);font-weight:600;color:var(--muted);text-align:center;line-height:1.15;min-height:2.3em;max-width:max(6em, calc(var(--cw) + 1em))}
+.abaco.stretto .nome{display:none}
+.abaco.stretto .etichetta{min-height:0}
 
-  .btn {
-    width: 52px;
-    height: 42px;
-    border: none;
-    border-radius: 12px;
-    font-size: 1.4rem;
-    cursor: pointer;
-    transition: transform 0.1s, background 0.15s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-  }
+/* il riporto si vede: la colonna successiva lampeggia */
+.col.riporto .finestra{animation:lampo .45s ease}
+@keyframes lampo{0%{box-shadow:0 0 0 0 var(--c)}40%{box-shadow:0 0 0 6px var(--cbg),0 0 0 9px var(--c)}100%{box-shadow:0 0 0 0 transparent}}
 
-  .btn:active { transform: scale(0.92); }
+/* ---------- lettura del numero ---------- */
+.lettura{
+  width:min(1000px,100%); min-height:clamp(70px,13vh,140px);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+  text-align:center;
+}
+.lettura > div{display:none}
+.lettura > div.on{display:block}
+.numero{font-size:clamp(36px,7vmin,72px);font-weight:900;letter-spacing:.02em;line-height:1.05;font-variant-numeric:tabular-nums}
+.numero .punto{color:#b9b3aa}
+.scomp{font-size:clamp(17px,2.6vmin,26px);font-weight:600;line-height:1.3}
+.scomp .meno{color:var(--muted);font-weight:400}
+.lettere{font-size:clamp(17px,2.8vmin,28px);font-weight:600;font-style:italic;color:var(--ink);word-break:break-word}
 
-  .btn-up   { background: #ff6eb4; color: white; }
-  .btn-down { background: #ff6eb4; color: white; }
+/* ---------- comandi ---------- */
+.comandi{
+  margin-top:auto; width:min(1100px,100%);
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:center;
+  gap:8px 16px; padding-top:10px; border-top:1px solid var(--line);
+}
+.gruppo{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center}
+.gruppo-nome{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.seg{display:flex;border:1px solid var(--ink);border-radius:6px;overflow:hidden}
+.seg button{
+  min-width:44px;min-height:44px;border:0;border-left:1px solid var(--ink);background:#fff;
+  font:700 17px 'Source Sans 3',sans-serif;color:var(--ink);cursor:pointer;
+}
+.seg button:first-child{border-left:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.pill{
+  display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;
+  border:1px solid var(--ink);border-radius:6px;background:#fff;color:var(--ink);
+  font:600 16px 'Source Sans 3',sans-serif;cursor:pointer;
+}
+.pill:hover{background:var(--soft)}
+.pill[aria-pressed="true"]{background:var(--ink);color:#fff}
+.pill[aria-pressed]::before{
+  content:"";width:14px;height:14px;border-radius:3px;border:2px solid currentColor;flex:none;
+}
+.pill[aria-pressed="true"]::before{background:var(--red);border-color:#fff}
+.pill.rosso{border-color:var(--red);color:var(--red)}
+.pill.rosso:hover{background:#fdecec}
+.pill svg{width:18px;height:18px}
+.pill:focus-visible,.seg button:focus-visible{outline:3px solid var(--red);outline-offset:2px}
 
-  .cifra-box {
-    width: 72px;
-    height: 90px;
-    background: white;
-    border: 3px solid #ddd;
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 3rem;
-    font-weight: 900;
-    color: #222;
-    box-shadow: inset 0 2px 6px rgba(0,0,0,0.07);
-    transition: transform 0.15s;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .cifra-box.animating {
-    animation: flip 0.2s ease;
-  }
-
-  @keyframes flip {
-    0%   { transform: scaleY(1); }
-    40%  { transform: scaleY(0.1); }
-    100% { transform: scaleY(1); }
-  }
-
-  /* separatore migliaia */
-  .sep {
-    font-size: 2.5rem;
-    font-weight: 900;
-    color: #bbb;
-    align-self: center;
-    margin-top: 52px;
-    margin-bottom: 10px;
-  }
-
-  .reset-btn {
-    margin-top: 28px;
-    padding: 10px 28px;
-    background: #7bc67e;
-    color: white;
-    border: none;
-    border-radius: 30px;
-    font-size: 0.95rem;
-    font-weight: 700;
-    cursor: pointer;
-    letter-spacing: 0.04em;
-    transition: background 0.2s;
-  }
-  .reset-btn:hover { background: #5aab5e; }
-
-  @media (max-width: 480px) {
-    .abaco {
-      gap: 6px;
-      padding: 18px 10px 16px;
-      border-width: 3px;
-      border-radius: 14px;
-    }
-    .cifra-box {
-      width: 48px;
-      height: 60px;
-      font-size: 1.9rem;
-      border-radius: 10px;
-    }
-    .btn {
-      width: 36px;
-      height: 32px;
-      font-size: 1rem;
-      border-radius: 8px;
-    }
-    .label {
-      font-size: 0.55rem;
-      min-height: 24px;
-    }
-    .sep {
-      font-size: 1.6rem;
-      margin-top: 36px;
-      margin-bottom: 6px;
-    }
-    .logo img {
-      width: 48px;
-      height: 48px;
-    }
-    .logo span {
-      font-size: 0.85rem;
-    }
-    .reset-btn {
-      padding: 8px 22px;
-      font-size: 0.85rem;
-      margin-top: 18px;
-    }
-  }
+@media (max-width:640px){
+  .classe-nome{font-size:10px;letter-spacing:.04em}
+  .finestra{border-width:2px}
+  .btn-giro{border-radius:8px}
+}
 </style>
 </head>
 <body>
 
-<a class="logo" href="https://matematichenonsinasce.com/" >
-  <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="logo">
+<a class="logo" href="https://matematichenonsinasce.com/" target="_top">
+  <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="">
   <span>Matematiche non si nasce</span>
 </a>
 
-<div class="abaco">
-  <!-- Migliaia -->
-  <div class="colonna">
-    <div class="label">Unità di<br>migliaia</div>
-    <button class="btn btn-up" onclick="cambia(0,1)">▲</button>
-    <div class="cifra-box" id="c0">0</div>
-    <button class="btn btn-down" onclick="cambia(0,-1)">▼</button>
+<div class="abaco" id="abaco" aria-live="off"></div>
+
+<div class="lettura" aria-live="polite">
+  <div class="numero on" id="vNumero"></div>
+  <div class="scomp" id="vScomp"></div>
+  <div class="lettere" id="vLettere"></div>
+</div>
+
+<div class="comandi">
+  <div class="gruppo">
+    <span class="gruppo-nome">Cifre</span>
+    <div class="seg" id="segCifre" role="group" aria-label="Numero di cifre"></div>
   </div>
-
-  <div class="sep">.</div>
-
-  <!-- Centinaia -->
-  <div class="colonna">
-    <div class="label">Centinaia</div>
-    <button class="btn btn-up" onclick="cambia(1,1)">▲</button>
-    <div class="cifra-box" id="c1">0</div>
-    <button class="btn btn-down" onclick="cambia(1,-1)">▼</button>
+  <div class="gruppo">
+    <button type="button" class="pill" id="tRiporto" aria-pressed="false">Cambio automatico</button>
   </div>
-
-  <!-- Decine -->
-  <div class="colonna">
-    <div class="label">Decine</div>
-    <button class="btn btn-up" onclick="cambia(2,1)">▲</button>
-    <div class="cifra-box" id="c2">0</div>
-    <button class="btn btn-down" onclick="cambia(2,-1)">▼</button>
+  <div class="gruppo">
+    <span class="gruppo-nome">Mostra</span>
+    <button type="button" class="pill" data-mostra="vNumero" aria-pressed="true">Numero</button>
+    <button type="button" class="pill" data-mostra="vScomp" aria-pressed="false">Scomposizione</button>
+    <button type="button" class="pill" data-mostra="vLettere" aria-pressed="false">In lettere</button>
   </div>
-
-  <!-- Unità -->
-  <div class="colonna">
-    <div class="label">Unità</div>
-    <button class="btn btn-up" onclick="cambia(3,1)">▲</button>
-    <div class="cifra-box" id="c3">0</div>
-    <button class="btn btn-down" onclick="cambia(3,-1)">▼</button>
+  <div class="gruppo">
+    <button type="button" class="pill" id="bCaso">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>
+      Numero a caso</button>
+    <button type="button" class="pill rosso" id="bAzzera">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+      Azzera</button>
   </div>
 </div>
 
-<button class="reset-btn" onclick="reset()">↺ Ricomincia</button>
-
 <script>
-  const cifre = [0, 0, 0, 0];
+// Giro le cifre · © Rita Di Ianni · matematichenonsinasce.com · licenza AGPL v3
+(function(){
+  // posizioni dalla più piccola: 0 = unità
+  var POS = [
+    {s:'u',   n:'unità'},
+    {s:'da',  n:'decine'},
+    {s:'h',   n:'centinaia'},
+    {s:'uk',  n:'unità di migliaia'},
+    {s:'dak', n:'decine di migliaia'},
+    {s:'hk',  n:'centinaia di migliaia'},
+    {s:'uM',  n:'unità di milioni'},
+    {s:'daM', n:'decine di milioni'},
+    {s:'hM',  n:'centinaia di milioni'}
+  ];
+  var VAL = [1,10,100,1000,10000,100000,1000000,10000000,100000000];
+  var MAX = 9;
+  var CLASSI = ['Unità semplici', 'Migliaia', 'Milioni'];
+  var UP   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 15l7-7 7 7"/></svg>';
+  var DOWN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l7 7 7-7"/></svg>';
 
-  function cambia(col, dir) {
-    cifre[col] = (cifre[col] + dir + 10) % 10;
-    const box = document.getElementById('c' + col);
-    box.classList.remove('animating');
-    void box.offsetWidth; // reflow
-    box.classList.add('animating');
-    box.textContent = cifre[col];
+  var n = 4, cambio = false;
+  var d = [0,0,0,0,0,0,0,0,0];
+  var finestre = [];
+  function zeri(){ return [0,0,0,0,0,0,0,0,0]; }
+
+  var abaco = document.getElementById('abaco');
+
+  function colonna(p){
+    var info = POS[p];
+    var col = document.createElement('div');
+    col.className = 'col';
+    col.innerHTML =
+      '<button type="button" class="btn-giro" aria-label="Aumenta ' + info.n + '">' + UP + '</button>' +
+      '<div class="finestra"><span class="cifra">' + d[p] + '</span></div>' +
+      '<button type="button" class="btn-giro" aria-label="Diminuisci ' + info.n + '">' + DOWN + '</button>' +
+      '<div class="etichetta"><span class="sigla">' + info.s + '</span><span class="nome">' + info.n + '</span></div>';
+    var b = col.querySelectorAll('.btn-giro');
+    b[0].addEventListener('click', function(){ gira(p, 1); });
+    b[1].addEventListener('click', function(){ gira(p, -1); });
+    finestre[p] = col;
+    return col;
   }
 
-  function reset() {
-    for (let i = 0; i < 4; i++) {
-      cifre[i] = 0;
-      document.getElementById('c' + i).textContent = '0';
+  function classe(nome, posizioni){
+    var g = document.createElement('div');
+    g.className = 'classe';
+    var t = document.createElement('div');
+    t.className = 'classe-nome';
+    t.textContent = nome;
+    var c = document.createElement('div');
+    c.className = 'classe-col';
+    posizioni.forEach(function(p){ c.appendChild(colonna(p)); });
+    g.appendChild(t); g.appendChild(c);
+    return g;
+  }
+
+  function costruisci(){
+    abaco.innerHTML = '';
+    finestre = [];
+    for (var i = n; i < MAX; i++) d[i] = 0;
+    var nClassi = Math.ceil(n / 3);
+    for (var c = nClassi - 1; c >= 0; c--){
+      var pos = [];
+      for (var p = Math.min(n, c * 3 + 3) - 1; p >= c * 3; p--) pos.push(p);
+      abaco.appendChild(classe(CLASSI[c], pos));
+      if (c > 0){
+        var sep = document.createElement('div');
+        sep.className = 'sep'; sep.textContent = '.'; sep.setAttribute('aria-hidden','true');
+        abaco.appendChild(sep);
+      }
     }
+    dimensiona();
+    aggiornaLettura();
   }
+
+  // le finestrelle si ridimensionano in base al numero di cifre e allo schermo
+  function dimensiona(){
+    var W = document.documentElement.clientWidth, H = window.innerHeight;
+    var nSep = Math.ceil(n / 3) - 1;
+    var perAltezza = Math.min(140, Math.max(48, (H - 470) / 2.4));
+    // larghezza disponibile: colonne + spazi (circa 0,2 cw ciascuno) + separatori
+    var perLarghezza = (W - 40) / (n + (n - 1) * 0.2 + nSep * 0.9 + nSep * 0.3);
+    var cw = Math.max(26, Math.floor(Math.min(perAltezza, perLarghezza)));
+    abaco.style.setProperty('--cw', cw + 'px');
+    abaco.style.setProperty('--gap', Math.max(4, Math.round(cw * 0.2)) + 'px');
+    abaco.classList.toggle('stretto', cw < 74);
+  }
+  window.addEventListener('resize', dimensiona);
+
+  function mostra(p, dir){
+    var f = finestre[p].querySelector('.finestra');
+    var vecchie = f.querySelectorAll('.cifra');
+    vecchie.forEach(function(v){
+      v.className = 'cifra ' + (dir > 0 ? 'esce-su' : 'esce-giu');
+      setTimeout(function(){ if (v.parentNode) v.parentNode.removeChild(v); }, 270);
+    });
+    var nuova = document.createElement('span');
+    nuova.className = 'cifra ' + (dir > 0 ? 'entra-su' : 'entra-giu');
+    nuova.textContent = d[p];
+    f.appendChild(nuova);
+  }
+
+  function lampeggia(p){
+    var c = finestre[p];
+    c.classList.remove('riporto'); void c.offsetWidth; c.classList.add('riporto');
+  }
+
+  function gira(p, dir){
+    var v = d[p] + dir;
+    var passa = (v > 9 || v < 0);
+    d[p] = (v + 10) % 10;
+    mostra(p, dir);
+    if (cambio && passa && p + 1 < n){
+      setTimeout(function(){ lampeggia(p + 1); gira(p + 1, dir); }, 180);
+      return;
+    }
+    aggiornaLettura();
+  }
+
+  function imposta(nuovi){
+    for (var p = 0; p < n; p++){
+      if (d[p] !== nuovi[p]){
+        var dir = nuovi[p] > d[p] ? 1 : -1;
+        d[p] = nuovi[p];
+        (function(pp, dd){ setTimeout(function(){ mostra(pp, dd); }, (n - 1 - pp) * 60); })(p, dir);
+      }
+    }
+    aggiornaLettura();
+  }
+
+  // ----- lettura -----
+  function valore(){ var s = 0; for (var p = 0; p < n; p++) s += d[p] * VAL[p]; return s; }
+
+  function numeroColorato(){
+    var v = valore();
+    var str = String(v);
+    var html = '';
+    for (var i = 0; i < str.length; i++){
+      var p = str.length - 1 - i;
+      html += str[i];
+      if (p > 0 && p % 3 === 0) html += '<span class="punto">.</span>';
+    }
+    return html;
+  }
+
+  function scomposizione(){
+    var a = [], b = [];
+    for (var p = n - 1; p >= 0; p--){
+      if (d[p]){
+        a.push(d[p] + ' ' + POS[p].s);
+        b.push(puntini(d[p] * VAL[p]));
+      }
+    }
+    if (!a.length) return '0';
+    return a.join(' + ') + (b.length > 1 ? '<br><span class="meno">=</span> ' + b.join(' + ') : '');
+  }
+  function puntini(x){ return String(x).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+
+  var U = ['zero','uno','due','tre','quattro','cinque','sei','sette','otto','nove','dieci','undici','dodici','tredici','quattordici','quindici','sedici','diciassette','diciotto','diciannove'];
+  var T = ['','','venti','trenta','quaranta','cinquanta','sessanta','settanta','ottanta','novanta'];
+  function sotto100(x){
+    if (x < 20) return x ? U[x] : '';
+    var t = T[Math.floor(x / 10)], u = x % 10;
+    if (!u) return t;
+    if (u === 1 || u === 8) t = t.slice(0, -1);
+    return t + (u === 3 ? 'tré' : U[u]);
+  }
+  function sotto1000(x){
+    var h = Math.floor(x / 100), r = x % 100, s = '';
+    if (h) s = (h === 1 ? '' : U[h]) + 'cento';
+    var rr = sotto100(r);
+    if (h && r === 3) rr = 'tré';
+    if (h && (r === 8 || Math.floor(r / 10) === 8)) s = s.slice(0, -1);
+    return s + rr;
+  }
+  function lettere(x){
+    if (x === 0) return 'zero';
+    var m = Math.floor(x / 1000000), resto = x % 1000000, sm = '';
+    if (m === 1) sm = 'un milione';
+    else if (m > 1){
+      var wm = sotto1000(m);
+      if (/uno$/.test(wm)) wm = wm.slice(0, -1);
+      sm = wm + ' milioni';
+    }
+    if (!resto) return sm;
+    return sm ? sm + ' ' + sottoMilione(resto) : sottoMilione(resto);
+  }
+  function sottoMilione(x){
+    var k = Math.floor(x / 1000), r = x % 1000, s = '';
+    if (k === 1) s = 'mille';
+    else if (k > 1){
+      var w = sotto1000(k).replace(/é$/, 'e');
+      if (/uno$/.test(w)) w = w.slice(0, -1);
+      s = w + 'mila';
+    }
+    var rr = sotto1000(r);
+    if (k && r === 3) rr = 'tré';
+    return s + rr;
+  }
+
+  function aggiornaLettura(){
+    document.getElementById('vNumero').innerHTML = numeroColorato();
+    document.getElementById('vScomp').innerHTML = scomposizione();
+    document.getElementById('vLettere').textContent = lettere(valore());
+  }
+
+  // ----- comandi -----
+  var seg = document.getElementById('segCifre');
+  [2,3,4,5,6,7,8,9].forEach(function(k){
+    var b = document.createElement('button');
+    b.type = 'button'; b.textContent = k;
+    b.setAttribute('aria-pressed', k === n ? 'true' : 'false');
+    b.addEventListener('click', function(){
+      n = k;
+      seg.querySelectorAll('button').forEach(function(x){ x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      costruisci();
+    });
+    seg.appendChild(b);
+  });
+
+  var tR = document.getElementById('tRiporto');
+  tR.addEventListener('click', function(){
+    cambio = !cambio;
+    tR.setAttribute('aria-pressed', cambio ? 'true' : 'false');
+  });
+
+  document.querySelectorAll('[data-mostra]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var on = b.getAttribute('aria-pressed') !== 'true';
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      document.getElementById(b.getAttribute('data-mostra')).classList.toggle('on', on);
+    });
+  });
+
+  document.getElementById('bCaso').addEventListener('click', function(){
+    var nuovi = zeri();
+    for (var p = 0; p < n; p++) nuovi[p] = Math.floor(Math.random() * 10);
+    if (n > 1 && !nuovi[n - 1]) nuovi[n - 1] = 1 + Math.floor(Math.random() * 9);
+    imposta(nuovi);
+  });
+  document.getElementById('bAzzera').addEventListener('click', function(){ imposta(zeri()); });
+
+  costruisci();
+})();
 </script>
 </body>
 </html>
