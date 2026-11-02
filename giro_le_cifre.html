@@ -21,9 +21,11 @@ body{
   font-family:'Source Sans 3',-apple-system,'Segoe UI',Arial,sans-serif;
   color:var(--ink); background:#fff;
   display:flex; flex-direction:column; align-items:center;
-  min-height:100vh; padding:12px 16px 16px; gap:clamp(8px,1.8vh,20px);
+  min-height:100vh; padding:10px 16px 12px; gap:clamp(6px,1.6vh,20px);
   -webkit-user-select:none; user-select:none;
 }
+
+body > *{flex-shrink:0}
 
 /* logo standard */
 .logo{display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none}
@@ -143,10 +145,62 @@ body{
 .pill svg{width:18px;height:18px}
 .pill:focus-visible,.seg button:focus-visible{outline:3px solid var(--red);outline-offset:2px}
 
+@media (max-height:720px), (max-width:640px){
+  .logo{gap:2px}
+  .logo img{width:40px;height:40px}
+  .logo span{font-size:12px}
+  .lettura{min-height:0}
+}
+/* schermi molto bassi (cellulare in orizzontale): il logo è già nella barra del blog */
+@media (max-height:480px){
+  .logo{display:none}
+  body{padding-top:6px;gap:4px}
+  .classe-nome{font-size:10px;padding-bottom:3px}
+  .comandi{gap:4px 8px;padding-top:6px}
+  .gruppo{gap:4px}
+  .gruppo-nome{font-size:11px}
+  .pill{min-height:36px;padding:0 10px;font-size:14px}
+  .seg button{min-width:34px;min-height:36px;font-size:15px}
+  .numero{font-size:30px}
+  .scomp,.lettere{font-size:14px}
+}
 @media (max-width:640px){
+  body{padding:8px 10px 10px}
+  .comandi{gap:6px 8px;padding-top:8px}
+  .gruppo{gap:6px}
+  .gruppo-nome{font-size:11px;letter-spacing:.06em}
+  .pill{min-height:40px;padding:0 10px;font-size:14px;gap:6px}
+  .pill[aria-pressed]::before{width:12px;height:12px}
+  .seg button{min-width:36px;min-height:40px;font-size:15px}
+  .numero{font-size:clamp(28px,9vw,48px)}
+  .scomp{font-size:14px}
+  .lettere{font-size:15px}
   .classe-nome{font-size:10px;letter-spacing:.04em}
   .finestra{border-width:2px}
   .btn-giro{border-radius:8px}
+}
+
+/* cellulare e schermi bassi: comandi compatti (Numero a caso e Azzera solo icona) */
+@media (max-width:640px), (max-height:480px){
+  .g-cambio{order:2} .g-azioni{order:3} .g-mostra{order:4}
+  .g-azioni .t{display:none}
+  .g-azioni .pill{padding:0;width:44px;justify-content:center}
+  .g-mostra .gruppo-nome{display:none}
+}
+@media (max-width:640px){ .g-mostra{flex-basis:100%} }
+@media (max-height:480px){
+  .comandi .gruppo-nome{display:none}
+  .seg button{min-width:30px}
+  .g-azioni .pill{width:38px}
+}
+
+@media (max-width:640px), (max-height:480px){
+  .btn-giro{height:max(28px, calc(var(--cw) * .55))}
+  .lettura{gap:2px}
+  .numero{font-size:28px}
+  .scomp,.lettere{font-size:13px;line-height:1.25}
+  .pill,.seg button{min-height:36px}
+  .g-azioni .pill{width:38px}
 }
 </style>
 </head>
@@ -170,22 +224,22 @@ body{
     <span class="gruppo-nome">Cifre</span>
     <div class="seg" id="segCifre" role="group" aria-label="Numero di cifre"></div>
   </div>
-  <div class="gruppo">
+  <div class="gruppo g-cambio">
     <button type="button" class="pill" id="tRiporto" aria-pressed="false">Cambio automatico</button>
   </div>
-  <div class="gruppo">
+  <div class="gruppo g-mostra">
     <span class="gruppo-nome">Mostra</span>
     <button type="button" class="pill" data-mostra="vNumero" aria-pressed="true">Numero</button>
     <button type="button" class="pill" data-mostra="vScomp" aria-pressed="false">Scomposizione</button>
     <button type="button" class="pill" data-mostra="vLettere" aria-pressed="false">In lettere</button>
   </div>
-  <div class="gruppo">
-    <button type="button" class="pill" id="bCaso">
+  <div class="gruppo g-azioni">
+    <button type="button" class="pill" id="bCaso" aria-label="Numero a caso">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>
-      Numero a caso</button>
-    <button type="button" class="pill rosso" id="bAzzera">
+      <span class="t">Numero a caso</span></button>
+    <button type="button" class="pill rosso" id="bAzzera" aria-label="Azzera">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
-      Azzera</button>
+      <span class="t">Azzera</span></button>
   </div>
 </div>
 
@@ -266,18 +320,32 @@ body{
   }
 
   // le finestrelle si ridimensionano in base al numero di cifre e allo schermo
-  function dimensiona(){
-    var W = document.documentElement.clientWidth, H = window.innerHeight;
-    var nSep = Math.ceil(n / 3) - 1;
-    var perAltezza = Math.min(140, Math.max(48, (H - 470) / 2.4));
-    // larghezza disponibile: colonne + spazi (circa 0,2 cw ciascuno) + separatori
-    var perLarghezza = (W - 40) / (n + (n - 1) * 0.2 + nSep * 0.9 + nSep * 0.3);
-    var cw = Math.max(26, Math.floor(Math.min(perAltezza, perLarghezza)));
+  // Tutto deve stare in una sola schermata (LIM, computer, cellulare):
+  // si parte dalla misura più grande possibile e si riduce finché la pagina non scorre più.
+  // La misura si prende con il caso più lungo (tutte cifre 4), così non cambia mentre si gioca.
+  function imposta_cw(cw){
     abaco.style.setProperty('--cw', cw + 'px');
     abaco.style.setProperty('--gap', Math.max(4, Math.round(cw * 0.2)) + 'px');
     abaco.classList.toggle('stretto', cw < 74);
   }
-  window.addEventListener('resize', dimensiona);
+  function dimensiona(){
+    var W = document.documentElement.clientWidth, H = window.innerHeight;
+    var nSep = Math.ceil(n / 3) - 1;
+    var perLarghezza = (W - 40) / (n + (n - 1) * 0.2 + nSep * 0.9 + nSep * 0.3);
+    var cw = Math.max(22, Math.floor(Math.min(140, perLarghezza)));
+    var salva = d.slice();
+    for (var p = 0; p < n; p++) d[p] = 4;
+    aggiornaLettura();
+    imposta_cw(cw);
+    var giri = 0;
+    while (document.documentElement.scrollHeight > H && cw > 22 && giri < 80){
+      cw -= 2; imposta_cw(cw); giri++;
+    }
+    d = salva;
+    aggiornaLettura();
+  }
+  var attesa;
+  window.addEventListener('resize', function(){ clearTimeout(attesa); attesa = setTimeout(dimensiona, 120); });
 
   function mostra(p, dir){
     var f = finestre[p].querySelector('.finestra');
@@ -423,6 +491,7 @@ body{
       var on = b.getAttribute('aria-pressed') !== 'true';
       b.setAttribute('aria-pressed', on ? 'true' : 'false');
       document.getElementById(b.getAttribute('data-mostra')).classList.toggle('on', on);
+      dimensiona();
     });
   });
 
