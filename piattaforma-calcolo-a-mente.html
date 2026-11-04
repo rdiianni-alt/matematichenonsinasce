@@ -1,111 +1,16 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calcolo a mente entro il 20</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700&display=swap">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contiamo con le mani · Matematiche non si nasce</title>
 <style>
-* { box-sizing: border-box; }
-[hidden] { display: none !important; }
-html, body { margin: 0; padding: 0; background: #ffffff; font-family: Arial, Helvetica, sans-serif; color: #2b2b2b; }
-body { min-height: 100vh; }
-
-.logo { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: #2b2b2b; padding-top: clamp(6px, 1.5vw, 12px); }
-.logo img { width: clamp(44px, 8vmin, 64px); height: clamp(44px, 8vmin, 64px); border-radius: 50%; object-fit: contain; }
-.logo span { font-size: clamp(0.62rem, 1.4vmin, 0.8rem); font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; }
-
-#app { max-width: 1200px; margin: 0 auto; padding: clamp(8px, 2vw, 20px); }
-
-.titolo { text-align: center; font-size: clamp(1.2rem, 4vmin, 1.8rem); margin: clamp(4px, 1vw, 8px) 0 4px; color: #2b2b2b; }
-.sub { text-align: center; font-size: clamp(0.8rem, 1.8vmin, 0.95rem); color: #6a6a6a; margin: 0 0 clamp(10px, 2vw, 16px); }
-.etichetta { font-size: clamp(0.7rem, 1.6vmin, 0.85rem); text-transform: uppercase; letter-spacing: 0.06em; color: #6a6a6a; margin: 0; font-weight: bold; }
-
-.btn { background: #ffffff; border: 2px solid #d6d6d6; border-radius: 14px; padding: clamp(8px, 1.4vmin, 12px) clamp(10px, 2vw, 18px); font-family: inherit; font-size: clamp(0.75rem, 1.7vmin, 0.95rem); font-weight: bold; color: #2b2b2b; cursor: pointer; min-height: 44px; }
-.btn:hover { filter: brightness(0.96); }
-.btn:disabled { opacity: 0.5; cursor: default; }
-.btn.piccolo { padding: 6px 12px; min-height: 36px; font-size: clamp(0.7rem, 1.5vmin, 0.85rem); }
-.btn.attivo { background: #dff1ff; border-color: #2d9be0; }
-.btn.grande { min-height: 58px; font-size: clamp(1rem, 2.6vmin, 1.25rem); padding: 12px 28px; min-width: 160px; }
-.btn.costruisci { background: #ffe9b8; border-color: #ffb020; }
-.btn.continua { background: #d6ecff; border-color: #2d9be0; }
-.btn.avanti { background: #e8dcff; border-color: #8b62d9; }
-.btn.giusta { background: #2fb47a; border-color: #2fb47a; color: #ffffff; }
-.btn.sbagliata { background: #ef6b6b; border-color: #ef6b6b; color: #ffffff; }
-.btn.pdf { background: #ffe3d0; border-color: #f47c2c; }
-
-.riga { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; }
-.pannello { background: #ffffff; border: 2px solid #efefef; border-radius: 18px; padding: clamp(10px, 1.5vw, 14px); display: flex; flex-direction: column; gap: 10px; margin-bottom: clamp(10px, 2vw, 16px); }
-
-.griglia { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(150px, 22vw, 220px), 1fr)); gap: clamp(8px, 1.6vw, 16px); }
-.carta-gioco { border: 3px solid; border-radius: 18px; padding: clamp(10px, 2vw, 16px); text-align: left; cursor: pointer; font-family: inherit; color: #2b2b2b; display: flex; flex-direction: column; gap: 6px; min-height: clamp(84px, 14vh, 110px); }
-.carta-gioco:hover { transform: translateY(-2px); box-shadow: 0 4px 0 rgba(0, 0, 0, 0.08); }
-.carta-gioco .nome { font-size: clamp(0.8rem, 1.8vmin, 0.98rem); font-weight: bold; }
-.carta-gioco .desc { font-size: clamp(0.7rem, 1.5vmin, 0.82rem); color: #555; }
-
-#gioco { display: grid; gap: clamp(8px, 1.5vw, 16px); grid-template-columns: 1fr; grid-template-areas: "head" "carta" "mat" "zona"; }
-#g-head { grid-area: head; }
-#g-carta { grid-area: carta; }
-.mat-wrap { grid-area: mat; display: flex; justify-content: center; }
-#g-zona { grid-area: zona; }
-#mat { display: block; width: 100%; aspect-ratio: 1180 / 760; background: #e3e1da; border-radius: 14px; border: 2px solid #efefef; }
-@media (min-width: 900px) {
-  #gioco { grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.5fr); grid-template-areas: "head head" "carta mat" "zona mat"; align-items: start; }
-  .mat-wrap { min-width: 0; }
-  #mat { width: min(100%, 58vw, calc((100vh - 170px) * 1180 / 760)); }
-}
-
-.tessera { background: #ffffff; border: 6px solid; border-radius: 18px; text-align: center; padding: clamp(6px, 1.5vh, 12px) 12px; width: 100%; max-width: 440px; margin: 0 auto; }
-.tessera .op { font-size: clamp(2.2rem, min(9vw, 9vh), 4.2rem); font-weight: bold; line-height: 1.1; }
-.tessera .tip { font-size: clamp(0.75rem, 1.6vmin, 0.9rem); color: #555; margin-top: 6px; line-height: 1.35; }
-
-.zona { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-.azioni { display: flex; flex-wrap: wrap; gap: clamp(8px, 1.5vw, 14px); justify-content: center; }
-.pausa-box { background: #fff8e6; border: 3px solid #ffb020; border-radius: 16px; padding: 10px 14px; max-width: 560px; width: 100%; }
-.titolo-p { font-size: 0.8rem; text-transform: uppercase; font-weight: bold; color: #b26a00; letter-spacing: 0.05em; }
-.testo-p { font-size: clamp(0.9rem, 2vmin, 1.05rem); margin-top: 4px; line-height: 1.4; }
-.messaggio { font-size: clamp(0.95rem, 2.2vmin, 1.1rem); font-weight: bold; min-height: 1.4em; }
-.messaggio.ok { color: #23875b; }
-.messaggio.ko { color: #d63b3b; }
-.strategia { font-size: clamp(0.8rem, 1.7vmin, 0.92rem); color: #555; max-width: 560px; margin: 0; line-height: 1.4; }
-.risposta { font-size: clamp(1.6rem, 4vmin, 2.2rem); font-weight: bold; min-height: 48px; border-bottom: 3px solid #2b2b2b; width: 150px; line-height: 1.2; }
-.tastiera { display: grid; grid-template-columns: repeat(3, minmax(56px, 1fr)); gap: 8px; width: min(100%, 300px); }
-.tastiera button { background: #ffffff; border: 2px solid #d6d6d6; border-radius: 14px; font-family: inherit; font-size: clamp(1.1rem, 3vmin, 1.5rem); font-weight: bold; min-height: 52px; cursor: pointer; color: #2b2b2b; }
-.tastiera button:hover { background: #f3f3f3; }
-.tastiera button.azione { font-size: 0.8rem; text-transform: uppercase; }
-.tastiera button.verifica { background: #2fb47a; border-color: #2fb47a; color: #ffffff; }
-.opzioni { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; width: 100%; max-width: 600px; }
-.opzioni .btn { text-align: left; }
-
-.fine { text-align: center; padding-top: 10px; }
-.medaglia { width: clamp(150px, 30vmin, 210px); height: clamp(150px, 30vmin, 210px); border-radius: 50%; border: 10px solid #ffb020; background: #fff8e6; margin: 10px auto 14px; display: flex; align-items: center; justify-content: center; }
-.medaglia span { font-size: 0.85rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.08em; color: #b26a00; text-align: center; padding: 0 10px; }
-.fine p { margin: 6px 0; }
-</style>
-</head>
+:root{--ink:#293e3c;--muted:#697873;--green:#326957;--paper:#f8f7f2;--line:#dfe5dc}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}[hidden]{display:none!important}button,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.45;cursor:default}:focus-visible{outline:3px solid #be7e2e;outline-offset:4px}header,main{max-width:1200px;margin:auto;padding:0 26px}.brand{display:flex;align-items:center;gap:12px;padding:18px 0;border-bottom:1px solid var(--line);font-size:14px;font-weight:750}.brand img{width:44px;height:44px;object-fit:contain}.brand a{color:inherit;text-decoration:none}.hero{padding:36px 0 26px}.eyebrow{text-transform:uppercase;color:var(--green);letter-spacing:.17em;font-size:12px;font-weight:750}h1{font-size:clamp(32px,5vw,52px);letter-spacing:-.04em;line-height:1.12;margin:10px 0 16px}h1 span{color:var(--green)}.intro{color:var(--muted);max-width:650px;margin:0;font-size:18px}.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:0 0 22px}.mode-card{border:1px solid #d6e2d8;border-radius:20px;padding:24px;text-align:left;background:#edf3e8;color:var(--ink);display:grid;grid-template-columns:54px 1fr;gap:15px;align-items:start;transition:transform .15s}.mode-card:hover{transform:translateY(-3px)}.mode-card:nth-child(2){background:#fff0da;border-color:#eadac1}.mode-card:nth-child(3){background:#eeebf7;border-color:#ded6ed}.mode-card:nth-child(4){background:#e8f1f5;border-color:#d1e0e6}.mode-icon{font-size:34px}.mode-card strong{font-size:20px;display:block;margin-bottom:6px}.mode-card small{display:block;font-size:15px;line-height:1.5;color:#56645e}.teacher-tools{background:white;border:1px solid var(--line);border-radius:14px;padding:15px 18px;margin-bottom:30px}.teacher-tools summary{cursor:pointer;font-weight:650}.strategies{display:flex;flex-wrap:wrap;gap:8px;padding-top:14px}.btn{border:1px solid #cbd6cc;border-radius:12px;padding:11px 17px;background:white;color:var(--ink);min-height:44px;font-weight:650}.btn.primary{background:var(--green);border-color:var(--green);color:white}.btn.answer{background:#f8e4b9;border-color:#e2c98f}.btn.small{font-size:14px;padding:8px 13px}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:16px 0}.toolbar-side{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.mode-title{font-weight:750}.exercise{display:flex;flex-direction:column;align-items:center;min-height:119px;justify-content:center;text-align:center}.prompt{font-size:clamp(28px,4vw,46px);font-weight:750;letter-spacing:-.025em;line-height:1.2}.prompt .result{color:var(--green)}.hint{font-size:14px;color:var(--muted);margin:10px 0 4px}.stage{border:1px solid var(--line);background:#fcfaf6;border-radius:22px;padding:4px 12px;overflow:hidden}#mat{width:100%;max-width:1080px;margin:auto}#mat svg{display:block;width:100%;height:auto}.actions{display:flex;flex-direction:column;align-items:center;gap:14px;padding:18px 0 26px}.action-row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}.feedback{min-height:26px;margin:0;color:var(--green);font-weight:600;text-align:center}.number-grid{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;max-width:790px}.number-grid .btn{min-width:48px}.number-grid .selected{background:var(--green);color:white}.composer{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:16px;color:var(--muted);font-size:14px}.composer select{border:1px solid #cbd6cc;border-radius:9px;background:white;color:var(--ink);padding:7px;min-height:40px}.tip{font-size:13px;color:var(--muted);text-align:center;margin:0 0 16px}footer{max-width:1200px;margin:10px auto 0;padding:20px 26px;font-size:13px;color:var(--muted);border-top:1px solid var(--line)}@media(max-width:640px){header,main{padding:0 16px}.mode-grid{grid-template-columns:1fr}.mode-card{padding:18px;grid-template-columns:42px 1fr}.mode-card strong{font-size:18px}.hero{padding-top:24px}.toolbar{gap:12px}.stage{padding:0;border-radius:12px}.btn{font-size:14px;padding:10px 12px}.hint{font-size:13px}.mode-icon{font-size:29px}.teacher-tools{font-size:14px}}@media(prefers-reduced-motion:reduce){.mode-card{transition:none}}
+</style></head>
 <body>
-
-<a class="logo" href="https://matematichenonsinasce.com/" target="_self">
-  <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Logo" />
-  <span>Matematiche non si nasce</span>
-</a>
-
-<div id="app">
-  <div id="menu"></div>
-  <div id="gioco" hidden>
-    <div id="g-head"></div>
-    <div id="g-carta"></div>
-    <div class="mat-wrap"><canvas id="mat" role="img" aria-label="Tovaglietta con decine e unità, con le mani che costruiscono il numero"></canvas></div>
-    <div id="g-zona"></div>
-  </div>
-  <div id="fine" hidden></div>
-</div>
-
+<header><div class="brand"><img src="logo.png" alt="Logo"><a href="https://matematichenonsinasce.com/">Matematiche non si nasce</a></div></header>
+<main id="app"><section id="menu"></section><section id="workspace" hidden><div id="toolbar"></div><div id="exercise" class="exercise"></div><div class="stage"><div id="mat" role="img" aria-label="Quattro mani affiancate"></div></div><div id="actions" class="actions"></div></section></main>
+<footer>Quattro mani, venti dita. Un numero alla volta, insieme alla classe.</footer>
 <script>
-/* ================= STRATEGIE E TESSERE ================= */
 const STR = {
   uno:   { nome: 'Aggiungi o togli 1', colore: '#ffb020', fondo: '#fff1cc', tip: 'Aggiungere 1 significa andare al numero successivo; togliere 1 significa tornare al numero precedente.' },
   zero:  { nome: 'Aggiungi o togli 0', colore: '#2fb47a', fondo: '#d6f5e6', tip: 'Aggiungere o togliere 0 non cambia il numero.' },
@@ -116,8 +21,8 @@ const STR = {
   c7:    { nome: 'Combinazioni con il 7', colore: '#7cb82f', fondo: '#e6f5c9', tip: 'Ci sono coppie di numeri che fanno 7: 1 e 6, 2 e 5, 3 e 4.' },
   c8:    { nome: 'Combinazioni con il 8', colore: '#f47c2c', fondo: '#ffe3d0', tip: 'Ci sono coppie di numeri che fanno 8: 1 e 7, 2 e 6, 3 e 5, 4 e 4.' },
   c9:    { nome: 'Combinazioni con il 9', colore: '#4f6fe0', fondo: '#dfe5ff', tip: 'Ci sono coppie di numeri che fanno 9: 1 e 8, 2 e 7, 3 e 6, 4 e 5.' },
-  p5:    { nome: 'Passaggio al 5 e ritorno al 5', colore: '#e6a817', fondo: '#fff3d4', tip: 'Si fa una tappa al 5 (o al 10) e poi si aggiunge quello che resta.' },
-  pd:    { nome: 'Passaggio alla decina e ritorno alla decina', colore: '#14a0c8', fondo: '#d2f1fb', tip: 'Si arriva alla decina (10) e poi si aggiunge quello che resta.' }
+  p5:    { nome: 'Addizioni oltre il 5', colore: '#e6a817', fondo: '#fff3d4', tip: 'Si fa una tappa al 5 (o al 10) e poi si aggiunge quello che resta.' },
+  pd:    { nome: 'Addizioni oltre il 10', colore: '#14a0c8', fondo: '#d2f1fb', tip: 'Si arriva alla decina (10) e poi si aggiunge quello che resta.' }
 };
 
 function f(a, op, b, s, step) {
@@ -150,856 +55,300 @@ const GIOCHI = [
   { id: 'c7', nome: 'Combinazioni con il 7', desc: 'Coppie che fanno 7', col: STR.c7.colore, fondo: STR.c7.fondo, deck: () => combN(7, 'c7') },
   { id: 'c8', nome: 'Combinazioni con il 8', desc: 'Coppie che fanno 8', col: STR.c8.colore, fondo: STR.c8.fondo, deck: () => combN(8, 'c8') },
   { id: 'c9', nome: 'Combinazioni con il 9', desc: 'Coppie che fanno 9', col: STR.c9.colore, fondo: STR.c9.fondo, deck: () => combN(9, 'c9') },
-  { id: 'p5', nome: 'Passaggio al 5 e ritorno al 5', desc: 'Tappa al 5, poi si prosegue', col: STR.p5.colore, fondo: STR.p5.fondo,
+  { id: 'p5', nome: 'Addizioni oltre il 5', desc: 'Le dita si alzano senza interruzioni', col: STR.p5.colore, fondo: STR.p5.fondo,
     deck: () => P5.map(([a, b]) => f(a, '+', b, 'p5', 5)) },
-  { id: 'pd', nome: 'Passaggio alla decina e ritorno alla decina', desc: 'Tappa alla decina, poi si prosegue', col: STR.pd.colore, fondo: STR.pd.fondo,
+  { id: 'pd', nome: 'Addizioni oltre il 10', desc: 'Le dita continuano oltre la prima coppia di mani', col: STR.pd.colore, fondo: STR.pd.fondo,
     deck: () => PD.map(([a, b]) => f(a, '+', b, 'pd', 10)) },
   { id: 'misto', nome: 'Riepilogo', desc: 'Tutte le combinazioni, in ordine casuale', col: '#7a7a7a', fondo: '#ececec', misto: true,
     deck: () => uniq([].concat(...GIOCHI.filter(g => !g.misto).map(g => g.deck()))) }
 ];
 
-/* ================= TOVAGLIETTA (motore delle cannucce) ================= */
-const Tov = (() => {
-  const W = 1180, H = 760;
-  const SL = 220, SWD = 13, PAD = 10, SS = 3;
-  const Y0 = 184, Y1 = 426;
-  const unitSlot = i => ({ x: 552 + (i % 10) * 34, y: i < 10 ? Y0 : Y1 });
-  const tenSlot = j => ({ x: 130 + (j % 5) * 84, y: j < 5 ? Y0 : Y1 });
-  const BOXL = { x: 1048, y: 470 }, BOXB = { x: 1048, y: 196 };
-  const HOME = { L: { x: 330, y: 728 }, R: { x: 770, y: 728 } };
-  const UNIT_C = 707;
-  const ABORT = { abort: true };
-  /* colori delle cannucce nella riga delle unità: le prime 5 di un tipo, le successive 5 dell'altro */
-  const PAL = { nero: ['#f6f6f2', '#2a2b2e'], avana: ['#f4f1e8', '#c7b28c'] };
-  const unitKind = i => (i % 10) < 5 ? 'nero' : 'avana';
-
-  const lerp = (a, b, t) => a + (b - a) * t;
-  const rand = (a, b) => a + Math.random() * (b - a);
-  const eio = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-  const lin = t => t;
-  const rk = () => Math.random() < .55 ? 'nero' : 'avana';
-  const removeFrom = (arr, o) => { const i = arr.indexOf(o); if (i >= 0) arr.splice(i, 1); };
-  const toTop = (arr, o) => { removeFrom(arr, o); arr.push(o); };
-  const roundRect = (g, x, y, w, h, r, fill) => { g.beginPath(); g.roundRect(x, y, w, h, r); g.fillStyle = fill; g.fill(); };
-
-  function makeSprite(kind) {
-    const c = document.createElement('canvas');
-    c.width = (SWD + PAD * 2) * SS; c.height = (SL + PAD * 2) * SS;
-    const g = c.getContext('2d'); g.scale(SS, SS); g.translate(PAD + SWD / 2, PAD + SL / 2);
-    const [base, stripe] = PAL[kind] || PAL.avana;
-    const shape = () => { g.beginPath(); g.roundRect(-SWD / 2, -SL / 2, SWD, SL, 2); };
-    g.save(); g.shadowColor = 'rgba(30,40,15,.33)'; g.shadowBlur = 3; g.shadowOffsetX = 2.5; g.shadowOffsetY = 3.5;
-    shape(); g.fillStyle = base; g.fill(); g.restore();
-    g.save(); shape(); g.clip();
-    g.fillStyle = stripe;
-    for (let y = -SL / 2 - 30; y < SL / 2 + 30; y += 22) {
-      g.beginPath(); g.moveTo(-SWD / 2, y); g.lineTo(SWD / 2, y - 13); g.lineTo(SWD / 2, y - 13 + 10.5); g.lineTo(-SWD / 2, y + 10.5); g.closePath(); g.fill();
+/* ================= MANI: DUE PERSONE, QUATTRO GRUPPI DI CINQUE ================= */
+const Mani = (() => {
+  const ABORT = {abort:true};
+  let element=null, count=0, speed=1, aborted=false;
+  const fingers=Array(20).fill(0);
+  const clamp=n=>Math.max(0,Math.min(20,Math.round(Number(n)||0)));
+  function hand(index){
+    const tone=Math.floor(index/2),values=fingers.slice(index*5,index*5+5);
+    const mirror=index%2===0, id='hand-'+index;
+    const color=tone===0?{light:'#ffe4cf',mid:'#e9b795',shade:'#bb7f61',line:'#975f46'}:{light:'#d6aa85',mid:'#aa7655',shade:'#784c37',line:'#603d2d'};
+    const geometry=[{x:63,tip:58,top:48,w:20},{x:89,tip:87,top:29,w:21},{x:115,tip:117,top:41,w:19},{x:139,tip:146,top:72,w:16}];
+    let extended='',folded='';
+    for(let i=0;i<4;i++){
+      const {x,tip,top,w}=geometry[i],open=values[i+1];
+      const tipX=x+(tip-x)*open,tipY=145-(145-top)*open,half=w/2;
+      const base=157,midY=tipY+(base-tipY)*.53;
+      const contour=`M ${x-half-1} ${base} C ${x-half-2} ${midY+20} ${tipX-half} ${tipY+25} ${tipX-half+1} ${tipY+11} C ${tipX-half+2} ${tipY-3} ${tipX+half-2} ${tipY-3} ${tipX+half-1} ${tipY+11} C ${tipX+half+1} ${tipY+29} ${x+half+2} ${midY+19} ${x+half+1} ${base} Z`;
+      extended+=`<path d="${contour}" fill="url(#${id}-finger)" stroke="${color.line}" stroke-opacity=".55" stroke-width=".9"/>
+        <g opacity="${open*.55}" fill="none" stroke="${color.line}" stroke-width=".65" stroke-linecap="round">
+          <path d="M ${tipX-half+5} ${tipY+(base-tipY)*.43} q ${half-4} 3 ${w-10} -.3 M ${tipX-half+4} ${tipY+(base-tipY)*.65} q ${half-3} 3 ${w-8} -.7"/>
+          <path d="M ${tipX-4} ${tipY+13} q 4 -2 8 0" stroke-opacity=".45"/>
+        </g>
+        <path d="M ${tipX-half+4} ${tipY+17} Q ${tipX-half+3} ${midY} ${x-half+4} 145" fill="none" stroke="${color.light}" stroke-width="1.3" opacity="${open*.5}"/>`;
+      const foldedTop=144+[0,-3,0,8][i];
+      folded+=`<g opacity="${1-open}">
+        <path d="M ${x-half-1} ${foldedTop+11} C ${x-half-2} ${foldedTop-4} ${x+half+1} ${foldedTop-5} ${x+half+1} ${foldedTop+10} L ${x+half} ${foldedTop+29} Q ${x+half-1} ${foldedTop+39} ${x} ${foldedTop+39} Q ${x-half} ${foldedTop+38} ${x-half-1} ${foldedTop+29} Z" fill="url(#${id}-curl)" stroke="${color.line}" stroke-opacity=".45" stroke-width=".85"/>
+        <path d="M ${x-half+4} ${foldedTop+25} Q ${x} ${foldedTop+29} ${x+half-4} ${foldedTop+25} M ${x-half+5} ${foldedTop+28} Q ${x} ${foldedTop+31} ${x+half-5} ${foldedTop+28}" fill="none" stroke="${color.line}" stroke-opacity=".55" stroke-width=".7"/>
+        <path d="M ${x-half+4} ${foldedTop+8} Q ${x} ${foldedTop+2} ${x+half-4} ${foldedTop+8}" fill="none" stroke="${color.light}" stroke-opacity=".4" stroke-width="1.3"/>
+      </g>`;
     }
-    if (kind === 'avana') {
-      for (let k = 0; k < 160; k++) { g.fillStyle = `rgba(110,85,50,${rand(.15, .4)})`; g.beginPath(); g.arc(rand(-SWD / 2, SWD / 2), rand(-SL / 2, SL / 2), rand(.2, .5), 0, 7); g.fill(); }
+    // Identical Bézier topology lets the thumb unfold smoothly rather than
+    // switching between a mitten shape and a stick.
+    const thumb=values[0];
+    const closed=[70,223,55,217,49,201,54,190,61,180,70,175,81,180,92,183,105,190,112,194,123,200,116,212,106,211,98,210,91,204,84,203,85,215,81,220,70,223];
+    const opened=[70,223,51,215,46,193,43,177,35,160,18,148,14,137,7,123,14,116,23,120,33,122,37,135,47,146,62,163,76,175,81,193,84,208,81,218,70,223];
+    const a=closed.map((n,i)=>n+(opened[i]-n)*thumb);
+    let thumbPath=`M ${a.slice(0,2)}`;
+    for(let i=2;i<a.length;i+=6)thumbPath+=` C ${a.slice(i,i+6)}`;
+    thumbPath+=' Z';
+    const raised=values.filter(v=>v>.99).length;
+    return `<g class="hand" data-hand="${index}" data-raised="${raised}" transform="translate(${10+index*240} 0)">
+      <defs>
+        <radialGradient id="${id}-palm" cx="38%" cy="35%" r="78%"><stop stop-color="${color.light}"/><stop offset=".56" stop-color="${color.mid}"/><stop offset="1" stop-color="${color.shade}"/></radialGradient>
+        <linearGradient id="${id}-finger" x1="0" x2="1"><stop stop-color="${color.shade}"/><stop offset=".22" stop-color="${color.mid}"/><stop offset=".52" stop-color="${color.light}"/><stop offset=".8" stop-color="${color.mid}"/><stop offset="1" stop-color="${color.shade}"/></linearGradient>
+        <linearGradient id="${id}-curl" x1="0" y1="0" x2=".2" y2="1"><stop stop-color="${color.light}"/><stop offset=".4" stop-color="${color.mid}"/><stop offset="1" stop-color="${color.shade}"/></linearGradient>
+      </defs>
+      <g transform="${mirror?'translate(200 0) scale(-1 1)':''}">
+        <path d="M 76 217 Q 79 244 73 269 L 133 269 Q 124 241 128 216 Z" fill="url(#${id}-palm)" stroke="${color.line}" stroke-width=".8" stroke-opacity=".5"/>
+        ${extended}
+        <path d="M 51 151 Q 54 136 65 139 Q 78 143 89 138 Q 102 141 114 140 Q 130 146 145 148 Q 154 155 150 177 L 146 199 Q 142 217 129 229 Q 119 238 104 238 Q 78 239 67 227 Q 53 214 51 195 Q 46 174 51 151 Z" fill="url(#${id}-palm)"/>
+        <path d="M 52 154 Q 46 175 51 195 Q 53 214 67 227 Q 79 239 104 238 Q 121 238 129 229 Q 142 217 146 199 L 150 177 Q 154 155 145 148" fill="none" stroke="${color.line}" stroke-opacity=".58" stroke-width=".95"/>
+        <g fill="none" stroke="${color.line}" stroke-linecap="round" opacity=".36">
+          <path d="M 62 174 Q 92 166 131 177 M 83 186 Q 110 191 135 181" stroke-width=".9"/>
+          <path d="M 75 186 C 93 190 94 209 85 224 M 93 202 Q 105 212 126 211" stroke-width=".85"/>
+          <path d="M 79 231 Q 100 236 122 231 M 81 245 Q 103 249 124 244" stroke-width=".65"/>
+          <path d="M 109 198 l 10 -7 M 107 219 l 7 -5 M 66 202 l -4 -9 M 126 194 l 7 -4" stroke-width=".45"/>
+        </g>
+        ${folded}
+        <path d="${thumbPath}" fill="url(#${id}-palm)" stroke="${color.line}" stroke-opacity=".5" stroke-width=".95"/>
+        <path d="M ${29+thumb*-6} ${163-thumb*22} q 5 -2 10 2" fill="none" stroke="${color.line}" stroke-width=".7" opacity="${thumb*.45}"/>
+        <path d="M 70 258 Q 101 265 136 258 L 139 277 L 68 277 Z" fill="${tone===0?'#447886':'#7d658f'}"/>
+        <path d="M 71 261 Q 104 267 135 261" fill="none" stroke="${tone===0?'#76a3ac':'#aa94b9'}" stroke-width="1.4"/>
+      </g>
+    </g>`;
+  }
+  function draw(){
+    if(!element)return;
+    element.setAttribute('aria-label',`${count} dita alzate su due coppie di mani, in gruppi di cinque`);
+    element.dataset.number=count;
+    element.innerHTML=`<svg viewBox="0 0 960 326" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect width="960" height="326" rx="20" fill="#fcfaf6"/>
+      <text x="240" y="25" text-anchor="middle" fill="#486572" font-family="Arial,sans-serif" font-size="13" letter-spacing="2">PRIMA PERSONA</text>
+      <text x="720" y="25" text-anchor="middle" fill="#79608f" font-family="Arial,sans-serif" font-size="13" letter-spacing="2">SECONDA PERSONA</text>
+      <g transform="translate(0 32)">${hand(0)}${hand(1)}${hand(2)}${hand(3)}</g>
+    </svg>`;
+  }
+  function check(){if(aborted)throw ABORT;}
+  async function moveTo(number){
+    const target=clamp(number);
+    while(count!==target){
+      check();
+      const increasing=target>count,index=increasing?fingers.findIndex(value=>value<.5):fingers.findLastIndex(value=>value>.5);
+      const from=fingers[index],to=increasing?1:0;
+      const duration=matchMedia('(prefers-reduced-motion: reduce)').matches?50:430/speed;
+      await new Promise((resolve,reject)=>{
+        const start=performance.now();
+        function frame(now){
+          if(aborted){reject(ABORT);return;}
+          const t=Math.min(1,(now-start)/duration),ease=t*t*(3-2*t);
+          fingers[index]=from+(to-from)*ease;draw();
+          if(t<1)requestAnimationFrame(frame);else resolve();
+        }
+        requestAnimationFrame(frame);
+      });
+      count+=increasing?1:-1;draw();
     }
-    const gr = g.createLinearGradient(-SWD / 2, 0, SWD / 2, 0);
-    gr.addColorStop(0, 'rgba(0,0,0,.30)'); gr.addColorStop(.32, 'rgba(255,255,255,.28)');
-    gr.addColorStop(.55, 'rgba(0,0,0,0)'); gr.addColorStop(1, 'rgba(0,0,0,.34)');
-    g.fillStyle = gr; g.fillRect(-SWD / 2, -SL / 2, SWD, SL);
-    g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(-SWD / 2, -SL / 2, SWD, 1.3); g.fillRect(-SWD / 2, SL / 2 - 1.3, SWD, 1.3);
-    g.restore();
-    return c;
+    check();
   }
-  const SPR = { nero: makeSprite('nero'), avana: makeSprite('avana') };
-
-  function drawStraw(g, kind, x, y, rot, alpha = 1, sc = 1) {
-    g.save(); g.globalAlpha = alpha; g.translate(x, y); g.rotate(rot); if (sc !== 1) g.scale(sc, sc);
-    g.drawImage(SPR[kind], -SWD / 2 - PAD, -SL / 2 - PAD, SWD + 2 * PAD, SL + 2 * PAD);
-    g.restore();
-  }
-  function bundleItems(kinds) {
-    return kinds.map((k, i) => { const back = i < 5, c = i % 5;
-      return { kind: k, dx: (c - 2) * 13 + (back ? 6.5 : 0), dy: (back ? -5 : 4) + rand(-7, 7), r: rand(-.025, .025) }; });
-  }
-  function makeBundle(x, y, band = 1) {
-    const kinds = Array.from({ length: 10 }, rk);
-    return { x, y, rot: rand(-.02, .02), items: bundleItems(kinds), band, bandY: 22, bandA: 1, a: 1, lift: 0 };
-  }
-  function drawBand(g, b) {
-    if (b.band <= 0 || b.bandA <= 0) return;
-    g.save(); g.globalAlpha *= b.bandA;
-    const y = b.bandY, x0 = -40, x1 = x0 + 80 * b.band;
-    g.lineCap = 'round'; g.lineJoin = 'round';
-    const path = () => { g.beginPath(); let first = true;
-      for (let x = x0; x < x1; x += 4) { const yy = y + 3 * (1 - (x / 40) ** 2); first ? g.moveTo(x, yy) : g.lineTo(x, yy); first = false; }
-      g.lineTo(x1, y + 3 * (1 - (x1 / 40) ** 2)); };
-    path(); g.strokeStyle = 'rgba(20,60,50,.35)'; g.lineWidth = 7; g.stroke();
-    path(); g.strokeStyle = '#4db8a7'; g.lineWidth = 4.6; g.stroke();
-    g.translate(0, -1.2); path(); g.strokeStyle = 'rgba(225,255,248,.75)'; g.lineWidth = 1.2; g.stroke();
-    g.restore();
-  }
-  function drawBundle(g, b) {
-    g.save(); g.globalAlpha = b.a; g.translate(b.x, b.y); g.rotate(b.rot);
-    const sc = 1 + .05 * (b.lift || 0); if (sc !== 1) g.scale(sc, sc);
-    for (const it of b.items) {
-      g.save(); g.translate(it.dx, it.dy); g.rotate(it.r);
-      g.drawImage(SPR[it.kind], -SWD / 2 - PAD, -SL / 2 - PAD, SWD + 2 * PAD, SL + 2 * PAD); g.restore();
-    }
-    drawBand(g, b);
-    g.restore();
-  }
-
-  const boxPile = {
-    bundles: [makeBundle(1000, 196), makeBundle(1090, 202)],
-    loose: Array.from({ length: 11 }, (_, i) => ({ kind: rk(), x: 962 + i * 17 + rand(-4, 4), y: 470 + rand(-22, 22), rot: rand(-.28, .28) }))
-  };
-  function drawStatic(g) {
-    g.fillStyle = '#e3e1da'; g.fillRect(0, 0, W, H);
-    const vg = g.createRadialGradient(W / 2, H / 2, 200, W / 2, H / 2, 820);
-    vg.addColorStop(0, 'rgba(255,255,255,.18)'); vg.addColorStop(1, 'rgba(90,80,60,.14)');
-    g.fillStyle = vg; g.fillRect(0, 0, W, H);
-    g.save(); g.shadowColor = 'rgba(50,45,30,.22)'; g.shadowBlur = 14; g.shadowOffsetY = 5;
-    roundRect(g, 30, 14, 882, 688, 8, '#fbfbf6'); g.restore();
-    g.fillStyle = '#1f8aa3'; g.font = '700 25px "Baloo 2", "Trebuchet MS", sans-serif'; g.textBaseline = 'middle';
-    g.fillText('ABACO  DECINE  E  UNITÀ', 58, 39);
-    roundRect(g, 58, 62, 466, 500, 3, '#b7d263');
-    roundRect(g, 530, 62, 352, 500, 3, '#d2e39e');
-    roundRect(g, 58, 566, 466, 40, 3, '#a4c34a');
-    roundRect(g, 530, 566, 352, 40, 3, '#bdd57c');
-    roundRect(g, 58, 610, 466, 68, 3, '#c6dd84');
-    roundRect(g, 530, 610, 352, 68, 3, '#dbe9b3');
-    g.fillStyle = '#2b3818'; g.font = '500 25px "Baloo 2", "Trebuchet MS", sans-serif'; g.textAlign = 'center';
-    g.fillText('decine', 291, 587); g.fillText('unità', 706, 587);
-    g.textAlign = 'left';
-    g.save(); g.beginPath(); g.roundRect(30, 14, 882, 688, 8); g.clip();
-    const gl = g.createLinearGradient(100, 0, 700, 700);
-    gl.addColorStop(0, 'rgba(255,255,255,0)'); gl.addColorStop(.42, 'rgba(255,255,255,0)');
-    gl.addColorStop(.47, 'rgba(255,255,255,.16)'); gl.addColorStop(.52, 'rgba(255,255,255,0)'); gl.addColorStop(1, 'rgba(255,255,255,0)');
-    g.fillStyle = gl; g.fillRect(30, 14, 882, 688); g.restore();
-    g.save(); g.shadowColor = 'rgba(50,40,20,.28)'; g.shadowBlur = 12; g.shadowOffsetY = 5;
-    roundRect(g, 930, 14, 236, 688, 6, '#c89e63'); g.restore();
-    roundRect(g, 944, 28, 208, 660, 4, '#a47a45');
-    const bg = g.createLinearGradient(0, 28, 0, 688); bg.addColorStop(0, 'rgba(0,0,0,.18)'); bg.addColorStop(.12, 'rgba(0,0,0,0)');
-    g.fillStyle = bg; g.fillRect(944, 28, 208, 660);
-    g.fillStyle = 'rgba(60,38,15,.55)'; g.font = '700 22px "Baloo 2", "Trebuchet MS", sans-serif'; g.textAlign = 'center';
-    g.fillText('SCATOLA', 1048, 654); g.textAlign = 'left';
-    boxPile.loose.forEach(s => drawStraw(g, s.kind, s.x, s.y, s.rot));
-    boxPile.bundles.forEach(b => drawBundle(g, b));
-  }
-
-  let straws = [], bundles = [], unitsList = [], tensList = [];
-  let D = 0, U = 0;
-  const flash = { d: 0, u: 0 };
-  const bump = w => { flash[w] = performance.now(); };
-  const HS = 1.3;
-  const L = { id: 'L', x: HOME.L.x, y: HOME.L.y, sx: 250, sy: 1090, mirror: true, curl: 0 };
-  const R = { id: 'R', x: HOME.R.x, y: HOME.R.y, sx: 850, sy: 1090, mirror: false, curl: 0 };
-
-  const SKIN = '#f1c4a0', EDGE = '#c78c66', NAIL = '#f9e2d6', SLEEVE = '#3f6fb4', CUFF = '#335d9c';
-  function handShapes(g, curl, fill, stroke) {
-    const fingers = [[-17, 46, -0.10], [-5.5, 52, -0.03], [6, 49, 0.04], [17, 40, 0.12]];
-    g.save(); g.translate(-22, 54); g.rotate(-0.95 + 0.55 * curl);
-    const tl = 38 * (1 - .25 * curl);
-    g.beginPath(); g.roundRect(-7.5, -tl, 15, tl + 10, 7.5); g.fillStyle = fill; g.fill();
-    if (stroke) { g.strokeStyle = stroke; g.stroke(); g.fillStyle = NAIL; g.beginPath(); g.ellipse(0, -tl + 7, 4.2, 5.5, 0, 0, 7); g.fill(); }
-    g.restore();
-    for (const [x, len, sp] of fingers) {
-      g.save(); g.translate(x, 20); g.rotate(sp * (1 - curl));
-      const l = len * (1 - .45 * curl);
-      g.beginPath(); g.roundRect(-6.3, -l, 12.6, l + 8, 6.3); g.fillStyle = fill; g.fill();
-      if (stroke) { g.strokeStyle = stroke; g.stroke(); g.fillStyle = NAIL; g.beginPath(); g.ellipse(0, -l + 6.5, 3.6, 5, 0, 0, 7); g.fill(); }
-      g.restore();
-    }
-    g.beginPath(); g.roundRect(-27, 10, 54, 74, 22); g.fillStyle = fill; g.fill();
-    if (stroke) {
-      g.strokeStyle = stroke; g.stroke();
-      g.strokeStyle = 'rgba(180,120,90,.35)'; g.lineWidth = 1;
-      for (const [x] of [[-17], [-5.5], [6], [17]]) { g.beginPath(); g.arc(x, 24, 3, Math.PI * 1.1, Math.PI * 1.9); g.stroke(); }
-    }
-  }
-  function drawHand(g, h) {
-    const dx = h.x - h.sx, dy = h.y - h.sy, len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len;
-    const ang = Math.atan2(uy, ux) + Math.PI / 2;
-    const wx = h.x - ux * 92 * HS, wy = h.y - uy * 92 * HS;
-    const fx = wx - ux * 55, fy = wy - uy * 55;
-    const line = (a, b, c, d) => { g.beginPath(); g.moveTo(a, b); g.lineTo(c, d); g.stroke(); };
-    g.save(); g.lineCap = 'round';
-    g.strokeStyle = 'rgba(50,40,20,.14)'; g.lineWidth = 84; line(fx + 12, fy + 16, h.sx + 12, h.sy + 16);
-    g.strokeStyle = 'rgba(50,40,20,.12)'; g.lineWidth = 48; line(wx + 10, wy + 13, fx + 10, fy + 13);
-    g.strokeStyle = SKIN; g.lineWidth = 46; line(wx, wy, fx, fy);
-    g.strokeStyle = SLEEVE; g.lineWidth = 82; line(fx - ux * 10, fy - uy * 10, h.sx, h.sy);
-    g.strokeStyle = CUFF; g.lineWidth = 84; line(fx, fy, fx - ux * 8, fy - uy * 8);
-    g.strokeStyle = 'rgba(255,255,255,.12)'; g.lineWidth = 2;
-    for (let k = -30; k <= 30; k += 10) { const px = -uy, py = ux; line(fx + px * k, fy + py * k, fx + px * k - ux * 12, fy + py * k - uy * 12); }
-    g.restore();
-    g.save(); g.translate(h.x + 8, h.y + 11); g.rotate(ang); g.scale(HS * (h.mirror ? -1 : 1), HS);
-    g.globalAlpha = .16; handShapes(g, h.curl, '#3a2c1a', null); g.restore();
-    g.save(); g.translate(h.x, h.y); g.rotate(ang); g.scale(HS * (h.mirror ? -1 : 1), HS);
-    g.lineWidth = 1.2 / HS; handShapes(g, h.curl, SKIN, EDGE); g.restore();
-  }
-
-  let speed = 1, abortFlag = false;
-  let cv = null, ctx = null, scale = 1;
-  const staticLayer = document.createElement('canvas');
-
-  function tween(ms, fn, ease = eio) {
-    return new Promise((res, rej) => {
-      const d = Math.max(16, ms / speed); let el = 0, last = performance.now();
-      function step(now) {
-        if (abortFlag) { rej(ABORT); return; }
-        el += now - last; last = now;
-        const t = Math.min(1, el / d); fn(ease(t));
-        t < 1 ? requestAnimationFrame(step) : res();
+  async function addGroups(amount){
+    let remaining=Math.min(20-count,clamp(amount));
+    while(remaining>0){
+      check();
+      const hands=Array.from({length:4},(_,hand)=>Array.from({length:5},(_,i)=>hand*5+i));
+      const empty=hands.filter(indices=>indices.every(i=>fingers[i]<.5));
+      let indices;
+      // Add whole tens/fives on unused hands. Keep the original partial
+      // hand in place and use it for the remainder instead of recounting.
+      if(remaining>=10&&empty.length>=2)indices=[...empty[0],...empty[1]];
+      else if(remaining>=5&&empty.length)indices=empty[0];
+      else{
+        const partial=hands.find(indices=>indices.some(i=>fingers[i]>.5)&&indices.some(i=>fingers[i]<.5));
+        const available=(partial||empty[0]||[]).filter(i=>fingers[i]<.5);
+        indices=available.slice(0,remaining);
       }
-      requestAnimationFrame(step);
-    });
-  }
-  const wait = ms => tween(ms, () => {});
-  function moveHand(h, x, y, ms) { const x0 = h.x, y0 = h.y; return tween(ms, t => { h.x = lerp(x0, x, t); h.y = lerp(y0, y, t) - Math.sin(t * Math.PI) * 8; }); }
-  function grip(h, v, ms = 110) { const c0 = h.curl; return tween(ms, t => { h.curl = lerp(c0, v, t); }); }
-  const home = (h, ms = 450) => moveHand(h, HOME[h.id].x, HOME[h.id].y, ms);
-  function carry(h, objs, x, y, ms, rot) {
-    const x0 = h.x, y0 = h.y;
-    const offs = objs.map(o => ({ o, dx: o.x - x0, dy: o.y - y0, r0: o.rot }));
-    return tween(ms, t => {
-      h.x = lerp(x0, x, t); h.y = lerp(y0, y, t);
-      for (const k of offs) { k.o.x = h.x + k.dx; k.o.y = h.y + k.dy; if (rot !== undefined) k.o.rot = lerp(k.r0, rot, t); k.o.lift = Math.sin(t * Math.PI); }
-    });
-  }
-
-  function recolorUnits() { unitsList.forEach((s, i) => { s.kind = unitKind(i); }); }
-
-  async function placeStraw() {
-    await moveHand(R, BOXL.x + rand(-40, 40), BOXL.y + rand(-18, 18), 340);
-    await grip(R, .75, 90);
-    const s = { kind: unitKind(unitsList.length), x: R.x, y: R.y, rot: rand(-.25, .25), r: rand(-.035, .035), a: 1, lift: 0 };
-    straws.push(s);
-    const t = unitSlot(unitsList.length);
-    unitsList.push(s);
-    await carry(R, [s], t.x, t.y, 470, s.r);
-    s.lift = 0; U = unitsList.length; bump('u');
-    await grip(R, 0, 80);
-  }
-  async function tieTen() {
-    const group = unitsList.splice(0, 10);
-    const cx = UNIT_C, cy = Y0;
-    await Promise.all([moveHand(L, cx - 80, cy + 45, 450), moveHand(R, cx + 80, cy + 45, 450)]);
-    await Promise.all([grip(L, .45), grip(R, .45)]);
-    const items = bundleItems(group.map(s => s.kind));
-    const st = group.map(s => ({ x: s.x, y: s.y, r: s.rot }));
-    await tween(720, t => {
-      L.x = lerp(cx - 80, cx - 48, t); R.x = lerp(cx + 80, cx + 48, t);
-      group.forEach((s, i) => { s.x = lerp(st[i].x, cx + items[i].dx, t); s.y = lerp(st[i].y, cy + items[i].dy, t); s.rot = lerp(st[i].r, items[i].r, t); });
-    });
-    group.forEach(s => removeFrom(straws, s));
-    const b = { x: cx, y: cy, rot: 0, items, band: 0, bandY: 22, bandA: 1, a: 1, lift: 0 };
-    bundles.push(b);
-    await Promise.all([moveHand(L, cx, cy - 45, 260), moveHand(R, cx + 46, cy + 55, 260), grip(R, .3, 200)]);
-    await grip(L, .8, 100);
-    await tween(1050, t => {
-      b.band = t; const a = -Math.PI / 2 + t * Math.PI * 4;
-      R.x = cx + Math.cos(a) * 52; R.y = cy + 62 + Math.sin(a) * 16;
-    }, lin);
-    U = unitsList.length; bump('u');
-    const slot = tenSlot(tensList.length);
-    await Promise.all([carry(L, [b], slot.x, slot.y - 45, 760, 0), grip(R, 0, 120).then(() => home(R, 520))]);
-    b.lift = 0; tensList.push(b); D = tensList.length; bump('d');
-    await grip(L, 0, 90);
-    if (unitsList.length) {
-      const st = unitsList.map(s => ({ x: s.x, y: s.y }));
-      await Promise.all([home(L, 420), tween(700, t => { unitsList.forEach((s, i) => { const sl = unitSlot(i); s.x = lerp(st[i].x, sl.x, t); s.y = lerp(st[i].y, sl.y, t); }); })]);
-    } else await home(L, 420);
-    recolorUnits();
-    U = unitsList.length;
-  }
-  async function addReadyBundle() {
-    await moveHand(R, BOXB.x + rand(-30, 30), BOXB.y - 45, 440); await grip(R, .8, 100);
-    const b = makeBundle(R.x, R.y + 45); bundles.push(b);
-    const sl = tenSlot(tensList.length);
-    await carry(R, [b], sl.x, sl.y - 45, 760, 0); b.lift = 0;
-    tensList.push(b); D = tensList.length; bump('d');
-    await grip(R, 0, 90);
-  }
-  async function removeBundle() {
-    const b = tensList[tensList.length - 1];
-    await moveHand(R, b.x, b.y - 45, 460); await grip(R, .8, 100);
-    tensList.pop(); D = tensList.length; bump('d'); toTop(bundles, b);
-    await carry(R, [b], BOXB.x + rand(-30, 30), BOXB.y - 45, 760, rand(-.05, .05));
-    await tween(200, t => { b.a = 1 - t; }); removeFrom(bundles, b);
-    await grip(R, 0, 90);
-  }
-  async function untieOne() {
-    const b = tensList[tensList.length - 1];
-    await moveHand(L, b.x, b.y - 45, 480); await grip(L, .8, 100);
-    tensList.pop(); D = tensList.length; bump('d'); toTop(bundles, b);
-    const cx = UNIT_C, cy = Y1;
-    await carry(L, [b], cx, cy - 45, 780, 0); b.lift = 0;
-    await moveHand(R, cx + 36, cy + b.bandY + 34, 420); await grip(R, .7, 100);
-    await tween(760, t => { b.bandY = lerp(22, -150, t); R.y = cy + b.bandY + 34; b.bandA = t > .72 ? 1 - (t - .72) / .28 : 1; });
-    const ns = b.items.map((it, i) => ({ kind: unitKind(i), x: cx + it.dx, y: cy + it.dy, rot: it.r, r: rand(-.035, .035), a: 1, lift: 0 }));
-    removeFrom(bundles, b); straws.push(...ns);
-    await Promise.all([grip(L, 0, 100), grip(R, 0, 100)]);
-    const st = ns.map(s => ({ x: s.x, y: s.y, r: s.rot }));
-    const lx = L.x, ly = L.y, rx = R.x, ry = R.y;
-    await tween(820, t => {
-      ns.forEach((s, i) => { const sl = { x: 552 + i * 34, y: Y1 }; s.x = lerp(st[i].x, sl.x, t); s.y = lerp(st[i].y, sl.y, t); s.rot = lerp(st[i].r, s.r, t); });
-      L.x = lerp(lx, cx - 120, t); L.y = lerp(ly, cy + 20, t); R.x = lerp(rx, cx + 120, t); R.y = lerp(ry, cy + 20, t);
-    });
-    unitsList.push(...ns); recolorUnits(); U = unitsList.length; bump('u');
-    await Promise.all([home(L, 450), home(R, 450)]);
-  }
-  const inTopRow = s => s.y < (Y0 + Y1) / 2;
-  async function removeStraw() {
-    let idx = -1;
-    for (let i = unitsList.length - 1; i >= 0; i--) { if (inTopRow(unitsList[i])) { idx = i; break; } }
-    if (idx < 0) idx = unitsList.length - 1;
-    const s = unitsList[idx];
-    await moveHand(R, s.x, s.y, 380); await grip(R, .75, 90);
-    unitsList.splice(idx, 1); recolorUnits(); U = unitsList.length; bump('u'); toTop(straws, s);
-    await carry(R, [s], BOXL.x + rand(-40, 40), BOXL.y + rand(-15, 15), 520, rand(-.25, .25));
-    await tween(160, t => { s.a = 1 - t; }); removeFrom(straws, s);
-    await grip(R, 0, 80);
-  }
-
-  /* operazioni composte: si posano tutte le cannucce, senza legare */
-  async function build(n) {
-    const d = Math.floor(n / 10), u = n % 10;
-    for (let k = 0; k < d; k++) { await addReadyBundle(); await wait(300); }
-    for (let i = 0; i < u; i++) { await placeStraw(); await wait(300); }
-    await Promise.all([home(L), home(R)]);
-  }
-  async function subN(m) {
-    const d = Math.floor(m / 10), u = m % 10;
-    for (let k = 0; k < d; k++) await removeBundle();
-    if (u) {
-      if (U < u) { await untieOne(); await wait(400); }
-      for (let k = 0; k < u; k++) await removeStraw();
+      if(!indices.length)break;
+      const from=indices.map(i=>fingers[i]);
+      const duration=matchMedia('(prefers-reduced-motion: reduce)').matches?50:550/speed;
+      await new Promise((resolve,reject)=>{
+        const start=performance.now();
+        function frame(now){
+          if(aborted){reject(ABORT);return;}
+          const t=Math.min(1,(now-start)/duration),ease=t*t*(3-2*t);
+          indices.forEach((index,i)=>fingers[index]=from[i]+(1-from[i])*ease);draw();
+          if(t<1)requestAnimationFrame(frame);else resolve();
+        }
+        requestAnimationFrame(frame);
+      });
+      count+=indices.length;remaining-=indices.length;draw();
     }
-    await Promise.all([home(L), home(R)]);
-    if (unitsList.length && !unitsList.some(inTopRow)) {
-      const st = unitsList.map(s => ({ x: s.x, y: s.y }));
-      await tween(700, t => { unitsList.forEach((s, i) => { const sl = unitSlot(i); s.x = lerp(st[i].x, sl.x, t); s.y = lerp(st[i].y, sl.y, t); }); });
-      recolorUnits();
+    check();
+  }
+  async function subtractGroups(amount){
+    let remaining=Math.min(count,clamp(amount));
+    // Remove complete tens/fives when possible. For the remainder, start
+    // on the right so 13-3 removes its partial hand and leaves a visible ten.
+    while(remaining>0){
+      check();
+      const hands=Array.from({length:4},(_,hand)=>Array.from({length:5},(_,i)=>hand*5+i));
+      const full=hands.filter(indices=>indices.every(i=>fingers[i]>.5));
+      let indices;
+      if(remaining>=10&&full.length>=2)indices=[...full[0],...full[1]];
+      else if(remaining>=5&&full.length)indices=full[0];
+      else{
+        const rightmost=hands.slice().reverse().find(indices=>indices.some(i=>fingers[i]>.5));
+        if(!rightmost)break;
+        indices=rightmost.slice().reverse().filter(i=>fingers[i]>.5).slice(0,remaining);
+      }
+      const from=indices.map(i=>fingers[i]);
+      const duration=matchMedia('(prefers-reduced-motion: reduce)').matches?50:550/speed;
+      await new Promise((resolve,reject)=>{
+        const start=performance.now();
+        function frame(now){
+          if(aborted){reject(ABORT);return;}
+          const t=Math.min(1,(now-start)/duration),ease=t*t*(3-2*t);
+          indices.forEach((index,i)=>fingers[index]=from[i]*(1-ease));draw();
+          if(t<1)requestAnimationFrame(frame);else resolve();
+        }
+        requestAnimationFrame(frame);
+      });
+      count-=indices.length;remaining-=indices.length;draw();
     }
+    check();
   }
-
-  function setInstant(n) {
-    n = Math.max(0, Math.min(99, n | 0));
-    straws = []; bundles = []; unitsList = []; tensList = [];
-    const d = Math.floor(n / 10), u = n % 10;
-    for (let j = 0; j < d; j++) { const sl = tenSlot(j); const b = makeBundle(sl.x, sl.y); bundles.push(b); tensList.push(b); }
-    for (let i = 0; i < u; i++) { const sl = unitSlot(i); const r = rand(-.035, .035); const s = { kind: unitKind(i), x: sl.x, y: sl.y, rot: r, r, a: 1, lift: 0 }; straws.push(s); unitsList.push(s); }
-    D = d; U = u;
-  }
-  function homeInstant() { for (const h of [L, R]) { h.x = HOME[h.id].x; h.y = HOME[h.id].y; h.curl = 0; } }
-
-  function resize() {
-    const w = cv.clientWidth; if (!w) return;
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
-    cv.width = Math.round(w * dpr); cv.height = Math.round(w * H / W * dpr); scale = cv.width / W;
-    staticLayer.width = cv.width; staticLayer.height = cv.height;
-    const sctx = staticLayer.getContext('2d'); sctx.setTransform(scale, 0, 0, scale, 0, 0); drawStatic(sctx);
-  }
-  function drawDigits(g, now) {
-    const cells = [['d', D, 291], ['u', U, 706]];
-    for (const [k, v, x] of cells) {
-      const fl = Math.max(0, 1 - (now - flash[k]) / 450);
-      g.save(); g.translate(x, 645); g.scale(1 + .3 * fl, 1 + .3 * fl);
-      g.fillStyle = fl > 0 ? `rgba(28,124,144,${.6 + .4 * fl})` : '#24321a';
-      g.font = '700 46px "Baloo 2", "Trebuchet MS", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
-      g.fillText(String(v), 0, 3); g.restore();
-    }
-  }
-  function frame(now) {
-    if (ctx) {
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      if (staticLayer.width) ctx.drawImage(staticLayer, 0, 0);
-      ctx.setTransform(scale, 0, 0, scale, 0, 0);
-      drawDigits(ctx, now);
-      for (const s of straws) drawStraw(ctx, s.kind, s.x, s.y, s.rot, s.a, 1 + .06 * (s.lift || 0));
-      for (const b of bundles) drawBundle(ctx, b);
-      drawHand(ctx, L); drawHand(ctx, R);
-    }
-    requestAnimationFrame(frame);
-  }
-
-  function init(canvas) {
-    cv = canvas; ctx = canvas.getContext('2d');
-    new ResizeObserver(resize).observe(canvas);
-    resize();
-    requestAnimationFrame(frame);
-  }
-
-  setInstant(0); homeInstant();
   return {
-    ABORT, init, build, subN, setInstant, homeInstant,
-    unita: () => unitsList.length,
-    legaSeDieci: async () => { if (unitsList.length >= 10) await tieTen(); },
-    abort() { abortFlag = true; },
-    clearAbort() { abortFlag = false; },
-    setSpeed(v) { speed = v; }
+    ABORT,init(node){element=node;draw();},
+    build:addGroups,subN:subtractGroups,
+    moveTo,
+    setInstant(n){count=clamp(n);fingers.forEach((_,i)=>fingers[i]=i<count?1:0);draw();},
+    getNumber:()=>count,getFingers:()=>fingers.slice(),
+    abort(){aborted=true;},clearAbort(){aborted=false;},setSpeed(v){speed=v;}
   };
 })();
 
-/* ================= PIATTAFORMA ================= */
-const VELOCITA = [0.6, 1, 2.2];
-const NOMI_VEL = ['lenta', 'normale', 'veloce'];
-let stato = {
-  schermo: 'menu', gioco: null, deck: [], i: 0, primi: 0,
-  fase: 'inizio', tent: 0, input: '', msg: '', msgCls: '', giudizio: null,
-  casuale: true, suggerimento: false, modo: 'voce', velIdx: 1,
-  pausaTitolo: '', pausaTesto: '', pannelloPdf: false
-};
-let resumeFn = null, seqPromise = null, token = 0, avantiInCorso = false;
-let pdfSel = {};
 
-const elMenu = document.getElementById('menu');
-const elGioco = document.getElementById('gioco');
-const elHead = document.getElementById('g-head');
-const elCarta = document.getElementById('g-carta');
-const elZona = document.getElementById('g-zona');
-const elFine = document.getElementById('fine');
-
-const sg = op => op === '+' ? '+' : '−';
-const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
-const card = () => stato.deck[stato.i];
-
-/* linea dei numeri: usata solo nelle tessere stampate */
-function linea() {
-  const W = 1000, H = 210, Y = 150, X = n => 40 + n * 46;
-  let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Linea dei numeri da 0 a 20" style="width:100%;height:auto;display:block">`;
-  s += `<line x1="${X(0) - 24}" y1="${Y}" x2="${X(20) + 24}" y2="${Y}" stroke="#222" stroke-width="3"/>`;
-  for (let n = 0; n <= 20; n++) {
-    const big = n % 5 === 0;
-    s += `<line x1="${X(n)}" y1="${Y - (big ? 14 : 8)}" x2="${X(n)}" y2="${Y + (big ? 14 : 8)}" stroke="#222" stroke-width="${big ? 3 : 1.5}"/>`;
-    s += `<text x="${X(n)}" y="${Y + 42}" text-anchor="middle" font-size="${big ? 26 : 20}" font-weight="${big ? 'bold' : 'normal'}" fill="#222">${n}</text>`;
+const shuffle = a => {a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const VELOCITA=[.6,1,2.2], NOMI_VEL=['lenta','normale','veloce'];
+const stato={mode:'menu',strategy:'libere',history:[],index:-1,deck:[],busy:false,revealed:false,speed:1,phase:'',customA:8,customB:4,customOp:'+'};
+let runToken=0,animation=Promise.resolve();
+const card=()=>stato.history[stato.index];
+const symbol=op=>op==='+'?'+':'−';
+function allOperations(){const cards=[];for(let a=0;a<=20;a++)for(let b=0;b<=20;b++){if(a+b<=20)cards.push(f(a,'+',b,'uno'));if(a-b>=0)cards.push(f(a,'-',b,'due'));}return cards;}
+function nextCard(){
+  if(!stato.deck.length){
+    const previous=card();
+    const source=stato.mode==='riconosci'?Array.from({length:21},(_,n)=>({n,key:'n'+n})):stato.strategy==='libere'?allOperations():GIOCHI.find(g=>g.id===stato.strategy).deck();
+    stato.deck=shuffle(source);
+    if(previous&&stato.deck.length>1&&stato.deck[stato.deck.length-1].key===previous.key)[stato.deck[0],stato.deck[stato.deck.length-1]]=[stato.deck[stato.deck.length-1],stato.deck[0]];
   }
-  return s + '</svg>';
+  return stato.deck.pop();
 }
-
-/* ---------- stampa tessere ---------- */
-const LOGO_TESSERE = 'https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/055f4e9caf74c856ae2f59926ae544fc0e493e33/logoconkalimba.png';
-function htmlTessere(titolo, carte, misto) {
-  const tessere = carte.map(c => `<div class="t" style="border-color:${STR[c.s].colore}"><div class="corpo"><div class="op">${c.a} ${sg(c.op)} ${c.b}</div>${linea()}</div><div class="firma"><img src="${LOGO_TESSERE}" alt=""><span>matematichenonsinasce.com</span></div></div>`).join('');
-  const soluzioni = carte.map(c => `<li>${c.a} ${sg(c.op)} ${c.b} = ${c.res}</li>`).join('');
-  return `<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><title>Tessere – ${titolo}</title><style>
-@page { size: A4; margin: 10mm; }
-html, body { background: #fff !important; margin: 0; padding: 0; font-family: Arial, sans-serif; color: #222; }
-h1 { font-size: 13pt; text-transform: uppercase; margin: 0 0 6mm; letter-spacing: 0.04em; }
-.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6mm; }
-.t { height: 60mm; border: 4mm solid; box-sizing: border-box; display: flex; flex-direction: column; align-items: stretch; padding: 0; page-break-inside: avoid; background: #fff; position: relative; }
-.firma { position: absolute; right: 2mm; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; gap: 1.5mm; }
-.firma img { height: 6mm; width: auto; }
-.firma span { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 6pt; color: #b8b8b8; white-space: nowrap; }
-.corpo { flex: 1; width: 100%; min-width: 0; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2mm 13mm 2mm 2mm; }
-.op { font-size: 34pt; font-weight: bold; height: 24mm; display: flex; align-items: center; }
-.corpo svg { width: 100%; max-width: 100%; height: auto; }
-.sol { page-break-before: always; }
-.sol ol { columns: 3; font-size: 12pt; line-height: 1.8; }
-.sol li { break-inside: avoid; }
-</style></head><body>
-<h1>${titolo}</h1>
-<div class="grid">${tessere}</div>
-${misto ? '' : `<div class="sol"><h1>Soluzioni</h1><ol>${soluzioni}</ol></div>`}
-</body></html>`;
-}
-/* una tessera in PDF: bordo colorato, operazione, linea dei numeri da 0 a 20 */
-function disegnaTessera(doc, c, x, y, w, h, logo) {
-  const B = 4, rgb = hexRGB(STR[c.s].colore);
-  doc.setFillColor(rgb[0], rgb[1], rgb[2]); doc.rect(x, y, w, h, 'F');
-  doc.setFillColor(255, 255, 255); doc.rect(x + B, y + B, w - 2 * B, h - 2 * B, 'F');
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(30); doc.setTextColor(34, 34, 34);
-  doc.text(`${c.a} ${opPdf(c)} ${c.b}`, x + w / 2, y + 22, { align: 'center' });
-  const lx0 = x + 12, lx1 = x + w - 12, ly = y + 38;
-  const sx = n => lx0 + n * (lx1 - lx0) / 20;
-  doc.setDrawColor(34, 34, 34); doc.setLineWidth(0.5); doc.line(lx0 - 2, ly, lx1 + 2, ly);
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(6);
-  for (let n = 0; n <= 20; n++) {
-    const big = n % 5 === 0;
-    doc.setLineWidth(big ? 0.5 : 0.25);
-    doc.line(sx(n), ly - (big ? 2 : 1.2), sx(n), ly + (big ? 2 : 1.2));
-    doc.text(String(n), sx(n), ly + 5, { align: 'center' });
+async function animateCard(reset=true, applyOperation=false){
+  const my=++runToken,previous=animation;
+  Mani.abort();await previous;
+  if(my!==runToken)return;
+  Mani.clearAbort();Mani.setSpeed(VELOCITA[stato.speed]);
+  const current=card(),operation=stato.mode==='operazioni';
+  // Recognition is a simultaneous configuration, never a count-up animation.
+  if(stato.mode==='riconosci'){
+    Mani.setInstant(current.n);stato.busy=false;stato.revealed=false;stato.phase='done';render();return;
   }
-  /* bambina e scritta, centrate in basso, sopra la cornice colorata */
-  const testo = 'matematichenonsinasce.com';
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(7);
-  const lw = logo ? 8 * logo.w / logo.h : 0;
-  const tot = lw + (logo ? 2 : 0) + doc.getTextWidth(testo);
-  let px = x + w / 2 - tot / 2;
-  const cy = y + h - 9;
-  if (logo) { doc.addImage(logo.data, 'PNG', px, cy - 4, lw, 8); px += lw + 2; }
-  doc.setTextColor(120, 120, 120);
-  doc.text(testo, px, cy + 1.2);
-}
-const opPdf = c => c.op === '+' ? '+' : '-';
-
-/* scarica le tessere del gioco come PDF, due colonne per pagina */
-async function scarica() {
-  if (!window.jspdf) { alert('Non riesco a caricare lo strumento per il PDF: controlla la connessione a internet e ricarica la pagina.'); return; }
-  const g = stato.gioco;
-  const carte = g.misto ? stato.deck : g.deck();
-  const { jsPDF } = window.jspdf;
-  const logo = await caricaImg(LOGO_TESSERE);
-  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-  const M = 8, GAP = 6, CW = (210 - 2 * M - GAP) / 2, CH = 60, PER = 8;
-  const pagine = Math.max(1, Math.ceil(carte.length / PER));
-  for (let p = 0; p < pagine; p++) {
-    if (p > 0) doc.addPage();
-    carte.slice(p * PER, (p + 1) * PER).forEach((c, i) => {
-      disegnaTessera(doc, c, M + (i % 2) * (CW + GAP), M + Math.floor(i / 2) * (CH + GAP), CW, CH, logo);
-    });
+  if(operation&&!applyOperation){
+    Mani.setInstant(0);stato.busy=false;stato.revealed=false;stato.phase='ready';render();return;
   }
-  if (!g.misto) {
-    const SOL = 45;
-    for (let p = 0; p < Math.ceil(carte.length / SOL); p++) {
-      doc.addPage();
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.setTextColor(34, 34, 34); doc.text('Soluzioni', M, 16);
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(11);
-      carte.slice(p * SOL, (p + 1) * SOL).forEach((c, i) => {
-        doc.text(`${c.a} ${opPdf(c)} ${c.b} = ${c.res}`, M + (i % 3) * 62, 28 + Math.floor(i / 3) * 12);
-      });
-    }
-  }
-  doc.save(`tessere-${g.id}.pdf`);
-}
-
-/* ---------- flusso del gioco ---------- */
-function prepara() {
-  token++;
-  Tov.clearAbort(); Tov.setInstant(0); Tov.homeInstant();
-  stato.fase = 'inizio';
-  stato.giudizio = null; stato.tent = 0; stato.input = ''; stato.msg = ''; stato.msgCls = '';
-  stato.pausaTitolo = ''; stato.pausaTesto = '';
-  resumeFn = null;
-}
-function avvia(id) {
-  const g = GIOCHI.find(x => x.id === id);
-  let d = g.deck();
-  if (g.misto) d = shuffle(d);
-  else if (stato.casuale) d = shuffle(d);
-  stato.gioco = g; stato.deck = d; stato.i = 0; stato.primi = 0;
-  stato.schermo = 'gioco';
-  prepara(); renderAll();
-}
-async function fermaSequenza() {
-  if (!seqPromise) return;
-  Tov.abort();
-  if (resumeFn) { const f = resumeFn; resumeFn = null; f(); }
-  await seqPromise;
-  seqPromise = null;
-}
-async function vaiMenu() {
-  await fermaSequenza();
-  stato.schermo = 'menu'; renderAll();
-}
-function attendi(titolo, testo) {
-  stato.fase = 'pausa'; stato.pausaTitolo = titolo; stato.pausaTesto = testo; renderAll();
-  return new Promise(r => { resumeFn = r; });
-}
-function continua() {
-  if (stato.fase !== 'pausa' || !resumeFn) return;
-  stato.fase = 'lavoro';
-  const f = resumeFn; resumeFn = null;
-  renderAll(); f();
-}
-function costruisci() {
-  if (stato.fase !== 'inizio') return;
-  stato.fase = 'lavoro'; renderAll();
-  seqPromise = sequenza(card(), token);
-}
-function saltaFine() { fermaSequenza().then(renderAll); }
-
-/* sequenza: costruisce il primo numero, si ferma, poi completa l'operazione */
-async function sequenza(c, my) {
-  let abortato = false;
-  try {
-    await Tov.build(c.a);
-    await attendi(`Sulla tovaglietta c'è ${c.a}`, `Quanto farà ${c.a} ${sg(c.op)} ${c.b}? Ragionate, poi premete Continua.`);
-    if (c.op === '+') {
-      const piv = c.step ? (Math.floor(c.a / c.step) + 1) * c.step : 0;
-      if (piv && piv < c.res && piv < 10) {
-        await Tov.build(piv - c.a);
-        await attendi(`Tappa al ${piv}`, `Le mani sono arrivate a ${piv}. Quanto manca per arrivare a ${c.res}? Premete Continua.`);
-        await Tov.build(c.res - piv);
-      } else {
-        await Tov.build(c.b);
+  Mani.setInstant(operation?current.a:reset?0:Mani.getNumber());
+  stato.busy=true;stato.revealed=false;stato.phase='Le dita si alzano…';render();
+  animation=(async()=>{
+    let success=false;
+    try{
+      if(stato.mode==='esplora')await Mani.moveTo(current.n);
+      else{
+        stato.phase=current.op==='+'?'Aggiungiamo '+current.b+' dita per gruppi, usando le mani libere…':'Togliamo '+current.b+' dita: prima i gruppi completi, poi da destra…';render();
+        if(current.op==='-')await Mani.subN(current.b);
+        else await Mani.build(current.b);
       }
-      // si posano tutte le cannucce senza legare: il bambino vede 10 sulla prima riga e il resto sotto
-      if (Tov.unita() >= 10) {
-        await attendi(`Sulla prima riga ci sono 10 cannucce`, `Ecco una decina: quanto fa ${c.a} ${sg(c.op)} ${c.b}? Premete Continua e il mazzetto si lega.`);
-        await Tov.legaSeDieci();
-      }
-    } else {
-      await Tov.subN(c.b);
-    }
-  } catch (e) {
-    if (e !== Tov.ABORT) console.error(e);
-    abortato = true;
-  }
-  if (abortato) { Tov.setInstant(c.res); Tov.homeInstant(); }
-  Tov.clearAbort();
-  if (my !== token) return;
-  stato.fase = 'fine';
-  renderAll();
+      success=true;
+    }catch(error){if(error!==Mani.ABORT)console.error(error);}
+    finally{if(my===runToken){
+      stato.busy=false;
+      stato.phase=success?'done':'error';
+      stato.revealed=success&&operation&&applyOperation;
+      render();
+    }}
+  })();
+  await animation;
 }
-
-async function avanti() {
-  if (avantiInCorso) return;
-  avantiInCorso = true;
-  try {
-    await fermaSequenza();
-    stato.i++;
-    if (stato.i >= stato.deck.length) stato.schermo = 'fine';
-    else prepara();
-    renderAll();
-  } finally { avantiInCorso = false; }
+async function start(mode,strategy='libere'){
+  ++runToken;Mani.abort();await animation;
+  stato.mode=mode;stato.strategy=strategy;stato.history=[];stato.index=-1;stato.deck=[];stato.revealed=false;
+  const first=mode==='esplora'?{n:0,key:'n0'}:mode==='operazioni'&&strategy==='libere'?f(8,'+',4,'pd'):null;
+  stato.history.push(first||nextCard());stato.index=0;
+  render();await animateCard();
 }
-
-/* giudizio a voce (LIM) */
-function giudica(giusta) {
-  if (stato.giudizio) return;
-  const c = card();
-  if (giusta) { stato.giudizio = 'ok'; if (stato.tent === 0) stato.primi++; stato.msg = 'Esatto!'; stato.msgCls = 'ok'; }
-  else { stato.giudizio = 'ko'; stato.msg = `Il risultato è ${c.res}.`; stato.msgCls = 'ko'; }
-  renderAll();
+async function menu(){++runToken;Mani.abort();await animation;stato.mode='menu';stato.busy=false;render();}
+async function next(){
+  if(stato.mode==='esplora'){return chooseNumber((card().n+1)%21);}
+  if(stato.index<stato.history.length-1)stato.index++;
+  else{stato.history.push(nextCard());stato.index++;}
+  await animateCard();
 }
-/* risposta scritta */
-function tasto(t) {
-  if (stato.giudizio) return;
-  if (t === 'CANC') stato.input = stato.input.slice(0, -1);
-  else if (t === 'OK') { verifica(); return; }
-  else if (stato.input.length < 2) stato.input += t;
-  renderAll();
+async function previous(){if(stato.index<=0)return;stato.index--;await animateCard();}
+async function repeat(){
+  if(stato.mode!=='operazioni'){await animateCard();return;}
+  const my=++runToken;Mani.abort();await animation;
+  if(my!==runToken)return;
+  Mani.clearAbort();Mani.setInstant(card().a);
+  stato.busy=false;stato.revealed=false;stato.phase='predict';render();
 }
-function verifica() {
-  if (stato.giudizio || stato.input === '') return;
-  const c = card();
-  const v = parseInt(stato.input, 10);
-  if (v === c.res) {
-    stato.giudizio = 'ok'; if (stato.tent === 0) stato.primi++;
-    stato.msg = 'Esatto!'; stato.msgCls = 'ok';
-  } else {
-    stato.tent++;
-    if (stato.tent < 2) { stato.msg = 'Non ancora. Riprova.'; stato.msgCls = ''; stato.input = ''; }
-    else { stato.giudizio = 'ko'; stato.msg = `Il risultato è ${c.res}.`; stato.msgCls = 'ko'; }
-  }
-  renderAll();
+async function chooseNumber(n){
+  stato.history=stato.history.slice(0,stato.index+1);stato.history.push({n,key:'n'+n});stato.index++;await animateCard(false);
 }
-function impostaModo(m) { stato.modo = m; stato.input = ''; renderAll(); }
-function toggleOrdine() { stato.casuale = !stato.casuale; renderAll(); }
-function toggleSugg() { stato.suggerimento = !stato.suggerimento; renderAll(); }
-function ciclaVelocita() { stato.velIdx = (stato.velIdx + 1) % VELOCITA.length; Tov.setSpeed(VELOCITA[stato.velIdx]); renderAll(); }
-
-/* ---------- viste ---------- */
-function bottoniImpostazioni() {
-  return `
-    <button class="btn piccolo" onclick="toggleOrdine()">Ordine: ${stato.casuale ? 'casuale' : 'in sequenza'}</button>
-    <button class="btn piccolo ${stato.modo === 'voce' ? 'attivo' : ''}" onclick="impostaModo('voce')">A voce</button>
-    <button class="btn piccolo ${stato.modo === 'scritta' ? 'attivo' : ''}" onclick="impostaModo('scritta')">Scritta</button>
-    <button class="btn piccolo" onclick="ciclaVelocita()">Velocità: ${NOMI_VEL[stato.velIdx]}</button>
-    <button class="btn piccolo ${stato.suggerimento ? 'attivo' : ''}" onclick="toggleSugg()">Suggerimento: ${stato.suggerimento ? 'sì' : 'no'}</button>`;
+async function showAnswer(){
+  if(stato.mode==='operazioni'&&stato.phase==='ready'){Mani.setInstant(card().a);stato.phase='predict';stato.revealed=false;render();return;}
+  if(stato.mode==='operazioni'&&stato.phase==='predict'){if(!stato.busy)await animateCard(true,true);return;}
+  if(stato.mode==='operazioni'&&stato.busy)return;
+  stato.revealed=!stato.revealed;render();
 }
-function vistaMenu() {
-  return `
-    <h1 class="titolo">Calcolo a mente entro il 20</h1>
-    <p class="sub">Scegli un gioco e costruisci i numeri con le mani</p>
-    <div class="pannello"><div class="riga">${bottoniImpostazioni()}</div></div>
-    <div class="riga" style="margin-bottom:12px"><button class="btn pdf" onclick="apriPannelloPdf()">Schede PDF</button></div>
-    ${stato.pannelloPdf ? vistaPannelloPdf() : ''}
-    <div class="griglia">
-      ${GIOCHI.map(g => `<button class="carta-gioco" style="background:${g.fondo};border-color:${g.col}" onclick="avvia('${g.id}')"><span class="nome">${g.nome}</span><span class="desc">${g.desc}</span></button>`).join('')}
-    </div>`;
+function cycleSpeed(){stato.speed=(stato.speed+1)%VELOCITA.length;Mani.setSpeed(VELOCITA[stato.speed]);render();}
+async function customOperation(){
+  const a=Number(document.querySelector('#operand-a').value),b=Number(document.querySelector('#operand-b').value),op=document.querySelector('#operation').value;
+  const c=f(a,op,b,'pd');if(c.res<0||c.res>20){document.querySelector('#composer-message').textContent='Scegli un’operazione con risultato fra 0 e 20.';return;}
+  stato.customA=a;stato.customB=b;stato.customOp=op;
+  stato.history=stato.history.slice(0,stato.index+1);stato.history.push(c);stato.index++;await animateCard();
 }
-function vistaHead() {
-  return `
-    <div class="riga">
-      <button class="btn piccolo" onclick="vaiMenu()">Menu</button>
-      <span class="etichetta">${stato.gioco.nome}</span>
-      <span class="etichetta">${stato.i + 1} / ${stato.deck.length}</span>
-    </div>
-    <div class="riga" style="margin-top:8px">
-      ${bottoniImpostazioni()}
-      <button class="btn piccolo" onclick="scarica()">Scarica tessere</button>
-    </div>`;
+function modeTitle(){return stato.mode==='riconosci'?'Che numero è?':stato.mode==='esplora'?'Esplora le mani':stato.strategy==='misto'?'Riepilogo casuale':stato.strategy==='libere'?'Addizioni e sottrazioni':GIOCHI.find(g=>g.id===stato.strategy).nome;}
+function menuHTML(){return `<div class="hero"><div class="eyebrow">Per contare, capire, riprovare</div><h1>I numeri prendono <span>forma.</span></h1><p class="intro">Quattro mani affiancate per vedere i gruppi di cinque. Scegli un’attività e ragioniamo insieme, senza fretta.</p></div>
+<div class="mode-grid">
+<button class="mode-card" onclick="start('riconosci')"><span class="mode-icon" aria-hidden="true">👀</span><span><strong>Che numero è?</strong><small>Le dita sono già alzate tutte insieme. La classe riconosce il numero senza contare il movimento.</small></span></button>
+<button class="mode-card" onclick="start('operazioni')"><span class="mode-icon" aria-hidden="true">＋</span><span><strong>Addizioni e sottrazioni</strong><small>Si forma il primo numero. La classe prevede il risultato, poi controlla con le mani.</small></span></button>
+<button class="mode-card" onclick="start('operazioni','misto')"><span class="mode-icon" aria-hidden="true">🎲</span><span><strong>Riepilogo casuale</strong><small>Tutte le attività mescolate, per allenarsi con operazioni sempre diverse.</small></span></button>
+<button class="mode-card" onclick="start('esplora')"><span class="mode-icon" aria-hidden="true">✋</span><span><strong>Esplora liberamente</strong><small>Scegli un numero da 0 a 20. Le mani lo costruiscono un dito alla volta.</small></span></button>
+</div><details class="teacher-tools"><summary>Vuoi allenare una strategia precisa?</summary><div class="strategies">${GIOCHI.filter(g=>g.id!=='misto').map(g=>`<button class="btn small" onclick="start('operazioni','${g.id}')">${g.nome}</button>`).join('')}</div></details>`;}
+function composer(){const options=selected=>Array.from({length:21},(_,n)=>`<option ${n===selected?'selected':''}>${n}</option>`).join('');return `<details class="teacher-tools" style="width:min(100%,680px);margin:0"><summary>Scegli tu un’operazione</summary><div class="composer"><select id="operand-a" aria-label="Primo numero">${options(stato.customA)}</select><select id="operation" aria-label="Operazione"><option value="+" ${stato.customOp==='+'?'selected':''}>+</option><option value="-" ${stato.customOp==='-'?'selected':''}>−</option></select><select id="operand-b" aria-label="Secondo numero">${options(stato.customB)}</select><button class="btn small primary" onclick="customOperation()">Mostra con le mani</button></div><p id="composer-message" class="hint" role="status"></p></details>`;}
+function render(){
+  const isMenu=stato.mode==='menu';document.querySelector('#menu').hidden=!isMenu;document.querySelector('#workspace').hidden=isMenu;
+  if(isMenu){document.querySelector('#menu').innerHTML=menuHTML();return;}
+  const c=card();
+  document.querySelector('#toolbar').innerHTML=`<div class="toolbar"><div class="toolbar-side"><button class="btn small" onclick="menu()">‹ Menu</button><span class="mode-title">${modeTitle()}</span></div><button class="btn small" onclick="cycleSpeed()">Velocità: ${NOMI_VEL[stato.speed]}</button></div>`;
+  const prompt=stato.mode==='riconosci'?(stato.revealed?`<span class="result">${c.n}</span>`:'Che numero vedi?'):stato.mode==='esplora'?`<span class="result">${c.n}</span>`:`${c.a} ${symbol(c.op)} ${c.b}${stato.revealed?` = <span class="result">${c.res}</span>`:''}`;
+  document.querySelector('#exercise').innerHTML=`<div class="prompt">${prompt}</div><p class="hint">${stato.mode==='riconosci'?'Osserva le mani e rispondi a voce. Non occorre scrivere.':stato.mode==='esplora'?'Dal pollice al mignolo: ogni mano completa vale cinque.':(c.op==='-'?'Togliamo prima gruppi completi di dieci o cinque, poi le dita da destra. Le dita rimaste non si spostano.':'Prevedi il risultato: aggiungiamo gruppi di cinque o dieci sulle mani libere, poi completiamo la mano già aperta.')}</p>`;
+  document.querySelector('#actions').innerHTML=`<p class="feedback" role="status">${stato.busy?stato.phase:stato.phase==='ready'?'Premi Avanti: il primo numero apparirà tutto insieme.':stato.phase==='predict'?`Le mani mostrano ${c.a}. Quanto farà ${c.a} ${symbol(c.op)} ${c.b}?`:stato.revealed?(stato.mode==='riconosci'?`Sono ${c.n} dita.`:`${c.a} ${symbol(c.op)} ${c.b} = ${c.res}`):'Osserviamo e ragioniamo insieme.'}</p><div class="action-row"><button class="btn" onclick="previous()" ${stato.index<=0?'disabled':''}>‹ Precedente</button><button class="btn" onclick="repeat()">↻ Ripeti</button>${stato.mode!=='esplora'?`<button class="btn answer" onclick="showAnswer()" ${stato.mode==='operazioni'&&stato.busy?'disabled':''}>${stato.phase==='ready'?'Avanti':stato.phase==='predict'?'Mostra risultato':stato.revealed?'Nascondi risposta':stato.mode==='riconosci'?'Mostra risposta':'Mostra risultato'}</button>`:''}<button class="btn primary" onclick="next()">Successivo ›</button></div>${stato.mode==='esplora'?`<div class="number-grid">${Array.from({length:21},(_,n)=>`<button class="btn ${c.n===n?'selected':''}" onclick="chooseNumber(${n})">${n}</button>`).join('')}</div>`:stato.mode==='operazioni'?composer():''}`;
 }
-function vistaCarta() {
-  const c = card();
-  const mostraTip = stato.suggerimento && !stato.gioco.misto && (stato.fase === 'inizio' || stato.fase === 'pausa');
-  return `<div class="tessera" style="border-color:${STR[c.s].colore};background:${STR[c.s].fondo}">
-    <div class="op">${c.a} ${sg(c.op)} ${c.b}</div>
-    ${mostraTip ? `<div class="tip">${STR[c.s].tip}</div>` : ''}
-  </div>`;
-}
-function bloccoVoce() {
-  return `<div class="azioni">
-      <button class="btn grande giusta" onclick="giudica(true)">Giusta</button>
-      <button class="btn grande sbagliata" onclick="giudica(false)">Sbagliata</button>
-    </div>`;
-}
-function bloccoScritta() {
-  return `<div class="risposta">${stato.input || '&nbsp;'}</div>
-    <div class="messaggio ${stato.msgCls}">${stato.msg}</div>
-    <div class="tastiera">
-      ${['1','2','3','4','5','6','7','8','9'].map(t => `<button onclick="tasto('${t}')">${t}</button>`).join('')}
-      <button class="azione" onclick="tasto('CANC')">Canc</button>
-      <button onclick="tasto('0')">0</button>
-      <button class="azione verifica" onclick="tasto('OK')">OK</button>
-    </div>`;
-}
-function bloccoRisposta() {
-  if (stato.giudizio) return `<div class="messaggio ${stato.msgCls}">${stato.msg}</div>`;
-  return stato.modo === 'voce' ? bloccoVoce() : bloccoScritta();
-}
-function vistaZona() {
-  const c = card();
-  let h = '';
-  if (stato.fase === 'inizio') {
-    h = bloccoRisposta() + `<div class="azioni">
-      <button class="btn grande costruisci" onclick="costruisci()">Costruisci il primo numero</button>
-      <button class="btn piccolo" onclick="avanti()">Avanti senza svolgere</button></div>`;
-  } else if (stato.fase === 'lavoro') {
-    h = `<p class="etichetta">Le mani lavorano…</p>` + bloccoRisposta() +
-      `<div class="azioni"><button class="btn piccolo" onclick="saltaFine()">Salta alla fine</button></div>`;
-  } else if (stato.fase === 'pausa') {
-    h = `<div class="pausa-box"><div class="titolo-p">${stato.pausaTitolo}</div><div class="testo-p">${stato.pausaTesto}</div></div>` +
-      bloccoRisposta() + `<div class="azioni">
-        <button class="btn grande continua" onclick="continua()">Continua</button>
-        <button class="btn piccolo" onclick="saltaFine()">Salta alla fine</button></div>`;
-  } else {
-    const esito = stato.giudizio ? stato.msg : `${c.a} ${sg(c.op)} ${c.b} = ${c.res}.`;
-    h = `<div class="messaggio ${stato.giudizio ? stato.msgCls : ''}">${esito}</div>` +
-      (stato.giudizio ? '' : bloccoRisposta()) +
-      `<p class="strategia">Strategia: ${STR[c.s].nome}. ${STR[c.s].tip}</p>
-       <div class="azioni"><button class="btn grande avanti" onclick="avanti()">Avanti</button></div>`;
-  }
-  return `<div class="zona">${h}</div>`;
-}
-function vistaFine() {
-  const g = stato.gioco;
-  return `
-    <div class="fine">
-      <div class="medaglia"><span>${g.misto ? 'Coppa del calcolo a mente' : 'Brevetto'}</span></div>
-      <h1 class="titolo">${g.misto ? 'Coppa conquistata' : 'Brevetto conquistato'}</h1>
-      <p>${g.nome}</p>
-      <p>Risposte giuste al primo tentativo: ${stato.primi} su ${stato.deck.length}</p>
-      <div class="riga" style="margin-top:14px">
-        <button class="btn" onclick="avvia('${g.id}')">Ricomincia</button>
-        <button class="btn" onclick="scarica()">Scarica tessere</button>
-        <button class="btn" onclick="vaiMenu()">Menu</button>
-      </div>
-    </div>`;
-}
-function renderAll() {
-  const s = stato.schermo;
-  elMenu.hidden = s !== 'menu';
-  elGioco.hidden = s !== 'gioco';
-  elFine.hidden = s !== 'fine';
-  if (s === 'menu') elMenu.innerHTML = vistaMenu();
-  if (s === 'gioco') {
-    elHead.innerHTML = vistaHead();
-    elCarta.innerHTML = vistaCarta();
-    elZona.innerHTML = vistaZona();
-  }
-  if (s === 'fine') elFine.innerHTML = vistaFine();
-}
-
-/* ================= SCHEDE PDF ================= */
-function caricaImg(url) {
-  return new Promise(res => {
-    const img = new Image(); img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      try {
-        const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
-        const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0);
-        res({ data: c.toDataURL('image/png'), w: c.width, h: c.height });
-      } catch (e) { res(null); }
-    };
-    img.onerror = () => res(null);
-    img.src = url;
-    setTimeout(() => res(null), 5000);
-  });
-}
-const hexRGB = h => [1, 3, 5].map(i => parseInt(h.substr(i, 2), 16));
-function intestazionePdf(doc, logo, M, PW) {
-  if (logo) doc.addImage(logo.data, 'PNG', M, 9, 13, 13 * logo.h / logo.w);
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.setTextColor(34, 34, 34);
-  doc.text('Matematiche non si nasce', M + 17, 18);
-  doc.setDrawColor(225, 6, 0); doc.setLineWidth(0.6); doc.line(M, 26, PW - M, 26);
-  doc.setTextColor(34, 34, 34);
-}
-function piePdf(doc, logoF, M) {
-  const fy = 268;
-  if (logoF) doc.addImage(logoF.data, 'PNG', M, fy, 14, 14 * logoF.h / logoF.w);
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(34, 34, 34);
-  doc.text('Rita Di Ianni', M + 18, fy + 6);
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(90, 90, 90);
-  doc.text('Materiale e idee per la scuola primaria', M + 18, fy + 11);
-}
-function apriPannelloPdf() { stato.pannelloPdf = !stato.pannelloPdf; renderAll(); }
-function togglePdfSel(id) { pdfSel[id] = !pdfSel[id]; renderAll(); }
-function vistaPannelloPdf() {
-  return `<div class="pannello">
-    <p class="etichetta">Scegli le tipologie di esercizi da inserire nella scheda</p>
-    <div class="riga">${GIOCHI.map(g => `<button class="btn piccolo ${pdfSel[g.id] ? 'attivo' : ''}" style="background:${pdfSel[g.id] ? g.fondo : '#fff'};border-color:${g.col}" onclick="togglePdfSel('${g.id}')">${g.nome}</button>`).join('')}</div>
-    <div class="riga"><button class="btn grande pdf" onclick="creaSchedaPdf()">Crea PDF</button></div>
-    <p class="etichetta" id="pdf-stato"></p>
-  </div>`;
-}
-async function creaSchedaPdf() {
-  const scelti = GIOCHI.filter(g => !g.misto && pdfSel[g.id]);
-  const mix = !!pdfSel['misto'];
-  const st = document.getElementById('pdf-stato');
-  if (!scelti.length && !mix) { st.textContent = 'Seleziona almeno una tipologia di esercizi.'; return; }
-  let carte = [];
-  scelti.forEach(g => carte.push(...g.deck()));
-  if (mix) carte.push(...shuffle(GIOCHI.find(g => g.misto).deck()).slice(0, 48));
-  carte = shuffle(uniq(carte));
-  await generaPdf(carte, st);
-}
-async function generaPdf(carte, st) {
-  if (!window.jspdf) { st.textContent = 'Non riesco a caricare lo strumento per il PDF: controlla la connessione a internet e ricarica la pagina.'; return; }
-  st.textContent = 'Preparo la scheda…';
-  const { jsPDF } = window.jspdf;
-  const [logoTop, logoFondo] = await Promise.all([caricaImg(document.querySelector('.logo img').src), caricaImg(LOGO_TESSERE)]);
-  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-  const PW = 210, M = 14, COLS = 4, colW = (PW - 2 * M) / COLS, ROWH = 19.5, Y0 = 42, PER = 48;
-  const pagine = Math.max(1, Math.ceil(carte.length / PER));
-  for (let p = 0; p < pagine; p++) {
-    if (p > 0) doc.addPage();
-    intestazionePdf(doc, logoTop, M, PW);
-    doc.setFontSize(14);
-    carte.slice(p * PER, (p + 1) * PER).forEach((c, i) => {
-      const x = M + (i % COLS) * colW, y = Y0 + Math.floor(i / COLS) * ROWH;
-      const rgb = hexRGB(STR[c.s].colore);
-      doc.setFillColor(rgb[0], rgb[1], rgb[2]); doc.rect(x, y - 4.5, 2.6, 5, 'F');
-      const txt = `${c.a} ${c.op === '+' ? '+' : '-'} ${c.b} =`;
-      doc.setFont('helvetica', 'normal'); doc.text(txt, x + 5, y);
-      const w = doc.getTextWidth(txt);
-      doc.setDrawColor(120, 120, 120); doc.setLineWidth(0.3); doc.line(x + 5 + w + 2, y + 0.8, x + colW - 6, y + 0.8);
-    });
-    piePdf(doc, logoFondo, M);
-  }
-  doc.save('scheda-esercizi.pdf');
-  st.textContent = `PDF creato con ${carte.length} esercizi. Ogni volta che lo crei, il Riepilogo esce con un mix diverso.`;
-}
-
-/* ================= TASTIERA ================= */
-document.addEventListener('keydown', e => {
-  if (stato.schermo !== 'gioco') return;
-  if (e.target.matches('button, input')) return;
-  const avKey = e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowRight';
-  if (stato.fase === 'pausa' && avKey) { e.preventDefault(); continua(); return; }
-  if (stato.fase === 'fine' && avKey) { e.preventDefault(); avanti(); return; }
-  if (stato.giudizio) return;
-  if (stato.modo === 'voce') {
-    if (e.key === 'g' || e.key === 'G') giudica(true);
-    else if (e.key === 's' || e.key === 'S') giudica(false);
-  } else {
-    if (/^[0-9]$/.test(e.key)) tasto(e.key);
-    else if (e.key === 'Backspace') tasto('CANC');
-    else if (e.key === 'Enter') verifica();
-  }
+document.addEventListener('keydown',event=>{
+  if(stato.mode==='menu'||['INPUT','SELECT','TEXTAREA','BUTTON','SUMMARY'].includes(event.target.tagName))return;
+  if(event.key==='ArrowRight'){event.preventDefault();next();}
+  if(event.key==='ArrowLeft'){event.preventDefault();previous();}
+  if(event.key===' '){event.preventDefault();repeat();}
 });
-
-/* ================= AVVIO ================= */
-Tov.init(document.getElementById('mat'));
-renderAll();
-</script>
-</body>
-</html>
+Mani.init(document.querySelector('#mat'));render();
+</script></body></html>
