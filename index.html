@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Tutti i giochi di Matematiche non si nasce: scopri, cerca e gioca con numeri, forme e parole.">
+<title>Tutti i giochi · Matematiche non si nasce</title>
+<style>
+:root{color-scheme:light;--ink:#243c39;--green:#245d4c;--muted:#62746d;--paper:#faf9f4;--line:#dfe5db}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header,main,footer{max-width:1000px;margin:auto;padding:0 26px}.brand{display:flex;align-items:center;gap:14px;padding:30px 0;border-bottom:1px solid var(--line);font-size:15px;font-weight:750;letter-spacing:.02em}.brand img{width:52px;height:52px;object-fit:contain}.hero{padding:48px 0 30px}.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:12px;font-weight:750;color:var(--green)}h1{font-size:clamp(36px,7vw,62px);line-height:1.1;letter-spacing:-.045em;margin:12px 0 18px}h1 span{color:var(--green)}.intro{max-width:600px;color:var(--muted);margin:0;font-size:19px}.tools{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:8px 0 28px;flex-wrap:wrap}.search{display:block;flex:1;max-width:520px}.search label{display:block;font-size:14px;font-weight:650;margin-bottom:7px}.search input{width:100%;font:inherit;padding:14px 18px;border:1px solid #b5c7bc;border-radius:12px;background:white;color:var(--ink)}:focus-visible{outline:3px solid #c67c2c;outline-offset:4px}#count{font-size:14px;color:var(--muted)}.catalog{padding:0;margin:0;list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:12px 18px}.game a{display:flex;align-items:center;gap:16px;min-height:94px;padding:16px 18px;background:#fff;border:1px solid var(--line);border-radius:16px;color:inherit;text-decoration:none;transition:transform .16s,border-color .16s,box-shadow .16s}.game a:hover{transform:translateY(-2px);border-color:#8aa997;box-shadow:0 5px 16px #234c3910}.picture{display:grid;place-items:center;flex:0 0 56px;height:56px;border-radius:14px;background:#eef3df;font-size:30px}.game:nth-child(4n+2) .picture{background:#fff0dc}.game:nth-child(4n+3) .picture{background:#eaf2f8}.game:nth-child(4n) .picture{background:#f7eaf0}.name{font-size:16px;font-weight:650;line-height:1.35;overflow-wrap:anywhere}.arrow{margin-left:auto;color:#7c9486;font-size:20px}.notice{color:var(--muted);font-size:14px}.empty{padding:35px 0;color:var(--muted)}[hidden]{display:none!important}footer{margin-top:50px;padding-top:24px;padding-bottom:32px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}footer a{color:var(--green)}button{font:inherit;color:var(--green);background:white;border:1px solid var(--line);border-radius:8px;padding:9px 16px;cursor:pointer}@media(max-width:640px){header,main,footer{padding-left:18px;padding-right:18px}.catalog{grid-template-columns:1fr}.hero{padding-top:32px}.tools{gap:10px}.search{max-width:none;flex-basis:100%}.brand{padding:20px 0}.intro{font-size:17px}}@media(prefers-reduced-motion:reduce){.game a{transition:none}}
+
+.game-text{min-width:0;flex:1}.name{display:block}.published-badge{display:inline-block;margin-top:7px;padding:3px 9px;border-radius:7px;background:#e6f3e8;color:#205237;font-size:12px;line-height:1.5;font-weight:650}.publication-note{font-size:14px;color:var(--muted);margin:0 0 24px}.publication-note a{color:var(--green)}
+
+.group-tools{display:flex;gap:10px;margin-bottom:14px}.topic{margin-bottom:14px;border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden}.topic summary{cursor:pointer;display:flex;align-items:center;gap:14px;padding:20px;list-style:none}.topic summary::-webkit-details-marker{display:none}.topic summary::after{content:'+';font-size:26px;margin-left:auto;color:var(--green)}.topic[open] summary::after{content:'−'}.topic-symbol{font-size:26px;flex-shrink:0}.topic-heading{min-width:0}.topic-title{display:block;font-size:19px;font-weight:750}.topic-description{display:block;font-size:13px;color:var(--muted)}.topic-total{flex-shrink:0;font-size:13px;color:var(--green);background:#eef3df;border-radius:20px;padding:4px 10px}.topic .catalog{padding:0 16px 16px}.topic .game a{background:var(--paper)}@media(max-width:640px){.topic summary{padding:16px 12px;gap:9px}.topic-title{font-size:16px}.topic-description{font-size:12px}.topic-total{padding:3px 7px}.topic .catalog{padding:0 10px 10px}}
+</style>
+</head>
+<body>
+<header><div class="brand"><img src="logo.png" alt="Logo"><span>Matematiche non si nasce</span></div></header>
+<main>
+<section class="hero"><div class="eyebrow">Esplorare · Scoprire · Imparare</div><h1>Un gioco, <span>tante scoperte.</span></h1><p class="intro">Numeri, forme, parole e piccole sfide. Scegli un’attività e comincia a giocare!</p></section>
+<div class="tools"><div class="search"><label for="search">Quale gioco cerchi?</label><input id="search" type="search" placeholder="Cerca per nome, per esempio: frazioni" autocomplete="off" aria-controls="games"></div><span id="count" role="status" aria-live="polite">Caricamento dei giochi…</span></div>
+<p class="publication-note">Le etichette verdi indicano i 9 giochi presenti nella <a href="https://matematichenonsinasce.com/giochi-pubblicati-html/">pagina del blog che hai condiviso</a>.</p>
+<p id="notice" class="notice" role="status" hidden></p>
+<div class="group-tools"><button id="expand" type="button">Apri tutti</button><button id="collapse" type="button">Chiudi tutti</button></div>
+<p class="publication-note">Apri un argomento per scegliere un gioco. La ricerca esplora tutti gli argomenti.</p>
+<div id="games" aria-label="Giochi divisi per argomento"></div>
+<p id="empty" class="empty" hidden>Nessun gioco trovato. Prova con un’altra parola.</p>
+<button id="retry" type="button" hidden>Riprova</button>
+<noscript><p>Attiva JavaScript per visualizzare il catalogo. Puoi anche consultare <a href="https://github.com/rdiianni-alt/matematichenonsinasce">tutti i file dei giochi su GitHub</a>.</p></noscript>
+</main>
+<footer>Un’idea alla volta, un gioco alla volta. <a href="https://matematichenonsinasce.com/">Visita il blog</a> · <a href="https://github.com/rdiianni-alt/matematichenonsinasce">Il progetto su GitHub</a></footer>
+<script>
+'use strict';
+const list = document.querySelector('#games');
+const search = document.querySelector('#search');
+const count = document.querySelector('#count');
+const notice = document.querySelector('#notice');
+const retry = document.querySelector('#retry');
+const collator = new Intl.Collator('it', {sensitivity:'base', numeric:true});
+const normalize = text => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('it');
+const initialGames = [{"file": "addizioni_furbe_compatta.html", "title": "Addiziona in modo furbo entro il 100", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "addizioni-sottrazioni-in-colonna.html", "title": "Addizioni e Sottrazioni in Colonna", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "alberi-gioco.html", "title": "Alberi d'Europa", "icon": "🌳", "iconLabel": "Albero"}, {"file": "esploratori-di-mappe.html", "title": "Alla scoperta delle mappe", "icon": "🏞️", "iconLabel": "Paesaggio"}, {"file": "bruco_formica_coccinella.html", "title": "Bruco, Formica e Coccinella", "icon": "🐛", "iconLabel": "Bruco"}, {"file": "calcolo_a_mente_con_linea.html", "title": "Calcolo a mente entro il 20", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "piattaforma-calcolo-a-mente.html", "title": "Calcolo a mente entro il 20", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "calcolo_mentale.html", "title": "Calcolo Mentale", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "cannucce-decine-unita.html", "title": "Cannucce delle Decine e Unità", "icon": "🥢", "iconLabel": "Bastoncini"}, {"file": "cannucce.html", "title": "Cannucce per contare", "icon": "🥢", "iconLabel": "Bastoncini"}, {"file": "care_le_mie_parole.html", "title": "Care le mie parole", "icon": "💬", "iconLabel": "Parole"}, {"file": "frazioni.html", "title": "Carte delle Frazioni", "icon": "🍕", "iconLabel": "Frazioni"}, {"file": "chiudi_la_scatola.html", "title": "Chiudi la scatola", "icon": "🃏", "iconLabel": "Carte"}, {"file": "costruisci-la-figura.html", "title": "Costruisci la Figura", "icon": "🧩", "iconLabel": "Forme"}, {"file": "divisione_canadese.html", "title": "Divisione Canadese", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "divisione_danda_lunga.html", "title": "Divisione danda lunga", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "dove-e-nascosta-la-maestra.html", "title": "Dov'è nascosta la maestra?", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "fattoria-moltiplicazioni.html", "title": "Fattoria delle Moltiplicazioni", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "fisarmonica.html", "title": "Fisarmonica", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "Frazioni_sul_filo.html", "title": "Frazioni sul filo", "icon": "🍕", "iconLabel": "Frazioni"}, {"file": "gambero rosso.html", "title": "Gambero rosso", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "gelosia.html", "title": "Gelosia", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "generatore_operazioni.html", "title": "Generatore di Operazioni", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "bolle.html", "title": "Gioco delle Bolle · LIM", "icon": "🎈", "iconLabel": "Palloncino"}, {"file": "divisioni_con_le_tabelline.html", "title": "Gioco delle Divisioni", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "gioco_sovrapposizione.html", "title": "Gioco di sovrapposizione", "icon": "🧩", "iconLabel": "Forme"}, {"file": "giro_le_cifre.html", "title": "Giro le cifre", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "goniometro.html", "title": "Goniometro", "icon": "📐", "iconLabel": "Misure"}, {"file": "grafici_interattivi.html", "title": "Grafici incompleti", "icon": "📊", "iconLabel": "Grafico"}, {"file": "bastoncini-di-nepero.html", "title": "I bastoncini di Nepero", "icon": "🥢", "iconLabel": "Bastoncini"}, {"file": "paesaggi-naturali-antropici-variante.html", "title": "I Paesaggi: Naturali o Antropici? (Variante)", "icon": "🏞️", "iconLabel": "Paesaggio"}, {"file": "armadio_del_100.html", "title": "I pallini del 100", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "bruco.html", "title": "Il Bruco Mangianumeri", "icon": "🐛", "iconLabel": "Bruco"}, {"file": "contafagioli.html", "title": "Il Contafagioli", "icon": "🫘", "iconLabel": "Fagioli"}, {"file": "quanti_fagioli.html", "title": "Il Gioco dei Fagioli", "icon": "🫘", "iconLabel": "Fagioli"}, {"file": "mattonelle.html", "title": "Il Gioco delle Mattonelle", "icon": "🧩", "iconLabel": "Forme"}, {"file": "il_gioco_di_Uri.html", "title": "Il Gioco di Uri", "icon": "🐾", "iconLabel": "Impronte"}, {"file": "paesaggio-di-montagna.html", "title": "Il paesaggio di montagna", "icon": "🏞️", "iconLabel": "Paesaggio"}, {"file": "tavolo_carte_mazzo_40_carte.html", "title": "Il tavolo delle carte", "icon": "🃏", "iconLabel": "Carte"}, {"file": "valutazione_primaria_plus.html", "title": "Indicazioni di valutazione alla scuola primaria — Plus", "icon": "📊", "iconLabel": "Grafico"}, {"file": "abaco-decine.html", "title": "L'abaco trasparente", "icon": "🧮", "iconLabel": "Abaco"}, {"file": "bee_game.html", "title": "L'Ape e il Fiore", "icon": "🐝", "iconLabel": "Ape"}, {"file": "la-corsa-al-20.html", "title": "La Corsa al 20", "icon": "🏁", "iconLabel": "Sfida"}, {"file": "gara-dei-numeri.html", "title": "La Gara dei Numeri", "icon": "🏁", "iconLabel": "Sfida"}, {"file": "gara-dei-numeri-2.html", "title": "La Gara dei Numeri 2", "icon": "🏁", "iconLabel": "Sfida"}, {"file": "linea-del-100.html", "title": "La Linea del 100", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "macchia_di_caffe.html", "title": "La Macchia di Caffè", "icon": "☕", "iconLabel": "Caffè"}, {"file": "macchina_sottrazioni.html", "title": "La macchina delle sottrazioni", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "macchina-tabelline-paolini.html", "title": "La macchina delle tabelline del maestro Paolini", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "pecorelle.html", "title": "Le pecorelle", "icon": "🐑", "iconLabel": "Pecora"}, {"file": "piramide.html", "title": "Le piramidi dei numeri", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "misure.html", "title": "Le Unità di Misura", "icon": "📐", "iconLabel": "Misure"}, {"file": "lego.html", "title": "Lego – Vista dall'Alto", "icon": "🧩", "iconLabel": "Forme"}, {"file": "linea-del-20.html", "title": "Linea dei numeri", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "Maggiore_minore.html", "title": "Maggiore, Minore o Uguale?", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "mazzetti-di-cannucce.html", "title": "Mazzetti di cannucce", "icon": "🥢", "iconLabel": "Bastoncini"}, {"file": "moltiplicazione_visiva.html", "title": "Moltiplicazione visiva", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "multiPLO.html", "title": "Multipli con le carte", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "fantasmino.html", "title": "Numeri Fantasmino", "icon": "👻", "iconLabel": "Fantasmino"}, {"file": "pallottoliere_per_operazioni.html", "title": "Pallottoliere", "icon": "🧮", "iconLabel": "Abaco"}, {"file": "quante_cannucce.html", "title": "Quante cannucce?", "icon": "🥢", "iconLabel": "Bastoncini"}, {"file": "cubetti_mancanti.html", "title": "Quanti cubetti mancano?", "icon": "🧩", "iconLabel": "Forme"}, {"file": "invalsi.html", "title": "Quiz INVALSI Matematica", "icon": "📊", "iconLabel": "Grafico"}, {"file": "salta_la_tabellina.html", "title": "Salta la Tabellina", "icon": "🏁", "iconLabel": "Sfida"}, {"file": "scatolina.html", "title": "Scatolina", "icon": "🃏", "iconLabel": "Carte"}, {"file": "schieramenti_di_fagioli.html", "title": "Schieramenti di Fagioli", "icon": "🫘", "iconLabel": "Fagioli"}, {"file": "scrivo_il_numero.html", "title": "Scrivo il numero", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "Sfida_dei_Palloncini.html", "title": "Sfida dei Palloncini", "icon": "🎈", "iconLabel": "Palloncino"}, {"file": "somme_parlate.html", "title": "Somme Parlate", "icon": "💬", "iconLabel": "Parole"}, {"file": "supermercato.html", "title": "Spesa al Supermercato", "icon": "🛒", "iconLabel": "Spesa"}, {"file": "subitizing.html", "title": "Subitizing", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "armadio-del-cento.html", "title": "Tabella del 100", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "tabelline.html", "title": "Tabelline", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "tavola_delle_divisioni.html", "title": "Tavola delle Divisioni", "icon": "🔢", "iconLabel": "Numeri"}, {"file": "tenframe.html", "title": "Ten Frame", "icon": "🧮", "iconLabel": "Abaco"}, {"file": "uccelli-gioco.html", "title": "Uccelli d'Italia", "icon": "🐦", "iconLabel": "Uccello"}];
+// Published games from the visible PUBLISHED list in the blog page supplied by the author.
+// Update this map when the selection on the blog changes. Repository discovery stays automatic.
+const publishedOnBlog = {
+  "quante_cannucce.html": "https://matematichenonsinasce.com/quante_cannucce/",
+  "scatolina.html": "https://matematichenonsinasce.com/scatolina/",
+  "gambero rosso.html": "https://matematichenonsinasce.com/gambero_rosso/",
+  "pallottoliere_per_operazioni.html": "https://matematichenonsinasce.com/pallottoliere/",
+  "supermercato.html": "https://matematichenonsinasce.com/supermercato/",
+  "il_gioco_di_Uri.html": "https://matematichenonsinasce.com/uri/",
+  "tavola_delle_divisioni.html": "https://matematichenonsinasce.com/tavola_delle_divisioni/",
+  "contafagioli.html": "https://matematichenonsinasce.com/contafagioli/",
+  "pecorelle.html": "https://matematichenonsinasce.com/pecorelle/"
+};
+let games = [...initialGames];
+const groups = [
+  {id:'numeri', title:'Numeri e quantità', icon:'🔢', description:'Contare, leggere, confrontare e rappresentare i numeri'},
+  {id:'calcolo', title:'Calcolo e operazioni', icon:'🧮', description:'Calcolo a mente, addizioni, sottrazioni, moltiplicazioni e divisioni'},
+  {id:'spazio', title:'Spazio e figure', icon:'🧩', description:'Forme, geometria, orientamento e rappresentazioni'},
+  {id:'logica', title:'Logica, dati e problemi', icon:'💡', description:'Ragionare, dedurre, leggere dati e risolvere problemi'},
+  {id:'altre', title:'Altre discipline', icon:'🌍', description:'Geografia, scienze e scoperta del territorio'},
+  {id:'nuovi', title:'Da classificare', icon:'✨', description:'Nuovi giochi di cui non è stato riconosciuto l’argomento'}
+];
+const gameGroups = {
+  "addizioni_furbe_compatta.html": "calcolo",
+  "addizioni-sottrazioni-in-colonna.html": "calcolo",
+  "alberi-gioco.html": "altre",
+  "esploratori-di-mappe.html": "altre",
+  "bruco_formica_coccinella.html": "logica",
+  "calcolo_a_mente_con_linea.html": "calcolo",
+  "piattaforma-calcolo-a-mente.html": "calcolo",
+  "calcolo_mentale.html": "calcolo",
+  "cannucce-decine-unita.html": "numeri",
+  "cannucce.html": "calcolo",
+  "care_le_mie_parole.html": "logica",
+  "frazioni.html": "spazio",
+  "chiudi_la_scatola.html": "calcolo",
+  "costruisci-la-figura.html": "spazio",
+  "divisione_canadese.html": "calcolo",
+  "divisione_danda_lunga.html": "calcolo",
+  "dove-e-nascosta-la-maestra.html": "logica",
+  "fattoria-moltiplicazioni.html": "logica",
+  "fisarmonica.html": "numeri",
+  "Frazioni_sul_filo.html": "numeri",
+  "gambero rosso.html": "logica",
+  "gelosia.html": "calcolo",
+  "generatore_operazioni.html": "calcolo",
+  "bolle.html": "calcolo",
+  "divisioni_con_le_tabelline.html": "calcolo",
+  "gioco_sovrapposizione.html": "spazio",
+  "giro_le_cifre.html": "numeri",
+  "goniometro.html": "spazio",
+  "grafici_interattivi.html": "logica",
+  "bastoncini-di-nepero.html": "calcolo",
+  "paesaggi-naturali-antropici-variante.html": "altre",
+  "armadio_del_100.html": "numeri",
+  "bruco.html": "numeri",
+  "contafagioli.html": "numeri",
+  "quanti_fagioli.html": "numeri",
+  "mattonelle.html": "spazio",
+  "il_gioco_di_Uri.html": "numeri",
+  "paesaggio-di-montagna.html": "altre",
+  "tavolo_carte_mazzo_40_carte.html": "logica",
+  "valutazione_primaria_plus.html": "logica",
+  "abaco-decine.html": "numeri",
+  "bee_game.html": "spazio",
+  "la-corsa-al-20.html": "logica",
+  "gara-dei-numeri.html": "numeri",
+  "gara-dei-numeri-2.html": "numeri",
+  "linea-del-100.html": "numeri",
+  "macchia_di_caffe.html": "calcolo",
+  "macchina_sottrazioni.html": "calcolo",
+  "macchina-tabelline-paolini.html": "calcolo",
+  "pecorelle.html": "numeri",
+  "piramide.html": "calcolo",
+  "misure.html": "logica",
+  "lego.html": "spazio",
+  "linea-del-20.html": "numeri",
+  "Maggiore_minore.html": "numeri",
+  "mazzetti-di-cannucce.html": "calcolo",
+  "moltiplicazione_visiva.html": "calcolo",
+  "multiPLO.html": "calcolo",
+  "fantasmino.html": "calcolo",
+  "pallottoliere_per_operazioni.html": "calcolo",
+  "quante_cannucce.html": "numeri",
+  "cubetti_mancanti.html": "spazio",
+  "invalsi.html": "logica",
+  "salta_la_tabellina.html": "calcolo",
+  "scatolina.html": "numeri",
+  "schieramenti_di_fagioli.html": "calcolo",
+  "scrivo_il_numero.html": "numeri",
+  "Sfida_dei_Palloncini.html": "calcolo",
+  "somme_parlate.html": "calcolo",
+  "supermercato.html": "logica",
+  "subitizing.html": "numeri",
+  "armadio-del-cento.html": "numeri",
+  "tabelline.html": "calcolo",
+  "tavola_delle_divisioni.html": "calcolo",
+  "tenframe.html": "numeri",
+  "uccelli-gioco.html": "altre"
+};
+function groupOf(game) {
+  if (Object.hasOwn(gameGroups, game.file)) return gameGroups[game.file];
+  const name = normalize(game.file + ' ' + game.title);
+  if (/mappe|geograf|alber|paesagg|montagna|uccell|scienz|continent/.test(name)) return 'altre';
+  if (/logic|problem|indovin|deduz|grafic|dati|supermercat|invalsi/.test(name)) return 'logica';
+  if (/figur|geometr|angol|goniometr|lego|cubett|mattonell|coding|ape|fiore|simmetri/.test(name)) return 'spazio';
+  if (/calcol|addizion|sottraz|moltiplic|division|tabellin|operazion|multipl/.test(name)) return 'calcolo';
+  if (/numer|quantit|conta|decin|unita|abaco|frazion|ten.?frame/.test(name)) return 'numeri';
+  return 'nuovi';
+}
+const openGroups = new Set();
+function gameCard(game) {
+    const item = document.createElement('li'); item.className = 'game';
+    const link = document.createElement('a'); link.href = './' + encodeURIComponent(game.file);
+    const picture = document.createElement('span'); picture.className = 'picture'; picture.setAttribute('aria-hidden', 'true'); picture.textContent = game.icon || '🔢';
+    const name = document.createElement('span'); name.className = 'name'; name.textContent = game.title;
+    const arrow = document.createElement('span'); arrow.className = 'arrow'; arrow.setAttribute('aria-hidden', 'true'); arrow.textContent = '›';
+    const text = document.createElement('span'); text.className = 'game-text'; text.append(name);
+    if (Object.hasOwn(publishedOnBlog, game.file)) {
+      const badge = document.createElement('span'); badge.className = 'published-badge';
+      badge.textContent = 'Pubblicato sul blog'; text.append(badge);
+    }
+    link.append(picture, text, arrow); item.append(link); return item;
+
+}
+function render() {
+  const query = normalize(search.value.trim());
+  const shown = games.filter(game => normalize(game.title).includes(query));
+  const fragment = document.createDocumentFragment();
+  for (const group of groups) {
+    const items = shown.filter(game => groupOf(game) === group.id)
+      .sort((a,b) => collator.compare(a.title,b.title) || collator.compare(a.file,b.file));
+    if (!items.length) continue;
+    const section = document.createElement('details'); section.className = 'topic'; section.dataset.group = group.id;
+    section.open = Boolean(query) || openGroups.has(group.id);
+    const summary = document.createElement('summary');
+    const icon = document.createElement('span'); icon.className='topic-symbol'; icon.textContent=group.icon; icon.setAttribute('aria-hidden','true');
+    const heading = document.createElement('span'); heading.className='topic-heading';
+    const title = document.createElement('span'); title.className='topic-title'; title.textContent=group.title;
+    const description = document.createElement('span'); description.className='topic-description'; description.textContent=group.description;
+    heading.append(title,description);
+    const total = document.createElement('span'); total.className='topic-total'; total.textContent=items.length + (items.length===1?' gioco':' giochi');
+    summary.append(icon,heading,total); section.append(summary);
+    const catalog = document.createElement('ul'); catalog.className='catalog'; catalog.setAttribute('aria-label', group.title);
+    items.forEach(game => catalog.append(gameCard(game))); section.append(catalog);
+    section.addEventListener('toggle', () => {
+      if (search.value.trim() || !section.isConnected) return;
+      if(section.open) openGroups.add(group.id); else openGroups.delete(group.id);
+    });
+    fragment.append(section);
+  }
+  list.replaceChildren(fragment);
+  count.textContent = query ? `${shown.length} di ${games.length} giochi` : `${games.length} giochi per argomento`;
+  document.querySelector('#empty').hidden = shown.length !== 0;
+}
+for (const [id, open] of [['expand',true],['collapse',false]]) {
+  document.getElementById(id).addEventListener('click', () => {
+    list.querySelectorAll('details').forEach(section => {
+      section.open = open;
+      if(open) openGroups.add(section.dataset.group); else openGroups.delete(section.dataset.group);
+    });
+  });
+}
+// Read the public repository without login, tokens or GitHub Actions.
+const repository = 'https://api.github.com/repos/rdiianni-alt/matematichenonsinasce/contents/?ref=main';
+function iconFor(file) {
+  const themes = [
+    [/ape|bee|fiore/i,'🐝'], [/bruco|formica|coccinella/i,'🐛'],
+    [/uccelli/i,'🐦'], [/alberi/i,'🌳'], [/frazion/i,'🍕'],
+    [/palloncini|bolle/i,'🎈'], [/fagioli/i,'🫘'], [/pecore/i,'🐑'],
+    [/fantasmino/i,'👻'], [/caff/i,'☕'], [/paesagg|montagna|mappe/i,'🏞️'],
+    [/cannucc|bastoncini/i,'🥢'], [/lego|cubetti|mattonelle|figura/i,'🧩'],
+    [/carte|scatola|scatolina/i,'🃏'], [/misur|goniometro/i,'📐'],
+    [/parole|parlate/i,'💬'], [/supermercato/i,'🛒'],
+    [/grafici|valutazione|invalsi/i,'📊'], [/abaco|pallottoliere|tenframe/i,'🧮'],
+    [/gara|corsa|salta/i,'🏁'], [/uri/i,'🐾']
+  ];
+  return themes.find(([pattern]) => pattern.test(file))?.[1] || '🔢';
+}
+async function load() {
+  retry.hidden = true; notice.hidden = true;
+  // Show the included catalogue immediately, even without a connection.
+  games.sort((a,b) => collator.compare(a.title,b.title) || collator.compare(a.file,b.file));
+  render();
+  try {
+    const response = await fetch(repository, {cache:'no-store', signal:AbortSignal.timeout(10000)});
+    if (!response.ok) throw new Error('Repository unavailable');
+    const files = await response.json();
+    if (!Array.isArray(files)) throw new Error('Invalid file list');
+    const known = new Map(initialGames.map(game => [game.file, game]));
+    games = files.filter(file => file.type === 'file' && typeof file.name === 'string' && /^[^/\\]+\.html$/i.test(file.name) && file.name.toLowerCase() !== 'index.html')
+      .map(file => known.get(file.name) || {
+        file:file.name,
+        title:file.name.replace(/\.html$/i,'').replace(/[_-]+/g,' ').replace(/^./, char => char.toLocaleUpperCase('it')),
+        icon:iconFor(file.name)
+      });
+    games.sort((a,b) => collator.compare(a.title,b.title) || collator.compare(a.file,b.file));
+    render();
+  } catch (error) {
+    notice.textContent = 'Elenco salvato disponibile. Non è stato possibile verificare gli ultimi giochi: riprova tra poco.';
+    notice.hidden = false; retry.hidden = false;
+  }
+}
+search.addEventListener('input', render);
+retry.addEventListener('click', load);
+load();
+</script>
+</body>
+</html>
