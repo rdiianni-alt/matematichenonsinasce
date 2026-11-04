@@ -3,415 +3,270 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Divisione Canadese</title>
+<title>Divisione canadese · Dividiamo insieme</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', sans-serif; background: #f0f7ff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+*{box-sizing:border-box;margin:0;padding:0}
+:root{font-family:system-ui,sans-serif;color:#294c44;background:#f3f5ef;--green:#2e6656;--line:#d9e3d5}
+body{padding:clamp(8px,2vw,20px);min-height:100svh}main{max-width:1100px;margin:auto}
+header{text-align:center;margin-bottom:14px}h1{font-size:clamp(25px,4vw,35px);letter-spacing:-1px}header p{font-size:14px;color:#65786c;margin-top:4px;line-height:1.5}
+button,input,select{font:inherit}button{min-height:44px;border:0;border-radius:12px;padding:10px 16px;background:var(--green);color:#fff;font-weight:650;cursor:pointer;touch-action:manipulation}button:hover{background:#234e41}button:disabled{opacity:.5;cursor:default}
+input,select{min-height:46px;width:100%;border:1px solid #b8cdbd;border-radius:10px;padding:8px 10px;background:#fcfdf9;color:#294c44;font-size:18px}input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid #bf8c2d;outline-offset:3px}
+[hidden]{display:none!important}.card{background:#fffefa;border:1px solid var(--line);border-radius:20px;padding:16px}
+#setup{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:end;background:#fff;margin-bottom:8px}.field{display:flex;flex-direction:column;gap:5px;min-width:0}.field label{font-size:13px;font-weight:650}.field small{font-size:11px;color:#6c7b6e}.field select{font-size:16px}
+#setup-msg{min-height:0;font-size:13px;color:#a03c30;text-align:center;margin:8px 0}#setup-msg:empty{margin:0}
+.empty{text-align:center;padding:clamp(25px,7vh,60px) 20px;border:1px dashed #bacdb8;border-radius:22px;color:#68796c;margin-top:14px}.empty-icon{font-size:42px;margin-bottom:10px}.empty h2{font-size:20px;color:#345949;margin-bottom:8px}.empty p{font-size:14px;line-height:1.6}
+#game{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(285px,1fr);grid-template-areas:'summary summary' 'scene dist' 'scene algo' 'scene final' 'scene result';gap:12px;align-items:start;margin-top:12px}
+#sticky-bar{grid-area:summary;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:#e5eddc;border:1px solid #d3dfc8;border-radius:16px;padding:10px;gap:8px;text-align:center}.bar-label{display:block;font-size:12px;color:#60705f}.bar-value{font-size:24px;font-weight:700;display:block}
+#scene{grid-area:scene;min-width:0}#scene h2{font-size:16px;margin-bottom:10px}#round-table{display:block;width:min(100%,520px);height:auto;aspect-ratio:1;margin:auto;overflow:visible}
+.scene-note{font-size:12px;line-height:1.4;color:#687461;text-align:center;margin-top:8px}
+.seat-count{fill:#315b45;font-size:19px;font-weight:750;text-anchor:middle}
+.moving-object{filter:drop-shadow(0 1px 1px #76501a35)}
+#dist-area{grid-area:dist}#dist-label{display:block;font-size:15px;font-weight:650;line-height:1.4;margin-bottom:10px}#dist-row{display:flex;gap:8px;align-items:center}#dist-input{width:90px;text-align:center}#dist-btn{flex:1}#dist-msg{font-size:13px;line-height:1.4;color:#a13a2b;margin-top:8px}#dist-msg:empty{display:none}.dist-help{color:#6d7c6a;font-size:12px;line-height:1.4;margin-top:8px}
+#algo-wrap{grid-area:algo;min-width:0}#algo-wrap h2{font-size:15px;margin-bottom:10px}.algo-scroll{max-height:230px;overflow:auto;overscroll-behavior:contain}#algo-table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}#algo-table td{padding:5px 8px;font-size:15px}#algo-table .left-col{text-align:right;border-right:2px solid #567564;width:30%}#algo-table .right-col{padding-left:12px}.algo-header td{font-weight:700;border-bottom:2px solid #567564}.algo-sub{color:#7b8172}.algo-result .left-col{border-top:1px solid #b9c7b1;font-weight:650}.algo-partial{color:#32634f}.algo-total td{border-top:2px solid #78966b;font-weight:700;color:#386c43}.algo-note{font-size:12px;line-height:1.4;color:#6f7d69;margin-top:8px}
+#final-form{grid-area:final}#result{grid-area:result}#final-form h2,#result h2{font-size:18px;margin-bottom:12px}.questions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.q-row label{display:block;font-size:12px;line-height:1.4;margin-bottom:5px}.q-row input{font-size:18px}.final-actions{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}.feedback-row{font-size:13px;margin-bottom:7px;line-height:1.4}.wrong{color:#a23f30}.formulas{padding:12px;background:#eaf1e0;border-radius:12px;margin-top:12px}.formulas p{font-size:16px;font-weight:650;margin:3px 0;overflow-wrap:anywhere}.secondary{background:#e6edde;color:#365b44}.secondary:hover{background:#d8e4ce}#final-msg{font-size:13px;color:#a13a2b;margin-top:8px}
+@media(max-width:700px){body{padding:8px}header{margin-bottom:10px}header p{font-size:12px}#setup{grid-template-columns:1fr 1fr;gap:8px;padding:12px}.field small{font-size:10px}.field select{font-size:14px}#setup button{align-self:center;margin-top:8px}#game{grid-template-columns:1fr;grid-template-areas:'summary' 'dist' 'scene' 'algo' 'final' 'result';gap:8px;margin-top:8px}.card{padding:12px}#sticky-bar{gap:3px;padding:8px 4px}.bar-label{font-size:10px}.bar-value{font-size:20px}.scene-note{margin-bottom:8px}.algo-scroll{max-height:180px}}
+@media(max-height:600px) and (min-width:701px){header{margin-bottom:8px}h1{font-size:25px}body{padding:8px}#setup{padding:10px}#game{gap:8px}.card{padding:10px}.algo-scroll{max-height:150px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;scroll-behavior:auto!important}}
 
-  .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; text-decoration: none; }
-  .logo img { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; }
-  .logo-text { font-size: 1em; color: #2c5f8a; font-weight: bold; }
 
-  h1 { color: #2c5f8a; font-size: 1.5em; margin-bottom: 16px; text-align: center; }
+@media(max-width:700px){
+header{margin-bottom:8px}#game{display:flex;flex-direction:column;gap:6px}#game>*{width:100%}
+#sticky-bar{order:0}#dist-area{order:1}#scene{order:2}#algo-wrap{order:3}#final-form{order:4}#result{order:5}
+.card{padding:10px}.field:has(select) small{display:none}
+#scene h2{margin-bottom:6px}.scene-note{margin:4px 0 6px}
+}
 
-  /* SETUP */
-  #setup { background: white; border-radius: 16px; padding: 28px 32px; box-shadow: 0 2px 12px #0001; max-width: 360px; width: 100%; }
-  #setup label { display: block; margin-bottom: 6px; color: #444; font-size: 1em; }
-  #setup input { width: 100%; padding: 9px 12px; border: 2px solid #b0cfe8; border-radius: 8px; font-size: 1.1em; margin-bottom: 16px; }
-  #setup button { width: 100%; padding: 11px; background: #2c7be5; color: white; border: none; border-radius: 10px; font-size: 1.1em; cursor: pointer; }
-  #setup button:hover { background: #1a5cbf; }
-
-  /* GAME */
-  #game { display: none; width: 100%; max-width: 980px; flex-direction: column; align-items: center; gap: 12px; }
-
-  .restart-btn { padding: 8px 20px; background: #e74c3c; color: white; border: none; border-radius: 9px; font-size: 0.93em; cursor: pointer; }
-  .restart-btn:hover { background: #c0392b; }
-
-  /* STICKY BAR */
-  #sticky-bar {
-    position: sticky; top: 8px; z-index: 10;
-    background: #2c7be5; color: white;
-    border-radius: 12px; padding: 10px 22px;
-    font-size: 1em; text-align: center;
-    width: 100%;
-    box-shadow: 0 2px 8px #0003;
-    display: flex; justify-content: center; gap: 32px;
-  }
-  .bar-item { display: flex; flex-direction: column; align-items: center; }
-  .bar-label { font-size: 0.78em; opacity: 0.85; }
-  .bar-value { font-size: 1.3em; font-weight: bold; }
-
-  /* DIST AREA */
-  #dist-area { background: white; border-radius: 14px; padding: 14px 20px; box-shadow: 0 2px 8px #0001; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-  #dist-area label { color: #444; font-size: 0.97em; text-align: center; }
-  #dist-row { display: flex; gap: 10px; align-items: center; }
-  #dist-input { padding: 8px 12px; border: 2px solid #b0cfe8; border-radius: 8px; font-size: 1.1em; width: 90px; text-align: center; }
-  #dist-btn { padding: 9px 20px; background: #2c7be5; color: white; border: none; border-radius: 9px; font-size: 1em; cursor: pointer; }
-  #dist-btn:hover { background: #1a5cbf; }
-  #dist-msg { color: #c0392b; font-size: 0.92em; min-height: 1.2em; text-align: center; }
-
-  /* MAIN ROW: table + algorithm */
-  #main-row { display: flex; gap: 20px; align-items: flex-start; justify-content: center; width: 100%; }
-
-  /* TABLE */
-  #table-wrap { position: relative; width: 500px; height: 500px; flex-shrink: 0; }
-  #table-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-  #balls-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-  .ball {
-    position: absolute; width: 18px; height: 18px; border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, #74c0fc, #1971c2);
-    box-shadow: 1px 2px 4px #0004;
-    transition: left 0.65s ease, top 0.65s ease;
-    transform: translate(-50%, -50%);
-  }
-  .child-wrap { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 2px; transform: translate(-50%, -50%); }
-  .child-emoji { font-size: 2.2em; line-height: 1; }
-  .bubble { background: white; border: 2px solid #2c7be5; border-radius: 12px; padding: 2px 8px; font-size: 0.88em; color: #2c5f8a; font-weight: bold; min-width: 28px; text-align: center; }
-
-  /* ALGORITHM TABLE */
-  #algo-wrap {
-    background: white; border-radius: 14px; padding: 18px 20px;
-    box-shadow: 0 2px 8px #0001;
-    min-width: 220px; flex-shrink: 0;
-    font-family: 'Courier New', monospace;
-  }
-  #algo-wrap h3 { color: #2c5f8a; font-size: 0.95em; margin-bottom: 12px; text-align: center; font-family: 'Segoe UI', sans-serif; }
-  #algo-table { width: 100%; border-collapse: collapse; }
-  #algo-table td { padding: 3px 10px; font-size: 1em; text-align: right; }
-  #algo-table td.left-col { border-right: 2px solid #2c5f8a; text-align: right; min-width: 80px; }
-  #algo-table td.right-col { text-align: left; min-width: 120px; color: #555; padding-left: 14px; }
-  .algo-header td { font-weight: bold; color: #2c5f8a; font-size: 1em; padding-bottom: 6px; border-bottom: 2px solid #2c5f8a; }
-  .algo-sub { color: #888 !important; font-size: 0.9em !important; }
-  .algo-line td { border-top: none; }
-  .algo-result td.left-col { border-top: 1px solid #ccc; font-weight: bold; color: #2c5f8a; padding-top: 4px; }
-  .algo-result td.right-col { border-top: none; }
-  .algo-partial { color: #1971c2; font-weight: bold; }
-  #algo-total-row td { border-top: 2px solid #2c5f8a; font-weight: bold; color: #27ae60; padding-top: 5px; }
-
-  /* FINAL FORM */
-  #final-form { display: none; background: white; border-radius: 14px; padding: 20px 24px; box-shadow: 0 2px 8px #0001; width: 100%; }
-  #final-form h2 { color: #2c5f8a; font-size: 1.1em; margin-bottom: 14px; text-align: center; }
-  .q-row { display: flex; flex-direction: column; margin-bottom: 12px; }
-  .q-row label { font-size: 0.95em; color: #444; margin-bottom: 4px; }
-  .q-row input { padding: 7px 10px; border: 2px solid #b0cfe8; border-radius: 8px; font-size: 1em; width: 120px; }
-  #final-btn { margin-top: 8px; padding: 10px 28px; background: #2c7be5; color: white; border: none; border-radius: 9px; font-size: 1em; cursor: pointer; }
-  #final-btn:hover { background: #1a5cbf; }
-
-  /* RESULT */
-  #result { display: none; background: white; border-radius: 14px; padding: 22px 26px; box-shadow: 0 2px 8px #0001; width: 100%; }
-  #result h2 { color: #2c5f8a; font-size: 1.1em; margin-bottom: 12px; text-align: center; }
-  .feedback-row { margin-bottom: 8px; font-size: 0.97em; color: #333; }
-  .wrong { color: #c0392b; }
-  .formulas { margin-top: 14px; background: #f0f7ff; border-radius: 10px; padding: 14px 18px; }
-  .formulas p { font-size: 1.15em; color: #2c5f8a; font-weight: bold; margin-bottom: 6px; text-align: center; }
+@media(min-width:701px){body{padding:12px}header{margin-bottom:10px}#round-table{width:min(100%,520px,max(300px,calc(100svh - 420px)))}}
+#dist-area[aria-busy="true"] #dist-msg{color:#436c50}
 </style>
 </head>
 <body>
-
-<a href="https://matematichenonsinasce.com/" class="logo">
-  <img src="https://rdiianni-alt.github.io/matematichenonsinasce/logo.png" alt="logo">
-  <div class="logo-text">Matematiche non si nasce</div>
-</a>
-
-<h1>🔵 Divisione Canadese</h1>
-
-<!-- SETUP -->
-<div id="setup">
-  <label>Quante palline?</label>
-  <input type="number" id="inp-balls" min="2" max="9999" placeholder="es. 62">
-  <label>Quante bambine?</label>
-  <input type="number" id="inp-children" min="2" max="8" placeholder="es. 10">
-  <button onclick="startGame()">Inizia</button>
-  <div style="margin-top:20px; padding-top:16px; border-top:1px solid #e0e0e0; font-size:0.88em; color:#666; line-height:1.6;">
-    <p style="margin-bottom:8px;">Questo gioco riproduce visivamente la <strong>divisione canadese</strong>: un algoritmo in cui il dividendo è il numero di palline e il divisore è il numero di bambine.</p>
-    <p style="margin-bottom:8px;">A ogni turno si decide quante palline distribuire a ciascuna bambina. Le palline si spostano sul tavolo verso le bambine e lo schema a fianco registra la sottrazione progressiva, esattamente come si farebbe sul quaderno.</p>
-    <p>Si continua finché le palline rimaste sono meno delle bambine: quelle sono il resto. Alla fine il gioco chiede di rispondere a qualche domanda e mostra le due scritture del risultato.</p>
+<main>
+<header><h1>Divisione canadese</h1><p>Distribuiamo in parti uguali, un po’ alla volta.</p></header>
+<form id="setup" class="card" novalidate>
+  <div class="field"><label for="inp-balls">Dividendo · oggetti</label><input type="number" id="inp-balls" min="1" max="9999" step="1" inputmode="numeric" placeholder="Totale" required><small>Da 1 a 9 999</small></div>
+  <div class="field"><label for="inp-children">Divisore · bambine</label><input type="number" id="inp-children" min="1" max="12" step="1" inputmode="numeric" placeholder="Bambine" required><small>Da 1 a 12</small></div>
+  <div class="field"><label for="object-type">Cosa distribuiamo?</label><select id="object-type"><option value="balls">Palline</option><option value="candies">Caramelle</option><option value="donuts">Ciambelle</option></select><small>La scena si adatta alla scelta</small></div>
+  <button type="submit" id="start-btn">Prepara il tavolo →</button>
+</form>
+<p id="setup-msg" role="status" aria-live="polite"></p>
+<section id="empty-state" class="empty"><div class="empty-icon" aria-hidden="true">🍬 👧 🍩</div><h2>Quante cose ci dividiamo?</h2><p>Inserisci il totale e il numero di bambine, poi prepara il tavolo.<br>Scegli tu quanto dare a ciascuna a ogni turno.</p></section>
+<div id="game" hidden>
+  <div id="sticky-bar" aria-label="Situazione della distribuzione">
+    <div><span class="bar-label">Bambine</span><strong class="bar-value" id="lbl-children">0</strong></div>
+    <div><span class="bar-label" id="total-label">Palline totali</span><strong class="bar-value" id="lbl-total">0</strong></div>
+    <div><span class="bar-label">Da distribuire</span><strong class="bar-value" id="lbl-remaining">0</strong></div>
+    <div><span class="bar-label">A ciascuna</span><strong class="bar-value" id="lbl-each">0</strong></div>
   </div>
+  <section id="scene" class="card" aria-labelledby="scene-title">
+    <h2 id="scene-title">Il tavolo della distribuzione</h2>
+    <svg id="round-table" viewBox="0 0 500 500" role="img" aria-labelledby="table-title table-description">
+      <title id="table-title">Distribuzione intorno al tavolo tondo</title>
+      <desc id="table-description">Gli oggetti partono dal centro e arrivano uno per uno davanti a ogni bambina.</desc>
+      <defs>
+        <radialGradient id="wood"><stop stop-color="#f6e7bc"/><stop offset="1" stop-color="#e4c98d"/></radialGradient>
+        <radialGradient id="blue-ball" cx="32%" cy="28%"><stop stop-color="#9edaf9"/><stop offset="1" stop-color="#287bb5"/></radialGradient>
+        <symbol id="object-balls" viewBox="-10 -10 20 20"><circle r="8" fill="url(#blue-ball)" stroke="#246a9b" stroke-width=".7"/></symbol>
+        <symbol id="object-candies" viewBox="-10 -10 20 20"><path d="M-4-3L-9-6v12l5-3m8-6l5-3v12L4 3" fill="#dfa4bc" stroke="#ab5b7c" stroke-width=".8"/><rect x="-5" y="-5" width="10" height="10" rx="3" fill="#dc82a2" stroke="#ab5b7c" stroke-width=".8"/><path d="M-2-4L2 4" stroke="#fce7ef" stroke-width="2"/></symbol>
+        <symbol id="object-donuts" viewBox="-10 -10 20 20"><circle r="8" fill="#c98b47"/><circle r="6.5" fill="#e3a1ba"/><circle r="2.6" fill="#f1dfb3"/><path d="M-5-2l2-1m5-2l1 2m1 6l-2 1m-6-1l1 2" stroke="#fff2d5" stroke-width="1.2"/></symbol>
+      </defs>
+      <circle cx="250" cy="250" r="194" fill="url(#wood)" stroke="#bd9a5e" stroke-width="3"/>
+      <circle cx="250" cy="250" r="186" fill="none" stroke="#f9edcf" stroke-width="2"/>
+      <g id="plates-layer"></g>
+      <text id="pool-name" x="250" y="162" text-anchor="middle" fill="#73582e" font-size="13">Palline sul tavolo</text>
+      <text id="pool-count" x="250" y="186" text-anchor="middle" fill="#73582e" font-size="24" font-weight="700">0</text>
+      <g id="balls-layer" aria-hidden="true"></g>
+      <g id="children-layer"></g>
+    </svg>
+    <p class="scene-note" id="scene-note">Ogni oggetto parte dal centro e arriva nel piatto di una bambina.</p>
+  </section>
+  <section id="dist-area" class="card">
+    <label id="dist-label" for="dist-input">Quante palline dai a ciascuna bambina?</label>
+    <div id="dist-row"><input type="number" id="dist-input" min="1" step="1" inputmode="numeric" placeholder="?" aria-describedby="dist-help"><button id="dist-btn" type="button" onclick="distribute()">Distribuisci</button></div>
+    <p class="dist-help" id="dist-help">Puoi distribuirne una o più di una alla volta.</p>
+    <p id="dist-msg" role="status" aria-live="polite"></p>
+  </section>
+  <section id="algo-wrap" class="card"><h2>La divisione sul quaderno</h2><div class="algo-scroll" tabindex="0" aria-label="Passaggi della divisione"><table id="algo-table" aria-label="Sottrazioni e quote distribuite"></table></div><p class="algo-note" id="algo-note">Ogni turno aggiunge una sottrazione.</p></section>
+  <section id="final-form" class="card" hidden>
+    <h2>Abbiamo finito: cosa hai scoperto?</h2>
+    <div class="questions">
+      <div class="q-row"><label for="q1">Quante bambine in tutto?</label><input type="number" id="q1" min="0" step="1" inputmode="numeric"></div>
+      <div class="q-row"><label for="q2" id="q2-label">Quante palline all’inizio?</label><input type="number" id="q2" min="0" step="1" inputmode="numeric"></div>
+      <div class="q-row"><label for="q3" id="q3-label">Quante palline a ciascuna?</label><input type="number" id="q3" min="0" step="1" inputmode="numeric"></div>
+      <div class="q-row"><label for="q4" id="q4-label">Quante palline avanzate?</label><input type="number" id="q4" min="0" step="1" inputmode="numeric"></div>
+    </div>
+    <div class="final-actions"><button type="button" id="final-btn" onclick="checkAnswers()">Controlla</button></div><p id="final-msg" role="status" aria-live="polite"></p>
+  </section>
+  <section id="result" class="card" hidden><h2 id="result-title">Ecco il risultato</h2><div id="feedbacks" role="status" aria-live="polite"></div><div class="formulas"><p id="formula1"></p><p id="formula2"></p></div><div class="final-actions"><button type="button" class="secondary" onclick="retryAnswers()">Rivedi le risposte</button><button type="button" class="secondary" onclick="restart()">Nuova divisione</button></div></section>
 </div>
-
-<!-- GAME -->
-<div id="game">
-  <div style="width:100%;display:flex;justify-content:flex-end;">
-    <button class="restart-btn" onclick="restart()">↩ Ricomincia</button>
-  </div>
-
-  <div id="sticky-bar">
-    <div class="bar-item"><span class="bar-label">Bambine</span><span class="bar-value" id="lbl-children">0</span></div>
-    <div class="bar-item"><span class="bar-label">Palline totali</span><span class="bar-value" id="lbl-total">0</span></div>
-    <div class="bar-item"><span class="bar-label">Da distribuire</span><span class="bar-value" id="lbl-remaining">0</span></div>
-  </div>
-
-  <div id="dist-area">
-    <label id="dist-label">Quante palline vuoi dare a ciascuna bambina?</label>
-    <div id="dist-row">
-      <input type="number" id="dist-input" min="1" placeholder="0">
-      <button id="dist-btn" onclick="distribute()">Distribuisci</button>
-    </div>
-    <div id="dist-msg"></div>
-  </div>
-
-  <div id="main-row">
-    <!-- TAVOLO -->
-    <div id="table-wrap">
-      <svg id="table-svg">
-        <ellipse cx="250" cy="250" rx="210" ry="210" fill="#c8a05a" stroke="#9e7a32" stroke-width="7"/>
-        <ellipse cx="250" cy="250" rx="195" ry="195" fill="#ddb96a" stroke="none"/>
-      </svg>
-      <div id="balls-layer"></div>
-    </div>
-
-    <!-- ALGORITMO -->
-    <div id="algo-wrap">
-      <h3>Schema della divisione canadese</h3>
-      <table id="algo-table">
-        <tr class="algo-header">
-          <td class="left-col" id="algo-hdr-left">—</td>
-          <td class="right-col" id="algo-hdr-right">—</td>
-        </tr>
-      </table>
-    </div>
-  </div>
-
-  <!-- FINAL FORM -->
-  <div id="final-form">
-    <h2>Rispondi alle domande</h2>
-    <div class="q-row"><label>Quante bambine in tutto?</label><input type="number" id="q1" placeholder=" "></div>
-    <div class="q-row"><label>Quante palline c'erano da distribuire?</label><input type="number" id="q2" placeholder=" "></div>
-    <div class="q-row"><label>Quante palline ha ricevuto ciascuna bambina?</label><input type="number" id="q3" placeholder=" "></div>
-    <div class="q-row"><label>Quante palline sono avanzate?</label><input type="number" id="q4" placeholder=" "></div>
-    <button id="final-btn" onclick="checkAnswers()">Controlla</button>
-  </div>
-
-  <!-- RESULT -->
-  <div id="result">
-    <h2>Ecco il risultato</h2>
-    <div id="feedbacks"></div>
-    <div class="formulas">
-      <p id="formula1"></p>
-      <p id="formula2"></p>
-    </div>
-    <button class="restart-btn" style="margin-top:14px;" onclick="restart()">↩ Ricomincia</button>
-  </div>
-</div>
-
+</main>
 <script>
-let totalBalls, numChildren, remaining, perChild, childPositions, balls, childCounts;
-let steps = []; // { partial, product, remainingBefore, remainingAfter }
-const CX = 250, CY = 250, R = 148;
-
-function startGame() {
-  totalBalls = parseInt(document.getElementById('inp-balls').value);
-  numChildren = parseInt(document.getElementById('inp-children').value);
-  if (!totalBalls || !numChildren || totalBalls < 2 || numChildren < 2) { alert('Inserisci valori validi.'); return; }
-  if (numChildren > totalBalls) { alert('Le palline devono essere più delle bambine.'); return; }
-  remaining = totalBalls;
-  perChild = 0;
-  childCounts = new Array(numChildren).fill(0);
-  steps = [];
-  document.getElementById('setup').style.display = 'none';
-  document.getElementById('game').style.display = 'flex';
-  document.getElementById('lbl-children').textContent = numChildren;
-  document.getElementById('lbl-total').textContent = totalBalls;
-  document.getElementById('lbl-remaining').textContent = remaining;
-  buildTable();
-  placeBalls();
-  initAlgoTable();
-  updateDistArea();
+const OBJECTS={balls:{name:'palline',icon:'🔵'},candies:{name:'caramelle',icon:'🍬'},donuts:{name:'ciambelle',icon:'🍩'}};
+let totalBalls=0,numChildren=0,remaining=0,perChild=0,steps=[],activeObject=OBJECTS.balls,busy=false,gameVersion=0;
+let balls=[],childCounts=[],platePositions=[],animationFrame=null,stopAnimation=null;
+const SVG_NS='http://www.w3.org/2000/svg';
+function svgNode(tag,attrs={}){const n=document.createElementNS(SVG_NS,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);return n;}
+const byId=id=>document.getElementById(id);
+function integerValue(id){const raw=byId(id).value.trim();return raw!==''&&Number.isInteger(Number(raw))?Number(raw):NaN;}
+function cancelDistribution(){if(animationFrame!==null)cancelAnimationFrame(animationFrame);animationFrame=null;if(stopAnimation){const resolve=stopAnimation;stopAnimation=null;resolve();}}
+function startGame(){
+  const total=integerValue('inp-balls'),children=integerValue('inp-children');
+  if(!Number.isInteger(total)||total<1||total>9999){byId('setup-msg').textContent='Inserisci un totale intero da 1 a 9 999.';return;}
+  if(!Number.isInteger(children)||children<1||children>12){byId('setup-msg').textContent='Inserisci un numero intero di bambine da 1 a 12.';return;}
+  gameVersion++;cancelDistribution();busy=false;totalBalls=total;numChildren=children;remaining=total;perChild=0;steps=[];
+  activeObject=OBJECTS[byId('object-type').value];
+  byId('setup-msg').textContent='';byId('game').hidden=false;byId('empty-state').hidden=true;byId('final-form').hidden=true;byId('result').hidden=true;byId('final-msg').textContent='';byId('dist-msg').textContent='';
+  ['q1','q2','q3','q4'].forEach(id=>byId(id).value='');
+  byId('start-btn').textContent='Aggiorna tavolo';
+  byId('total-label').textContent=capitalize(activeObject.name)+' totali';
+  byId('dist-label').textContent=`Quante ${activeObject.name} dai a ciascuna bambina?`;
+  byId('q2-label').textContent=`Quante ${activeObject.name} all’inizio?`;byId('q3-label').textContent=`Quante ${activeObject.name} a ciascuna?`;byId('q4-label').textContent=`Quante ${activeObject.name} avanzate?`;
+  buildChildren();placeBalls();renderState();renderAlgoTable();updateDistArea();
 }
-
-function buildTable() {
-  const layer = document.getElementById('balls-layer');
-  layer.innerHTML = '';
-  childPositions = [];
-  for (let i = 0; i < numChildren; i++) {
-    const angle = (2 * Math.PI * i / numChildren) - Math.PI / 2;
-    const x = CX + R * Math.cos(angle);
-    const y = CY + R * Math.sin(angle);
-    childPositions.push({ x, y });
-    const wrap = document.createElement('div');
-    wrap.className = 'child-wrap';
-    wrap.id = 'child-' + i;
-    wrap.style.left = x + 'px';
-    wrap.style.top = y + 'px';
-    wrap.innerHTML = `<div class="child-emoji">👧🏻</div><div class="bubble" id="bubble-${i}">0</div>`;
-    layer.appendChild(wrap);
+function capitalize(s){return s[0].toUpperCase()+s.slice(1);}
+function buildChildren(){
+  byId('children-layer').innerHTML='';byId('plates-layer').innerHTML='';
+  childCounts=Array(numChildren).fill(0);platePositions=[];
+  const faces=['👧🏻','👧🏽','👧🏾','👧🏼','👧🏿','👧'];
+  for(let i=0;i<numChildren;i++){
+    const angle=-Math.PI/2+2*Math.PI*i/numChildren;
+    const pos={x:250+143*Math.cos(angle),y:250+143*Math.sin(angle)};platePositions.push(pos);
+    const plate=svgNode('circle',{cx:pos.x,cy:pos.y,r:numChildren>8?29:34,fill:'#fffaf0',stroke:'#cfb681','stroke-width':1.5,'data-plate':i});byId('plates-layer').appendChild(plate);
+    const x=250+219*Math.cos(angle),y=250+219*Math.sin(angle);
+    const seat=svgNode('g',{id:'child-'+i,class:'seat',role:'img','aria-label':`Bambina ${i+1}: 0 ${activeObject.name}`});
+    const face=svgNode('text',{x,y:y+2,'text-anchor':'middle','font-size':31,'aria-hidden':'true'});face.textContent=faces[i%faces.length];seat.appendChild(face);
+    const badge=svgNode('rect',{x:x-22,y:y+9,width:44,height:25,rx:10,fill:'#fffefa',stroke:'#c8d9c2'});seat.appendChild(badge);
+    const count=svgNode('text',{x,y:y+28,id:'bubble-'+i,class:'seat-count'});count.textContent='0';seat.appendChild(count);byId('children-layer').appendChild(seat);
   }
 }
-
-function placeBalls() {
-  const layer = document.getElementById('balls-layer');
-  balls = [];
-  for (let i = 0; i < totalBalls; i++) {
-    const b = document.createElement('div');
-    b.className = 'ball';
-    b.id = 'ball-' + i;
-    const angle = Math.random() * 2 * Math.PI;
-    const r = Math.random() * Math.random() * 80;
-    b.style.left = (CX + r * Math.cos(angle)) + 'px';
-    b.style.top = (CY + r * Math.sin(angle)) + 'px';
-    layer.appendChild(b);
-    balls.push(b);
+function placeBalls(){
+  const layer=byId('balls-layer');layer.innerHTML='';balls=[];
+  const size=totalBalls<=120?17:totalBalls<=500?12:7;
+  for(let i=0;i<totalBalls;i++){
+    const angle=i*2.399963229728653,r=62*Math.sqrt((i+.5)/totalBalls);
+    const x=250+r*Math.cos(angle),y=270+r*Math.sin(angle);
+    const node=svgNode('g',{transform:`translate(${x} ${y})`,class:'table-object','data-assigned':'0'});
+    node.appendChild(svgNode('use',{href:'#object-'+byId('object-type').value,x:-size/2,y:-size/2,width:size,height:size}));layer.appendChild(node);
+    balls.push({node,x,y,assigned:false});
   }
 }
-
-function initAlgoTable() {
-  const t = document.getElementById('algo-table');
-  // header row
-  t.innerHTML = `<tr class="algo-header">
-    <td class="left-col">${totalBalls}</td>
-    <td class="right-col">${numChildren}</td>
-  </tr>`;
+function setObjectPosition(ball,x,y){ball.x=x;ball.y=y;ball.node.setAttribute('transform',`translate(${x} ${y})`);}
+function destination(child,index){
+  const pos=platePositions[child],capacity=Math.max(1,Math.floor(totalBalls/numChildren));
+  const angle=index*2.399963229728653,r=(numChildren>8?19:24)*Math.sqrt((index+.5)/capacity);
+  return {x:pos.x+r*Math.cos(angle),y:pos.y+r*Math.sin(angle)};
 }
-
-function renderAlgoTable() {
-  const t = document.getElementById('algo-table');
-  let html = `<tr class="algo-header">
-    <td class="left-col">${totalBalls}</td>
-    <td class="right-col">${numChildren}</td>
-  </tr>`;
-
-  for (let i = 0; i < steps.length; i++) {
-    const s = steps[i];
-    // subtraction line
-    html += `<tr class="${i === 0 ? 'algo-line' : ''}">
-      <td class="left-col algo-sub">− ${s.product}</td>
-      <td class="right-col"><span class="algo-partial">${numChildren} × ${s.partial} = ${s.product}</span></td>
-    </tr>`;
-    // remainder
-    html += `<tr class="algo-result">
-      <td class="left-col">${s.remainingAfter}</td>
-      <td class="right-col"></td>
-    </tr>`;
-  }
-
-  // total quoziente
-  if (steps.length > 0) {
-    const quotient = steps.map(s => s.partial).reduce((a, b) => a + b, 0);
-    const partials = steps.map(s => s.partial).join(' + ');
-    html += `<tr id="algo-total-row">
-      <td class="left-col"></td>
-      <td class="right-col">${steps.length > 1 ? partials + ' = ' : ''}${quotient}</td>
-    </tr>`;
-  }
-
-  t.innerHTML = html;
+function updateChildCount(i,n){
+  childCounts[i]=n;byId('bubble-'+i).textContent=n;
+  byId('child-'+i).setAttribute('aria-label',`Bambina ${i+1}: ${n} ${activeObject.name}`);
 }
-
-function updateDistArea() {
-  document.getElementById('lbl-remaining').textContent = remaining;
-  if (remaining < numChildren) {
-    document.getElementById('dist-area').style.display = 'none';
-    showFinalForm();
-  } else {
-    document.getElementById('dist-area').style.display = 'flex';
-    document.getElementById('dist-input').value = '';
-    document.getElementById('dist-msg').textContent = '';
-  }
-}
-
-function distribute() {
-  const n = parseInt(document.getElementById('dist-input').value);
-  const msg = document.getElementById('dist-msg');
-  if (!n || n < 1) { msg.textContent = 'Inserisci un numero valido.'; return; }
-  if (n * numChildren > remaining) {
-    msg.textContent = `Non ci sono abbastanza palline per darne ${n} a ciascuna.`;
-    return;
-  }
-  msg.textContent = '';
-  const product = n * numChildren;
-  const remainingBefore = remaining;
-  const remainingAfter = remaining - product;
-
-  steps.push({ partial: n, product, remainingBefore, remainingAfter });
-  renderAlgoTable();
-
-  // move balls
-  let ballIdx = 0;
-  while (ballIdx < balls.length && balls[ballIdx].dataset.assigned === '1') ballIdx++;
-  for (let c = 0; c < numChildren; c++) {
-    for (let k = 0; k < n; k++) {
-      while (ballIdx < balls.length && balls[ballIdx].dataset.assigned === '1') ballIdx++;
-      if (ballIdx >= balls.length) break;
-      const b = balls[ballIdx];
-      b.dataset.assigned = '1';
-      const pos = childPositions[c];
-      const jx = (Math.random() - 0.5) * 44;
-      const jy = (Math.random() - 0.5) * 30;
-      b.style.left = (pos.x + jx) + 'px';
-      b.style.top = (pos.y + jy - 44) + 'px';
-      ballIdx++;
-    }
-    childCounts[c] += n;
-  }
-  perChild += n;
-  remaining -= product;
-
-  setTimeout(() => {
-    for (let c = 0; c < numChildren; c++) {
-      document.getElementById('bubble-' + c).textContent = childCounts[c];
-    }
-    document.getElementById('lbl-remaining').textContent = remaining;
-    updateDistArea();
-  }, 750);
-}
-
-function showFinalForm() {
-  // disponi palline avanzate in fila
-  const unassigned = balls.filter(b => b.dataset.assigned !== '1');
-  const n = unassigned.length;
-  if (n > 0) {
-    const spacing = 28;
-    const totalW = (n - 1) * spacing;
-    const startX = CX - totalW / 2;
-    unassigned.forEach((b, i) => {
-      b.style.left = (startX + i * spacing) + 'px';
-      b.style.top = CY + 'px';
-      b.style.width = '22px';
-      b.style.height = '22px';
-      b.style.zIndex = '10';
+function renderState(){
+  byId('lbl-children').textContent=numChildren;byId('lbl-total').textContent=totalBalls;byId('lbl-remaining').textContent=remaining;byId('lbl-each').textContent=perChild;
+  byId('pool-count').textContent=remaining;byId('pool-name').textContent=remaining<numChildren?capitalize(activeObject.name)+' avanzate':capitalize(activeObject.name)+' sul tavolo';
+  byId('scene-note').textContent=totalBalls>120?'Ogni simbolo è un oggetto. Con tanti oggetti i gruppi sono più fitti: i contatori mostrano la quantità esatta.':'Ogni oggetto parte dal centro e arriva nel piatto di una bambina.';
+  for(let i=0;i<numChildren;i++)updateChildCount(i,perChild);
+  byId('table-description').textContent=`Tavolo tondo con ${numChildren} bambine. Al centro restano ${remaining} ${activeObject.name}. Ogni bambina ne ha ${perChild}.`;
+  // Oggetti del resto separati e sfalsati, per poterli contare uno a uno.
+  if(remaining<numChildren){
+    const rest=balls.filter(b=>!b.assigned);
+    const columns=Math.min(4,rest.length),rows=Math.ceil(rest.length/Math.max(1,columns));
+    rest.forEach((ball,i)=>{
+      const row=Math.floor(i/columns),col=i%columns;
+      const rowLength=Math.min(columns,rest.length-row*columns);
+      setObjectPosition(ball,250+(col-(rowLength-1)/2)*30,260+(row-(rows-1)/2)*32+(col%2===0?-5:5));
+      const icon=ball.node.querySelector('use');
+      icon.setAttribute('x',-11);icon.setAttribute('y',-11);icon.setAttribute('width',22);icon.setAttribute('height',22);
+      icon.setAttribute('transform',`rotate(${i%2===0?-25:25})`);
+      ball.node.dataset.remainder='1';
     });
   }
-  document.getElementById('final-form').style.display = 'block';
 }
-
-function checkAnswers() {
-  const quotient = perChild;
-  const rest = remaining;
-  const answers = [
-    { label: 'Quante bambine in tutto', correct: numChildren, val: parseInt(document.getElementById('q1').value) },
-    { label: 'Quante palline c\'erano da distribuire', correct: totalBalls, val: parseInt(document.getElementById('q2').value) },
-    { label: 'Quante palline ha ricevuto ciascuna bambina', correct: quotient, val: parseInt(document.getElementById('q3').value) },
-    { label: 'Quante palline sono avanzate', correct: rest, val: parseInt(document.getElementById('q4').value) },
-  ];
-  let html = '';
-  answers.forEach(q => {
-    if (q.val === q.correct) {
-      html += `<div class="feedback-row">✅ ${q.label}: <strong>${q.correct}</strong></div>`;
-    } else {
-      html += `<div class="feedback-row wrong">⚠️ Attenzione: "${q.label}" — in realtà era <strong>${q.correct}</strong></div>`;
-    }
-  });
-  document.getElementById('feedbacks').innerHTML = html;
-  if (rest === 0) {
-    document.getElementById('formula1').textContent = `${totalBalls} = ${quotient} × ${numChildren}`;
-    document.getElementById('formula2').textContent = `${totalBalls} ÷ ${numChildren} = ${quotient}`;
-  } else {
-    document.getElementById('formula1').textContent = `${totalBalls} = ${quotient} × ${numChildren} + ${rest}`;
-    document.getElementById('formula2').textContent = `${totalBalls} ÷ ${numChildren} = ${quotient} + ${rest}/${numChildren}`;
+function renderAlgoTable(){
+  let html=`<tr class="algo-header"><td class="left-col">${totalBalls}</td><td class="right-col">${numChildren}</td></tr>`;
+  for(const s of steps){html+=`<tr><td class="left-col algo-sub">− ${s.product}</td><td class="right-col algo-partial">${numChildren} × ${s.partial} = ${s.product}</td></tr><tr class="algo-result"><td class="left-col">${s.remainingAfter}</td><td class="right-col"></td></tr>`;}
+  if(steps.length)html+=`<tr class="algo-total"><td class="left-col">A ciascuna</td><td class="right-col">${steps.length>1?steps.map(s=>s.partial).join(' + ')+' = ':''}${perChild}</td></tr>`;
+  byId('algo-table').innerHTML=html;
+  byId('algo-note').textContent=steps.length?`Distribuiti ${totalBalls-remaining} oggetti: ${numChildren} bambine × ${perChild} a ciascuna.`:'Ogni turno aggiunge una sottrazione.';
+  const scroll=document.querySelector('.algo-scroll');scroll.scrollTop=scroll.scrollHeight;
+}
+function updateDistArea(){
+  byId('dist-area').setAttribute('aria-busy',String(busy));
+  const finished=remaining<numChildren;
+  byId('dist-area').hidden=finished;byId('dist-btn').disabled=busy;byId('dist-input').disabled=busy;
+  byId('dist-input').max=Math.floor(remaining/numChildren);byId('dist-input').value='';
+  if(finished)byId('final-form').hidden=false;
+}
+async function animateDistribution(n){
+  const version=gameVersion,reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const available=balls.filter(b=>!b.assigned),moves=[];
+  const roundDelay=Math.min(430,4200/Math.max(1,n));
+  const childDelay=Math.min(65,roundDelay/numChildren),duration=480;
+  let index=0;
+  // Un giro del tavolo alla volta: un singolo oggetto per bambina a ogni giro.
+  for(let k=0;k<n;k++)for(let c=0;c<numChildren;c++){
+    const ball=available[index++],to=destination(c,perChild+k);
+    moves.push({ball,child:c,to,from:{x:ball.x,y:ball.y},delay:k*roundDelay+c*childDelay,started:false,arrived:false});
   }
-  document.getElementById('final-form').style.display = 'none';
-  document.getElementById('result').style.display = 'block';
+  if(reduced){
+    for(const m of moves){setObjectPosition(m.ball,m.to.x,m.to.y);m.ball.assigned=true;m.ball.node.dataset.assigned='1';m.ball.node.dataset.child=m.child;}
+    return;
+  }
+  byId('dist-msg').textContent=`Distribuzione in corso: ${n} ${activeObject.name} a ciascuna, un oggetto alla volta.`;
+  await new Promise(resolve=>{
+    stopAnimation=resolve;let start=null,departed=0;
+    function frame(time){
+      if(version!==gameVersion){resolve();return;}
+      if(start===null)start=time;
+      const elapsed=time-start;let finished=0;
+      for(const m of moves){
+        if(m.arrived){finished++;continue;}
+        if(elapsed<m.delay)continue;
+        if(!m.started){
+          m.started=true;departed++;m.ball.node.classList.add('moving-object');m.ball.node.dataset.moving='1';
+          byId('pool-count').textContent=remaining-departed;byId('lbl-remaining').textContent=remaining-departed;
+        }
+        const t=Math.min(1,(elapsed-m.delay)/duration),ease=t*t*(3-2*t);
+        setObjectPosition(m.ball,m.from.x+(m.to.x-m.from.x)*ease,m.from.y+(m.to.y-m.from.y)*ease);
+        if(t===1){
+          m.arrived=true;m.ball.assigned=true;m.ball.node.dataset.assigned='1';m.ball.node.dataset.child=m.child;
+          m.ball.node.dataset.moving='0';m.ball.node.classList.remove('moving-object');
+          updateChildCount(m.child,childCounts[m.child]+1);finished++;
+        }
+      }
+      if(finished===moves.length){animationFrame=null;stopAnimation=null;resolve();}
+      else animationFrame=requestAnimationFrame(frame);
+    }
+    animationFrame=requestAnimationFrame(frame);
+  });
 }
-
-function restart() {
-  document.getElementById('result').style.display = 'none';
-  document.getElementById('final-form').style.display = 'none';
-  document.getElementById('game').style.display = 'none';
-  document.getElementById('setup').style.display = 'block';
-  document.getElementById('inp-balls').value = '';
-  document.getElementById('inp-children').value = '';
-  ['q1','q2','q3','q4'].forEach(id => document.getElementById(id).value = '');
+async function distribute(){
+  if(busy||remaining<numChildren||totalBalls===0)return;
+  const n=integerValue('dist-input'),msg=byId('dist-msg');
+  if(!Number.isInteger(n)||n<1){msg.textContent='Inserisci un numero intero maggiore di zero.';return;}
+  if(n*numChildren>remaining){msg.textContent=`Non ci sono abbastanza ${activeObject.name} per darne ${n} a ciascuna. Prova una quantità più piccola.`;return;}
+  msg.textContent='';busy=true;byId('dist-area').setAttribute('aria-busy','true');byId('dist-btn').disabled=true;byId('dist-input').disabled=true;
+  const version=gameVersion;
+  await animateDistribution(n);
+  if(version!==gameVersion)return;
+  cancelDistribution();byId('dist-msg').textContent='';const product=n*numChildren;steps.push({partial:n,product,remainingBefore:remaining,remainingAfter:remaining-product});remaining-=product;perChild+=n;busy=false;
+  renderState();renderAlgoTable();updateDistArea();
 }
+function checkAnswers(){
+  if(remaining>=numChildren)return;
+  const values=['q1','q2','q3','q4'].map(integerValue);
+  if(values.some(n=>!Number.isInteger(n)||n<0)){byId('final-msg').textContent='Completa le quattro risposte con numeri interi, anche zero se serve.';return;}
+  byId('final-msg').textContent='';const correct=[numChildren,totalBalls,perChild,remaining];
+  const labels=['Bambine',capitalize(activeObject.name)+' iniziali',capitalize(activeObject.name)+' a ciascuna',capitalize(activeObject.name)+' avanzate'];
+  byId('feedbacks').innerHTML=values.map((n,i)=>`<p class="feedback-row ${n===correct[i]?'':'wrong'}">${n===correct[i]?'✓':'Da rivedere:'} ${labels[i]}: <strong>${correct[i]}</strong></p>`).join('');
+  byId('result-title').textContent=values.every((n,i)=>n===correct[i])?'Tutto giusto!':'Riguardiamo insieme';
+  byId('formula1').textContent=`${totalBalls} = ${perChild} × ${numChildren}${remaining?' + '+remaining:''}`;
+  byId('formula2').textContent=`${totalBalls} ÷ ${numChildren} = ${perChild}${remaining?' + '+remaining+'/'+numChildren:''}`;
+  byId('final-form').hidden=true;byId('result').hidden=false;
+}
+function retryAnswers(){byId('result').hidden=true;byId('final-form').hidden=false;}
+function restart(){gameVersion++;cancelDistribution();busy=false;totalBalls=0;numChildren=0;remaining=0;perChild=0;steps=[];byId('game').hidden=true;byId('empty-state').hidden=false;byId('setup-msg').textContent='';byId('inp-balls').value='';byId('inp-children').value='';byId('start-btn').textContent='Prepara il tavolo →';byId('inp-balls').focus();}
+byId('setup').addEventListener('submit',e=>{e.preventDefault();startGame();});
+byId('dist-input').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();distribute();}});
 </script>
 </body>
 </html>
