@@ -151,6 +151,20 @@ h1 { text-align: center; color: #2e7d32; font-size: 26px; margin-bottom: 10px; }
 .finale-stampa .linea-risposta {
   display: inline-block; border-bottom: 2px solid #333; width: 150px; height: 20px;
 }
+
+/* Interfaccia leggera: nessun font, suono o libreria esterna. */
+body{background:#f6f3e9;color:#253e32;padding:18px;text-transform:none;letter-spacing:0;font-family:Arial,sans-serif}
+header{max-width:1080px;margin:0 auto 18px;flex-direction:row;justify-content:space-between;background:transparent;box-shadow:none;padding:0 4px}
+.logo img{width:48px;height:48px}.blog-title{font-style:normal;font-size:15px;color:#5e6d60}.blog-title a{color:inherit;text-decoration:none}h1{font-size:34px;letter-spacing:-1px;color:#254c38;margin:8px 0 12px}h1 small{display:block;font-size:16px;font-weight:normal;letter-spacing:0;color:#667464;margin-top:10px}
+#schermata-livello{max-width:780px;gap:14px;margin:20px auto}#schermata-livello h2{font-size:18px;font-weight:normal}.btn-livello{text-align:left;padding:24px 28px;border:2px solid #c3d2b6;border-radius:22px;box-shadow:0 5px 0 #dce3d1;background:#fffef9;color:#284c38}.btn-livello:hover{background:#edf4de}.btn-livello small{display:block;font-size:15px;font-weight:normal;margin-top:8px;letter-spacing:0;text-transform:none}
+#gioco{max-width:1080px;margin:auto;background:#fffef9;border:1px solid #dedfd2;border-radius:28px;padding:18px 24px}.speech-area{margin:6px 0;min-height:92px}.bubble{background:transparent;border:0;box-shadow:none;color:#294d38;font-size:32px;padding:8px}.bubble:after{display:none}.sub-hint{font-style:normal;margin:4px 0;font-size:17px;color:#5b685c;min-height:24px}.numbers-area{margin:14px 0;gap:12px}.num-card{background:#edf3df;border:2px solid #cfdbbd;border-radius:20px;padding:10px;gap:5px;box-shadow:0 4px 0 #dfe6d2}.digit{font-family:Arial,sans-serif;font-size:52px;font-weight:bold;line-height:1.1;min-width:65px;min-height:76px;border:2px solid transparent;background:#fffef9;color:#284c38;display:inline-flex;align-items:center;justify-content:center;padding:8px;cursor:pointer;touch-action:manipulation}.digit.clickable{animation:none;border:2px solid #c4d4b6}.digit.clickable:hover{transform:none;background:#f9e9a9;border-color:#b79938}.digit:focus{outline:3px solid #b3752b;outline-offset:2px}.digit.eaten{background:#dce6cc;color:transparent;border:2px dashed #aabf96}.digit.eaten:after{content:'';width:12px;height:12px;background:#aabf96;border-radius:50%}.digit.wrong-click{background:#fce3d6}
+.garden{position:relative;height:115px;margin:0 0 8px;border-bottom:3px solid #c9d7ad;background:linear-gradient(transparent 75%,#f0f4e6 75%);border-radius:14px;overflow:hidden}.garden:after{content:'UN BOCCONE ALLA VOLTA';position:absolute;right:18px;bottom:16px;font-size:12px;letter-spacing:2px;color:#6a7d54}#crawlerHome{position:absolute;left:28px;bottom:1px;width:170px;height:100px}#crawler{width:170px;height:100px;z-index:1000;pointer-events:none;transform-origin:85% 60%}#crawler svg{width:100%;height:100%;overflow:visible}.walking .segment{animation:wiggle .3s ease-in-out infinite alternate}.walking .s2{animation-delay:.1s}.walking .s3{animation-delay:.2s}.chomping .head{animation:chew .16s ease-in-out 4 alternate;transform-origin:140px 57px}@keyframes wiggle{to{transform:translateY(-5px)}}@keyframes chew{to{transform:rotate(-7deg) scale(1.06)}}
+.progress-row{display:flex;justify-content:space-between;align-items:center;gap:16px;color:#67755c;font-size:14px;margin-bottom:10px}.progress-track{height:8px;background:#e8eddf;border-radius:8px;flex:1;overflow:hidden}.progress-fill{height:100%;width:0;background:#70954d;transition:width .3s}
+.controls{border-top:1px solid #e4e5d9;padding-top:12px;margin-top:18px}.btn{border-radius:12px;box-shadow:none;background:#edf0e5;color:#35503b;font-size:15px;margin:4px;padding:14px 18px;min-height:48px}.btn:hover{background:#dfe8d4;transform:none}.btn.scuro{background:#355b40;color:white}.btn.scuro:hover{background:#284a32}.final-area{padding:16px;background:#f1f3e8;border-radius:18px}.final-area label{color:#35503b;font-size:22px}.final-input{border-color:#8ba371;background:white;color:#2f4f37;width:130px}.keypad{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;max-width:580px;margin:12px auto 0}.keypad button{min-width:44px;min-height:48px;font-size:22px;background:white;border:1px solid #b8c9a5;border-radius:10px;color:#304d35;cursor:pointer}.step-log{max-width:780px;font-size:14px;background:#f3f5ed}.result-msg{font-size:20px}details{margin:12px auto;color:#506348}summary{cursor:pointer;padding:10px;min-height:44px}
+@media(max-width:650px){body{padding:10px}header{margin-bottom:12px}.blog-title{font-size:12px}h1{font-size:26px}#gioco{padding:12px 8px;border-radius:20px}.bubble{font-size:25px}.num-card{padding:5px;gap:2px;border-radius:12px}.digit{min-width:37px;min-height:58px;font-size:34px;padding:4px}.numbers-area>div{gap:6px!important}.garden:after{font-size:9px;right:8px;letter-spacing:1px}.btn{font-size:12px;padding:12px}.sub-hint{font-size:14px}.keypad button{min-width:40px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media print{body{padding:0}#crawler,h1,header{display:none!important}.scheda-stampa{border-color:#555}.istruzioni-stampa b,.numeri-stampa{color:#222}}
+
 </style>
 </head>
 <body>
@@ -162,32 +176,32 @@ h1 { text-align: center; color: #2e7d32; font-size: 26px; margin-bottom: 10px; }
            onerror="this.src='https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png'">
     </a>
   </div>
-  <div class="blog-title">Matematiche non si nasce</div>
+  <div class="blog-title"><a href="https://matematichenonsinasce.com/" target="_blank" rel="noopener">Rita Di Ianni · Matematiche non si nasce<br>matematichenonsinasce.com ↗</a></div>
 </header>
 
-<h1>🐛 IL BRUCO MANGIANUMERI</h1>
+<h1>Il bruco mangianumeri<small>Ascolta il bruco. Trova la cifra. Scopri quanto vale.</small></h1>
 
 <div id="schermata-livello">
   <h2>Scegli il livello:</h2>
-  <button class="btn-livello" onclick="avvia(2)">🐛 NUMERI A DUE CIFRE</button>
-  <button class="btn-livello" onclick="avvia(3)">🐛🐛 NUMERI A TRE CIFRE</button>
+  <button class="btn-livello" onclick="avvia(2)">DUE CIFRE <small>Decine e unità · 9 bocconi</small></button>
+  <button class="btn-livello" onclick="avvia(3)">TRE CIFRE <small>Centinaia, decine e unità · 14 bocconi</small></button>
 </div>
 
-<div id="gioco">
+<div id="gioco"><div class="garden" aria-hidden="true"><div id="crawlerHome"><div id="crawler"><svg viewBox="0 0 180 105" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#536b35" stroke-width="4" stroke-linecap="round"><path d="M30 82l-4 10m33-10l-4 10m34-10l-3 10m31-10l4 10"/></g><g stroke="#587b36" stroke-width="2"><circle class="segment" cx="28" cy="71" r="19" fill="#a4bf68"/><circle class="segment s2" cx="57" cy="67" r="23" fill="#95b85b"/><circle class="segment s3" cx="89" cy="65" r="25" fill="#85aa4d"/><circle class="segment" cx="119" cy="65" r="25" fill="#95b85b"/></g><g class="head"><path d="M139 35l-5-18m20 18l9-18" fill="none" stroke="#536b35" stroke-width="3" stroke-linecap="round"/><circle cx="134" cy="16" r="4" fill="#b58048"/><circle cx="164" cy="16" r="4" fill="#b58048"/><circle cx="146" cy="56" r="28" fill="#b6ce78" stroke="#587b36" stroke-width="2"/><ellipse cx="153" cy="48" rx="7" ry="10" fill="white"/><circle cx="156" cy="49" r="3.5" fill="#293b2e"/><circle cx="163" cy="63" r="5" fill="#dfab77"/><path d="M148 66q8 10 17 0" fill="none" stroke="#354d2d" stroke-width="3" stroke-linecap="round"/></g></svg></div></div></div><div class="progress-row"><span id="progressLabel">0 bocconi</span><div class="progress-track"><div id="progressFill" class="progress-fill"></div></div><span id="levelLabel"></span></div>
   <div class="speech-area">
-    <div class="bubble" id="bubble">COMINCIAMO! 🐛</div>
+    <div class="bubble" id="bubble" role="status" aria-live="polite">COMINCIAMO! 🐛</div>
     <div class="sub-hint" id="subHint"></div>
   </div>
   <div class="numbers-area" id="numbersArea"></div>
-  <div class="step-log" id="stepLog" style="display:none">
+  <details class="step-log" id="stepLog" style="display:none"><summary>I bocconi del bruco</summary>
     <strong>Cosa ha mangiato il bruco:</strong>
     <ul id="stepList"></ul>
-  </div>
+  </details>
   <div class="final-area" id="finalArea" style="display:none">
     <label>Quanto rimane? </label>
-    <input type="number" class="final-input" id="finalInput" placeholder="?">
+    <input aria-label="Quanto rimane?" inputmode="numeric" min="0" step="1" type="number" class="final-input" id="finalInput" placeholder="?">
     <button class="btn scuro" onclick="checkAnswer()">CONTROLLA ✅</button>
-    <div class="result-msg" id="resultMsg"></div>
+    <div class="keypad" id="keypad" aria-label="Tastiera numerica"></div><div class="result-msg" id="resultMsg" role="status"></div>
   </div>
   <div class="controls">
     <button class="btn scuro" onclick="newGame()">NUOVA PARTITA 🔄</button>
@@ -202,6 +216,21 @@ h1 { text-align: center; color: #2e7d32; font-size: 26px; margin-bottom: 10px; }
 
 <script>
 var cifre = 2;
+var pendingTimers=[];
+function later(fn,ms){var t=setTimeout(fn,ms);pendingTimers.push(t);return t;}
+function cancelPending(){for(var i=0;i<pendingTimers.length;i++)clearTimeout(pendingTimers[i]);pendingTimers=[];resetCrawler();}
+function resetCrawler(){var c=document.getElementById('crawler');if(!c)return;c.className='';c.style.cssText='';document.getElementById('crawlerHome').appendChild(c);}
+function updateProgress(){document.getElementById('progressLabel').textContent=stepIdx+' / '+game.steps.length+' bocconi';document.getElementById('progressFill').style.width=(100*stepIdx/game.steps.length)+'%';document.getElementById('levelLabel').textContent=cifre===2?'DECINE E UNITÀ':'CENTINAIA, DECINE E UNITÀ';}
+function eatDigit(el,done){
+ var c=document.getElementById('crawler'),from=c.getBoundingClientRect(),to=el.getBoundingClientRect();
+ var reduced=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ document.body.appendChild(c);c.style.position='fixed';c.style.left=from.left+'px';c.style.top=from.top+'px';c.className='walking';
+ later(function(){c.style.transition=reduced?'none':'left .65s ease-in-out, top .65s ease-in-out';c.style.left=(to.left+to.width/2-146)+'px';c.style.top=(to.top+to.height/2-57)+'px';},20);
+ later(function(){c.className='chomping';el.classList.add('eaten');el.disabled=true;},reduced?40:700);
+ later(function(){c.className='walking';var home=document.getElementById('crawlerHome').getBoundingClientRect();c.style.left=home.left+'px';c.style.top=home.top+'px';},reduced?90:1200);
+ later(function(){resetCrawler();done();},reduced?150:1900);
+}
+
 var game = null, stepIdx = 0, logLines = [], waitingClick = false;
 
 var unita = ['','uno','due','tre','quattro','cinque','sei','sette','otto','nove','dieci','undici','dodici','tredici','quattordici','quindici','sedici','diciassette','diciotto','diciannove'];
@@ -220,6 +249,7 @@ function toWords(n) {
   var c = Math.floor(n/100), resto = n%100;
   var baseC = c===1 ? 'cento' : centinaia[c];
   if (resto===0) return baseC;
+  if (resto===8 || (resto>=80 && resto<90)) baseC=baseC.slice(0,-1);
   return baseC + toWords(resto);
 }
 
@@ -295,11 +325,13 @@ function avvia(nc) {
 }
 
 function tornaScelta() {
+  cancelPending(); waitingClick=false;
   document.getElementById('gioco').style.display = 'none';
   document.getElementById('schermata-livello').style.display = 'flex';
 }
 
 function newGame() {
+  cancelPending();
   game = cifre===2 ? generateGame2() : generateGame3();
   stepIdx=0; logLines=[]; waitingClick=false;
   document.getElementById('finalArea').style.display='none';
@@ -308,9 +340,9 @@ function newGame() {
   document.getElementById('stepList').innerHTML='';
   document.getElementById('finalInput').value='';
   document.getElementById('subHint').textContent='';
-  renderNumbers();
+  renderNumbers(); updateProgress();
   setBubble('COMINCIAMO! 🐛');
-  setTimeout(showCurrentStep, 700);
+  later(showCurrentStep, 400);
 }
 
 function renderNumbers() {
@@ -326,7 +358,8 @@ function renderNumbers() {
     card.className = 'num-card';
     card.id = 'card-'+ni;
     digits.forEach(function(d, di) {
-      var span = document.createElement('span');
+      var span = document.createElement('button');
+      span.type="button"; span.setAttribute("aria-label", "Cifra "+d+" nel numero "+n);
       span.className = 'digit';
       span.id = 'd-'+ni+'-'+di;
       span.textContent = d;
@@ -375,22 +408,24 @@ function onDigitClick(ni, di) {
   if (digitVal===s.val) {
     waitingClick = false;
     clearClickable();
-    el.classList.add('eaten');
+    setBubble('GNAM, '+toWords(s.val)+'!');
+    eatDigit(el,function(){
     logLines.push('Ho mangiato il <strong>'+digits[di]+'</strong> (vale '+toWords(s.val)+') dal numero <strong>'+game.nums[ni]+'</strong>');
-    stepIdx++;
+    stepIdx++; updateProgress();
     setHint('');
     if (stepIdx>=game.steps.length) {
-      setBubble('HO MANGIATO TUTTO! 🎉');
+      setBubble('È RIMASTA UNA CIFRA!');
       showLog(); showFinal();
     } else {
       setBubble('ESATTO! 🌟');
-      setTimeout(showCurrentStep, 900);
+      later(showCurrentStep, 300);
     }
+    });
   } else {
     el.classList.add('wrong-click');
     var word = toWords(s.val);
     setBubble('OPS! QUELLA CIFRA NON VALE '+word+'! RIPROVA 🤔');
-    setTimeout(function(){
+    later(function(){
       el.classList.remove('wrong-click');
       setBubble('MANGIO '+word+'!');
     }, 900);
@@ -427,7 +462,7 @@ function checkAnswer() {
     msg.innerHTML = '🎉 ESATTO! RIMANE <strong>'+correct+'</strong>';
     msg.className = 'result-msg correct';
   } else {
-    msg.innerHTML = '❌ QUASI! RIMANE <strong>'+correct+'</strong>. RIPROVA!';
+    msg.innerHTML = 'RIPROVA: PENSA AL POSTO DELLA CIFRA RIMASTA.';
     msg.className = 'result-msg wrong';
   }
 }
@@ -509,6 +544,8 @@ function stampaSoglio() {
     }, 1000);
   }, 400);
 }
+
+(function(){var pad=document.getElementById('keypad');for(var i=0;i<11;i++){var b=document.createElement('button');b.type='button';b.textContent=i===10?'⌫':String(i);b.setAttribute('aria-label',i===10?'Cancella ultima cifra':String(i));b.onclick=function(){var input=document.getElementById('finalInput');input.value=this.textContent==='⌫'?input.value.slice(0,-1):(input.value+this.textContent).slice(0,4);};pad.appendChild(b);}document.getElementById('finalInput').onkeydown=function(e){if(e.key==='Enter')checkAnswer();};})();
 </script>
 </body>
 </html>
