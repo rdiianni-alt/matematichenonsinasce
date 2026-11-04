@@ -63,15 +63,6 @@
   }
   .secondary-btn:hover{border-color:var(--red);transform:translateY(-1px);}
 
-  .topbar{
-    width:100%;display:flex;justify-content:space-between;align-items:center;
-    margin-bottom:10px;font-weight:600;font-size:15px;color:var(--text-secondary);
-  }
-  .progress-bar-wrap{
-    width:100%;height:9px;background:var(--border);border-radius:999px;
-    overflow:hidden;margin-bottom:20px;
-  }
-  .progress-bar-fill{height:100%;background:var(--red);border-radius:999px;transition:width .25s;}
 
   #game-area{width:100%;display:flex;flex-direction:column;align-items:center;}
 
@@ -120,23 +111,13 @@
   button.primary:disabled{opacity:0.35;cursor:not-allowed;}
   button.primary:not(:disabled):hover{transform:translateY(-1px);}
 
-  #end-screen{
-    display:none;flex-direction:column;align-items:center;background:var(--card-bg);
-    border:1px solid var(--border);border-radius:20px;padding:44px 28px;width:100%;
-    text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.04);
-  }
-  #end-screen .trophy{font-size:52px;margin-bottom:6px;}
-  #end-screen h2{margin:0 0 10px;font-size:22px;}
-  #final-score{font-size:38px;font-weight:700;color:var(--red);margin:6px 0 14px;}
-  #end-message{color:var(--text-secondary);margin-bottom:26px;font-size:15px;}
-
   /* ---------- scheda stampabile ---------- */
   .print-sheet{display:none;}
   @page{size:A4;margin:15mm 14mm;}
   @media print{
-    body{padding:0;background:#fff;}
+    body{display:block;padding:0;background:#fff;print-color-adjust:exact;-webkit-print-color-adjust:exact;}
     .app{display:none;}
-    .print-sheet{display:block;}
+    .print-sheet{display:block;width:100%;}
   }
   .print-page{
     page-break-after:always;
@@ -168,8 +149,8 @@
     display:flex;flex-direction:column;align-items:center;gap:0.8mm;
   }
   .print-card-logo{width:5.5mm;height:5.5mm;border-radius:50%;object-fit:contain;align-self:flex-start;flex:0 0 auto;}
-  .print-scene{width:100%;max-width:28mm;flex:0 1 auto;min-height:0;}
-  .print-scene svg{width:100%;height:auto;max-height:20mm;display:block;margin:0 auto;}
+  .print-scene{width:100%;max-width:46mm;flex:0 1 auto;min-height:0;}
+  .print-scene svg{width:100%;height:auto;max-height:32mm;display:block;margin:0 auto;}
   .print-q{font-size:7pt;font-weight:600;text-align:center;margin:0;flex:0 0 auto;}
   .print-options{display:flex;justify-content:space-between;width:100%;gap:1.5mm;flex:0 0 auto;}
   .print-opt{flex:1;display:flex;flex-direction:column;align-items:center;gap:0.5mm;min-width:0;}
@@ -177,6 +158,11 @@
   .print-opt-visual svg{width:100%;height:auto;display:block;}
   .print-opt-label{font-size:7pt;font-weight:700;}
   .print-key{display:grid;grid-template-columns:repeat(5,1fr);gap:3mm;margin-top:6mm;font-size:10pt;}
+
+  .print-button{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#e10600,#b41a12);color:white;border:0;border-radius:18px;padding:16px 22px;font:inherit;text-align:left;cursor:pointer;box-shadow:0 5px 0 #90140d,0 9px 20px #b41a1224;transition:transform .15s,box-shadow .15s}
+  .print-button strong{display:block;font-size:16px}.print-button small{display:block;font-size:12px;margin-top:4px;color:#fff1df}.print-icon{font-size:30px}.print-button:hover{transform:translateY(-2px);box-shadow:0 7px 0 #90140d,0 12px 22px #b41a1233}.print-button:active{transform:translateY(3px);box-shadow:0 2px 0 #90140d}.print-button:focus-visible{outline:3px solid #1b5eab;outline-offset:5px}.top-actions{align-items:center;gap:18px;margin-bottom:26px}
+
+  #scene{touch-action:none;cursor:grab;aspect-ratio:1;outline-offset:4px}#scene:active{cursor:grabbing}#scene:focus-visible{outline:3px solid #1b5eab;border-radius:12px}.orbit-help{font-size:13px;text-align:center;color:var(--text-secondary);max-width:360px;margin:4px 0 12px}.orbit-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}.view-status{font-size:13px;text-align:center;color:var(--text-secondary);min-height:20px;margin:10px 0 0}
 </style>
 </head>
 <body>
@@ -191,19 +177,17 @@
   <p class="subtitle">Osserva la costruzione fatta con i mattoncini. Poi scegli il disegno che mostra come si vede <strong>guardandola dall'alto</strong>.</p>
 
   <div class="top-actions">
-    <button class="secondary-btn" id="print-btn">🖨️ Stampa scheda</button>
-    <button class="secondary-btn" id="regenerate-btn">🔄 Nuove costruzioni</button>
+    <button class="print-button" id="print-btn"><span class="print-icon" aria-hidden="true">🖨️</span><span><strong>Crea e stampa una scheda</strong><small>6 nuove costruzioni + soluzioni</small></span><span aria-hidden="true">›</span></button>
+    <button class="secondary-btn" id="regenerate-btn">🎲 Un’altra costruzione</button>
   </div>
 
-  <div class="topbar">
-    <span id="level-indicator">Costruzione 1 di 30</span>
-    <span id="score-indicator">Punteggio: 0/30</span>
-  </div>
-  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-fill"></div></div>
 
   <div id="game-area">
     <div class="scene-card">
-      <div id="scene"></div>
+      <div id="scene" tabindex="0" role="img" aria-label="Costruzione tridimensionale ruotabile" aria-describedby="orbit-help"></div>
+      <p id="orbit-help" class="orbit-help">Trascina per girare e inclinare la costruzione. Puoi usare anche i tasti freccia.</p>
+      <div class="orbit-actions"><button type="button" class="secondary-btn" id="top-view">Vista dall’alto</button><button type="button" class="secondary-btn" id="initial-view">Vista iniziale</button></div>
+      <p id="view-status" class="view-status" role="status"></p>
       <p class="question">Come la vede dall'alto?</p>
       <p class="question-sub">Tocca il disegno giusto</p>
       <div id="options"></div>
@@ -212,17 +196,10 @@
     <p class="feedback" id="feedback"></p>
 
     <div class="controls">
-      <button class="primary" id="next-btn" disabled>Avanti →</button>
+      <button class="primary" id="next-btn" disabled>Un’altra costruzione →</button>
     </div>
   </div>
 
-  <div id="end-screen">
-    <div class="trophy">🏆</div>
-    <h2>Hai completato tutte le costruzioni!</h2>
-    <div id="final-score">0/30</div>
-    <p id="end-message"></p>
-    <button class="primary" id="restart-btn">Ricomincia</button>
-  </div>
 
 </div>
 
@@ -239,11 +216,13 @@ function darken(hex,p){ const [r,g,b]=hexToRgb(hex); const f=c=>Math.round(c*(1-
 
 function buildIsoSVG(footprint, baseColor, opts={}){
   const size = opts.size || 50;
-  const height = opts.height || 34;
-  const topColor = lighten(baseColor,0.35);
+  const height = opts.height || size * 0.96;
+  const studHeight = size * 0.16;
+  const topColor = lighten(baseColor,0.18);
   const leftColor = darken(baseColor,0.22);
   const rightColor = darken(baseColor,0.42);
-  const studColor = lighten(baseColor,0.5);
+  const studColor = lighten(baseColor,0.26);
+  const studSide = darken(baseColor,0.12);
 
   const cells = footprint.slice().sort((a,b)=>(a[0]+a[1])-(b[0]+b[1]) || a[1]-b[1]);
 
@@ -265,7 +244,7 @@ function buildIsoSVG(footprint, baseColor, opts={}){
   const offX = -minX+pad, offY = -minY+pad;
   const width = (maxX-minX)+pad*2;
   const heightV = (maxY-minY)+pad*2;
-  const srx = size*0.11, sry = size*0.065;
+  const srx = size*0.15, sry = size*0.087;
 
   const shift = ([x,y]) => [x+offX, y+offY];
   const poly = (pts,fill) => {
@@ -278,10 +257,15 @@ function buildIsoSVG(footprint, baseColor, opts={}){
     parts += poly([cu.D,cu.C,cu.F,cu.E], leftColor);
     parts += poly([cu.B,cu.C,cu.F,cu.G], rightColor);
     parts += poly([cu.A,cu.B,cu.C,cu.D], topColor);
-    const [sx1,sy1] = shift(cu.s1);
-    const [sx2,sy2] = shift(cu.s2);
-    parts += `<ellipse cx="${sx1.toFixed(1)}" cy="${sy1.toFixed(1)}" rx="${srx.toFixed(1)}" ry="${sry.toFixed(1)}" fill="${studColor}" stroke="rgba(0,0,0,0.2)" stroke-width="0.8"/>`;
-    parts += `<ellipse cx="${sx2.toFixed(1)}" cy="${sy2.toFixed(1)}" rx="${srx.toFixed(1)}" ry="${sry.toFixed(1)}" fill="${studColor}" stroke="rgba(0,0,0,0.2)" stroke-width="0.8"/>`;
+    // The knobs are raised cylinders: a curved wall with an elliptical top.
+    for (const center of [cu.s1, cu.s2]) {
+      const [cx, baseY] = shift(center);
+      const topY = baseY - studHeight;
+      const n = value => value.toFixed(2);
+      parts += `<path class="stud-wall" d="M ${n(cx-srx)} ${n(topY)} L ${n(cx-srx)} ${n(baseY)} A ${n(srx)} ${n(sry)} 0 0 0 ${n(cx+srx)} ${n(baseY)} L ${n(cx+srx)} ${n(topY)} Z" fill="${studSide}" stroke="rgba(0,0,0,0.25)" stroke-width="0.7"/>`;
+      parts += `<ellipse class="stud-top" cx="${n(cx)}" cy="${n(topY)}" rx="${n(srx)}" ry="${n(sry)}" fill="${studColor}" stroke="rgba(0,0,0,0.25)" stroke-width="0.7"/>`;
+      parts += `<path d="M ${n(cx-srx*0.65)} ${n(topY-sry*0.3)} Q ${n(cx)} ${n(topY-sry*0.95)} ${n(cx+srx*0.55)} ${n(topY-sry*0.4)}" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="${n(size*0.025)}" stroke-linecap="round"/>`;
+    }
   });
 
   return `<svg viewBox="0 0 ${width.toFixed(1)} ${heightV.toFixed(1)}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">${parts}</svg>`;
@@ -290,7 +274,8 @@ function buildIsoSVG(footprint, baseColor, opts={}){
 function buildTopSVG(footprint, baseColor, opts={}){
   const size = opts.size || 36;
   const fill = lighten(baseColor,0.15);
-  const stud = darken(baseColor,0.08);
+  const stud = lighten(baseColor,0.28);
+  const studEdge = darken(baseColor,0.2);
   let minR=Infinity,maxR=-Infinity,minC=Infinity,maxC=-Infinity;
   footprint.forEach(([r,c])=>{ if(r<minR)minR=r; if(r>maxR)maxR=r; if(c<minC)minC=c; if(c>maxC)maxC=c; });
   const pad = size*0.28;
@@ -300,13 +285,145 @@ function buildTopSVG(footprint, baseColor, opts={}){
   let parts='';
   footprint.forEach(([r,c])=>{
     const x=(c-minC)*size+pad, y=(r-minR)*size+pad;
-    parts += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${size}" height="${size}" rx="5" fill="${fill}" stroke="rgba(0,0,0,0.35)" stroke-width="1.5"/>`;
+    parts += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${size}" height="${size}" rx="2" fill="${fill}" stroke="rgba(0,0,0,0.35)" stroke-width="1.5"/>`;
     const cy = y+size*0.5;
-    parts += `<circle cx="${(x+size*0.3).toFixed(1)}" cy="${cy.toFixed(1)}" r="${(size*0.13).toFixed(1)}" fill="${stud}"/>`;
-    parts += `<circle cx="${(x+size*0.7).toFixed(1)}" cy="${cy.toFixed(1)}" r="${(size*0.13).toFixed(1)}" fill="${stud}"/>`;
+    parts += `<circle cx="${(x+size*0.3).toFixed(1)}" cy="${cy.toFixed(1)}" r="${(size*0.15).toFixed(1)}" fill="${stud}" stroke="${studEdge}" stroke-width="1"/>`;
+    parts += `<circle cx="${(x+size*0.7).toFixed(1)}" cy="${cy.toFixed(1)}" r="${(size*0.15).toFixed(1)}" fill="${stud}" stroke="${studEdge}" stroke-width="1"/>`;
   });
 
   return `<svg viewBox="0 0 ${width.toFixed(1)} ${heightV.toFixed(1)}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">${parts}</svg>`;
+}
+
+/* Interactive model uses the same cells, dimensions and stud positions as
+   the fixed print renderer. The camera moves; the answer never changes. */
+const camera = {yaw:Math.PI/4, elevation:Math.PI/6};
+let cameraAnimation = 0;
+// Split surfaces along their 3D planes before drawing them back to front.
+// Sorting only by the centre depth can put a brick top OVER its raised studs.
+function orderOrbitFaces(faces, direction){
+  const epsilon=1e-7;
+  const dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+  function build(polygons){
+    if(!polygons.length)return null;
+    const first=polygons[0], normal=first.normal, offset=dot(normal,first.points[0]);
+    const coplanar=[], front=[], back=[];
+    for(const polygon of polygons){
+      const distances=polygon.points.map(point=>dot(normal,point)-offset);
+      const positive=distances.some(d=>d>epsilon), negative=distances.some(d=>d<-epsilon);
+      if(!positive&&!negative){coplanar.push(polygon);continue;}
+      if(!negative){front.push(polygon);continue;}
+      if(!positive){back.push(polygon);continue;}
+      const frontPoints=[],backPoints=[];
+      for(let i=0;i<polygon.points.length;i++){
+        const j=(i+1)%polygon.points.length, point=polygon.points[i], next=polygon.points[j];
+        const d=distances[i], nextD=distances[j];
+        if(d>=-epsilon)frontPoints.push(point);
+        if(d<=epsilon)backPoints.push(point);
+        if((d>epsilon&&nextD<-epsilon)||(d<-epsilon&&nextD>epsilon)){
+          const t=d/(d-nextD),cut=point.map((value,k)=>value+t*(next[k]-value));
+          frontPoints.push(cut);backPoints.push(cut);
+        }
+      }
+      if(frontPoints.length>=3)front.push({...polygon,points:frontPoints,split:true});
+      if(backPoints.length>=3)back.push({...polygon,points:backPoints,split:true});
+    }
+    return {normal,coplanar,front:build(front),back:build(back)};
+  }
+  const ordered=[];
+  function visit(node){
+    if(!node)return;
+    const facing=dot(node.normal,direction)>=0;
+    visit(facing?node.back:node.front);ordered.push(...node.coplanar);visit(facing?node.front:node.back);
+  }
+  visit(build(faces));return ordered;
+}
+function buildOrbitSVG(footprint, color, view){
+  const h=.96, radius=.15, studH=.16, segments=24;
+  const minR=Math.min(...footprint.map(p=>p[0])), maxR=Math.max(...footprint.map(p=>p[0]))+1;
+  const minC=Math.min(...footprint.map(p=>p[1])), maxC=Math.max(...footprint.map(p=>p[1]))+1;
+  const centerX=(minC+maxC)/2, centerY=(minR+maxR)/2;
+  const sinA=Math.sin(view.yaw), cosA=Math.cos(view.yaw);
+  const sinE=Math.sin(view.elevation), cosE=Math.cos(view.elevation);
+  const project=([x,y,z])=>{
+    x-=centerX;y-=centerY;z-=h/2;
+    const depth=x*sinA+y*cosA;
+    return [x*cosA-y*sinA, depth*sinE-z*cosE, depth*cosE+z*sinE];
+  };
+  const faces=[];
+  function face(points,fill,normal,kind=''){
+    if(normal[0]*sinA*cosE+normal[1]*cosA*cosE+normal[2]*sinE<=1e-7) return;
+    faces.push({points,normal,fill,kind});
+  }
+  const occupied=new Set(footprint.map(([r,c])=>r+','+c));
+  for(const [r,c] of footprint){
+    const x=c,y=r;
+    face([[x,y,h],[x+1,y,h],[x+1,y+1,h],[x,y+1,h]],lighten(color,.18),[0,0,1]);
+    if(!occupied.has(r+','+(c+1)))face([[x+1,y,0],[x+1,y+1,0],[x+1,y+1,h],[x+1,y,h]],darken(color,.30),[1,0,0]);
+    if(!occupied.has(r+','+(c-1)))face([[x,y+1,0],[x,y,0],[x,y,h],[x,y+1,h]],darken(color,.20),[-1,0,0]);
+    if(!occupied.has((r+1)+','+c))face([[x+1,y+1,0],[x,y+1,0],[x,y+1,h],[x+1,y+1,h]],darken(color,.12),[0,1,0]);
+    if(!occupied.has((r-1)+','+c))face([[x,y,0],[x+1,y,0],[x+1,y,h],[x,y,h]],darken(color,.36),[0,-1,0]);
+    for(const offset of [.3,.7]){
+      const cx=x+offset,cy=y+.5;
+      const ring=Array.from({length:segments},(_,i)=>{const a=i*2*Math.PI/segments;return [cx+radius*Math.cos(a),cy+radius*Math.sin(a),h+studH];});
+      face(ring,lighten(color,.26),[0,0,1],'stud-top');
+      for(let i=0;i<segments;i++){
+        const j=(i+1)%segments, a=(i+.5)*2*Math.PI/segments;
+        const shade=.08+.20*(1-(Math.cos(a)+Math.sin(a))/2);
+        face([[ring[i][0],ring[i][1],h],[ring[j][0],ring[j][1],h],ring[j],ring[i]],darken(color,shade),[Math.cos(a),Math.sin(a),0],'stud-wall');
+      }
+    }
+  }
+  const ordered=orderOrbitFaces(faces,[sinA*cosE,cosA*cosE,sinE]);
+  const extent=Math.hypot((maxC-minC)/2,(maxR-minR)/2,h/2+studH)+.18;
+  const paths=ordered.map(f=>`<polygon class="${f.kind}" points="${f.points.map(project).map(([x,y])=>x.toFixed(4)+','+y.toFixed(4)).join(' ')}" fill="${f.fill}" stroke="${f.kind==='stud-wall'||f.split?f.fill:'rgba(0,0,0,.24)'}" stroke-width="${f.kind==='stud-wall'?.008:.012}" stroke-linejoin="round"/>`).join('');
+  return `<svg viewBox="${-extent} ${-extent} ${2*extent} ${2*extent}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${paths}</svg>`;
+}
+function renderCamera(){
+  if(state.level)document.getElementById('scene').innerHTML=buildOrbitSVG(state.level.correct,state.level.color,camera);
+}
+function stopCameraAnimation(){cancelAnimationFrame(cameraAnimation);cameraAnimation=0;}
+function setCamera(yaw,elevation,animate=true){
+  stopCameraAnimation();
+  const from={...camera}, start=performance.now();
+  // Take the shortest path around the model.
+  const delta=Math.atan2(Math.sin(yaw-from.yaw),Math.cos(yaw-from.yaw));
+  const duration=animate&&!matchMedia('(prefers-reduced-motion: reduce)').matches?450:0;
+  function frame(now){
+    const t=duration?Math.min(1,(now-start)/duration):1, ease=t*t*(3-2*t);
+    camera.yaw=from.yaw+delta*ease;camera.elevation=from.elevation+(elevation-from.elevation)*ease;
+    renderCamera();if(t<1)cameraAnimation=requestAnimationFrame(frame);
+  }
+  cameraAnimation=requestAnimationFrame(frame);
+}
+function setupOrbitControls(){
+  const scene=document.getElementById('scene'), status=document.getElementById('view-status');
+  let drag=null;
+  scene.addEventListener('pointerdown',event=>{
+    if(!event.isPrimary||event.button!==0)return;
+    stopCameraAnimation();drag={id:event.pointerId,x:event.clientX,y:event.clientY};scene.setPointerCapture(event.pointerId);
+  });
+  scene.addEventListener('pointermove',event=>{
+    if(!drag||drag.id!==event.pointerId)return;
+    camera.yaw+=(event.clientX-drag.x)*.012;
+    camera.elevation=Math.max(.08,Math.min(Math.PI/2,camera.elevation+(event.clientY-drag.y)*.012));
+    drag.x=event.clientX;drag.y=event.clientY;status.textContent='Ruota e osserva: la costruzione rimane la stessa.';renderCamera();
+  });
+  const release=()=>{drag=null;};
+  scene.addEventListener('pointerup',release);scene.addEventListener('pointercancel',release);scene.addEventListener('lostpointercapture',release);
+  scene.addEventListener('keydown',event=>{
+    if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key))return;
+    event.preventDefault();stopCameraAnimation();
+    if(event.key==='ArrowLeft')camera.yaw-=.15;if(event.key==='ArrowRight')camera.yaw+=.15;
+    if(event.key==='ArrowUp')camera.elevation=Math.min(Math.PI/2,camera.elevation+.12);
+    if(event.key==='ArrowDown')camera.elevation=Math.max(.08,camera.elevation-.12);
+    renderCamera();
+  });
+  document.getElementById('top-view').addEventListener('click',()=>{
+    setCamera(0,Math.PI/2);status.textContent='Ora guardi dall’alto: confronta la sagoma con le tre risposte.';
+  });
+  document.getElementById('initial-view').addEventListener('click',()=>{
+    setCamera(Math.PI/4,Math.PI/6);status.textContent='Sei tornato alla vista iniziale.';
+  });
 }
 
 /* =========================================================
@@ -333,8 +450,17 @@ function normalize(cells){
   return cells.map(([r,c])=>[r-minR,c-minC]);
 }
 function canonicalize(cells){
-  const norm = normalize(cells).sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
-  return JSON.stringify(norm);
+  // Compare the shape independently of translation, rotation and reflection.
+  // Stud direction must never be the only difference between two answers.
+  const keys = [];
+  for (const mirror of [1, -1]) {
+    let turned = cells.map(([r,c]) => [r, c * mirror]);
+    for (let turn=0; turn<4; turn++) {
+      keys.push(JSON.stringify(normalize(turned).sort((a,b)=>a[0]-b[0]||a[1]-b[1])));
+      turned = turned.map(([r,c]) => [c, -r]);
+    }
+  }
+  return keys.sort()[0];
 }
 function isConnected(cells){
   if(cells.length===0) return false;
@@ -377,12 +503,6 @@ function generatePolyomino(targetSize, maxDim){
   return [...cells].map(k=>k.split(',').map(Number));
 }
 
-const T_mirrorH  = cells=>cells.map(([r,c])=>[r,-c]);
-const T_mirrorV  = cells=>cells.map(([r,c])=>[-r,c]);
-const T_rot90    = cells=>cells.map(([r,c])=>[c,-r]);
-const T_rot180   = cells=>cells.map(([r,c])=>[-r,-c]);
-const T_rot270   = cells=>cells.map(([r,c])=>[-c,r]);
-
 function mutate(cells, maxDim){
   for(let attempt=0; attempt<25; attempt++){
     const idx=randInt(cells.length);
@@ -418,12 +538,6 @@ function generateLevel(){
   const usedKeys=new Set([correctKey]);
   const wrongs=[];
 
-  shuffle([T_mirrorH,T_mirrorV,T_rot90,T_rot180,T_rot270]).forEach(t=>{
-    if(wrongs.length>=2) return;
-    const cand=normalize(t(correct));
-    const key=canonicalize(cand);
-    if(!usedKeys.has(key)){ usedKeys.add(key); wrongs.push(cand); }
-  });
 
   let mtries=0;
   while(wrongs.length<2 && mtries<60){
@@ -434,32 +548,52 @@ function generateLevel(){
     const key=canonicalize(cand);
     if(!usedKeys.has(key)){ usedKeys.add(key); wrongs.push(cand); }
   }
-  while(wrongs.length<2){
-    const cand = mutate(correct, maxDim+1);
-    if(cand){
-      const key=canonicalize(cand);
-      if(!usedKeys.has(key)){ usedKeys.add(key); wrongs.push(cand); }
-    }
+  // Bound retries even for an unlucky (or fixed) random sequence.
+  for(let attempt=0; wrongs.length<2 && attempt<200; attempt++){
+    const cand = generatePolyomino(size, maxDim);
+    if(!cand) continue;
+    const key = canonicalize(cand);
+    if(!usedKeys.has(key)){ usedKeys.add(key); wrongs.push(cand); }
+  }
+  // Three connected, mutually different shapes of the same size guarantee
+  // two alternatives even if random generation repeatedly returns one shape.
+  const fallbackShapes = [
+    Array.from({length:size}, (_,i)=>[0,i]),
+    [...Array.from({length:size-1}, (_,i)=>[0,i]), [1,0]],
+    [...Array.from({length:size-1}, (_,i)=>[0,i]), [1,1]]
+  ];
+  for(const cand of fallbackShapes){
+    if(wrongs.length===2) break;
+    const key = canonicalize(cand);
+    if(!usedKeys.has(key)){ usedKeys.add(key); wrongs.push(cand); }
   }
 
   return { color: COLORS[randInt(COLORS.length)], correct, wrong: wrongs };
 }
 
-function buildLevels(n){
-  return Array.from({length:n}, generateLevel);
-}
-
 /* =========================================================
    STATO DI GIOCO
    ========================================================= */
-let LEVELS = buildLevels(30);
-const state = { idx:0, score:0, answered:false, order:[] };
+const state = { level:null, answered:false, order:[] };
 
-function loadLevel(i){
+function differentLevel(previous){
+  const previousKey = previous ? canonicalize(previous.correct) : null;
+  const candidate = generateLevel();
+  if(canonicalize(candidate.correct) !== previousKey) return candidate;
+  // The alternatives are already distinct under every symmetry, so promoting
+  // one guarantees a new construction even with a fixed random sequence.
+  return {color:candidate.color, correct:candidate.wrong[0], wrong:[candidate.correct,candidate.wrong[1]]};
+}
+
+function loadLevel(){
   state.answered=false;
-  const lvl=LEVELS[i];
+  const lvl=differentLevel(state.level);
+  state.level=lvl;
 
-  document.getElementById('scene').innerHTML = buildIsoSVG(lvl.correct, lvl.color, {size:50, height:34});
+  stopCameraAnimation();
+  camera.yaw=Math.PI/4;camera.elevation=Math.PI/6;
+  document.getElementById('view-status').textContent='';
+  renderCamera();
 
   const opts = shuffle([
     {ok:true,  fp:lvl.correct},
@@ -482,9 +616,6 @@ function loadLevel(i){
   document.getElementById('feedback').textContent='';
   document.getElementById('feedback').className='feedback';
   document.getElementById('next-btn').disabled=true;
-  document.getElementById('level-indicator').textContent=`Costruzione ${i+1} di ${LEVELS.length}`;
-  document.getElementById('score-indicator').textContent=`Punteggio: ${state.score}/${LEVELS.length}`;
-  document.getElementById('progress-fill').style.width = `${(i/(LEVELS.length-1))*100}%`;
 }
 
 function selectOption(idx){
@@ -501,54 +632,30 @@ function selectOption(idx){
 
   const fb=document.getElementById('feedback');
   if(chosen.ok){
-    state.score++;
     fb.textContent="✓ Esatto! Hai capito bene come si vede dall'alto.";
     fb.className='feedback ok';
   } else {
     fb.textContent="✗ Non proprio: la risposta giusta è evidenziata in verde.";
     fb.className='feedback ko';
   }
-  document.getElementById('score-indicator').textContent=`Punteggio: ${state.score}/${LEVELS.length}`;
   document.getElementById('next-btn').disabled=false;
 }
 
 function nextLevel(){
-  if(state.idx < LEVELS.length-1){ state.idx++; loadLevel(state.idx); }
-  else showEnd();
-}
-
-function showEnd(){
-  document.getElementById('game-area').style.display='none';
-  document.getElementById('end-screen').style.display='flex';
-  document.getElementById('final-score').textContent=`${state.score}/${LEVELS.length}`;
-  let msg;
-  if(state.score===LEVELS.length) msg="Perfetto! Hai indovinato tutte le viste dall'alto!";
-  else if(state.score>=Math.ceil(LEVELS.length*0.6)) msg="Molto bene! Continua ad allenare lo sguardo nello spazio.";
-  else msg="Buon inizio: riprova per migliorare ancora.";
-  document.getElementById('end-message').textContent=msg;
-}
-
-function restartGame(){
-  state.idx=0; state.score=0;
-  document.getElementById('end-screen').style.display='none';
-  document.getElementById('game-area').style.display='flex';
-  loadLevel(0);
-}
-
-function regenerateAll(){
-  LEVELS = buildLevels(30);
-  buildPrintSheet();
-  restartGame();
+  loadLevel();
 }
 
 /* =========================================================
    SCHEDA STAMPABILE (6 esercizi per foglio A4 + soluzioni)
    ========================================================= */
 function buildPrintSheet(){
+  // A fresh independent worksheet; printing never changes the current game.
+  const printLevels=[];
+  for(let i=0;i<6;i++) printLevels.push(differentLevel(printLevels[i-1]));
   const container=document.getElementById('print-sheet');
   container.innerHTML='';
   const perPage=6;
-  const totalPages=Math.ceil(LEVELS.length/perPage);
+  const totalPages=Math.ceil(printLevels.length/perPage);
   const answerKey=[];
 
   for(let p=0;p<totalPages;p++){
@@ -564,8 +671,8 @@ function buildPrintSheet(){
     const grid=pageDiv.querySelector('.print-grid');
     for(let k=0;k<perPage;k++){
       const idx=p*perPage+k;
-      if(idx>=LEVELS.length) break;
-      const lvl=LEVELS[idx];
+      if(idx>=printLevels.length) break;
+      const lvl=printLevels[idx];
       const opts=shuffle([{ok:true,fp:lvl.correct},{ok:false,fp:lvl.wrong[0]},{ok:false,fp:lvl.wrong[1]}]);
       const labels=['A','B','C'];
       answerKey.push(labels[opts.findIndex(o=>o.ok)]);
@@ -574,7 +681,7 @@ function buildPrintSheet(){
       card.className='print-card';
       card.innerHTML=`
         <img class="print-card-logo" src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="">
-        <div class="print-scene">${buildIsoSVG(lvl.correct, lvl.color, {size:28, height:18})}</div>
+        <div class="print-scene">${buildIsoSVG(lvl.correct, lvl.color, {size:28})}</div>
         <div class="print-q">Come si vede dall'alto?</div>
         <div class="print-options">
           ${opts.map((o,i)=>`
@@ -600,19 +707,17 @@ function buildPrintSheet(){
   `;
   container.appendChild(keyPage);
 
-  document.getElementById('print-btn').textContent = `🖨️ Stampa scheda (${LEVELS.length} esercizi, ${totalPages} fogli)`;
 }
 
 /* =========================================================
    INIZIALIZZAZIONE
    ========================================================= */
 document.getElementById('next-btn').addEventListener('click', nextLevel);
-document.getElementById('restart-btn').addEventListener('click', restartGame);
-document.getElementById('regenerate-btn').addEventListener('click', regenerateAll);
-document.getElementById('print-btn').addEventListener('click', ()=>window.print());
+document.getElementById('regenerate-btn').addEventListener('click', nextLevel);
+document.getElementById('print-btn').addEventListener('click', ()=>{ buildPrintSheet(); window.print(); });
 
-buildPrintSheet();
-loadLevel(0);
+setupOrbitControls();
+loadLevel();
 </script>
 </body>
 </html>
