@@ -67,6 +67,47 @@
     .print-question { font-size: 9px; font-weight: bold; text-align: center; text-transform: uppercase; color: #333; margin-bottom: 1.5mm; line-height: 1.2; }
     .print-hint { font-size: 6.5px; color: #888; text-align: center; }
   }
+
+  /* Layout compatto, con comandi accessibili anche al tocco. */
+  body { background:#f4f6f2; color:#253e39; padding:12px; gap:8px; font-family:system-ui, sans-serif; }
+  .header { margin:0; }
+  .header a { flex-direction:row; gap:8px; }
+  .logo { width:28px; height:28px; margin:0; }
+  .blog-name { color:#65776f; font-size:11px; font-weight:500; }
+  h1 { font-size:clamp(22px,4vw,34px); text-transform:none; letter-spacing:-.8px; color:#244b41; margin:0; }
+  .level-bar { gap:8px; margin:0; }
+  button { touch-action:manipulation; }
+  .level-btn { min-height:44px; padding:8px 18px; border:1px solid #cfdbd2; border-radius:12px; font:600 13px system-ui; color:#476357; background:#fff; }
+  .level-btn.active { background:#285c4b; border-color:#285c4b; color:white; }
+  .canvas-wrap { width:min(100%,760px); height:clamp(180px,calc(100svh - 440px),480px); min-height:180px; margin:0; background:radial-gradient(ellipse at 50% 40%,#fff 20%,#e8eee5 100%); border:1px solid #dce5da; border-radius:24px; overflow:hidden; }
+  canvas { width:100%; height:100%; touch-action:none; cursor:grab; }
+  canvas.dragging { cursor:grabbing; }
+  .view-tools { display:flex; align-items:center; justify-content:center; gap:6px; flex-wrap:wrap; }
+  .view-tools button { background:white; border:1px solid #d0dcd2; color:#365e4e; border-radius:10px; min-width:44px; min-height:44px; padding:6px 12px; font:600 14px system-ui; cursor:pointer; }
+  .rotate-hint { color:#63786b; font-size:12px; text-align:center; }
+  .question { font-size:clamp(14px,2.5vw,18px); text-transform:none; margin:0; }
+  .hint { color:#60756a; font-size:12px; margin:0; }
+  .input-row { margin:0; gap:8px; }
+  input[type=number] { width:84px; min-height:46px; border:1px solid #b7cbbd; border-radius:12px; font-size:24px; color:#244b41; }
+  .btn { min-height:46px; padding:10px 18px; border-radius:12px; font:600 14px system-ui; text-transform:none; }
+  .btn-check,.btn-next { background:#285c4b; color:white; }
+  .print-row { order:20; margin:0; }
+  .btn-print { display:inline-flex; align-items:center; justify-content:center; background:#fff; color:#365e4e; border:1px solid #d0dcd2; min-width:44px; min-height:44px; padding:10px; }
+  .btn-print svg { width:22px; height:22px; }
+  .feedback { min-height:22px; font-size:14px; margin:0; text-transform:none; }
+  .stats { font-size:12px; color:#617568; }
+  button:focus-visible,canvas:focus-visible,input:focus-visible { outline:3px solid #b87e25; outline-offset:3px; }
+  @media(max-width:400px) { body { padding:8px; gap:4px; } .canvas-wrap { height:clamp(120px,calc(100svh - 460px),480px); min-height:120px; } .level-btn { padding:8px 12px; } h1 { font-size:24px; } .view-tools { gap:4px; } }
+  @media(max-height:500px) and (min-width:600px) {
+    body { display:grid; grid-template-columns:minmax(280px,1.2fr) minmax(260px,1fr); gap:6px 16px; align-content:center; min-height:100svh; padding:8px 16px; }
+    body > * { grid-column:2; }
+    .header { display:none; }
+    h1 { font-size:24px; }
+    .canvas-wrap { grid-column:1; grid-row:1 / span 10; height:calc(100svh - 24px); min-height:180px; }
+    .print-row { order:initial; }
+  }
+  @media print { body.printing { display:block; } }
+
 </style>
 </head>
 <body>
@@ -88,23 +129,32 @@
 </div>
 
 <div class="print-row">
-  <button class="btn btn-print" id="btnPrint" onclick="stampaPDF()">STAMPA PDF (6 CUBETTI - LIVELLO ATTUALE)</button>
+  <button type="button" class="btn btn-print" id="btnPrint" onclick="stampaPDF()" aria-label="Stampa 6 schede del livello attuale" title="Stampa 6 schede del livello attuale"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 17H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6z"/><path d="M18 12h.01"/></svg></button>
 </div>
 
 <div class="canvas-wrap">
-  <canvas id="cubeCanvas"></canvas>
+  <canvas id="cubeCanvas" tabindex="0" role="img" aria-label="Figura di cubetti in 3D. Trascina per ruotare oppure usa i tasti freccia."></canvas>
+</div>
+
+<div class="rotate-hint">Trascina la figura con il dito o con il mouse per esplorarla</div>
+<div class="view-tools" role="group" aria-label="Ruota la figura">
+  <button type="button" onclick="rotateView(-0.3,0)" aria-label="Ruota a sinistra">↶</button>
+  <button type="button" onclick="rotateView(0.3,0)" aria-label="Ruota a destra">↷</button>
+  <button type="button" onclick="rotateView(0,0.2)" aria-label="Guarda dall’alto">↑</button>
+  <button type="button" onclick="rotateView(0,-0.2)" aria-label="Guarda dal basso">↓</button>
+  <button type="button" onclick="resetView()">Vista iniziale</button>
 </div>
 
 <p class="question">Quanti cubetti mancano per completare il cubo?</p>
 <p class="hint">IL CUBO INTERO HA 64 CUBETTI (4 × 4 × 4)</p>
 
 <div class="input-row">
-  <input type="number" id="userAnswer" min="0" max="63" placeholder="?">
+  <input type="number" id="userAnswer" aria-label="Numero di cubetti mancanti" inputmode="numeric" step="1" min="0" max="63" placeholder="?">
   <button class="btn btn-check" id="btnCheck" onclick="checkAnswer()">CONTROLLA</button>
   <button class="btn btn-next"  id="btnNext"  onclick="nextPuzzle()" style="display:none">PROSSIMO →</button>
 </div>
 
-<div class="feedback" id="feedback"></div>
+<div class="feedback" id="feedback" role="status" aria-live="polite"></div>
 <div class="stats"    id="stats"></div>
 
 <script>
@@ -243,44 +293,75 @@ function drawCube(targetCtx, x, y, z, S, ox, oy) {
   polygon(targetCtx, [p(0,0,1), p(1,0,1), p(1,1,1), p(0,1,1)], C_SIDE);  // lato sinistro frontale
 }
 
-function drawScene(grid) {
-  const maxW = Math.min(window.innerWidth - 16, 440);
-
-  // Calcola S dal bounding box reale del cubo 4×4×4 con S=1
-  const S1 = 1;
-  const corners = [[0,0,0],[4,0,0],[0,0,4],[4,0,4],[0,4,0],[4,4,0],[0,4,4],[4,4,4]];
-  const pts1 = corners.map(([x,y,z]) => toScreen(x,y,z,S1,0,0));
-  const minX1 = Math.min(...pts1.map(p=>p.sx));
-  const maxX1 = Math.max(...pts1.map(p=>p.sx));
-  const minY1 = Math.min(...pts1.map(p=>p.sy));
-  const maxY1 = Math.max(...pts1.map(p=>p.sy));
-  const spanW = maxX1 - minX1;
-  const spanH = maxY1 - minY1;
-
-  const PAD = 10;
-  const S = Math.floor(Math.min((maxW - PAD*2) / spanW, (maxW * 0.68 - PAD*2) / spanH));
-
-  const W = Math.ceil(spanW * S) + PAD * 2;
-  const H = Math.ceil(spanH * S) + PAD * 2;
-
-  canvas.width  = W;
-  canvas.height = H;
-  ctx.clearRect(0, 0, W, H);
-
-  const ox = -minX1 * S + PAD;
-  const oy = -minY1 * S + PAD;
-
-  // Painter's algorithm: y crescente, poi (x+z) crescente (più lontano prima)
-  const cubes = [];
-  for (let y = 0; y < 4; y++)
-    for (let x = 0; x < 4; x++)
-      for (let z = 0; z < 4; z++)
-        if (y < grid[x][z]) cubes.push({x,y,z});
-
-  cubes.sort((a,b) => a.y !== b.y ? a.y - b.y : (a.x+a.z) - (b.x+b.z));
-
-  for (const {x,y,z} of cubes) drawCube(ctx, x,y,z,S,ox,oy);
+// Proiezione ortografica di vere coordinate 3D: facce esterne ordinate per profondità.
+let yaw = Math.PI / 4, pitch = .55;
+function project3D(x,y,z) {
+  x -= 2; y -= 2; z -= 2;
+  const u = Math.cos(yaw)*x - Math.sin(yaw)*z;
+  const depth = Math.sin(yaw)*x + Math.cos(yaw)*z;
+  return { x:u, y:-Math.cos(pitch)*y + Math.sin(pitch)*depth,
+    depth:Math.sin(pitch)*y + Math.cos(pitch)*depth };
 }
+const faceDefs = [
+  {n:[1,0,0],v:[[1,0,0],[1,1,0],[1,1,1],[1,0,1]],c:'#6b9f88'},
+  {n:[-1,0,0],v:[[0,0,1],[0,1,1],[0,1,0],[0,0,0]],c:'#7ead97'},
+  {n:[0,1,0],v:[[0,1,0],[0,1,1],[1,1,1],[1,1,0]],c:'#d5e7b4'},
+  {n:[0,-1,0],v:[[0,0,1],[0,0,0],[1,0,0],[1,0,1]],c:'#577d6c'},
+  {n:[0,0,1],v:[[1,0,1],[1,1,1],[0,1,1],[0,0,1]],c:'#a5c89c'},
+  {n:[0,0,-1],v:[[0,0,0],[0,1,0],[1,1,0],[1,0,0]],c:'#8cb6a2'}
+];
+function drawScene(grid) {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const w=rect.width, h=rect.height, dpr=Math.min(window.devicePixelRatio || 1,2);
+  canvas.width=Math.round(w*dpr); canvas.height=Math.round(h*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  // Scala fissa: la figura non cambia dimensione durante la rotazione.
+  const scale=Math.min((w-32)/7,(h-24)/7);
+  const occupied=(x,y,z)=>x>=0 && x<4 && z>=0 && z<4 && y>=0 && y<grid[x][z];
+  const faces=[];
+  for(let x=0;x<4;x++) for(let z=0;z<4;z++) for(let y=0;y<grid[x][z];y++) {
+    for(const f of faceDefs) {
+      const [nx,ny,nz]=f.n;
+      if(occupied(x+nx,y+ny,z+nz)) continue;
+      const facing=Math.cos(pitch)*(Math.sin(yaw)*nx+Math.cos(yaw)*nz)+Math.sin(pitch)*ny;
+      if(facing<=.00001) continue;
+      const pts=f.v.map(([dx,dy,dz])=>project3D(x+dx,y+dy,z+dz));
+      faces.push({pts,c:f.c,depth:pts.reduce((s,p)=>s+p.depth,0)/4});
+    }
+  }
+  faces.sort((a,b)=>a.depth-b.depth);
+  ctx.lineJoin='round';
+  for(const f of faces) {
+    ctx.beginPath();
+    f.pts.forEach((p,i)=>ctx[i?'lineTo':'moveTo'](w/2+p.x*scale,h/2+p.y*scale));
+    ctx.closePath(); ctx.fillStyle=f.c; ctx.fill();
+    ctx.strokeStyle='#3c6452';ctx.lineWidth=1.15;ctx.stroke();
+  }
+}
+function rotateView(dx,dy) {
+  yaw=(yaw+dx)%(Math.PI*2); pitch=Math.max(-1.35,Math.min(1.35,pitch+dy)); redraw();
+}
+function resetView() { yaw=Math.PI/4; pitch=.55; redraw(); }
+let drag=null;
+canvas.addEventListener('pointerdown',e=>{
+  if(drag || (e.pointerType==='mouse' && e.button!==0)) return;
+  drag={id:e.pointerId,x:e.clientX,y:e.clientY};
+  canvas.setPointerCapture(e.pointerId);canvas.classList.add('dragging');
+});
+canvas.addEventListener('pointermove',e=>{
+  if(!drag || drag.id!==e.pointerId) return;
+  rotateView((e.clientX-drag.x)*.012,(e.clientY-drag.y)*.012);
+  drag.x=e.clientX;drag.y=e.clientY;
+});
+function endDrag(e) { if(drag && drag.id===e.pointerId) { drag=null;canvas.classList.remove('dragging'); } }
+canvas.addEventListener('pointerup',endDrag);
+canvas.addEventListener('pointercancel',endDrag);
+canvas.addEventListener('lostpointercapture',endDrag);
+canvas.addEventListener('keydown',e=>{
+  const keys={ArrowLeft:[-.15,0],ArrowRight:[.15,0],ArrowUp:[0,.15],ArrowDown:[0,-.15]};
+  if(keys[e.key]) { e.preventDefault();rotateView(...keys[e.key]); }
+  if(e.key==='Home') {e.preventDefault();resetView();}
+});
 
 function redraw() { if (currentGrid) drawScene(currentGrid); }
 
@@ -414,16 +495,16 @@ function nextPuzzle() {
   const { grid, removed } = generatePuzzle(currentLevel);
   currentGrid = grid;
   correctAnswer = removed;
-  redraw();
+  resetView();
   updateStats();
-  document.getElementById('userAnswer').focus();
 }
 
 function checkAnswer() {
   if (answered) return;
-  const val = parseInt(document.getElementById('userAnswer').value);
-  if (isNaN(val)) {
-    document.getElementById('feedback').textContent = 'INSERISCI UN NUMERO!';
+  const raw = document.getElementById('userAnswer').value.trim();
+  const val = Number(raw);
+  if (!raw || !Number.isInteger(val) || val < 0 || val > 63) {
+    document.getElementById('feedback').textContent = 'Inserisci un numero intero da 0 a 63.';
     document.getElementById('feedback').className = 'feedback no';
     return;
   }
@@ -445,8 +526,7 @@ function checkAnswer() {
 }
 
 function updateStats() {
-  if (total > 0)
-    document.getElementById('stats').textContent = 'RISPOSTE CORRETTE: ' + score + ' SU ' + total;
+  document.getElementById('stats').textContent = total > 0 ? 'Risposte corrette: ' + score + ' su ' + total : '';
 }
 
 function setLevel(lvl) {
