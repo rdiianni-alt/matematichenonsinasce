@@ -3,101 +3,124 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>Divisione a danda lunga</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{width:100%;height:100%;background:transparent}
-body{font-family:'Nunito',sans-serif;color:#222;padding:clamp(8px,2vw,24px);display:flex;flex-direction:column;align-items:center}
-body>*{width:100%;max-width:700px}
+:root{--u:clamp(32px,4vw,44px);--ink:#284c46;--green:#2e6656;--muted:#65786e}
+body{font-family:system-ui,sans-serif;color:var(--ink);background:#f3f5f0;padding:clamp(10px,2vw,24px);min-height:100svh}
+main{max-width:980px;margin:auto}
+header{text-align:center;margin-bottom:18px}
+h1{font-size:clamp(25px,4vw,36px);letter-spacing:-1px;margin-bottom:6px}
+.intro{color:var(--muted);font-size:15px;line-height:1.5}
+.controls{display:flex;align-items:end;justify-content:center;gap:12px;flex-wrap:wrap;background:white;border:1px solid #dce4d8;border-radius:20px;padding:18px}
+.field{display:flex;flex-direction:column;gap:6px;flex:1;max-width:220px;min-width:100px}
+label{font-size:13px;font-weight:650;color:#526b60}
+.controls input{width:100%;min-height:48px;padding:9px 12px;border:1px solid #b9cec0;border-radius:12px;font:600 22px system-ui;color:var(--ink);background:#fafcf8}
+button{min-height:46px;padding:10px 18px;border:0;border-radius:12px;background:var(--green);color:white;font:600 15px system-ui;cursor:pointer;touch-action:manipulation}
+button:hover{background:#234f42}
+input:focus-visible,button:focus-visible{outline:3px solid #c59038;outline-offset:3px}
+.msg{font-size:15px;line-height:1.4;min-height:22px;margin:10px 0;color:var(--ink);text-align:center}
+.msg.ok{color:#236a4a;font-weight:650}.msg.err{color:#a53535}
+.empty-state{text-align:center;border:1px dashed #b9cdbb;border-radius:24px;padding:clamp(25px,7vh,70px) 18px;color:var(--muted)}
+.empty-icon{display:inline-block;padding:10px 20px;border-radius:18px;background:#e3ecd9;font-size:40px;color:var(--green);margin-bottom:12px}
+.empty-state h2{font-size:20px;color:var(--ink);margin-bottom:8px}.empty-state p{font-size:14px;line-height:1.6}
+.workspace{background:#fffefa;border:1px solid #dce4d8;border-radius:24px;padding:20px}
+.wrapper{display:flex;gap:24px;align-items:flex-start;justify-content:space-between}
+.division-grid{display:flex;align-items:flex-start;flex-shrink:0}
+.left-col,.right-col{display:flex;flex-direction:column}.right-col{min-width:calc(var(--u)*2)}
+.sep-line{width:2px;background:var(--ink);align-self:stretch;min-height:var(--u);margin:0 5px}
+.row,.sub-row,.divisore-row,.quot-row{display:flex;align-items:center;min-height:var(--u)}
+.cell,.sub-cell,.q-digit{width:var(--u);height:var(--u);display:flex;align-items:center;justify-content:center;font-size:calc(var(--u)*.62);font-weight:600;flex-shrink:0}
+.cell.marked{border-top:2px solid var(--ink)}
+.divisore-row,.quot-row{padding-left:6px}.divisore-val{font-size:calc(var(--u)*.62);font-weight:600}
+.horiz-line{height:2px;background:var(--ink);margin:0 4px}
+.result-input{width:var(--u);height:var(--u);border:1px solid #93b5a5;border-bottom:3px solid var(--green);border-radius:7px;background:#edf4e7;text-align:center;font:700 calc(var(--u)*.62) system-ui;color:var(--green)}
+.q-digit{color:var(--green)}.sub-cell.underline{border-bottom:2px solid var(--ink)}.sub-cell.lowered{color:#2a8870}
+.num-input{width:calc(var(--u)*2);min-height:44px;text-align:center;font:600 22px system-ui;border:1px solid #a6bfae;border-radius:9px;background:#f4f8ee;color:var(--ink);margin-top:5px}
+.confirm-btn{font-size:13px;margin:5px 0 0 6px;padding:8px 10px;min-height:44px}
+.tabellina{font-size:14px;padding:14px;border:1px solid #d6e2cf;border-radius:16px;background:#edf3e5;min-width:160px}
+.table-title{font-weight:650;margin-bottom:8px}.table-facts{display:grid;gap:4px}.table-facts>div{padding:3px 6px;border-radius:6px}
+.step-hint{font-size:16px;line-height:1.5;margin-top:16px;padding:12px 16px;background:#f1f4e9;border-radius:12px}.step-hint:empty{display:none}
+.resto-info{font-size:20px;font-weight:650;text-align:center;margin-top:12px}.resto-info:empty{display:none}
+[hidden]{display:none!important}
+@media(max-width:600px){:root{--u:clamp(24px,6vw,32px)}body{padding:8px}header{margin-bottom:8px}.intro{font-size:13px}.empty-state{padding:20px 14px}.empty-state h2{font-size:18px}.controls{padding:10px;gap:8px}.field{min-width:90px}.controls button{width:100%}.workspace{padding:14px 10px}.wrapper{flex-direction:column;gap:16px}.tabellina{width:100%;min-width:0;padding:10px;font-size:12px}.table-facts{grid-template-columns:repeat(3,minmax(0,1fr));gap:3px}.table-facts>div{padding:4px 0;white-space:nowrap}.step-hint{font-size:14px;padding:10px;margin-top:12px}.confirm-btn{display:block;margin-left:0}.msg{font-size:13px;margin:8px 0}}
+@media(max-height:500px) and (min-width:650px){body{padding:8px}header{margin-bottom:8px}h1{font-size:25px}.intro{font-size:13px}.controls{padding:6px}.controls input{min-height:44px;padding:6px 12px}.workspace{padding:12px}.msg{margin:5px 0}.tabellina{min-width:285px;padding:10px;font-size:12px}.table-facts{grid-template-columns:repeat(3,minmax(0,1fr))}.table-facts>div{padding:3px 0}.step-hint{margin-top:8px;padding:8px;font-size:14px}}
 
-/* unità base: tutto scala da questa */
-:root{--u:clamp(22px,4vw,48px)}
-
-.logo{display:flex;align-items:center;gap:calc(var(--u)*0.4);margin-bottom:calc(var(--u)*0.6);text-decoration:none}
-.logo img{width:var(--u);height:var(--u);object-fit:contain;border-radius:50%}
-.logo-text{font-size:calc(var(--u)*0.45);font-weight:500;color:#333}
-
-.controls{display:flex;gap:calc(var(--u)*0.4);margin-bottom:calc(var(--u)*0.7);align-items:center;flex-wrap:wrap}
-.controls label{font-size:calc(var(--u)*0.4);color:#555}
-.controls input{width:calc(var(--u)*2.2);text-align:center;font-size:calc(var(--u)*0.5);font-family:'Open Sans',sans-serif;padding:calc(var(--u)*0.1)}
-.controls button{font-size:calc(var(--u)*0.38);padding:calc(var(--u)*0.15) calc(var(--u)*0.5);font-family:'Open Sans',sans-serif}
-
-.wrapper{display:flex;gap:calc(var(--u)*1.5);align-items:flex-start;flex-wrap:wrap}
-
-/* griglia divisione */
-.division-grid{display:flex;flex-direction:row;align-items:flex-start}
-.left-col{display:flex;flex-direction:column}
-.sep-line{width:calc(var(--u)*0.07);min-width:2px;background:#333;align-self:stretch;min-height:var(--u);margin:0 calc(var(--u)*0.1)}
-.right-col{display:flex;flex-direction:column;min-width:calc(var(--u)*2)}
-
-.row{display:flex;align-items:center;min-height:var(--u)}
-.cell{width:var(--u);height:var(--u);display:flex;align-items:center;justify-content:center;font-size:calc(var(--u)*0.6);font-weight:600}
-.cell.marked{border-top:calc(var(--u)*0.06) solid #333}
-
-.divisore-row{display:flex;align-items:center;min-height:var(--u);padding-left:calc(var(--u)*0.2)}
-.divisore-val{font-size:calc(var(--u)*0.6);font-weight:600}
-.horiz-line{height:calc(var(--u)*0.07);min-height:2px;background:#333;margin:0 calc(var(--u)*0.2)}
-.quot-row{display:flex;align-items:center;min-height:var(--u);padding-left:calc(var(--u)*0.2)}
-
-.result-input{width:var(--u);height:var(--u);border:none;border-bottom:calc(var(--u)*0.06) solid #185FA5;background:transparent;text-align:center;font-size:calc(var(--u)*0.6);font-weight:700;font-family:'Nunito',sans-serif;color:#185FA5;outline:none}
-.result-input:focus{background:#e8f0fb}
-.q-digit{width:var(--u);height:var(--u);display:flex;align-items:center;justify-content:center;font-size:calc(var(--u)*0.6);font-weight:600;color:#185FA5}
-
-.sub-row{display:flex;align-items:center;min-height:var(--u)}
-.sub-cell{width:var(--u);height:var(--u);display:flex;align-items:center;justify-content:center;font-size:calc(var(--u)*0.6);font-weight:600}
-.sub-cell.underline{border-bottom:calc(var(--u)*0.05) solid #333}
-.sub-cell.lowered{color:#0F6E56}
-
-.msg{font-size:calc(var(--u)*0.38);margin:calc(var(--u)*0.3) 0;min-height:calc(var(--u)*0.5);color:#222}
-.msg.ok{color:#0F6E56;font-weight:500}
-.msg.err{color:#A32D2D}
-
-.tabellina{font-size:calc(var(--u)*0.35);line-height:1.8;padding:calc(var(--u)*0.3) calc(var(--u)*0.4);border:1px solid #ddd;border-radius:8px;background:#f7f7f7;min-width:calc(var(--u)*3)}
-.tabellina .hl{font-weight:700;background:#dbeafe;border-radius:3px;padding:0 4px;color:#1e40af}
-
-.step-hint{font-size:calc(var(--u)*0.38);color:#555;margin-top:calc(var(--u)*0.3);max-width:500px;line-height:1.5}
-.resto-info{font-size:calc(var(--u)*0.4);color:#555;margin-top:calc(var(--u)*0.2)}
-
-.num-input{width:calc(var(--u)*2);text-align:center;font-size:calc(var(--u)*0.5);font-family:'Nunito',sans-serif;margin-top:calc(var(--u)*0.1)}
-.confirm-btn{font-size:calc(var(--u)*0.35);margin-top:calc(var(--u)*0.2);margin-left:8px;font-family:'Open Sans',sans-serif}
+.fit-visual{margin-top:10px;padding:12px 14px;border:1px solid #d9e3d4;border-radius:16px;background:#fafcf6}
+.fit-heading{font-size:14px;font-weight:650;margin-bottom:4px}.fit-caption{font-size:12px;line-height:1.4;color:#617365}
+.fit-chart{width:100%;display:block;height:170px;margin:4px 0}
+.fit-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px}
+.fit-actions button{min-width:44px;min-height:44px;padding:8px 12px;font-size:13px}
+.fit-actions .secondary{color:var(--green);background:#e8efdf}
+.fit-actions button:disabled{opacity:.45;cursor:default}
+.fit-status{font-size:13px;line-height:1.4;margin-top:8px;min-height:20px;color:#355c4a}
+.fit-status.over{color:#a0442b}
+.msg:empty{min-height:0;margin:10px 0}
+@media(min-width:900px){
+body{padding:16px}header{margin-bottom:14px}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) 170px;gap:12px 20px}
+.wrapper{display:contents}.division-grid{grid-column:1;grid-row:1}
+.tabellina{grid-column:2;grid-row:1 / span 3;min-width:0;align-self:start}
+.step-hint{grid-column:1;grid-row:2;margin:0}.fit-visual{grid-column:1;grid-row:3;margin:0}
+.resto-info{grid-column:1 / -1}
+}
+@media(max-width:600px){.wrapper{gap:10px}.step-hint{margin-top:8px}.fit-visual{padding:8px}.fit-chart{height:150px}.fit-actions{gap:6px}.fit-actions button{padding:8px 10px}}
 </style>
 </head>
 <body>
-<a href="https://matematichenonsinasce.com/" target="_blank" class="logo">
-  <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/main/logo.png" alt="logo">
-  <div class="logo-text">Matematiche non si nasce</div>
-</a>
-<h2 style="font-size:calc(var(--u)*0.55);font-weight:700;margin-bottom:calc(var(--u)*0.3);letter-spacing:0.5px">
-  <span style="color:#185FA5">D</span><span style="color:#0F6E56">i</span><span style="color:#A32D2D">v</span><span style="color:#854F0B">i</span><span style="color:#185FA5">s</span><span style="color:#7C3D8A">i</span><span style="color:#0F6E56">o</span><span style="color:#A32D2D">n</span><span style="color:#185FA5">e</span>
-  <span style="color:#444"> a </span>
-  <span style="color:#854F0B">d</span><span style="color:#7C3D8A">a</span><span style="color:#0F6E56">n</span><span style="color:#A32D2D">d</span><span style="color:#185FA5">a</span>
-  <span style="color:#444"> </span>
-  <span style="color:#0F6E56">l</span><span style="color:#854F0B">u</span><span style="color:#7C3D8A">n</span><span style="color:#A32D2D">g</span><span style="color:#185FA5">a</span>
-</h2>
-<p style="font-size:calc(var(--u)*0.35);color:#666;margin-bottom:calc(var(--u)*0.6);line-height:1.5;max-width:600px">Un algoritmo passo dopo passo per eseguire la divisione classica. La tabellina del divisore è sempre a disposizione per aiutarti nei calcoli.</p>
-<div class="controls">
-  <label>Dividendo</label>
-  <input type="number" id="inp-div" value="592" min="1">
-  <label>Divisore</label>
-  <input type="number" id="inp-dsr" value="16" min="1">
-  <button onclick="startGame()">Inizia</button>
-</div>
-<div id="msg" class="msg"></div>
-<div class="wrapper">
-  <div class="division-grid" id="division-grid"></div>
-  <div id="tabellina" class="tabellina" style="display:none"></div>
-</div>
-<div id="step-hint" class="step-hint"></div>
-<div id="resto-info" class="resto-info"></div>
+<main>
+<header>
+<h1>Divisione a danda lunga</h1>
+<p class="intro">Scegli i tuoi numeri, poi risolvi un passaggio alla volta.</p>
+</header>
+<form class="controls" id="division-form" novalidate>
+  <div class="field"><label for="inp-div">Dividendo</label><input type="number" id="inp-div" min="1" max="99999" step="1" inputmode="numeric" placeholder="Da dividere" required></div>
+  <div class="field"><label for="inp-dsr">Divisore</label><input type="number" id="inp-dsr" min="1" max="999" step="1" inputmode="numeric" placeholder="Dividi per…" required></div>
+  <button type="submit" id="start-btn">Inizia la divisione →</button>
+</form>
+<div id="msg" class="msg" role="status" aria-live="polite"></div>
+<section id="empty-state" class="empty-state">
+  <span class="empty-icon" aria-hidden="true">÷</span>
+  <h2>La prossima divisione la scegli tu</h2>
+  <p>Inserisci dividendo e divisore, poi premi Inizia.<br>Compariranno la divisione e la tabellina per aiutarti.</p>
+</section>
+<section id="workspace" class="workspace" aria-label="Divisione passo dopo passo" hidden>
+  <div class="wrapper">
+    <div class="division-grid" id="division-grid"></div>
+    <aside id="tabellina" class="tabellina" aria-label="Tabellina del divisore" style="display:none"></aside>
+  </div>
+  <div id="step-hint" class="step-hint" aria-live="polite"></div>
+  <section id="fit-visual" class="fit-visual" aria-labelledby="fit-heading" hidden>
+    <h2 id="fit-heading" class="fit-heading">Quanti gruppi ci stanno?</h2>
+    <p class="fit-caption">Le due righe partono da zero e usano la stessa scala. Ogni tacca piccola vale 1.</p>
+    <svg id="fit-chart" class="fit-chart" role="img" aria-labelledby="fit-chart-title fit-chart-desc"></svg>
+    <div class="fit-actions" role="group" aria-label="Esplora i gruppi del divisore">
+      <button type="button" class="secondary" id="fit-minus" onclick="changeGroups(-1)" aria-label="Togli un gruppo">− 1 gruppo</button>
+      <button type="button" id="fit-plus" onclick="changeGroups(1)" aria-label="Aggiungi un gruppo">+ 1 gruppo</button>
+      <button type="button" class="secondary" id="fit-reset" onclick="resetGroups()">Da zero</button>
+    </div>
+    <p id="fit-status" class="fit-status" role="status" aria-live="polite"></p>
+  </section>
+  <div id="resto-info" class="resto-info"></div>
+</section>
+</main>
 
 <script>
 let DIV,DSR,digits,steps,currentStep,partialQuotient,lastRemainder;
+let gameVersion=0;
+function gameLater(fn,ms){const version=gameVersion;setTimeout(()=>{if(version===gameVersion)fn();},ms);}
 
 function startGame(){
-  DIV=parseInt(document.getElementById('inp-div').value);
-  DSR=parseInt(document.getElementById('inp-dsr').value);
-  if(!DIV||!DSR||DSR===0){setMsg('Inserisci numeri validi.',false);return;}
-  if(DIV<DSR){setMsg('Il dividendo deve essere ≥ del divisore.',false);return;}
+  const dividendText=document.getElementById('inp-div').value.trim();
+  const divisorText=document.getElementById('inp-dsr').value.trim();
+  const dividend=Number(dividendText), divisor=Number(divisorText);
+  if(!dividendText||!divisorText||!Number.isInteger(dividend)||!Number.isInteger(divisor)||dividend<1||divisor<1){setMsg('Inserisci due numeri interi maggiori di zero.',false);return;}
+  if(dividend>99999||divisor>999){setMsg('Usa un dividendo fino a 99 999 e un divisore fino a 999.',false);return;}
+  if(dividend<divisor){setMsg('Il dividendo deve essere maggiore o uguale al divisore.',false);return;}
+  DIV=dividend;DSR=divisor;gameVersion++;
+  document.getElementById('empty-state').hidden=true;
+  document.getElementById('workspace').hidden=false;
+  document.getElementById('start-btn').textContent='Ricomincia →';
   digits=String(DIV).split('').map(Number);
   steps=computeSteps(DIV,DSR);
   currentStep=0;partialQuotient=[];lastRemainder=null;
@@ -112,7 +135,7 @@ function computeSteps(div,dsr){
   let s=[],rem=0,d=String(div).split('').map(Number),pos=0;
   while(pos<d.length){
     rem=rem*10+d[pos];
-    while(rem<dsr&&pos<d.length-1){pos++;rem=rem*10+d[pos];}
+    while(s.length===0&&rem<dsr&&pos<d.length-1){pos++;rem=rem*10+d[pos];}
     let q=Math.floor(rem/dsr),prod=q*dsr,r=rem-prod;
     s.push({partial:rem,q,prod,r,endPos:pos});
     rem=r;pos++;
@@ -156,11 +179,13 @@ function askQuotient(idx){
   renderTabellina(DSR,s.q);
   document.getElementById('tabellina').style.display='block';
   document.getElementById('step-hint').textContent=`Quante volte ${DSR} entra in ${s.partial}?`;
+  showFitVisual(s.partial);
   updateQuotientDisplay(partialQuotient,()=>validateQuotient(idx));
 }
 
 function askSubtraction(idx){
   const s=steps[idx];
+  fitGroups=s.q;renderFitVisual();
   const sub=document.getElementById('sub-blocks');
   let block=document.getElementById('sub-'+idx);
   if(!block){block=document.createElement('div');block.id='sub-'+idx;sub.appendChild(block);}
@@ -175,25 +200,25 @@ function askSubtraction(idx){
   block.appendChild(prodRow);
   document.getElementById('step-hint').textContent=`Calcola ${s.partial} − ${s.prod} = ?`;
   const ri=document.createElement('input');
-  ri.type='number';ri.className='num-input';ri.id='rest-input-'+idx;
-  ri.style.marginLeft=(offset*getCellSize())+'px';ri.placeholder='?';
+  ri.type='number';ri.min='0';ri.step='1';ri.inputMode='numeric';ri.setAttribute('aria-label','Risultato della sottrazione');ri.className='num-input';ri.id='rest-input-'+idx;
+  ri.style.marginLeft='calc('+offset+' * var(--u))';ri.placeholder='?';
   ri.addEventListener('keydown',e=>{if(e.key==='Enter')validateResto(idx);});
   block.appendChild(ri);
   const btn=document.createElement('button');
   btn.textContent='Conferma';btn.className='confirm-btn';btn.onclick=()=>validateResto(idx);
   block.appendChild(btn);
-  setTimeout(()=>ri.focus(),50);
+  gameLater(()=>ri.focus(),50);
 }
 
 function getCellSize(){
-  const u=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--u'))||36;
+  const u=document.querySelector('.cell')?.getBoundingClientRect().width||36;
   return u;
 }
 
 function validateQuotient(idx){
   const inp=document.getElementById('q-input');if(!inp)return;
-  const val=parseInt(inp.value);const s=steps[idx];
-  if(isNaN(val)||val<0||val>9){setMsg('Inserisci una cifra da 0 a 9.',false);inp.value='';return;}
+  const val=inp.value.trim()===''?NaN:Number(inp.value);const s=steps[idx];
+  if(!Number.isInteger(val)||val<0||val>9){setMsg('Inserisci una cifra da 0 a 9.',false);inp.value='';return;}
   if(val!==s.q){setMsg(`Non è corretto. ${DSR} × ${val} = ${DSR*val}, ma il parziale è ${s.partial}. Riprova.`,false);inp.value='';inp.focus();return;}
   setMsg('');partialQuotient.push(s.q);
   updateQuotientDisplay(partialQuotient,null);
@@ -203,8 +228,8 @@ function validateQuotient(idx){
 function validateResto(idx){
   const s=steps[idx];
   const inp=document.getElementById('rest-input-'+idx);if(!inp)return;
-  const val=parseInt(inp.value);
-  if(isNaN(val)){setMsg('Inserisci il risultato della sottrazione.',false);return;}
+  const val=inp.value.trim()===''?NaN:Number(inp.value);
+  if(!Number.isInteger(val)||val<0){setMsg('Inserisci il risultato della sottrazione.',false);return;}
   if(val!==s.r){setMsg(`Non è corretto. ${s.partial} − ${s.prod} = ${s.r}, non ${val}. Riprova.`,false);inp.value='';inp.focus();return;}
   setMsg('');lastRemainder=s.r;
   inp.remove();
@@ -224,7 +249,7 @@ function validateResto(idx){
     const nextS=steps[currentStep];
     const lc=document.createElement('div');lc.className='sub-cell lowered';lc.textContent=digits[nextS.endPos];restRow.appendChild(lc);
     document.getElementById('step-hint').textContent=`Abbassa il ${digits[nextS.endPos]}…`;
-    setTimeout(()=>askQuotient(currentStep),400);
+    gameLater(()=>askQuotient(currentStep),400);
   }
 }
 
@@ -238,12 +263,12 @@ function updateQuotientDisplay(qDigits,onEnter){
   if(onEnter){
     const inp=document.createElement('input');
     inp.type='text';inp.maxLength=1;inp.className='result-input';inp.id='q-input';
-    inp.setAttribute('autocomplete','off');
+    inp.setAttribute('autocomplete','off');inp.inputMode='numeric';inp.setAttribute('aria-label','Prossima cifra del quoziente');
     inp.addEventListener('keydown',e=>{if(e.key==='Enter')onEnter();});
     inp.addEventListener('input',()=>{if(inp.value.length===1)onEnter();});
-    qRow.appendChild(inp);setTimeout(()=>inp.focus(),50);
+    qRow.appendChild(inp);gameLater(()=>inp.focus(),50);
   }
-  setTimeout(()=>{
+  gameLater(()=>{
     const hl=document.getElementById('horiz-line');const rc=document.getElementById('right-col');
     if(hl&&rc)hl.style.width=(rc.offsetWidth-12)+'px';
   },20);
@@ -251,15 +276,81 @@ function updateQuotientDisplay(qDigits,onEnter){
 
 function renderTabellina(dsr,correctQ){
   const tab=document.getElementById('tabellina');
-  let html=`<div style="font-size:calc(var(--u)*0.38);font-weight:500;color:#555;margin-bottom:calc(var(--u)*0.2)">Tabellina del ${dsr}</div>`;
-  for(let i=1;i<=9;i++){
-    const hl=i===correctQ?'hl':'';
-    html+=`<div class="${hl}">${dsr} × ${i} = <strong>${dsr*i}</strong></div>`;
-  }
+  let html=`<div class="table-title">Tabellina del ${dsr}</div><div class="table-facts">`;
+  for(let i=1;i<=9;i++) html+=`<div>${dsr} × ${i} = <strong>${dsr*i}</strong></div>`;
+  html+='</div>';
   tab.innerHTML=html;
 }
 
+// Due righe di lunghezze proporzionali, aggiornate a ogni parziale.
+let fitPartial=null,fitGroups=0;
+function showFitVisual(partial){
+  fitPartial=partial;fitGroups=0;
+  document.getElementById('fit-visual').hidden=false;
+  renderFitVisual();
+}
+function changeGroups(delta){
+  fitGroups=Math.max(0,Math.min(Math.floor(fitPartial/DSR)+1,fitGroups+delta));
+  renderFitVisual();
+}
+function resetGroups(){fitGroups=0;renderFitVisual();}
+function renderFitVisual(){
+  if(fitPartial===null||document.getElementById('fit-visual').hidden)return;
+  const partial=fitPartial,divisor=DSR,q=Math.floor(partial/divisor),limit=q+1;
+  const svg=document.getElementById('fit-chart');
+  const width=Math.max(240,svg.getBoundingClientRect().width),left=16,right=24,plot=width-left-right;
+  const extent=Math.max(partial*2,limit*divisor,1),scale=plot/extent;
+  const x=n=>left+n*scale;
+  const format=n=>String(n);
+  const topY=29,bottomY=105,barH=24;
+  svg.setAttribute('viewBox',`0 0 ${width} 170`);
+  const occupied=fitGroups*divisor,remaining=partial-occupied;
+  const description=`Riga superiore: intervalli da ${partial}, con segni a ${partial} e ${partial*2}. Riga inferiore: gruppi da ${divisor}. Hai aggiunto ${fitGroups} gruppi, che arrivano a ${occupied}. Il limite da non superare è ${partial}.`;
+  let html=`<title id="fit-chart-title">Confronto tra ${partial} e i gruppi da ${divisor}</title><desc id="fit-chart-desc">${description}</desc>`;
+  html+=`<text x="${left}" y="16" font-size="12" fill="#5e624a">Il numero da dividere: ${partial}</text>`;
+  // Il secondo intervallo mantiene visibili anche 24, 48, ... sulla riga superiore.
+  if(partial>0){
+    for(let i=0;i<2;i++)html+=`<rect data-partial-block="${i}" x="${x(i*partial)}" y="${topY}" width="${partial*scale}" height="${barH}" fill="${i===0?'#f4d98e':'#fbf1d7'}" stroke="#b88a2f" ${i===1?'stroke-dasharray="4 3"':''}/>`;
+  }else{
+    html+=`<circle cx="${left}" cy="${topY+barH/2}" r="4" fill="#b88a2f"/>`;
+  }
+  html+=`<text x="${left}" y="91" font-size="12" fill="#355f4b">I gruppi del divisore: ${divisor} alla volta</text>`;
+  for(let i=0;i<limit;i++){
+    const active=i<fitGroups,over=(i+1)*divisor>partial;
+    html+=`<rect data-divisor-block="${i+1}" x="${x(i*divisor)}" y="${bottomY}" width="${divisor*scale}" height="${barH}" fill="${active?(over?'#f4c6af':'#a9cfae'):'#f0f4eb'}" stroke="${over?'#ae6240':'#517b60'}" ${over?'stroke-dasharray="4 3"':''}/>`;
+    if(divisor*scale>48)html+=`<text x="${x((i+.5)*divisor)}" y="${bottomY+16}" text-anchor="middle" font-size="12" fill="#355343">${divisor}</text>`;
+  }
+  // Non affollare le unità quando i numeri sono grandi: la scala resta esatta.
+  const showUnits=scale>=4&&extent<=240;
+  if(showUnits){
+    for(let n=1;n<extent;n++){
+      if(n<partial*2)html+=`<path d="M${x(n)} ${topY+barH-5}v5" stroke="#aa8e52" stroke-width=".7"/>`;
+      if(n<limit*divisor)html+=`<path d="M${x(n)} ${bottomY+barH-5}v5" stroke="#7a9980" stroke-width=".7"/>`;
+    }
+  }
+  const label=(n,y,color='#496454')=>`<text x="${x(n)}" y="${y}" text-anchor="middle" font-size="12" fill="${color}">${format(n)}</text>`;
+  html+=label(0,69);
+  if(partial>0)html+=label(partial,69,'#855c16')+label(partial*2,69,'#855c16');
+  // Se i multipli sono ravvicinati, alternare due righe per le etichette essenziali.
+  const labelWidth=String(limit*divisor).length*7+10;
+  const stride=Math.max(1,Math.ceil(labelWidth/(divisor*scale)));
+  const labels=new Set([0,q,limit]);
+  for(let i=0;i<=limit;i+=stride)if(Math.abs(i-q)>=stride&&Math.abs(i-limit)>=stride)labels.add(i);
+  for(const i of [...labels].sort((a,b)=>a-b))html+=label(i*divisor,i===limit?163:146);
+  html+=`<line data-limit="${partial}" x1="${x(partial)}" x2="${x(partial)}" y1="23" y2="134" stroke="#a36d1e" stroke-width="2" stroke-dasharray="4 3"/>`;
+  svg.innerHTML=html;
+  document.querySelector('#fit-visual .fit-caption').textContent=showUnits?'Le due righe hanno la stessa scala. Ogni tacca piccola vale 1.':'Le due righe hanno la stessa scala. Le tacche indicano i multipli; le unità sono troppo piccole per mostrarle tutte.';
+  document.getElementById('fit-minus').disabled=fitGroups===0;
+  document.getElementById('fit-reset').disabled=fitGroups===0;
+  document.getElementById('fit-plus').disabled=fitGroups===limit;
+  const status=document.getElementById('fit-status');
+  status.className='fit-status'+(remaining<0?' over':'');
+  status.textContent=fitGroups===0?`Aggiungi un gruppo da ${divisor} e confrontalo con il segno di ${partial}.`:remaining<0?`${fitGroups} gruppi arrivano a ${occupied}: superi ${partial} di ${-remaining}. Un gruppo di troppo!`:remaining===0?`${fitGroups} ${fitGroups===1?'gruppo arriva':'gruppi arrivano'} a ${occupied}: proprio ${partial}, senza avanzare nulla.`:`${fitGroups} ${fitGroups===1?'gruppo arriva':'gruppi arrivano'} a ${occupied}: restano ${remaining} per arrivare a ${partial}.`;
+}
+new ResizeObserver(()=>renderFitVisual()).observe(document.getElementById('fit-chart'));
+
 function finalize(){
+  document.getElementById('fit-visual').hidden=true;
   const lastR=steps[steps.length-1].r;const q=partialQuotient.join('');
   document.getElementById('tabellina').style.display='none';
   document.getElementById('step-hint').textContent='';
@@ -274,7 +365,7 @@ function setMsg(txt,ok){
   el.className='msg'+(ok===true?' ok':ok===false?' err':'');
 }
 
-startGame();
+document.getElementById('division-form').addEventListener('submit',e=>{e.preventDefault();startGame();});
 </script>
 </body>
 </html>
