@@ -5,6 +5,8 @@
 <title>Contiamo con le mani · Matematiche non si nasce</title>
 <style>
 :root{--ink:#293e3c;--muted:#697873;--green:#326957;--paper:#f8f7f2;--line:#dfe5dc}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}[hidden]{display:none!important}button,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.45;cursor:default}:focus-visible{outline:3px solid #be7e2e;outline-offset:4px}header,main{max-width:1200px;margin:auto;padding:0 26px}.brand{display:flex;align-items:center;gap:12px;padding:18px 0;border-bottom:1px solid var(--line);font-size:14px;font-weight:750}.brand img{width:44px;height:44px;object-fit:contain}.brand a{color:inherit;text-decoration:none}.hero{padding:36px 0 26px}.eyebrow{text-transform:uppercase;color:var(--green);letter-spacing:.17em;font-size:12px;font-weight:750}h1{font-size:clamp(32px,5vw,52px);letter-spacing:-.04em;line-height:1.12;margin:10px 0 16px}h1 span{color:var(--green)}.intro{color:var(--muted);max-width:650px;margin:0;font-size:18px}.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:0 0 22px}.mode-card{border:1px solid #d6e2d8;border-radius:20px;padding:24px;text-align:left;background:#edf3e8;color:var(--ink);display:grid;grid-template-columns:54px 1fr;gap:15px;align-items:start;transition:transform .15s}.mode-card:hover{transform:translateY(-3px)}.mode-card:nth-child(2){background:#fff0da;border-color:#eadac1}.mode-card:nth-child(3){background:#eeebf7;border-color:#ded6ed}.mode-card:nth-child(4){background:#e8f1f5;border-color:#d1e0e6}.mode-icon{font-size:34px}.mode-card strong{font-size:20px;display:block;margin-bottom:6px}.mode-card small{display:block;font-size:15px;line-height:1.5;color:#56645e}.teacher-tools{background:white;border:1px solid var(--line);border-radius:14px;padding:15px 18px;margin-bottom:30px}.teacher-tools summary{cursor:pointer;font-weight:650}.strategies{display:flex;flex-wrap:wrap;gap:8px;padding-top:14px}.btn{border:1px solid #cbd6cc;border-radius:12px;padding:11px 17px;background:white;color:var(--ink);min-height:44px;font-weight:650}.btn.primary{background:var(--green);border-color:var(--green);color:white}.btn.answer{background:#f8e4b9;border-color:#e2c98f}.btn.small{font-size:14px;padding:8px 13px}.toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:16px 0}.toolbar-side{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.mode-title{font-weight:750}.exercise{display:flex;flex-direction:column;align-items:center;min-height:119px;justify-content:center;text-align:center}.prompt{font-size:clamp(28px,4vw,46px);font-weight:750;letter-spacing:-.025em;line-height:1.2}.prompt .result{color:var(--green)}.hint{font-size:14px;color:var(--muted);margin:10px 0 4px}.stage{border:1px solid var(--line);background:#fcfaf6;border-radius:22px;padding:4px 12px;overflow:hidden}#mat{width:100%;max-width:1080px;margin:auto}#mat svg{display:block;width:100%;height:auto}.actions{display:flex;flex-direction:column;align-items:center;gap:14px;padding:18px 0 26px}.action-row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}.feedback{min-height:26px;margin:0;color:var(--green);font-weight:600;text-align:center}.number-grid{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;max-width:790px}.number-grid .btn{min-width:48px}.number-grid .selected{background:var(--green);color:white}.composer{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:16px;color:var(--muted);font-size:14px}.composer select{border:1px solid #cbd6cc;border-radius:9px;background:white;color:var(--ink);padding:7px;min-height:40px}.tip{font-size:13px;color:var(--muted);text-align:center;margin:0 0 16px}footer{max-width:1200px;margin:10px auto 0;padding:20px 26px;font-size:13px;color:var(--muted);border-top:1px solid var(--line)}@media(max-width:640px){header,main{padding:0 16px}.mode-grid{grid-template-columns:1fr}.mode-card{padding:18px;grid-template-columns:42px 1fr}.mode-card strong{font-size:18px}.hero{padding-top:24px}.toolbar{gap:12px}.stage{padding:0;border-radius:12px}.btn{font-size:14px;padding:10px 12px}.hint{font-size:13px}.mode-icon{font-size:29px}.teacher-tools{font-size:14px}}@media(prefers-reduced-motion:reduce){.mode-card{transition:none}}
+
+.mode-grid{grid-template-areas:"riconosci strategie" "esplora operazioni"}.mode-card[data-mode=riconosci]{grid-area:riconosci}.mode-card[data-mode=esplora]{grid-area:esplora}.mode-card[data-mode=strategie]{grid-area:strategie}.mode-card[data-mode=operazioni]{grid-area:operazioni}.strategy-intro{padding:16px 0 24px}.strategy-intro h1{font-size:clamp(30px,4vw,43px)}.all-strategies{display:flex;justify-content:space-between;gap:20px;align-items:center;background:#eeebf7;border:1px solid #ded6ed;border-radius:18px;padding:22px;margin:0 0 22px}.all-strategies strong{font-size:20px}.all-strategies p{margin:6px 0 0;color:var(--muted);font-size:15px}.all-strategies .btn{flex-shrink:0}.strategy-panel{background:white;border:1px solid var(--line);border-radius:18px;padding:24px;margin-bottom:26px}.strategy-panel h2{font-size:22px;margin:0 0 5px}.strategy-panel>.hint{text-align:left;margin:0}.strategy-panel h3{font-size:15px;color:var(--muted);margin:24px 0 10px}.strategy-buttons{display:flex;gap:10px;flex-wrap:wrap}.strategy-choice.chosen{background:#e3f0e6;border-color:var(--green);box-shadow:inset 0 0 0 1px var(--green);color:#24533f}.strategy-launch{border-top:1px solid var(--line);margin-top:24px;padding-top:14px;text-align:center}.strategy-launch>p{color:var(--muted);font-size:14px}.strategy-launch .hint{margin-top:12px}@media(max-width:640px){.mode-grid{grid-template-areas:"riconosci" "esplora" "strategie" "operazioni"}.all-strategies{align-items:stretch;flex-direction:column;padding:18px}.strategy-panel{padding:18px}.strategy-launch .action-row{flex-direction:column}.strategy-launch .btn{width:100%}}
 </style></head>
 <body>
 <header><div class="brand"><img src="logo.png" alt="Logo"><a href="https://matematichenonsinasce.com/">Matematiche non si nasce</a></div></header>
@@ -15,14 +17,14 @@ const STR = {
   uno:   { nome: 'Aggiungi o togli 1', colore: '#ffb020', fondo: '#fff1cc', tip: 'Aggiungere 1 significa andare al numero successivo; togliere 1 significa tornare al numero precedente.' },
   zero:  { nome: 'Aggiungi o togli 0', colore: '#2fb47a', fondo: '#d6f5e6', tip: 'Aggiungere o togliere 0 non cambia il numero.' },
   due:   { nome: 'Aggiungi o togli 2', colore: '#2d9be0', fondo: '#d6ecff', tip: 'Aggiungere 2 significa andare avanti di due; togliere 2 significa tornare indietro di due.' },
-  doppi: { nome: 'Raddoppiamento', colore: '#ec5f86', fondo: '#ffdbe6', tip: 'Un doppio è la somma di due numeri uguali. Dai doppi si arriva ai numeri vicini.' },
+  doppi: { nome: 'I doppi', colore: '#ec5f86', fondo: '#ffdbe6', tip: 'Un doppio è la somma di due numeri uguali. Dai doppi si arriva ai numeri vicini.' },
   c5:    { nome: 'Combinazioni con il 5', colore: '#8b62d9', fondo: '#e8dcff', tip: 'Ci sono coppie di numeri che fanno 5: 1 e 4, 2 e 3, e così via.' },
   c6:    { nome: 'Combinazioni con il 6', colore: '#18a8a6', fondo: '#d0f4f2', tip: 'Ci sono coppie di numeri che fanno 6: 1 e 5, 2 e 4, 3 e 3.' },
   c7:    { nome: 'Combinazioni con il 7', colore: '#7cb82f', fondo: '#e6f5c9', tip: 'Ci sono coppie di numeri che fanno 7: 1 e 6, 2 e 5, 3 e 4.' },
   c8:    { nome: 'Combinazioni con il 8', colore: '#f47c2c', fondo: '#ffe3d0', tip: 'Ci sono coppie di numeri che fanno 8: 1 e 7, 2 e 6, 3 e 5, 4 e 4.' },
   c9:    { nome: 'Combinazioni con il 9', colore: '#4f6fe0', fondo: '#dfe5ff', tip: 'Ci sono coppie di numeri che fanno 9: 1 e 8, 2 e 7, 3 e 6, 4 e 5.' },
-  p5:    { nome: 'Addizioni oltre il 5', colore: '#e6a817', fondo: '#fff3d4', tip: 'Si fa una tappa al 5 (o al 10) e poi si aggiunge quello che resta.' },
-  pd:    { nome: 'Addizioni oltre il 10', colore: '#14a0c8', fondo: '#d2f1fb', tip: 'Si arriva alla decina (10) e poi si aggiunge quello che resta.' }
+  p5:    { nome: 'Passaggio al 5', colore: '#e6a817', fondo: '#fff3d4', tip: 'Si fa una tappa al 5 (o al 10) e poi si aggiunge quello che resta.' },
+  pd:    { nome: 'Passaggio alla decina', colore: '#14a0c8', fondo: '#d2f1fb', tip: 'Si arriva alla decina (10) e poi si aggiunge quello che resta.' }
 };
 
 function f(a, op, b, s, step) {
@@ -48,16 +50,16 @@ const GIOCHI = [
     deck: () => { const r = []; for (let a = 0; a <= 9; a++) { r.push(f(a, '+', 0, 'zero')); r.push(f(a, '-', 0, 'zero')); } return r; } },
   { id: 'due', nome: 'Aggiungi o togli 2', desc: 'Due in avanti o indietro', col: STR.due.colore, fondo: STR.due.fondo,
     deck: () => { const r = []; for (let a = 0; a <= 9; a++) r.push(f(a, '+', 2, 'due')); for (let a = 2; a <= 10; a++) r.push(f(a, '-', 2, 'due')); return r; } },
-  { id: 'doppi', nome: 'Raddoppiamento', desc: 'Il doppio e i numeri vicini', col: STR.doppi.colore, fondo: STR.doppi.fondo,
+  { id: 'doppi', nome: 'I doppi', desc: 'Il doppio e i numeri vicini', col: STR.doppi.colore, fondo: STR.doppi.fondo,
     deck: () => { const r = []; for (let a = 0; a <= 9; a++) r.push(f(a, '+', a, 'doppi')); for (let a = 1; a <= 9; a++) r.push(f(2 * a, '-', a, 'doppi')); return r; } },
   { id: 'c5', nome: 'Combinazioni con il 5', desc: 'Coppie che fanno 5', col: STR.c5.colore, fondo: STR.c5.fondo, deck: () => combN(5, 'c5') },
   { id: 'c6', nome: 'Combinazioni con il 6', desc: 'Coppie che fanno 6', col: STR.c6.colore, fondo: STR.c6.fondo, deck: () => combN(6, 'c6') },
   { id: 'c7', nome: 'Combinazioni con il 7', desc: 'Coppie che fanno 7', col: STR.c7.colore, fondo: STR.c7.fondo, deck: () => combN(7, 'c7') },
   { id: 'c8', nome: 'Combinazioni con il 8', desc: 'Coppie che fanno 8', col: STR.c8.colore, fondo: STR.c8.fondo, deck: () => combN(8, 'c8') },
   { id: 'c9', nome: 'Combinazioni con il 9', desc: 'Coppie che fanno 9', col: STR.c9.colore, fondo: STR.c9.fondo, deck: () => combN(9, 'c9') },
-  { id: 'p5', nome: 'Addizioni oltre il 5', desc: 'Le dita si alzano senza interruzioni', col: STR.p5.colore, fondo: STR.p5.fondo,
+  { id: 'p5', nome: 'Passaggio al 5', desc: 'Le dita si alzano senza interruzioni', col: STR.p5.colore, fondo: STR.p5.fondo,
     deck: () => P5.map(([a, b]) => f(a, '+', b, 'p5', 5)) },
-  { id: 'pd', nome: 'Addizioni oltre il 10', desc: 'Le dita continuano oltre la prima coppia di mani', col: STR.pd.colore, fondo: STR.pd.fondo,
+  { id: 'pd', nome: 'Passaggio alla decina', desc: 'Le dita continuano oltre la prima coppia di mani', col: STR.pd.colore, fondo: STR.pd.fondo,
     deck: () => PD.map(([a, b]) => f(a, '+', b, 'pd', 10)) },
   { id: 'misto', nome: 'Riepilogo', desc: 'Tutte le combinazioni, in ordine casuale', col: '#7a7a7a', fondo: '#ececec', misto: true,
     deck: () => uniq([].concat(...GIOCHI.filter(g => !g.misto).map(g => g.deck()))) }
@@ -237,17 +239,29 @@ const Mani = (() => {
 })();
 
 
-const shuffle = a => {a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+function randomIndex(limit){
+  // Use the browser's fresh entropy, including in embedded previews.
+  if(globalThis.crypto&&typeof globalThis.crypto.getRandomValues==='function'){
+    const sample=new Uint32Array(1),ceiling=Math.floor(4294967296/limit)*limit;
+    do{globalThis.crypto.getRandomValues(sample);}while(sample[0]>=ceiling);
+    return sample[0]%limit;
+  }
+  return Math.floor(Math.random()*limit);
+}
+const shuffle = a => {a=a.slice();for(let i=a.length-1;i>0;i--){const j=randomIndex(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;};
 const VELOCITA=[.6,1,2.2], NOMI_VEL=['lenta','normale','veloce'];
-const stato={mode:'menu',strategy:'libere',history:[],index:-1,deck:[],busy:false,revealed:false,speed:1,phase:'',customA:8,customB:4,customOp:'+'};
+const stato={mode:'menu',strategy:'libere',history:[],index:-1,deck:[],busy:false,revealed:false,speed:1,phase:'',customA:8,customB:4,customOp:'+',selectedStrategies:[],activeStrategies:[]};
 let runToken=0,animation=Promise.resolve();
 const card=()=>stato.history[stato.index];
 const symbol=op=>op==='+'?'+':'−';
 function allOperations(){const cards=[];for(let a=0;a<=20;a++)for(let b=0;b<=20;b++){if(a+b<=20)cards.push(f(a,'+',b,'uno'));if(a-b>=0)cards.push(f(a,'-',b,'due'));}return cards;}
+function selectedOperations(ids){
+  return uniq(GIOCHI.filter(g=>!g.misto&&ids.includes(g.id)).flatMap(g=>g.deck()));
+}
 function nextCard(){
   if(!stato.deck.length){
     const previous=card();
-    const source=stato.mode==='riconosci'?Array.from({length:21},(_,n)=>({n,key:'n'+n})):stato.strategy==='libere'?allOperations():GIOCHI.find(g=>g.id===stato.strategy).deck();
+    const source=stato.mode==='riconosci'?Array.from({length:21},(_,n)=>({n,key:'n'+n})):stato.strategy==='libere'?allOperations():stato.strategy==='selezionate'?selectedOperations(stato.activeStrategies):GIOCHI.find(g=>g.id===stato.strategy).deck();
     stato.deck=shuffle(source);
     if(previous&&stato.deck.length>1&&stato.deck[stato.deck.length-1].key===previous.key)[stato.deck[0],stato.deck[stato.deck.length-1]]=[stato.deck[stato.deck.length-1],stato.deck[0]];
   }
@@ -289,10 +303,13 @@ async function animateCard(reset=true, applyOperation=false){
   await animation;
 }
 async function start(mode,strategy='libere'){
+  if(strategy==='selezionate'&&!stato.selectedStrategies.length)return;
+  if(strategy==='selezionate')stato.activeStrategies=stato.selectedStrategies.slice();
   ++runToken;Mani.abort();await animation;
   stato.mode=mode;stato.strategy=strategy;stato.history=[];stato.index=-1;stato.deck=[];stato.revealed=false;
-  const first=mode==='esplora'?{n:0,key:'n0'}:mode==='operazioni'&&strategy==='libere'?f(8,'+',4,'pd'):null;
+  const first=mode==='esplora'?{n:0,key:'n0'}:null;
   stato.history.push(first||nextCard());stato.index=0;
+  if(mode==='operazioni'){stato.customA=card().a;stato.customB=card().b;stato.customOp=card().op;}
   render();await animateCard();
 }
 async function menu(){++runToken;Mani.abort();await animation;stato.mode='menu';stato.busy=false;render();}
@@ -326,26 +343,61 @@ async function customOperation(){
   stato.customA=a;stato.customB=b;stato.customOp=op;
   stato.history=stato.history.slice(0,stato.index+1);stato.history.push(c);stato.index++;await animateCard();
 }
-function modeTitle(){return stato.mode==='riconosci'?'Che numero è?':stato.mode==='esplora'?'Esplora le mani':stato.strategy==='misto'?'Riepilogo casuale':stato.strategy==='libere'?'Addizioni e sottrazioni':GIOCHI.find(g=>g.id===stato.strategy).nome;}
+async function openStrategies(){
+  ++runToken;Mani.abort();await animation;
+  stato.mode='strategie';stato.busy=false;render();
+}
+function toggleStrategy(id){
+  if(!GIOCHI.some(g=>!g.misto&&g.id===id))return;
+  if(stato.selectedStrategies.includes(id))stato.selectedStrategies=stato.selectedStrategies.filter(value=>value!==id);
+  else stato.selectedStrategies.push(id);
+  render();
+}
+function clearStrategies(){stato.selectedStrategies=[];render();}
+function modeTitle(){
+  if(stato.mode==='riconosci')return 'Che numero è?';
+  if(stato.mode==='esplora')return 'Esplora le mani';
+  if(stato.strategy==='libere')return 'Addizioni e sottrazioni';
+  if(stato.strategy==='misto')return 'Strategie · Tutte in ordine casuale';
+  if(stato.strategy==='selezionate')return stato.activeStrategies.length===1?'Strategie · '+GIOCHI.find(g=>g.id===stato.activeStrategies[0]).nome:'Strategie · '+stato.activeStrategies.length+' selezionate';
+  return GIOCHI.find(g=>g.id===stato.strategy).nome;
+}
 function menuHTML(){return `<div class="hero"><div class="eyebrow">Per contare, capire, riprovare</div><h1>I numeri prendono <span>forma.</span></h1><p class="intro">Quattro mani affiancate per vedere i gruppi di cinque. Scegli un’attività e ragioniamo insieme, senza fretta.</p></div>
 <div class="mode-grid">
-<button class="mode-card" onclick="start('riconosci')"><span class="mode-icon" aria-hidden="true">👀</span><span><strong>Che numero è?</strong><small>Le dita sono già alzate tutte insieme. La classe riconosce il numero senza contare il movimento.</small></span></button>
-<button class="mode-card" onclick="start('operazioni')"><span class="mode-icon" aria-hidden="true">＋</span><span><strong>Addizioni e sottrazioni</strong><small>Si forma il primo numero. La classe prevede il risultato, poi controlla con le mani.</small></span></button>
-<button class="mode-card" onclick="start('operazioni','misto')"><span class="mode-icon" aria-hidden="true">🎲</span><span><strong>Riepilogo casuale</strong><small>Tutte le attività mescolate, per allenarsi con operazioni sempre diverse.</small></span></button>
-<button class="mode-card" onclick="start('esplora')"><span class="mode-icon" aria-hidden="true">✋</span><span><strong>Esplora liberamente</strong><small>Scegli un numero da 0 a 20. Le mani lo costruiscono un dito alla volta.</small></span></button>
-</div><details class="teacher-tools"><summary>Vuoi allenare una strategia precisa?</summary><div class="strategies">${GIOCHI.filter(g=>g.id!=='misto').map(g=>`<button class="btn small" onclick="start('operazioni','${g.id}')">${g.nome}</button>`).join('')}</div></details>`;}
+<button class="mode-card" data-mode="riconosci" onclick="start('riconosci')"><span class="mode-icon" aria-hidden="true">👀</span><span><strong>Che numero è?</strong><small>Le dita sono già alzate tutte insieme. La classe riconosce il numero senza contare il movimento.</small></span></button>
+<button class="mode-card" data-mode="esplora" onclick="start('esplora')"><span class="mode-icon" aria-hidden="true">✋</span><span><strong>Esplora liberamente</strong><small>Scegli un numero da 0 a 20. Le mani lo costruiscono un dito alla volta.</small></span></button>
+<button class="mode-card" data-mode="strategie" onclick="openStrategies()"><span class="mode-icon" aria-hidden="true">🧠</span><span><strong>Strategie</strong><small>Seleziona o utilizza tutte le strategie che abbiamo imparato.</small></span></button>
+<button class="mode-card" data-mode="operazioni" onclick="start('operazioni')"><span class="mode-icon" aria-hidden="true">＋</span><span><strong>Addizioni e sottrazioni</strong><small>Si forma il numero e cerchiamo una strada per trovare il risultato.</small></span></button>
+</div>`;}
+function strategiesHTML(){
+  const choice=g=>`<button class="btn strategy-choice ${stato.selectedStrategies.includes(g.id)?'chosen':''}" data-strategy="${g.id}" aria-pressed="${stato.selectedStrategies.includes(g.id)}" onclick="toggleStrategy('${g.id}')">${stato.selectedStrategies.includes(g.id)?'✓ ':''}${g.nome}</button>`;
+  const base=GIOCHI.filter(g=>['uno','due','zero','doppi'].includes(g.id));
+  base.sort((a,b)=>['uno','due','doppi','zero'].indexOf(a.id)-['uno','due','doppi','zero'].indexOf(b.id));
+  const combinations=GIOCHI.filter(g=>/^c[5-9]$/.test(g.id));
+  const passages=GIOCHI.filter(g=>['p5','pd'].includes(g.id));
+  const count=selectedOperations(stato.selectedStrategies).length;
+  return `<div class="toolbar"><button class="btn small" onclick="menu()">‹ Menu</button><span class="mode-title">🧠 Strategie</span></div>
+  <div class="strategy-intro"><h1>Strategie</h1></div>
+  <div class="all-strategies"><div><strong>Tutte le strategie, in ordine casuale</strong><p>Un riepilogo con le operazioni delle diverse strategie mescolate fra loro.</p></div><button class="btn primary" id="all-strategies" onclick="start('operazioni','misto')">Usa tutte le strategie</button></div>
+  <section class="strategy-panel" aria-label="Seleziona le strategie"><h2>Vuoi allenare una strategia precisa?</h2><p class="hint">Scegli una o più strategie con i pulsanti qui sotto.</p>
+    <h3>Piccoli cambiamenti e doppi</h3><div class="strategy-buttons">${base.map(choice).join('')}</div>
+    <h3>Combinazioni con alcuni numeri</h3><div class="strategy-buttons">${combinations.map(choice).join('')}</div>
+    <h3>Passaggi</h3><div class="strategy-buttons">${passages.map(choice).join('')}</div>
+    <div class="strategy-launch"><p id="strategy-selection" role="status" aria-live="polite">${stato.selectedStrategies.length?(stato.selectedStrategies.length===1?'1 strategia selezionata':stato.selectedStrategies.length+' strategie selezionate')+' · '+count+' operazioni diverse':'Seleziona almeno una strategia.'}</p><div class="action-row"><button class="btn" onclick="clearStrategies()" ${stato.selectedStrategies.length?'':'disabled'}>Deseleziona tutte</button><button class="btn primary" id="start-selected" onclick="start('operazioni','selezionate')" ${stato.selectedStrategies.length?'':'disabled'}>Esercitati sulle selezionate</button></div><p class="hint">Le operazioni delle strategie scelte saranno proposte in ordine casuale.</p></div>
+  </section>`;
+}
 function composer(){const options=selected=>Array.from({length:21},(_,n)=>`<option ${n===selected?'selected':''}>${n}</option>`).join('');return `<details class="teacher-tools" style="width:min(100%,680px);margin:0"><summary>Scegli tu un’operazione</summary><div class="composer"><select id="operand-a" aria-label="Primo numero">${options(stato.customA)}</select><select id="operation" aria-label="Operazione"><option value="+" ${stato.customOp==='+'?'selected':''}>+</option><option value="-" ${stato.customOp==='-'?'selected':''}>−</option></select><select id="operand-b" aria-label="Secondo numero">${options(stato.customB)}</select><button class="btn small primary" onclick="customOperation()">Mostra con le mani</button></div><p id="composer-message" class="hint" role="status"></p></details>`;}
 function render(){
-  const isMenu=stato.mode==='menu';document.querySelector('#menu').hidden=!isMenu;document.querySelector('#workspace').hidden=isMenu;
-  if(isMenu){document.querySelector('#menu').innerHTML=menuHTML();return;}
+  const isMenu=stato.mode==='menu'||stato.mode==='strategie';document.querySelector('#menu').hidden=!isMenu;document.querySelector('#workspace').hidden=isMenu;
+  if(isMenu){document.querySelector('#menu').innerHTML=stato.mode==='strategie'?strategiesHTML():menuHTML();return;}
   const c=card();
-  document.querySelector('#toolbar').innerHTML=`<div class="toolbar"><div class="toolbar-side"><button class="btn small" onclick="menu()">‹ Menu</button><span class="mode-title">${modeTitle()}</span></div><button class="btn small" onclick="cycleSpeed()">Velocità: ${NOMI_VEL[stato.speed]}</button></div>`;
+  document.querySelector('#toolbar').innerHTML=`<div class="toolbar"><div class="toolbar-side"><button class="btn small" onclick="menu()">‹ Menu</button><span class="mode-title">${modeTitle()}</span>${stato.mode==='operazioni'&&stato.strategy!=='libere'?'<button class="btn small" onclick="openStrategies()">Cambia strategie</button>':''}</div><button class="btn small" onclick="cycleSpeed()">Velocità: ${NOMI_VEL[stato.speed]}</button></div>`;
   const prompt=stato.mode==='riconosci'?(stato.revealed?`<span class="result">${c.n}</span>`:'Che numero vedi?'):stato.mode==='esplora'?`<span class="result">${c.n}</span>`:`${c.a} ${symbol(c.op)} ${c.b}${stato.revealed?` = <span class="result">${c.res}</span>`:''}`;
   document.querySelector('#exercise').innerHTML=`<div class="prompt">${prompt}</div><p class="hint">${stato.mode==='riconosci'?'Osserva le mani e rispondi a voce. Non occorre scrivere.':stato.mode==='esplora'?'Dal pollice al mignolo: ogni mano completa vale cinque.':(c.op==='-'?'Togliamo prima gruppi completi di dieci o cinque, poi le dita da destra. Le dita rimaste non si spostano.':'Prevedi il risultato: aggiungiamo gruppi di cinque o dieci sulle mani libere, poi completiamo la mano già aperta.')}</p>`;
-  document.querySelector('#actions').innerHTML=`<p class="feedback" role="status">${stato.busy?stato.phase:stato.phase==='ready'?'Premi Avanti: il primo numero apparirà tutto insieme.':stato.phase==='predict'?`Le mani mostrano ${c.a}. Quanto farà ${c.a} ${symbol(c.op)} ${c.b}?`:stato.revealed?(stato.mode==='riconosci'?`Sono ${c.n} dita.`:`${c.a} ${symbol(c.op)} ${c.b} = ${c.res}`):'Osserviamo e ragioniamo insieme.'}</p><div class="action-row"><button class="btn" onclick="previous()" ${stato.index<=0?'disabled':''}>‹ Precedente</button><button class="btn" onclick="repeat()">↻ Ripeti</button>${stato.mode!=='esplora'?`<button class="btn answer" onclick="showAnswer()" ${stato.mode==='operazioni'&&stato.busy?'disabled':''}>${stato.phase==='ready'?'Avanti':stato.phase==='predict'?'Mostra risultato':stato.revealed?'Nascondi risposta':stato.mode==='riconosci'?'Mostra risposta':'Mostra risultato'}</button>`:''}<button class="btn primary" onclick="next()">Successivo ›</button></div>${stato.mode==='esplora'?`<div class="number-grid">${Array.from({length:21},(_,n)=>`<button class="btn ${c.n===n?'selected':''}" onclick="chooseNumber(${n})">${n}</button>`).join('')}</div>`:stato.mode==='operazioni'?composer():''}`;
+  document.querySelector('#actions').innerHTML=`<p class="feedback" role="status">${stato.busy?stato.phase:stato.phase==='ready'?'Premi Avanti: il primo numero apparirà tutto insieme.':stato.phase==='predict'?`Le mani mostrano ${c.a}. Qual è il risultato di ${c.a} ${symbol(c.op)} ${c.b}?`:stato.revealed?(stato.mode==='riconosci'?`Sono ${c.n} dita.`:`${c.a} ${symbol(c.op)} ${c.b} = ${c.res}`):'Osserviamo e ragioniamo insieme.'}</p><div class="action-row"><button class="btn" onclick="previous()" ${stato.index<=0?'disabled':''}>‹ Precedente</button><button class="btn" onclick="repeat()">↻ Ripeti</button>${stato.mode!=='esplora'?`<button class="btn answer" onclick="showAnswer()" ${stato.mode==='operazioni'&&stato.busy?'disabled':''}>${stato.phase==='ready'?'Avanti':stato.phase==='predict'?'Mostra risultato':stato.revealed?'Nascondi risposta':stato.mode==='riconosci'?'Mostra risposta':'Mostra risultato'}</button>`:''}<button class="btn primary" onclick="next()">Successivo ›</button></div>${stato.mode==='esplora'?`<div class="number-grid">${Array.from({length:21},(_,n)=>`<button class="btn ${c.n===n?'selected':''}" onclick="chooseNumber(${n})">${n}</button>`).join('')}</div>`:stato.mode==='operazioni'&&stato.strategy==='libere'?composer():''}`;
 }
 document.addEventListener('keydown',event=>{
-  if(stato.mode==='menu'||['INPUT','SELECT','TEXTAREA','BUTTON','SUMMARY'].includes(event.target.tagName))return;
+  if(['menu','strategie'].includes(stato.mode)||['INPUT','SELECT','TEXTAREA','BUTTON','SUMMARY'].includes(event.target.tagName))return;
   if(event.key==='ArrowRight'){event.preventDefault();next();}
   if(event.key==='ArrowLeft'){event.preventDefault();previous();}
   if(event.key===' '){event.preventDefault();repeat();}
