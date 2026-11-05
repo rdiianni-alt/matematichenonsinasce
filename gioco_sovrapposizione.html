@@ -1,247 +1,79 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gioco di sovrapposizione</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gioco di sovrapposizione · Matematiche non si nasce</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:sans-serif;background:#1a1a2e;color:#eee;padding:1.5rem;}
-@media(max-width:480px){
-  body{padding:.75rem;}
-  .canvas-wrap{height:140px;}
-  .canvas-wrap svg{width:130px;height:130px;}
-  .tile{width:68px;height:68px;}
-  .slot{width:46px;height:46px;}
-  h1{font-size:15px;}
-  .logo span{font-size:13px;}
-  .logo img{width:44px;height:44px;}
-  .section-label{font-size:12px;}
-  button{font-size:12px;padding:5px 10px;}
-}
-h1{font-size:26px;font-weight:700;margin-bottom:1.25rem;text-align:center;letter-spacing:1px;}
-.logo{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:1.25rem;text-decoration:none;}
-.logo img{width:60px;height:60px;object-fit:contain;border-radius:50%;}
-.logo span{font-size:15px;font-weight:500;color:#ccc;}
-.top{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;}
-.panel{background:#12122a;border:1px solid #333;border-radius:12px;padding:1rem;}
-.panel-title{font-size:13px;color:#888;margin-bottom:.75rem;text-align:center;}
-.canvas-wrap{display:flex;align-items:center;justify-content:center;height:210px;}
-.tiles-grid{display:flex;gap:.75rem;flex-wrap:wrap;justify-content:center;margin-bottom:1.5rem;}
-.tile{width:100px;height:100px;border:1px solid #444;border-radius:8px;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;background:#12122a;transition:transform .1s,border-color .1s;}
-.tile:hover{border-color:#aaa;}
-.tile.disabled{opacity:.35;cursor:default;pointer-events:none;}
-.section-label{font-size:13px;color:#888;text-align:center;margin-bottom:.5rem;}
-.order-row{display:flex;gap:.5rem;align-items:flex-start;justify-content:center;margin-bottom:1.25rem;flex-wrap:wrap;}
-.slot-wrap{display:flex;flex-direction:column;align-items:center;}
-.slot{width:64px;height:64px;border:1px dashed #555;border-radius:8px;
-  display:flex;align-items:center;justify-content:center;background:#0d0d1f;}
-.slot-label{font-size:11px;color:#666;text-align:center;margin-top:4px;}
-.btn-row{display:flex;gap:.75rem;justify-content:center;margin-bottom:1rem;}
-button{font-family:sans-serif;font-size:13px;padding:6px 14px;border-radius:8px;
-  border:1px solid #555;background:transparent;color:#ccc;cursor:pointer;}
-button:hover{background:#1e1e3a;}
-button:active{transform:scale(0.98);}
-#msg{text-align:center;font-size:15px;min-height:22px;}
-#msg.ok{color:#4caf50;}
-#msg.err{color:#e57373;}
+*{box-sizing:border-box}body{margin:0;background:#f6f4ef;color:#263d43;font-family:'Segoe UI',sans-serif;padding:20px 24px 36px}button,select{font:inherit}button{cursor:pointer}button:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid #935211;outline-offset:4px}button:disabled{cursor:default}header{text-align:center}header img{width:76px;height:76px;object-fit:contain}header a{display:inline-block}header p{font-size:13px;color:#526970;margin:3px 0 12px}h1{font-size:clamp(26px,4vw,38px);letter-spacing:-1px;margin:0 0 8px}.intro{text-align:center;line-height:1.6;color:#526970;margin:0 0 20px}.app{max-width:1120px;margin:auto}.toolbar{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px}.families{display:flex;gap:5px;background:#e9e8e1;padding:5px;border-radius:14px}.families button{border:0;border-radius:10px;background:transparent;padding:11px 18px;color:#40585e;min-height:46px}.families button[aria-pressed=true]{background:#284e53;color:white;box-shadow:0 2px 5px #263d4320}.new{border:1px solid #acbfbd;background:white;color:#284e53;border-radius:12px;padding:13px 18px;min-height:48px}.top{display:grid;grid-template-columns:1fr 1fr;gap:20px}.panel{border:1px solid #d6dedb;background:#fff;border-radius:22px;overflow:hidden}.panel-head{display:flex;justify-content:space-between;align-items:center;padding:18px 22px 0;gap:10px}.panel h2{font-size:18px;margin:0}.tag{font-size:12px;letter-spacing:.6px;color:#526970}.canvas-wrap{display:flex;align-items:center;justify-content:center;padding:12px 20px 4px;background:radial-gradient(ellipse,#f4f1e9 0%,#fff 70%)}.canvas-wrap svg{width:100%;max-width:330px;aspect-ratio:1;display:block;overflow:visible}.panel-caption{text-align:center;color:#526970;font-size:14px;min-height:38px;padding:0 12px 14px;margin:0;line-height:1.5}.workbench{margin-top:20px;background:#fff;border:1px solid #d6dedb;border-radius:22px;padding:22px}.workbench h2{font-size:17px;margin:0 0 6px;text-align:center}.help{font-size:14px;color:#526970;text-align:center;margin:0 0 16px;line-height:1.5}.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:620px;margin:0 auto 22px}.tile{position:relative;border:1px solid #bccdca;background:#fbfcfb;border-radius:14px;color:#263d43;padding:6px 6px 10px;display:flex;flex-direction:column;align-items:center;gap:3px}.tile:hover:not(:disabled){background:#eef4f2;border-color:#284e53}.tile svg{width:100%;max-width:112px;aspect-ratio:1}.tile .name{font-size:14px;font-weight:600}.tile:disabled{background:#eff2f0;border-style:dashed;color:#526970}.tile:disabled svg{opacity:.4}.used{position:absolute;top:6px;right:7px;background:#284e53;color:white;border-radius:50%;width:22px;height:22px;font-size:13px;display:grid;place-items:center}.stack-label{display:flex;justify-content:space-between;color:#526970;font-size:12px;max-width:620px;margin:0 auto 8px}.order-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;list-style:none;padding:0;max-width:620px;margin:0 auto 18px}.slot{border:1px dashed #acbfbd;background:#f8faf9;border-radius:12px;min-height:92px;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:8px 4px;gap:7px;font-size:13px}.slot.filled{border-style:solid}.slot-name{display:flex;align-items:center;gap:6px;font-weight:600}.dot{width:13px;height:13px;border-radius:50%;display:inline-block}.move{display:flex;gap:6px}.move button{min-width:44px;min-height:36px;background:white;color:#284e53;border:1px solid #acbfbd;border-radius:7px;font-size:17px}.move button:disabled{opacity:.3}.actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}.actions button{min-height:46px;border:1px solid #acbfbd;background:white;color:#284e53;padding:10px 16px;border-radius:10px}.actions button:disabled{color:#758783;background:#f4f6f5}.message{text-align:center;margin:16px 0 0;min-height:26px;font-weight:600;line-height:1.5}.message.ok{color:#216637}.message.err{color:#a23825}.note{color:#526970;font-size:13px;text-align:center;line-height:1.6;margin:18px 0 0}.legend{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}.legend span{display:flex;align-items:center;gap:6px}@media(max-width:620px){body{padding:12px 12px 24px}header img{width:62px;height:62px}.intro{font-size:15px;margin-bottom:14px}.toolbar{gap:8px;margin-bottom:14px}.families button{padding:10px 12px}.top{gap:10px}.panel{border-radius:15px}.panel-head{padding:12px 10px 0;flex-direction:column;align-items:flex-start;gap:4px}.panel h2{font-size:16px}.tag{font-size:10px}.canvas-wrap{padding:8px 4px}.panel-caption{font-size:12px;padding:0 6px 10px;min-height:46px}.workbench{padding:16px 10px;border-radius:16px;margin-top:12px}.tiles,.order-row{gap:7px}.tile{padding:4px 2px 8px;border-radius:10px}.tile .name{font-size:12px}.used{width:18px;height:18px;font-size:11px;right:3px;top:3px}.slot{font-size:11px}.move{gap:3px}.move button{min-width:30px;min-height:40px}.slot-name{gap:3px}.dot{width:10px;height:10px}.note{font-size:12px}}@media(prefers-reduced-motion:no-preference){.tile{transition:background .15s,border-color .15s}.panel{transition:border-color .15s}}
 </style>
 </head>
-<body>
-<a href="https://matematichenonsinasce.com/" class="logo" target="_blank">
-  <img src="https://rdiianni-alt.github.io/matematichenonsinasce/logo.png" alt="Logo Matematiche non si nasce">
-  <span>Matematiche non si nasce</span>
-</a>
-<h1 id="titolo">
-  <span style="color:#E24B4A">G</span><span style="color:#378ADD">i</span><span style="color:#4caf50">o</span><span style="color:#EF9F27">c</span><span style="color:#E24B4A">o</span>
-  <span style="color:#378ADD"> d</span><span style="color:#4caf50">i</span>
-  <span style="color:#EF9F27"> s</span><span style="color:#E24B4A">o</span><span style="color:#378ADD">v</span><span style="color:#4caf50">r</span><span style="color:#EF9F27">a</span><span style="color:#E24B4A">p</span><span style="color:#378ADD">p</span><span style="color:#4caf50">o</span><span style="color:#EF9F27">s</span><span style="color:#E24B4A">i</span><span style="color:#378ADD">z</span><span style="color:#4caf50">i</span><span style="color:#EF9F27">o</span><span style="color:#E24B4A">n</span><span style="color:#378ADD">e</span>
-</h1>
-<div class="top">
-  <div class="panel">
-    <div class="panel-title">Modello</div>
-    <div class="canvas-wrap"><svg id="svg-model" width="190" height="190" viewBox="0 0 190 190"></svg></div>
-  </div>
-  <div class="panel">
-    <div class="panel-title">Composizione</div>
-    <div class="canvas-wrap"><svg id="svg-comp" width="190" height="190" viewBox="0 0 190 190"></svg></div>
-  </div>
+<body><div class="app">
+<header><a href="https://matematichenonsinasce.com/" aria-label="Matematiche non si nasce, pagina iniziale"><img src="logo.png" alt="Logo Matematiche non si nasce"></a><p>Matematiche non si nasce</p><h1>Gioco di sovrapposizione</h1></header>
+<p class="intro">Quattro colori, un piccolo mosaico.<br>Osserva il modello e scopri in quale ordine sovrapporre le tessere.</p>
+<div class="toolbar"><div class="families" role="group" aria-label="Famiglia di forme"><button data-family="rosoni" aria-pressed="true">Rosoni</button><button data-family="geometrie" aria-pressed="false">Geometrie</button><button data-family="orbite" aria-pressed="false">Orbite</button></div><button class="new" id="btn-new">↻ Nuovo modello</button></div>
+<main>
+<div class="top"><section class="panel"><div class="panel-head"><h2>Il modello</h2><span class="tag">OSSERVA I COLORI</span></div><div class="canvas-wrap"><svg id="svg-model" viewBox="0 0 260 260" role="img" aria-label="Modello da ricostruire con tutti e quattro i colori"></svg></div><p class="panel-caption" id="model-caption">Quattro strati, tutti da scoprire.</p></section><section class="panel"><div class="panel-head"><h2>La tua composizione</h2><span class="tag" id="counter">0 DI 4 STRATI</span></div><div class="canvas-wrap"><svg id="svg-comp" viewBox="0 0 260 260" role="img" aria-label="Composizione ancora vuota"></svg></div><p class="panel-caption" id="comp-caption">Scegli la prima tessera: sarà quella sul fondo.</p></section></div>
+<section class="workbench" aria-labelledby="choose-title"><h2 id="choose-title">Costruisci il tuo mosaico</h2><p class="help">Tocca le tessere dal basso verso l’alto. Le aperture lasciano vedere gli strati sotto.</p><div class="tiles" id="tiles" role="group" aria-label="Tessere disponibili"></div><div class="stack-label"><span>FONDO · prima tessera</span><span>ULTIMO STRATO · sopra tutte</span></div><ol class="order-row" id="order-row" aria-label="Ordine degli strati dal fondo alla cima"></ol><div class="actions"><button id="btn-undo">← Togli l’ultima</button><button id="btn-reset">Ricomincia</button></div><p class="message" id="msg" role="status" aria-live="polite" aria-atomic="true"></p></section>
+</main><p class="note">Le tessere sono opache: se un colore scompare, prova a cambiare l’ordine.<br>Usa le frecce sotto gli strati per spostarli. Puoi giocare anche con Tab e Invio.</p>
 </div>
-<div class="section-label">Tessere — clicca nell'ordine dal basso verso l'alto</div>
-<div class="tiles-grid" id="tiles"></div>
-<div class="section-label">Ordine scelto</div>
-<div class="order-row" id="order-row"></div>
-<div class="btn-row">
-  <button id="btn-undo">Rimuovi ultima</button>
-  <button id="btn-reset">Ricomincia</button>
-  <button id="btn-new">Nuovo modello</button>
-</div>
-<div id="msg"></div>
-
 <script>
-const COLORS = ['#E24B4A','#378ADD','#4caf50','#EF9F27'];
-const NAMES  = ['rosso','blu','verde','arancio'];
-
-const SZ = 190;
-const CX = SZ/2, CY = SZ/2;
-const Q  = 130;
-
-// Pool di forme per il buco — tutte centrate, dimensioni calibrate
-const HOLE_TYPES = [
-  {type:'circle', s:38},
-  {type:'circle', s:28},
-  {type:'square', s:42},
-  {type:'square', s:30},
-  {type:'tri',    s:44},
-  {type:'tri',    s:32},
-];
-
-function shuffle(arr){
-  const a=[...arr];
-  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
-  return a;
+'use strict';
+const COLORS=['#dc5651','#357cc3','#25836b','#edb541'];
+const NAMES=['Corallo','Blu','Verde','Oro'];
+const FAMILY_NAMES={rosoni:'Rosone',geometrie:'Mosaico geometrico',orbite:'Orbita'};
+const NS='http://www.w3.org/2000/svg';
+let family='rosoni',game,chosen=[],uid=0;
+const $=id=>document.getElementById(id);
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function svgEl(tag,attrs={}){const e=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))e.setAttribute(k,v);return e}
+function radius(kind,a,phase,petals){
+ if(kind==='flower')return .91+.09*Math.cos(petals*(a-phase));
+ if(kind==='star')return .9+.1*Math.cos(petals*(a-phase));
+ if(kind==='square'){const t=a-phase;return .76/Math.pow(Math.pow(Math.abs(Math.cos(t)),6)+Math.pow(Math.abs(Math.sin(t)),6),1/6)}
+ if(kind==='hexagon'){const t=((a-phase)%(Math.PI/3)+Math.PI/3)%(Math.PI/3)-Math.PI/6;return .86/Math.cos(t)}
+ if(kind==='wave')return .91+.06*Math.cos(3*(a-phase))+.03*Math.sin(2*(a-phase));
+ return 1;
 }
-
-function f(n){return n.toFixed(2);}
-
-function holeClipPath(hole, scale, cx, cy){
-  const s = hole.s * scale;
-  if(hole.type==='circle') return {tag:'circle', attrs:{cx:f(cx),cy:f(cy),r:f(s),fill:'black'}};
-  if(hole.type==='square') return {tag:'path', attrs:{d:`M${f(cx-s)},${f(cy-s)} L${f(cx+s)},${f(cy-s)} L${f(cx+s)},${f(cy+s)} L${f(cx-s)},${f(cy+s)} Z`, fill:'black'}};
-  if(hole.type==='tri'){
-    const h=s*Math.sqrt(3)/2;
-    return {tag:'path', attrs:{d:`M${f(cx)},${f(cy-s)} L${f(cx+h)},${f(cy+s*0.5)} L${f(cx-h)},${f(cy+s*0.5)} Z`, fill:'black'}};
-  }
+function aperture(kind,size,phase,petals,dx=0,dy=0){
+ const points=[];for(let i=0;i<240;i++){const a=i*Math.PI*2/240;const r=size*radius(kind,a,phase,petals);points.push([130+dx+r*Math.cos(a),130+dy+r*Math.sin(a)])}return points;
 }
-
-function svgNS(tag,attrs){
-  const el=document.createElementNS('http://www.w3.org/2000/svg',tag);
-  for(const[k,v]of Object.entries(attrs)) el.setAttribute(k,v);
-  return el;
+function path(points){return points.map((p,i)=>(i?'L':'M')+p.map(n=>n.toFixed(3)).join(',')).join(' ')+'Z'}
+function genGame(fam){
+ const solution=shuffle([0,1,2,3]),holes=Array(4),phase=Math.random()*Math.PI*2,petals=shuffle([5,6,8])[0];
+ // Bounds are deliberate: each hole contains the one below it with a visible margin.
+ // The bottom sheet has the smallest hole; the top sheet has the largest.
+ const sizes=[18,39,64,95];
+ const geometry=shuffle(['circle','square','hexagon','star']);
+ solution.forEach((t,rank)=>{const kind=fam==='rosoni'?'flower':fam==='geometrie'?geometry[rank]:'wave';const dx=fam==='orbite'?Math.cos(phase+rank*.8)*rank*2:0;const dy=fam==='orbite'?Math.sin(phase+rank*.8)*rank*2:0;holes[t]=aperture(kind,sizes[rank],phase+(fam==='rosoni'?0:rank*.12),petals,dx,dy)});
+ return {solution,holes};
 }
-
-function drawTessera(svg, color, hole, scale, maskId){
-  const cx=CX*scale, cy=CY*scale, q=Q*scale;
-  const defs=svgNS('defs',{});
-  const mask=svgNS('mask',{id:maskId});
-  mask.appendChild(svgNS('rect',{x:f(cx-q/2),y:f(cy-q/2),width:f(q),height:f(q),fill:'white'}));
-  const clip=holeClipPath(hole, scale, cx, cy);
-  mask.appendChild(svgNS(clip.tag, clip.attrs));
-  defs.appendChild(mask);
-  svg.appendChild(defs);
-  svg.appendChild(svgNS('rect',{
-    x:f(cx-q/2),y:f(cy-q/2),width:f(q),height:f(q),
-    fill:color, mask:`url(#${maskId})`
-  }));
+function drawTile(svg,t,holes){
+ const id='cut-'+(++uid),defs=svgEl('defs'),mask=svgEl('mask',{id,maskUnits:'userSpaceOnUse',x:0,y:0,width:260,height:260,'mask-type':'luminance'});
+ mask.append(svgEl('rect',{x:18,y:18,width:224,height:224,rx:12,fill:'white'}),svgEl('path',{d:path(holes[t]),fill:'black'}));defs.append(mask);svg.append(defs,svgEl('rect',{x:18,y:18,width:224,height:224,rx:12,fill:COLORS[t],mask:`url(#${id})`}));
 }
-
-function renderStack(svg, order, holes){
-  while(svg.firstChild) svg.removeChild(svg.firstChild);
-  order.forEach((t,i)=>{
-    drawTessera(svg, COLORS[t], holes[t], 1, `m${t}_${i}_${Date.now()}`);
-  });
+function renderStack(svg,order){
+ svg.replaceChildren();svg.append(svgEl('rect',{x:18,y:18,width:224,height:224,rx:12,fill:'#fbfaf6',stroke:'#deded4','stroke-width':1}));
+ order.forEach(t=>drawTile(svg,t,game.holes));
+ if(!order.length){const txt=svgEl('text',{x:130,y:135,'text-anchor':'middle',fill:'#6b7f83','font-size':15});txt.textContent='Inizia da una tessera';svg.append(txt)}
 }
-
-function makePreview(t, holes, size=72){
-  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-  svg.setAttribute('width',size); svg.setAttribute('height',size);
-  const scale=size/SZ;
-  drawTessera(svg, COLORS[t], holes[t], scale, `p${t}_${Math.random().toString(36).slice(2)}`);
-  return svg;
-}
-
-function genGame(){
-  const solution = shuffle([0,1,2,3]);
-  // solution[0]=fondo, solution[3]=cima
-  // Per vedere tutti i colori: il buco di ogni tessera deve contenere
-  // il buco della tessera sopra. Quindi dal basso verso l'alto i buchi
-  // devono essere in ordine decrescente di dimensione.
-  // Scegliamo un tipo di forma per ogni posizione nella pila,
-  // con dimensioni decrescenti dal basso verso l'alto.
-  const shapeTypes = shuffle(['circle','square','tri']);
-  // 4 dimensioni decrescenti: grande → piccola
-  const sizes = [16, 28, 40, 52];
-  // Ogni posizione nella pila ha la sua dimensione
-  // La forma può variare ma deve contenere la precedente.
-  // Per semplicità: stessa forma, dimensioni decrescenti.
-  // Scegliamo una forma a caso per ogni tessera (può variare)
-  // ma garantiamo che i buchi siano annidati per dimensione.
-  const typePool = ['circle','square','tri'];
-  const holes = new Array(4);
-  solution.forEach((t, rank) => {
-    // rank 0 = fondo (buco più grande), rank 3 = cima (buco più piccolo)
-    holes[t] = {type: typePool[Math.floor(Math.random()*typePool.length)], s: sizes[rank]};
-  });
-  return {solution, holes};
-}
-
-let game={}, chosen=[];
-
-function newGame(){
-  game=genGame(); chosen=[];
-  renderStack(document.getElementById('svg-model'), game.solution, game.holes);
-  renderStack(document.getElementById('svg-comp'), [], game.holes);
-  renderTiles(); renderOrder(); setMsg('','');
-}
-
+function preview(t){const s=svgEl('svg',{viewBox:'0 0 260 260','aria-hidden':'true',focusable:'false'});drawTile(s,t,game.holes);return s}
+function setMsg(txt,cls=''){const m=$('msg');m.textContent=txt;m.className='message '+cls}
 function renderTiles(){
-  const grid=document.getElementById('tiles'); grid.innerHTML='';
-  [0,1,2,3].forEach(i=>{
-    const div=document.createElement('div');
-    div.className='tile'+(chosen.includes(i)?' disabled':'');
-    div.title=NAMES[i];
-    div.appendChild(makePreview(i,game.holes,76));
-    div.addEventListener('click',()=>selectTile(i));
-    grid.appendChild(div);
-  });
+ const grid=$('tiles');grid.replaceChildren();[0,1,2,3].forEach(t=>{const b=document.createElement('button');b.className='tile';const pos=chosen.indexOf(t);b.disabled=pos>=0;b.setAttribute('aria-label',`Aggiungi la tessera ${NAMES[t]} alla composizione`);b.append(preview(t));const name=document.createElement('span');name.className='name';name.textContent=NAMES[t];b.append(name);if(pos>=0){const used=document.createElement('span');used.className='used';used.textContent=pos+1;b.append(used)}b.onclick=()=>selectTile(t);grid.append(b)})
 }
-
 function renderOrder(){
-  const row=document.getElementById('order-row'); row.innerHTML='';
-  for(let pos=0;pos<4;pos++){
-    const wrap=document.createElement('div'); wrap.className='slot-wrap';
-    const slot=document.createElement('div'); slot.className='slot';
-    const lbl=document.createElement('div'); lbl.className='slot-label';
-    if(pos<chosen.length){
-      slot.appendChild(makePreview(chosen[pos],game.holes,52));
-      lbl.textContent=NAMES[chosen[pos]];
-    } else lbl.textContent=(pos+1)+'°';
-    wrap.appendChild(slot); wrap.appendChild(lbl); row.appendChild(wrap);
-  }
+ const row=$('order-row');row.replaceChildren();for(let i=0;i<4;i++){const li=document.createElement('li');li.className='slot'+(i<chosen.length?' filled':'');if(i<chosen.length){const t=chosen[i],label=document.createElement('span');label.className='slot-name';const dot=document.createElement('span');dot.className='dot';dot.style.background=COLORS[t];dot.setAttribute('aria-hidden','true');label.append(dot,document.createTextNode((i+1)+'. '+NAMES[t]));li.append(label);const controls=document.createElement('div');controls.className='move';[-1,1].forEach(delta=>{const b=document.createElement('button');b.textContent=delta<0?'←':'→';b.disabled=i+delta<0||i+delta>=chosen.length;b.setAttribute('aria-label',`Sposta ${NAMES[t]} ${delta<0?'verso il fondo':'verso la cima'}`);b.onclick=()=>{const to=i+delta;[chosen[i],chosen[to]]=[chosen[to],chosen[i]];update();const dest=$('order-row').children[to].querySelectorAll('button')[delta<0?0:1];if(!dest.disabled)dest.focus();else $('btn-undo').focus()};controls.append(b)});li.append(controls)}else li.textContent=(i+1)+'. In attesa';row.append(li)}
 }
-
-function selectTile(i){
-  if(chosen.includes(i)) return;
-  chosen.push(i);
-  renderStack(document.getElementById('svg-comp'),chosen,game.holes);
-  renderTiles(); renderOrder();
-  if(chosen.length===4) checkSolution();
+function update(){
+ renderStack($('svg-comp'),chosen);renderTiles();renderOrder();$('counter').textContent=chosen.length+' DI 4 STRATI';$('svg-comp').setAttribute('aria-label',chosen.length?'Strati dal fondo: '+chosen.map(t=>NAMES[t]).join(', '):'Composizione ancora vuota');$('btn-undo').disabled=$('btn-reset').disabled=!chosen.length;
+ $('comp-caption').textContent=chosen.length===4?'Confronta forme e colori con il modello.':chosen.length?`Hai aggiunto ${NAMES[chosen[chosen.length-1]]}. Quale tessera viene dopo?`:'Scegli la prima tessera: sarà quella sul fondo.';
+ if(chosen.length===4){const ok=chosen.every((t,i)=>t===game.solution[i]);setMsg(ok?'✓ Perfetto! Hai ricostruito il mosaico: tutti e quattro i colori sono visibili.':'L’ordine è diverso dal modello. Sposta gli strati con le frecce e osserva cosa cambia.',ok?'ok':'err')}else setMsg(chosen.length?`${chosen.length} strati inseriti. Aggiungi la prossima tessera.`:'Scegli una tessera per iniziare.');
 }
-
-function checkSolution(){
-  const ok=chosen.every((v,i)=>v===game.solution[i]);
-  setMsg(ok?'Esatto!':'Ordine non corretto. Riprova!',ok?'ok':'err');
-}
-
-function setMsg(txt,cls){
-  const m=document.getElementById('msg'); m.textContent=txt; m.className=cls;
-}
-
-document.getElementById('btn-undo').addEventListener('click',()=>{
-  if(!chosen.length) return;
-  chosen.pop();
-  renderStack(document.getElementById('svg-comp'),chosen,game.holes);
-  renderTiles(); renderOrder(); setMsg('','');
-});
-document.getElementById('btn-reset').addEventListener('click',()=>{
-  chosen=[];
-  renderStack(document.getElementById('svg-comp'),[],game.holes);
-  renderTiles(); renderOrder(); setMsg('','');
-});
-document.getElementById('btn-new').addEventListener('click',newGame);
-
+function selectTile(t){if(chosen.includes(t))return;chosen.push(t);update();const next=$('tiles').querySelector('button:not(:disabled)');(next||$('btn-undo')).focus()}
+function newGame(){game=genGame(family);chosen=[];renderStack($('svg-model'),game.solution);$('model-caption').textContent=FAMILY_NAMES[family]+' · Quattro colori da ritrovare.';update()}
+$('btn-undo').onclick=()=>{chosen.pop();update();if($('btn-undo').disabled)$('tiles').querySelector('button').focus()};
+$('btn-reset').onclick=()=>{chosen=[];update();$('tiles').querySelector('button').focus()};
+$('btn-new').onclick=newGame;
+document.querySelectorAll('[data-family]').forEach(b=>b.onclick=()=>{family=b.dataset.family;document.querySelectorAll('[data-family]').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));newGame()});
 newGame();
-</script>
-</body>
-</html>
+</script></body></html>
