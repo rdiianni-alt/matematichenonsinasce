@@ -94,7 +94,7 @@ body{padding:16px}header{margin-bottom:14px}
   <div class="field"><label for="inp-dsr">Divisore</label><input type="number" id="inp-dsr" min="1" max="999" step="1" inputmode="numeric" placeholder="Dividi per…" required></div>
   <fieldset class="mode">
     <legend>Quando alla fine avanza qualcosa…</legend>
-    <label class="mode-opt"><input type="radio" name="mode" value="resto" checked><span>Mi fermo con il resto<small>es. 17 : 5 = 3 resto 2</small></span></label>
+    <label class="mode-opt"><input type="radio" name="mode" value="resto" checked><span>Mi fermo con il resto<small>es. 17 = 3 × 5 + 2</small></span></label>
     <label class="mode-opt"><input type="radio" name="mode" value="virgola"><span>Continuo con la virgola<small>es. 17 : 5 = 3,4</small></span></label>
   </fieldset>
   <button type="submit" id="start-btn">Inizia la divisione →</button>
@@ -432,7 +432,7 @@ function finalize(){
   const ri=document.getElementById('resto-info');ri.innerHTML='';ri.style.color='#0F6E56';
   if(MODE==='resto'||decInfo.stop==='intero'){
     const q=partialQuotient.join('');
-    ri.textContent=lastR===0?`${DIV} = ${DSR} × ${q}`:`${DIV} = ${DSR} × ${q} + ${lastR}`;
+    ri.textContent=lastR===0?`${DIV} = ${q} × ${DSR}`:`${DIV} = ${q} × ${DSR} + ${lastR}`;
     ri.style.color=lastR===0?'#0F6E56':'#555';
     setMsg('Divisione completata!',true);return;
   }
