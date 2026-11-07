@@ -72,6 +72,40 @@ input:focus-visible,button:focus-visible{outline:3px solid #c59038;outline-offse
 .period-box{margin-top:12px;padding:12px 16px;border-radius:14px;background:#fdf3e2;border:1px solid #efd2a2;font-size:15px;line-height:1.55;font-weight:400;text-align:left;color:#5a4320}
 .period-box strong{color:#8a4a00}
 .resto-info .big{display:block;font-size:22px}
+.boxes{margin-top:12px;padding:14px;border:1px solid #d9e3d4;border-radius:16px;background:#fafcf6}
+.boxes-legend{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;font-size:13px;color:#617365;margin-bottom:10px}
+.boxes-legend span{display:inline-flex;align-items:center;gap:5px}
+.store{display:grid;grid-template-columns:repeat(var(--cols,4),minmax(0,1fr));gap:10px}
+.col{border:1px solid #dce4d8;border-radius:14px;background:#fff;display:flex;flex-direction:column;min-height:140px;transition:box-shadow .2s,border-color .2s}
+.col.active{border-color:var(--green);box-shadow:0 0 0 3px #cfe3cf}
+.col-head{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:6px 10px;background:#edf3e5;border-radius:13px 13px 0 0;font-weight:650;font-size:14px}
+.col.active .col-head{background:#dcebd6}
+.col-count{font-size:22px;color:var(--green);font-weight:700}
+.pile{display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start;align-items:flex-end;padding:8px;flex:1}
+.item{display:inline-flex;background:none;border:0;padding:1px;min-height:0;border-radius:6px;color:inherit}
+.item svg{display:block}
+button.item{cursor:pointer;background:#fdf3e2;box-shadow:0 0 0 2px #e2a54d;animation:wiggle 1.6s ease-in-out infinite}
+button.item:hover{background:#fbe0b4;transform:translateY(-2px)}
+@keyframes wiggle{0%,100%{transform:rotate(0)}10%{transform:rotate(-4deg)}20%{transform:rotate(4deg)}30%{transform:rotate(0)}}
+.item.pop{animation:pop .45s ease-out both}
+@keyframes pop{from{transform:scale(.2);opacity:0}}
+.item.gone{transition:transform .25s,opacity .25s;transform:scale(1.4);opacity:0}
+.box-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}
+.box-actions button:disabled{opacity:.45;cursor:default}
+.box-status{font-size:15px;line-height:1.4;color:#355c4a;flex:1;min-width:200px}
+.box-status.warn{color:#8a4a00}
+.girls{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px}
+.girl{border:1px solid #dce4d8;border-radius:14px;background:#fff;padding:6px 6px 8px;text-align:center}
+.girl img{width:64px;height:auto;display:block;margin:0 auto 2px}
+.girl-name{font-size:12px;color:var(--muted);margin-bottom:4px}
+.got{min-height:34px;display:flex;flex-direction:column;gap:3px;align-items:center}
+.got-row{display:flex;flex-wrap:wrap;gap:2px;align-items:flex-end;justify-content:center}
+.got-row b{font-size:14px;margin-left:4px;align-self:center;color:var(--green)}
+.flyer{position:fixed;pointer-events:none;z-index:50;margin:0}
+.store-rest{font-weight:650;color:#8a4a00}
+@media(min-width:900px){.boxes{grid-column:1 / -1;margin:0}}
+@media(max-width:600px){.store{grid-template-columns:repeat(2,minmax(0,1fr))}.girls{grid-template-columns:repeat(auto-fill,minmax(90px,1fr))}.girl img{width:52px}}
+@media(prefers-reduced-motion:reduce){button.item,.item.pop{animation:none}}
 @media(min-width:900px){
 body{padding:16px}header{margin-bottom:14px}
 .workspace{display:grid;grid-template-columns:minmax(0,1fr) 170px;gap:12px 20px}
@@ -93,9 +127,10 @@ body{padding:16px}header{margin-bottom:14px}
   <div class="field"><label for="inp-div">Dividendo</label><input type="number" id="inp-div" min="1" max="99999" step="1" inputmode="numeric" placeholder="Da dividere" required></div>
   <div class="field"><label for="inp-dsr">Divisore</label><input type="number" id="inp-dsr" min="1" max="999" step="1" inputmode="numeric" placeholder="Dividi per…" required></div>
   <fieldset class="mode">
-    <legend>Quando alla fine avanza qualcosa…</legend>
+    <legend>Come vuoi fare la divisione?</legend>
     <label class="mode-opt"><input type="radio" name="mode" value="resto" checked><span>Mi fermo con il resto<small>es. 17 = 3 × 5 + 2</small></span></label>
     <label class="mode-opt"><input type="radio" name="mode" value="virgola"><span>Continuo con la virgola<small>es. 17 : 5 = 3,4</small></span></label>
+    <label class="mode-opt"><input type="radio" name="mode" value="scatole"><span>Con le scatole<small>distribuisci alle bambine</small></span></label>
   </fieldset>
   <button type="submit" id="start-btn">Inizia la divisione →</button>
 </form>
@@ -122,6 +157,15 @@ body{padding:16px}header{margin-bottom:14px}
     </div>
     <p id="fit-status" class="fit-status" role="status" aria-live="polite"></p>
   </section>
+  <section id="boxes" class="boxes" aria-label="Distribuzione con le scatole" hidden>
+    <div class="boxes-legend" id="boxes-legend"></div>
+    <div id="store" class="store"></div>
+    <div class="box-actions">
+      <button type="button" id="give-btn">Dai a ciascuna</button>
+      <p id="box-status" class="box-status" role="status" aria-live="polite"></p>
+    </div>
+    <div id="girls" class="girls"></div>
+  </section>
   <div id="resto-info" class="resto-info"></div>
 </section>
 </main>
@@ -139,7 +183,8 @@ function startGame(){
   if(!dividendText||!divisorText||!Number.isInteger(dividend)||!Number.isInteger(divisor)||dividend<1||divisor<1){setMsg('Inserisci due numeri interi maggiori di zero.',false);return;}
   if(dividend>99999||divisor>999){setMsg('Usa un dividendo fino a 99 999 e un divisore fino a 999.',false);return;}
   MODE=document.querySelector('input[name="mode"]:checked').value;
-  if(dividend<divisor&&MODE==='resto'){setMsg('Con il resto il dividendo deve essere maggiore o uguale al divisore. Prova «Continuo con la virgola».',false);return;}
+  if(MODE==='scatole'&&(dividend>9999||divisor<2||divisor>9)){setMsg('Con le scatole usa un dividendo fino a 9 999 e un divisore da 2 a 9 (le bambine).',false);return;}
+  if(dividend<divisor&&MODE!=='virgola'){setMsg('Con il resto il dividendo deve essere maggiore o uguale al divisore. Prova «Continuo con la virgola».',false);return;}
   DIV=dividend;DSR=divisor;gameVersion++;
   document.getElementById('empty-state').hidden=true;
   document.getElementById('workspace').hidden=false;
@@ -150,6 +195,8 @@ function startGame(){
   document.getElementById('tabellina').style.display='none';
   document.getElementById('step-hint').textContent='';
   document.getElementById('resto-info').textContent='';
+  document.getElementById('fit-visual').hidden=true;
+  document.getElementById('boxes').hidden=MODE!=='scatole';
   setMsg('');
   renderLayout();
 }
@@ -217,6 +264,7 @@ function renderLayout(){
   const hLine=document.createElement('div');hLine.className='horiz-line';hLine.id='horiz-line';rightCol.appendChild(hLine);
   const qRow=document.createElement('div');qRow.className='quot-row';qRow.id='quot-row';rightCol.appendChild(qRow);
   grid.appendChild(leftCol);grid.appendChild(sepLine);grid.appendChild(rightCol);
+  if(MODE==='scatole'){updateQuotientDisplay([],null);boxStart();return;}
   updateQuotientDisplay([],()=>validateQuotient(0));
   askQuotient(0);
 }
@@ -225,8 +273,13 @@ function askQuotient(idx){
   const s=steps[idx];
   renderTabellina(DSR,s.q);
   document.getElementById('tabellina').style.display='block';
-  document.getElementById('step-hint').textContent=`Quante volte ${DSR} entra in ${s.partial}?`;
-  showFitVisual(s.partial);
+  if(MODE==='scatole'){
+    const pw=powOf(s.endPos),N=NAMES[pw];
+    document.getElementById('step-hint').textContent=`${N.f?'Quante':'Quanti'} ${N.p} ha ricevuto ciascuna bambina? Scrivilo nel quoziente.`;
+  }else{
+    document.getElementById('step-hint').textContent=`Quante volte ${DSR} entra in ${s.partial}?`;
+    showFitVisual(s.partial);
+  }
   updateQuotientDisplay(partialQuotient,()=>validateQuotient(idx));
 }
 
@@ -245,7 +298,10 @@ function askSubtraction(idx){
     const c=document.createElement('div');c.className='sub-cell underline';c.textContent=ch;prodRow.appendChild(c);
   });
   block.appendChild(prodRow);
-  document.getElementById('step-hint').textContent=`Calcola ${s.partial} − ${s.prod} = ?`;
+  if(MODE==='scatole'){
+    const N=NAMES[powOf(s.endPos)];
+    document.getElementById('step-hint').textContent=`Hai dato ${s.q} ${s.q===1?N.s:N.p} a ognuna delle ${DSR} bambine: ${s.q} × ${DSR} = ${s.prod}. ${N.f?'Quante':'Quanti'} ne restano nel magazzino? Calcola ${s.partial} − ${s.prod}.`;
+  }else document.getElementById('step-hint').textContent=`Calcola ${s.partial} − ${s.prod} = ?`;
   const ri=document.createElement('input');
   ri.type='number';ri.min='0';ri.step='1';ri.inputMode='numeric';ri.setAttribute('aria-label','Risultato della sottrazione');ri.className='num-input';ri.id='rest-input-'+idx;
   ri.style.marginLeft='calc('+offset+' * var(--u))';ri.placeholder='?';
@@ -296,6 +352,7 @@ function validateResto(idx){
   }
   else{
     const nextS=steps[currentStep];
+    if(MODE==='scatole'){boxAfterStep(idx,restRow,nextS);return;}
     if(nextS.first){askComma(idx,restRow,nextS);return;}
     const lc=document.createElement('div');lc.className='sub-cell lowered'+(nextS.decimal?' zero':'');lc.textContent=nextS.decimal?'0':digits[nextS.endPos];restRow.appendChild(lc);
     document.getElementById('step-hint').textContent=nextS.decimal?`Aggiungi uno zero al resto: ${s.r} diventa ${nextS.partial}…`:`Abbassa il ${digits[nextS.endPos]}…`;
@@ -434,6 +491,7 @@ function finalize(){
     const q=partialQuotient.join('');
     ri.textContent=lastR===0?`${DIV} = ${q} × ${DSR}`:`${DIV} = ${q} × ${DSR} + ${lastR}`;
     ri.style.color=lastR===0?'#0F6E56':'#555';
+    if(MODE==='scatole')boxFinal(lastR);
     setMsg('Divisione completata!',true);return;
   }
   const ex=exactDecimal(DIV,DSR);
@@ -459,6 +517,175 @@ function finalize(){
   }
   ri.appendChild(box);
   setMsg('Divisione completata!',true);
+}
+
+// ================= Con le scatole =================
+// Colonne da sinistra a destra: migliaia, centinaia, decine, unità.
+const NAMES=[
+  {s:'scatolina',p:'scatoline',f:true,un:'una scatolina',place:'Unità'},
+  {s:'fila da 10',p:'file da 10',f:true,un:'una fila da 10',place:'Decine'},
+  {s:'scatolone',p:'scatoloni',f:false,un:'uno scatolone',place:'Centinaia'},
+  {s:'camion',p:'camion',f:false,un:'un camion',place:'Migliaia'}];
+const B={piles:[],given:[],fresh:[],stage:'',col:-1,step:0,busy:false};
+const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function powOf(i){return digits.length-1-i;}
+function nm(pw,n){return n===1?NAMES[pw].s:NAMES[pw].p;}
+function cap(t){return t.charAt(0).toUpperCase()+t.slice(1);}
+function icon(pw,k=1){
+  if(pw===0)return `<svg width="${18*k}" height="${18*k}" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 7l4-4h10l-4 4z" fill="#fbe9b5" stroke="#b88a2f"/><path d="M13 7l4-4v10l-4 4z" fill="#e3bd62" stroke="#b88a2f"/><rect x="3" y="7" width="10" height="10" fill="#f4d98e" stroke="#b88a2f"/></svg>`;
+  if(pw===1){let r='';for(let j=0;j<10;j++)r+=`<rect x="3" y="${3+j*6.6}" width="8" height="5.6" fill="#f4d98e" stroke="#b88a2f" stroke-width=".8"/>`;
+    return `<svg width="${12*k}" height="${60*k}" viewBox="0 0 14 72" aria-hidden="true"><rect x="1" y="1" width="12" height="70" rx="3" fill="#e6f0e1" stroke="#517b60" stroke-width="1.4"/>${r}</svg>`;}
+  if(pw===2)return `<svg width="${42*k}" height="${38*k}" viewBox="0 0 44 40" aria-hidden="true"><path d="M2 12 L10 4 L22 12 Z M42 12 L34 4 L22 12 Z" fill="#e7bf8a" stroke="#8b5e2b"/><rect x="2" y="12" width="40" height="26" fill="#d9a86c" stroke="#8b5e2b"/><rect x="19" y="12" width="6" height="26" fill="#c38c4c"/><rect x="9" y="22" width="26" height="11" rx="2" fill="#fff7e6" stroke="#8b5e2b" stroke-width=".7"/><text x="22" y="30.5" text-anchor="middle" font-size="8.5" font-weight="700" fill="#6b4520" font-family="system-ui">100</text></svg>`;
+  return `<svg width="${60*k}" height="${38*k}" viewBox="0 0 64 40" aria-hidden="true"><rect x="2" y="3" width="40" height="26" rx="3" fill="#2e6656"/><text x="22" y="20" text-anchor="middle" font-size="10" font-weight="700" fill="#fff" font-family="system-ui">1000</text><path d="M43 11h10l8 9v10H43z" fill="#4c8c75"/><path d="M46 13h6l5 6h-11z" fill="#d8ece3"/><rect x="2" y="29" width="59" height="3" fill="#284c46"/><circle cx="14" cy="33" r="5" fill="#284c46" stroke="#fffefa" stroke-width="1.5"/><circle cx="51" cy="33" r="5" fill="#284c46" stroke="#fffefa" stroke-width="1.5"/></svg>`;
+}
+function pileScale(n){return n>60?.55:n>30?.7:n>15?.85:1;}
+
+function boxStart(){
+  B.piles=digits.slice();B.given=digits.map(()=>0);B.fresh=digits.map(()=>0);B.busy=false;
+  const L=digits.length;
+  let leg='';for(let pw=Math.min(3,L-1);pw>=1;pw--)leg+=`<span>${icon(pw,.7)} 1 ${NAMES[pw].s} = 10 ${NAMES[pw-1].p}</span>`;
+  leg+=`<span>${icon(0,.9)} 1 scatolina = 1</span>`;
+  document.getElementById('boxes-legend').innerHTML=leg;
+  const girls=document.getElementById('girls');girls.innerHTML='';
+  for(let g=0;g<DSR;g++){
+    const c=document.createElement('div');c.className='girl';
+    c.innerHTML=`<img src="bambina.png" alt=""><div class="girl-name">Bambina ${g+1}</div><div class="got" id="got-${g}"></div>`;
+    girls.appendChild(c);
+  }
+  const btn=document.getElementById('give-btn');btn.onclick=boxGive;btn.disabled=true;
+  boxStatus(`Nel magazzino ci sono ${DIV} scatoline, ben impacchettate. Dobbiamo dividerle in parti uguali fra ${DSR} bambine.`);
+  const e0=steps[0].endPos;
+  if(e0>0)boxLead(0);else boxDistribute(0);
+}
+function boxStatus(t,warn){const el=document.getElementById('box-status');el.textContent=t;el.className='box-status'+(warn?' warn':'');}
+
+// All'inizio le quantità grandi che non bastano per tutte vanno aperte.
+function boxLead(i){
+  B.stage='lead';B.col=i;
+  const n=B.piles[i],pw=powOf(i);
+  document.getElementById('step-hint').textContent=`${cap(n+' '+nm(pw,n))} non ${n===1?'basta':'bastano'} per dare qualcosa a tutte le ${DSR} bambine. ${n===1?'Cliccaci sopra':'Clicca su '+(NAMES[pw].f?'ognuna':'ognuno')}: ogni ${NAMES[pw].s} si apre in 10 ${NAMES[pw-1].p}.`;
+  document.getElementById('give-btn').disabled=true;
+  boxRender();
+}
+function boxDistribute(k){
+  B.stage='distribute';B.step=k;const e=steps[k].endPos;B.col=e;
+  const pw=powOf(e),N=NAMES[pw];
+  const btn=document.getElementById('give-btn');
+  btn.textContent=`Dai ${N.un} a ciascuna`;
+  document.getElementById('step-hint').textContent=`Ora distribuisci ${N.f?'le':'gli'} ${N.p}: ${B.piles[e]} da dividere fra ${DSR} bambine. Premi «Dai ${N.un} a ciascuna» finché ne bastano per tutte.`;
+  boxRender();
+  if(B.piles[e]<DSR)boxAfterDistribute();else{btn.disabled=false;gameLater(()=>btn.focus(),50);}
+}
+function boxGive(){
+  if(B.stage!=='distribute'||B.busy)return;
+  const e=B.col;
+  if(B.piles[e]<DSR){boxAfterDistribute();return;}
+  B.busy=true;const version=gameVersion;
+  flyToGirls(e,()=>{
+    if(version!==gameVersion)return;
+    B.piles[e]-=DSR;B.given[e]++;B.busy=false;
+    boxRender();
+    const pw=powOf(e);
+    boxStatus(`Giro ${B.given[e]}: ogni bambina ha ${B.given[e]} ${nm(pw,B.given[e])}. Nel magazzino ne restano ${B.piles[e]}.`);
+    if(B.piles[e]<DSR)boxAfterDistribute();
+  });
+}
+function boxAfterDistribute(){
+  const e=B.col,pw=powOf(e),n=B.piles[e],N=NAMES[pw];
+  document.getElementById('give-btn').disabled=true;
+  if(B.given[e]===0&&n===0)boxStatus(`Non ci sono ${N.p} da distribuire: ogni bambina ne riceve 0.`);
+  else if(n===0)boxStatus(`Fatto! Ogni bambina ha ricevuto ${B.given[e]} ${nm(pw,B.given[e])} e nel magazzino non ne avanza ${N.f?'nessuna':'nessuno'}.`);
+  else boxStatus(`${n===1?'Resta':'Restano'} ${n} ${nm(pw,n)}: non ${n===1?'basta':'bastano'} per darne ${N.f?'una':'uno'} a ciascuna delle ${DSR} bambine. Ci fermiamo.`,true);
+  B.stage='answer';
+  gameLater(()=>{updateQuotientDisplay(partialQuotient,()=>validateQuotient(B.step));askQuotient(B.step);},600);
+}
+// Dopo la sottrazione: si aprono le quantità rimaste, poi si "abbassa" la cifra successiva.
+function boxAfterStep(idx,restRow,nextS){
+  const s=steps[idx],e=s.endPos,pw=powOf(e);
+  if(s.r>0){
+    B.stage='break';B.col=e;B.pendingRow=restRow;B.pendingNext=nextS;
+    document.getElementById('step-hint').textContent=`${s.r===1?'È rimast'+(NAMES[pw].f?'a':'o'):'Sono rimast'+(NAMES[pw].f?'e':'i')} ${s.r} ${nm(pw,s.r)}. Non ${s.r===1?'si può dare':'si possono dare'} a tutte, ma ${s.r===1?'si può aprire':'si possono aprire'}! ${s.r===1?'Cliccaci sopra':'Clicca su '+(NAMES[pw].f?'ognuna':'ognuno')}: ogni ${NAMES[pw].s} diventa 10 ${NAMES[pw-1].p}.`;
+    boxRender();
+  }else boxLower(restRow,nextS,0);
+}
+function boxLower(restRow,nextS,opened){
+  const d=digits[nextS.endPos],pw=powOf(nextS.endPos);
+  const lc=document.createElement('div');lc.className='sub-cell lowered';lc.textContent=d;restRow.appendChild(lc);
+  document.getElementById('step-hint').textContent=opened?`Abbassa il ${d}: ${NAMES[pw].f?'alle':'ai'} ${opened} ${NAMES[pw].p} appena ${NAMES[pw].f?'arrivate':'arrivati'} si ${d===1?'aggiunge':'aggiungono'} ${d===1?(NAMES[pw].f?'quella':'quello'):(NAMES[pw].f?'le '+d:'i '+d)} che c'${d===1?'era':'erano'} già. In tutto ${opened} + ${d} = ${nextS.partial}.`:`Non è avanzato niente. Abbassa il ${d}: ci sono ${d} ${nm(pw,d)} da distribuire.`;
+  B.stage='wait';boxRender();
+  gameLater(()=>boxDistribute(currentStep),1600);
+}
+function boxBreak(i,el){
+  if(B.busy)return;
+  B.busy=true;el.classList.add('gone');
+  const version=gameVersion;
+  setTimeout(()=>{
+    if(version!==gameVersion)return;
+    B.busy=false;
+    B.piles[i]--;B.piles[i+1]+=10;B.fresh[i+1]=10;
+    const pw=powOf(i);
+    boxStatus(`${cap(NAMES[pw].un)} si è apert${NAMES[pw].f?'a':'o'} in 10 ${NAMES[pw-1].p}. Ora le ${NAMES[pw-1].place.toLowerCase()} sono ${B.piles[i+1]}.`);
+    if(B.piles[i]>0){boxRender();return;}
+    if(B.stage==='lead'){
+      if(i+1<steps[0].endPos)boxLead(i+1);else{boxRender();gameLater(()=>boxDistribute(0),700);B.stage='wait';}
+    }else{
+      const opened=steps[currentStep-1].r*10;
+      boxLower(B.pendingRow,B.pendingNext,opened);
+    }
+  },reduceMotion?0:260);
+}
+function boxItemClick(){
+  const msg={distribute:'Prima distribuisci con il pulsante «Dai … a ciascuna».',answer:'Rispondi prima alla domanda nella divisione.',done:'La divisione è finita!'}[B.stage]||'Aspetta un attimo…';
+  boxStatus(msg,true);
+}
+function boxRender(){
+  const L=digits.length,store=document.getElementById('store');
+  store.style.setProperty('--cols',L);store.innerHTML='';
+  for(let i=0;i<L;i++){
+    const pw=powOf(i),n=B.piles[i];
+    const col=document.createElement('div');col.className='col'+(i===B.col&&B.stage!=='done'?' active':'');
+    col.innerHTML=`<div class="col-head"><span>${NAMES[pw].place}</span><span class="col-count">${n}</span></div>`;
+    const pile=document.createElement('div');pile.className='pile';pile.id='pile-'+i;
+    const breakable=(B.stage==='lead'||B.stage==='break')&&i===B.col&&pw>0;
+    const k=pileScale(n);
+    for(let j=0;j<n;j++){
+      const it=document.createElement(breakable?'button':'span');
+      it.className='item'+(j>=n-B.fresh[i]?' pop':'');
+      if(breakable){it.type='button';it.setAttribute('aria-label',`Apri ${NAMES[pw].un}: diventa 10 ${NAMES[pw-1].p}`);it.onclick=()=>boxBreak(i,it);}
+      else it.onclick=boxItemClick;
+      if(j>=n-B.fresh[i])it.style.animationDelay=((j-(n-B.fresh[i]))*35)+'ms';
+      it.innerHTML=icon(pw,k);pile.appendChild(it);
+    }
+    col.appendChild(pile);store.appendChild(col);
+  }
+  B.fresh=B.fresh.map(()=>0);
+  for(let g=0;g<DSR;g++){
+    const got=document.getElementById('got-'+g);if(!got)continue;
+    let h='';
+    for(let i=0;i<L;i++){if(B.given[i]>0){const pw=powOf(i);h+=`<div class="got-row">${icon(pw,.5).repeat(B.given[i])}<b>${B.given[i]}</b></div>`;}}
+    got.innerHTML=h||'<span class="girl-name">ancora niente</span>';
+  }
+}
+function flyToGirls(e,done){
+  const pile=document.getElementById('pile-'+e);
+  const items=[...pile.children].slice(-DSR);
+  if(reduceMotion||!items.length||!items[0].animate){done();return;}
+  const anims=items.map((it,g)=>{
+    const r1=it.getBoundingClientRect(),r2=document.getElementById('got-'+g).getBoundingClientRect();
+    const c=it.cloneNode(true);c.classList.add('flyer');c.classList.remove('pop');
+    c.style.left=r1.left+'px';c.style.top=r1.top+'px';document.body.appendChild(c);
+    it.style.visibility='hidden';
+    const dx=r2.left+r2.width/2-(r1.left+r1.width/2),dy=r2.top+r2.height/2-(r1.top+r1.height/2);
+    const a=c.animate([{transform:'translate(0,0) scale(1)'},{transform:`translate(${dx*.5}px,${dy*.5-40}px) scale(1.1)`,offset:.5},{transform:`translate(${dx}px,${dy}px) scale(.55)`}],{duration:650,delay:g*90,easing:'ease-in-out',fill:'forwards'});
+    return a.finished.then(()=>c.remove());
+  });
+  Promise.all(anims).then(done);
+}
+function boxFinal(r){
+  B.stage='done';B.col=digits.length-1;boxRender();
+  document.getElementById('give-btn').disabled=true;
+  const q=partialQuotient.join('');
+  boxStatus(r===0?`Ogni bambina ha ricevuto ${q} scatoline e nel magazzino non è rimasto niente: la divisione è esatta.`:`Ogni bambina ha ricevuto ${q} scatoline. Nel magazzino ${r===1?'è rimasta':'sono rimaste'} ${r} ${r===1?'scatolina':'scatoline'}: non ${r===1?'basta':'bastano'} per tutte e non si ${r===1?'può':'possono'} aprire. ${r===1?'È':'Sono'} il resto.`);
 }
 
 function setMsg(txt,ok){
