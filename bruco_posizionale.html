@@ -63,10 +63,11 @@
 
   /* frecce */
   #ctrl { position: absolute; left: 0; top: 0; transition: opacity .4s; }
-  .folded-ui #ctrl { opacity: 0; pointer-events: none; }
+  .notrans .seg, .notrans .arrow { transition: none !important; }
   .arrow { position: absolute; transform: translateX(-50%); width: calc(var(--c) * 0.95); height: calc(var(--c) * 0.62);
            border: 0; border-radius: 10px; background: #f1f1f1; color: var(--ink); cursor: pointer;
-           display: flex; align-items: center; justify-content: center; padding: 0; }
+           display: flex; align-items: center; justify-content: center; padding: 0;
+           transition: left 1.3s cubic-bezier(.6,0,.3,1); }
   .arrow:hover { background: #e4e4e4; }
   .arrow svg { width: 50%; height: 70%; }
 
@@ -81,6 +82,13 @@
   .bar .seg-choice button + button { border-left: 2px solid var(--ink); }
   .bar .seg-choice button.on { background: var(--ink); color: #fff; }
   .bar button:disabled { opacity: .45; cursor: default; }
+  .numform { display: flex; border: 2px solid var(--ink); border-radius: 999px; overflow: hidden; }
+  .numform input { font-family: inherit; font-size: clamp(15px, 2.2vw, 19px); font-weight: 600; color: var(--ink); border: 0; outline: 0;
+                   width: 6.5em; padding: 10px 6px 10px 18px; background: #fff; }
+  .numform input::placeholder { color: #9a9a9a; font-weight: 400; }
+  .bar .numform button { border: 0; border-left: 2px solid var(--ink); border-radius: 0; padding: 10px 18px; }
+  .numform.err { animation: shake .3s; border-color: #b3261e; }
+  @keyframes shake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
 </style>
 </head>
 <body>
@@ -103,6 +111,10 @@
   <div class="bar">
     <button id="fold" class="main">Piega</button>
     <button id="rnd">Numero a caso</button>
+    <form class="numform" id="numForm" autocomplete="off">
+      <input id="numIn" inputmode="numeric" maxlength="4" placeholder="es. 8755" aria-label="Scrivi un numero da 2 a 4 cifre">
+      <button type="submit">Componi</button>
+    </form>
     <div class="seg-choice" id="nsel">
       <button data-n="2">2 cifre</button><button data-n="3">3 cifre</button><button data-n="4" class="on">4 cifre</button>
     </div>
@@ -165,7 +177,7 @@ function makeWin(p, inner) {
   const card = document.createElement("div");
   card.className = "card";
   card.style.width = `calc(var(--c) * ${p.cells} - var(--u))`;
-  card.addEventListener("click", () => { if (!folded && !busy) step(PLACES.indexOf(p), 1); });
+  card.addEventListener("click", () => { if (!busy) step(PLACES.indexOf(p), 1); });
   d.appendChild(card);
   p.card = card;
   return d;
@@ -193,6 +205,8 @@ function makePlaces(n) {
 }
 
 function build() {
+  bruco.classList.add("notrans");
+  ctrl.classList.add("notrans");
   bruco.innerHTML = "";
   ctrl.innerHTML = "";
   PLACES = makePlaces(N);
@@ -227,7 +241,7 @@ function build() {
 }
 
 function step(i, delta) {
-  if (folded || busy) return;
+  if (busy) return;
   const p = PLACES[i];
   let v = digits[i] + delta;
   if (v > 9) v = p.min;
@@ -253,16 +267,24 @@ function layout() {
   document.documentElement.style.setProperty("--c", c + "px");
   const u = c / 24;
   const H = 42 * u;
-  // frecce sopra e sotto le finestre
-  PLACES.forEach(p => {
-    const x = 52 * u + (p.start + p.cells / 2) * c;
+  wrap.dataset.c = c;
+  position(false);
+  bruco.offsetHeight;
+  bruco.classList.remove("notrans");
+  ctrl.classList.remove("notrans");
+}
+
+// frecce sopra e sotto ogni cartellino; a bruco chiuso stanno sopra e sotto la sua cifra
+function placeArrows() {
+  const c = parseFloat(wrap.dataset.c);
+  const u = c / 24, H = 42 * u;
+  PLACES.forEach((p, i) => {
+    const x = 52 * u + (folded ? (i + 0.5) : (p.start + p.cells / 2)) * c;
     p.up.style.left = x + "px";
-    p.up.style.top = (-0.62 * c - 0.18 * c) + "px";
+    p.up.style.top = (-0.8 * c) + "px";
     p.down.style.left = x + "px";
     p.down.style.top = (H + 0.18 * c) + "px";
   });
-  wrap.dataset.c = c;
-  position(false);
 }
 
 function position(animate) {
@@ -273,6 +295,7 @@ function position(animate) {
   const w = folded ? (52 * u + N * c + 56 * u) : (52 * u + N * N * c + 56 * u);
   const x = (sw - w) / 2;
   const y = -21 * u;
+  placeArrows();
   if (!animate) wrap.style.transition = "none";
   wrap.style.transform = `translate(${x}px, ${y}px)`;
   if (!animate) { wrap.offsetHeight; wrap.style.transition = ""; }
@@ -289,13 +312,11 @@ foldBtn.addEventListener("click", () => {
   document.body.classList.toggle("folded-ui", folded);
   position(true);
   foldBtn.textContent = folded ? "Apri" : "Piega";
-  rndBtn.disabled = folded;
-  nsel.querySelectorAll("button").forEach(b => b.disabled = folded);
   setTimeout(() => { busy = false; }, 1350);
 });
 
 rndBtn.addEventListener("click", () => {
-  if (folded || busy) return;
+  if (busy) return;
   digits = [1 + Math.floor(Math.random() * 9), ...Array.from({ length: N - 1 }, () => Math.floor(Math.random() * 10))];
   render();
 });
@@ -303,7 +324,7 @@ rndBtn.addEventListener("click", () => {
 const nsel = document.getElementById("nsel");
 nsel.addEventListener("click", e => {
   const b = e.target.closest("button");
-  if (!b || folded || busy) return;
+  if (!b || busy) return;
   const n = +b.dataset.n;
   if (n === N) return;
   // tiene le ultime cifre del numero attuale (la prima non può essere 0)
@@ -313,6 +334,31 @@ nsel.addEventListener("click", e => {
   N = n; digits = d;
   nsel.querySelectorAll("button").forEach(x => x.classList.toggle("on", +x.dataset.n === N));
   build(); render(); layout();
+});
+
+// scrivo un numero: il bruco lo compone chiuso, poi si apre per vedere la scomposizione
+const numForm = document.getElementById("numForm");
+const numIn = document.getElementById("numIn");
+numIn.addEventListener("input", () => { numIn.value = numIn.value.replace(/\D/g, "").slice(0, 4); });
+numForm.addEventListener("submit", e => {
+  e.preventDefault();
+  if (busy) return;
+  const v = numIn.value;
+  if (!/^[1-9]\d{1,3}$/.test(v)) {
+    numForm.classList.remove("err"); numForm.offsetWidth; numForm.classList.add("err");
+    numIn.focus();
+    return;
+  }
+  N = v.length;
+  digits = [...v].map(Number);
+  nsel.querySelectorAll("button").forEach(x => x.classList.toggle("on", +x.dataset.n === N));
+  folded = true;
+  bruco.classList.add("folded");
+  document.body.classList.add("folded-ui");
+  foldBtn.textContent = "Apri";
+  build(); render(); layout();
+  numIn.value = "";
+  numIn.blur();
 });
 
 build();
