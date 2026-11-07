@@ -56,6 +56,22 @@ input:focus-visible,button:focus-visible{outline:3px solid #c59038;outline-offse
 .fit-status{font-size:13px;line-height:1.4;margin-top:8px;min-height:20px;color:#355c4a}
 .fit-status.over{color:#a0442b}
 .msg:empty{min-height:0;margin:10px 0}
+.mode{flex:1 1 100%;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;border:0;margin-bottom:4px}
+.mode legend{width:100%;text-align:center;font-size:13px;font-weight:650;color:#526b60;margin-bottom:6px}
+.mode-opt{position:relative;cursor:pointer;flex:1 1 200px;max-width:280px}
+.mode-opt input{position:absolute;opacity:0;pointer-events:none}
+.mode-opt span{display:flex;flex-direction:column;gap:2px;padding:10px 14px;border:2px solid #cfdccb;border-radius:14px;background:#fafcf8;font-size:15px;font-weight:650;color:var(--ink);text-align:center}
+.mode-opt small{font-size:13px;font-weight:500;color:var(--muted)}
+.mode-opt input:checked+span{border-color:var(--green);background:#e6f0e1}
+.mode-opt input:focus-visible+span{outline:3px solid #c59038;outline-offset:3px}
+.q-digit.comma{width:calc(var(--u)*.4)}
+.q-digit.period,.period-num{text-decoration:overline;text-decoration-thickness:2px}
+.sub-cell.zero{color:#b86a12}
+.sub-cell.repeat{background:#fbe0b4;border-radius:8px;color:#8a4a00;box-shadow:0 0 0 2px #e2a54d inset}
+.decimal-btn{margin-top:8px;display:block}
+.period-box{margin-top:12px;padding:12px 16px;border-radius:14px;background:#fdf3e2;border:1px solid #efd2a2;font-size:15px;line-height:1.55;font-weight:400;text-align:left;color:#5a4320}
+.period-box strong{color:#8a4a00}
+.resto-info .big{display:block;font-size:22px}
 @media(min-width:900px){
 body{padding:16px}header{margin-bottom:14px}
 .workspace{display:grid;grid-template-columns:minmax(0,1fr) 170px;gap:12px 20px}
@@ -76,6 +92,11 @@ body{padding:16px}header{margin-bottom:14px}
 <form class="controls" id="division-form" novalidate>
   <div class="field"><label for="inp-div">Dividendo</label><input type="number" id="inp-div" min="1" max="99999" step="1" inputmode="numeric" placeholder="Da dividere" required></div>
   <div class="field"><label for="inp-dsr">Divisore</label><input type="number" id="inp-dsr" min="1" max="999" step="1" inputmode="numeric" placeholder="Dividi per…" required></div>
+  <fieldset class="mode">
+    <legend>Quando alla fine avanza qualcosa…</legend>
+    <label class="mode-opt"><input type="radio" name="mode" value="resto" checked><span>Mi fermo con il resto<small>es. 17 : 5 = 3 resto 2</small></span></label>
+    <label class="mode-opt"><input type="radio" name="mode" value="virgola"><span>Continuo con la virgola<small>es. 17 : 5 = 3,4</small></span></label>
+  </fieldset>
   <button type="submit" id="start-btn">Inizia la divisione →</button>
 </form>
 <div id="msg" class="msg" role="status" aria-live="polite"></div>
@@ -106,7 +127,8 @@ body{padding:16px}header{margin-bottom:14px}
 </main>
 
 <script>
-let DIV,DSR,digits,steps,currentStep,partialQuotient,lastRemainder;
+let DIV,DSR,digits,steps,currentStep,partialQuotient,lastRemainder,MODE='resto',decInfo=null;
+const MAX_DEC=8; // oltre queste cifre decimali ci fermiamo e spieghiamo il periodo
 let gameVersion=0;
 function gameLater(fn,ms){const version=gameVersion;setTimeout(()=>{if(version===gameVersion)fn();},ms);}
 
@@ -116,13 +138,14 @@ function startGame(){
   const dividend=Number(dividendText), divisor=Number(divisorText);
   if(!dividendText||!divisorText||!Number.isInteger(dividend)||!Number.isInteger(divisor)||dividend<1||divisor<1){setMsg('Inserisci due numeri interi maggiori di zero.',false);return;}
   if(dividend>99999||divisor>999){setMsg('Usa un dividendo fino a 99 999 e un divisore fino a 999.',false);return;}
-  if(dividend<divisor){setMsg('Il dividendo deve essere maggiore o uguale al divisore.',false);return;}
+  MODE=document.querySelector('input[name="mode"]:checked').value;
+  if(dividend<divisor&&MODE==='resto'){setMsg('Con il resto il dividendo deve essere maggiore o uguale al divisore. Prova «Continuo con la virgola».',false);return;}
   DIV=dividend;DSR=divisor;gameVersion++;
   document.getElementById('empty-state').hidden=true;
   document.getElementById('workspace').hidden=false;
   document.getElementById('start-btn').textContent='Ricomincia →';
   digits=String(DIV).split('').map(Number);
-  steps=computeSteps(DIV,DSR);
+  const res=computeSteps(DIV,DSR,MODE==='virgola');steps=res.steps;decInfo=res.info;
   currentStep=0;partialQuotient=[];lastRemainder=null;
   document.getElementById('tabellina').style.display='none';
   document.getElementById('step-hint').textContent='';
@@ -131,7 +154,7 @@ function startGame(){
   renderLayout();
 }
 
-function computeSteps(div,dsr){
+function computeSteps(div,dsr,decimalMode){
   let s=[],rem=0,d=String(div).split('').map(Number),pos=0;
   while(pos<d.length){
     rem=rem*10+d[pos];
@@ -140,7 +163,31 @@ function computeSteps(div,dsr){
     s.push({partial:rem,q,prod,r,endPos:pos});
     rem=r;pos++;
   }
-  return s;
+  const info={stop:'intero',periodStart:-1};
+  if(!decimalMode||rem===0)return {steps:s,info};
+  // Fase con la virgola: a ogni passo si aggiunge uno zero al resto.
+  // Se un resto si ripete, i passaggi si ripeterebbero all'infinito: è il periodo.
+  const seen=new Map();let dec=0,col=d.length;
+  while(true){
+    if(rem===0){info.stop='esatto';break;}
+    if(seen.has(rem)){info.stop='periodo';info.periodStart=seen.get(rem);info.repeatFrom=s.length-dec+seen.get(rem)-1;break;}
+    if(dec>=MAX_DEC){info.stop='limite';break;}
+    seen.set(rem,dec);
+    const partial=rem*10,q=Math.floor(partial/dsr),prod=q*dsr,r=partial-prod;
+    s.push({partial,q,prod,r,endPos:col,decimal:true,first:dec===0});
+    rem=r;dec++;col++;
+  }
+  info.decCount=dec;
+  return {steps:s,info};
+}
+
+// Scrittura esatta del quoziente: parte intera, antiperiodo, periodo.
+function exactDecimal(div,dsr){
+  const intPart=Math.floor(div/dsr);let rem=div%dsr;const ds=[],seen=new Map();
+  while(rem!==0&&!seen.has(rem)){seen.set(rem,ds.length);rem*=10;ds.push(Math.floor(rem/dsr));rem%=dsr;}
+  if(rem===0)return {intPart,ante:ds.join(''),period:''};
+  const k=seen.get(rem);
+  return {intPart,ante:ds.slice(0,k).join(''),period:ds.slice(k).join('')};
 }
 
 function spacer(n){
@@ -236,20 +283,23 @@ function validateResto(idx){
   const btn=document.getElementById('sub-'+idx)?.querySelector('button');if(btn)btn.remove();
   const block=document.getElementById('sub-'+idx);
   const pLen=String(s.partial).length;const offset=s.endPos-pLen+1;
-  const restRow=document.createElement('div');restRow.className='sub-row';
+  const restRow=document.createElement('div');restRow.className='sub-row';restRow.id='rest-row-'+idx;
   spacer(offset).forEach(c=>restRow.appendChild(c));
   const restStr=String(s.r).padStart(pLen,' ');
   [...restStr].forEach(ch=>{
-    const c=document.createElement('div');c.className='sub-cell';c.textContent=ch.trim();restRow.appendChild(c);
+    const c=document.createElement('div');c.className='sub-cell'+(ch.trim()?' rest-digit':'');c.textContent=ch.trim();restRow.appendChild(c);
   });
   block.appendChild(restRow);
   currentStep=idx+1;
-  if(currentStep>=steps.length){finalize();}
+  if(currentStep>=steps.length){
+    if(decInfo.stop==='periodo')showRepeat(idx);else finalize();
+  }
   else{
     const nextS=steps[currentStep];
-    const lc=document.createElement('div');lc.className='sub-cell lowered';lc.textContent=digits[nextS.endPos];restRow.appendChild(lc);
-    document.getElementById('step-hint').textContent=`Abbassa il ${digits[nextS.endPos]}…`;
-    gameLater(()=>askQuotient(currentStep),400);
+    if(nextS.first){askComma(idx,restRow,nextS);return;}
+    const lc=document.createElement('div');lc.className='sub-cell lowered'+(nextS.decimal?' zero':'');lc.textContent=nextS.decimal?'0':digits[nextS.endPos];restRow.appendChild(lc);
+    document.getElementById('step-hint').textContent=nextS.decimal?`Aggiungi uno zero al resto: ${s.r} diventa ${nextS.partial}…`:`Abbassa il ${digits[nextS.endPos]}…`;
+    gameLater(()=>askQuotient(currentStep),nextS.decimal?700:400);
   }
 }
 
@@ -258,7 +308,7 @@ function updateQuotientDisplay(qDigits,onEnter){
   const old=document.getElementById('q-input');if(old)old.remove();
   qRow.innerHTML='';
   qDigits.forEach(d=>{
-    const sp=document.createElement('div');sp.className='q-digit';sp.textContent=d;qRow.appendChild(sp);
+    const sp=document.createElement('div');sp.className='q-digit'+(d===','?' comma':'');sp.textContent=d;qRow.appendChild(sp);
   });
   if(onEnter){
     const inp=document.createElement('input');
@@ -349,14 +399,65 @@ function renderFitVisual(){
 }
 new ResizeObserver(()=>renderFitVisual()).observe(document.getElementById('fit-chart'));
 
+// Le cifre del dividendo sono finite ma c'è ancora resto: virgola nel quoziente e zero al resto.
+function askComma(idx,restRow,nextS){
+  const s=steps[idx];
+  document.getElementById('fit-visual').hidden=true;
+  const hint=document.getElementById('step-hint');
+  hint.innerHTML='';
+  hint.append(`Le cifre del dividendo sono finite, ma è avanzato ${s.r}. Per continuare scrivi la virgola nel quoziente e aggiungi uno zero al resto: ${s.r} diventa ${nextS.partial}.`);
+  const btn=document.createElement('button');btn.type='button';btn.className='decimal-btn';btn.textContent='Metti la virgola e aggiungi lo 0';
+  btn.onclick=()=>{
+    partialQuotient.push(',');
+    const lc=document.createElement('div');lc.className='sub-cell lowered zero';lc.textContent='0';restRow.appendChild(lc);
+    hint.textContent=`Dopo la virgola: ${s.r} diventa ${nextS.partial}.`;
+    updateQuotientDisplay(partialQuotient,null);
+    gameLater(()=>askQuotient(currentStep),500);
+  };
+  hint.appendChild(btn);gameLater(()=>btn.focus(),50);
+}
+
+// Un resto si ripete: lo segnaliamo prima di chiudere.
+function showRepeat(idx){
+  const r=steps[idx].r,from=decInfo.repeatFrom;
+  [from,idx].forEach(i=>document.querySelectorAll('#rest-row-'+i+' .rest-digit').forEach(c=>c.classList.add('repeat')));
+  finalize();
+}
+
 function finalize(){
   document.getElementById('fit-visual').hidden=true;
-  const lastR=steps[steps.length-1].r;const q=partialQuotient.join('');
+  const lastR=steps[steps.length-1].r;
   document.getElementById('tabellina').style.display='none';
   document.getElementById('step-hint').textContent='';
-  const ri=document.getElementById('resto-info');
-  ri.textContent=lastR===0?`${DIV} = ${DSR} × ${q}`:`${DIV} = ${DSR} × ${q} + ${lastR}`;
-  ri.style.color=lastR===0?'#0F6E56':'#555';
+  const ri=document.getElementById('resto-info');ri.innerHTML='';ri.style.color='#0F6E56';
+  if(MODE==='resto'||decInfo.stop==='intero'){
+    const q=partialQuotient.join('');
+    ri.textContent=lastR===0?`${DIV} = ${DSR} × ${q}`:`${DIV} = ${DSR} × ${q} + ${lastR}`;
+    ri.style.color=lastR===0?'#0F6E56':'#555';
+    setMsg('Divisione completata!',true);return;
+  }
+  const ex=exactDecimal(DIV,DSR);
+  const intStr=String(ex.intPart);
+  if(decInfo.stop==='esatto'){
+    ri.innerHTML=`<span class="big">${DIV} : ${DSR} = ${intStr},${ex.ante}</span>`;
+    setMsg('Divisione completata! Il resto è 0: il quoziente è un numero decimale finito.',true);return;
+  }
+  // Numero periodico: segniamo il periodo nel quoziente con il trattino sopra.
+  const qDigits=[...document.querySelectorAll('#quot-row .q-digit')];
+  const commaAt=qDigits.findIndex(el=>el.textContent===',');
+  qDigits.forEach((el,i)=>{const k=i-commaAt-1;if(commaAt>=0&&k>=ex.ante.length&&k<ex.ante.length+ex.period.length)el.classList.add('period');});
+  if(decInfo.stop==='limite'){const dots=document.createElement('div');dots.className='q-digit';dots.textContent='…';document.getElementById('quot-row').appendChild(dots);}
+  const shortPeriod=ex.period.length<=24?ex.period:ex.period.slice(0,24)+'…';
+  ri.innerHTML=`<span class="big">${DIV} : ${DSR} = ${intStr},${ex.ante}<span class="period-num">${shortPeriod}</span></span>`;
+  const box=document.createElement('div');box.className='period-box';
+  const tipo=ex.ante?`<strong>periodico misto</strong>: dopo la virgola c'è prima l'<strong>antiperiodo</strong> ${ex.ante}, che non si ripete, e poi il <strong>periodo</strong> ${shortPeriod}`:`<strong>periodico semplice</strong>: subito dopo la virgola inizia il <strong>periodo</strong> ${shortPeriod}`;
+  if(decInfo.stop==='periodo'){
+    const r=lastR;
+    box.innerHTML=`<strong>Attenzione: il resto ${r} è già comparso!</strong> L'abbiamo colorato due volte nella divisione. Se aggiungessimo ancora lo zero otterremmo di nuovo ${r*10} e rifaremmo per sempre gli stessi passaggi: le cifre ${ex.period} si ripeterebbero all'infinito. Per questo ci fermiamo.<br>Il quoziente è un numero decimale ${tipo}. Si scrive con un trattino sopra il periodo.`;
+  }else{
+    box.innerHTML=`<strong>Ci fermiamo qui: abbiamo già ${MAX_DEC} cifre dopo la virgola.</strong> Continuando prima o poi tornerebbe un resto già visto, perché i resti possibili sono pochi (da 1 a ${DSR-1}). Questo periodo però è lungo: ${ex.period.length} cifre.<br>Il quoziente è un numero decimale ${tipo}.`;
+  }
+  ri.appendChild(box);
   setMsg('Divisione completata!',true);
 }
 
@@ -366,6 +467,7 @@ function setMsg(txt,ok){
 }
 
 document.getElementById('division-form').addEventListener('submit',e=>{e.preventDefault();startGame();});
+document.querySelectorAll('input[name="mode"]').forEach(r=>r.addEventListener('change',()=>{if(!document.getElementById('workspace').hidden)startGame();}));
 </script>
 </body>
 </html>
