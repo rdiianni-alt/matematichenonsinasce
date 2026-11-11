@@ -6,25 +6,12 @@
 <title>Care le mie parole</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Courier New', monospace; background: #f5f0e8; min-height: 100vh; }
-
-  @media (max-width: 480px) {
-    #screen-select h1 { font-size: 1.3em; }
-    .listino-btn { width: 90%; font-size: 1em; padding: 14px 16px; }
-    #screen-game { padding: 10px; }
-    .game-title { font-size: 1.1em; }
-    table.listino td { font-size: 0.75em; padding: 4px 4px; }
-    .categoria-section { padding: 10px 12px; gap: 10px; }
-    .cat-btn { font-size: 0.85em; padding: 8px 12px; }
-    #categoria-display { font-size: 1.1em; }
-    .calc-section { padding: 12px; }
-    .calc-section h2 { font-size: 0.95em; }
-    #parola-input { font-size: 1em; padding: 8px 10px; letter-spacing: 1px; }
-    .calc-btn { font-size: 0.85em; padding: 8px 12px; }
-    .lettera-chip { padding: 4px 7px; font-size: 0.85em; }
-    .totale-row { font-size: 1.1em; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #fff; color: #000; min-height: 100vh;
   }
 
+  /* SCHERMATA DI SCELTA */
   #screen-select, #screen-game { display: none; }
   #screen-select.active, #screen-game.active { display: block; }
 
@@ -33,35 +20,93 @@
   .logo img { width: 60px; height: 60px; object-fit: contain; border-radius: 50%; }
   .logo-nome { font-size: 0.85em; font-style: italic; margin-top: 4px; letter-spacing: 1px; }
 
-  #screen-select { padding: 40px 20px; text-align: center; }
-  #screen-select h1 { font-size: 2em; font-weight: bold; text-decoration: underline; margin-bottom: 40px; letter-spacing: 2px; }
+  #screen-select { padding: 28px 20px; text-align: center; }
+  #screen-select h1 { font-size: 2em; font-weight: bold; margin-bottom: 20px; letter-spacing: 2px; }
+  .intro { margin: 0 auto 20px; max-width: 420px; font-size: 1em; line-height: 1.5; }
+  .gruppo-label { margin: 22px 0 4px; font-size: 0.95em; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
   .listino-btn {
-    display: block; width: 320px; margin: 16px auto;
-    padding: 18px 24px; font-size: 1.2em; font-family: 'Courier New', monospace;
-    font-weight: bold; border: 3px solid #222; background: #fff;
-    cursor: pointer; line-height: 1.4;
+    display: block; width: 340px; max-width: 92%; margin: 10px auto;
+    padding: 14px 20px; font-size: 1.1em; font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold; border: 3px solid #000; background: #fff;
+    cursor: pointer; line-height: 1.35;
   }
-  .listino-btn:hover { background: #ffe; }
+  .listino-btn:hover { background: #f2f2f2; }
+  .credito { margin-top: 32px; font-size: 0.8em; color: #444; max-width: 420px; margin-left: auto; margin-right: auto; line-height: 1.5; }
+  .credito a { color: #444; }
 
-  #screen-game { padding: 20px; max-width: 900px; margin: 0 auto; }
+  /* SCHERMATA DI GIOCO */
+  #screen-game { padding: 12px 16px; max-width: 980px; margin: 0 auto; }
 
-  .game-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
-  .back-btn {
-    padding: 6px 14px; font-family: 'Courier New', monospace; font-size: 0.9em;
-    border: 2px solid #222; background: #fff; cursor: pointer;
+  .game-header { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; flex-wrap: wrap; }
+  .back-btn, .small-btn {
+    padding: 6px 12px; font-family: Arial, Helvetica, sans-serif; font-size: 0.95em; font-weight: bold;
+    border: 2px solid #000; background: #fff; cursor: pointer;
   }
-  .back-btn:hover { background: #eee; }
-  .game-title { font-size: 1.5em; font-weight: bold; text-decoration: underline; letter-spacing: 1px; }
+  .back-btn:hover, .small-btn:hover { background: #eee; }
+  .game-title { font-size: 1.3em; font-weight: bold; letter-spacing: 1px; }
 
-  .tabellone-wrap { margin-bottom: 20px; }
-  .tabellone-wrap h2 { font-size: 1.1em; font-weight: bold; text-decoration: underline; margin-bottom: 10px; letter-spacing: 1px; }
-  .tabellone-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
-  .tabellone-header h2 { margin-bottom: 0; }
-  .print-btn {
-    padding: 8px 16px; font-size: 0.9em; font-family: 'Courier New', monospace;
-    font-weight: bold; border: 2px solid #222; background: #fff; cursor: pointer;
+  .blocco { border: 3px solid #000; background: #fff; padding: 12px 14px; margin-bottom: 12px; }
+  .blocco h2 { font-size: 1.05em; font-weight: bold; margin-bottom: 8px; letter-spacing: 1px; }
+  .blocco-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .blocco-header h2 { margin-bottom: 0; }
+
+  .print-btn { padding: 8px 14px; font-size: 0.95em; }
+
+  /* TABELLONE */
+  table.listino { border-collapse: collapse; width: 100%; border: 3px solid #000; }
+  table.listino td {
+    border: 1px solid #000; padding: 5px 8px; text-align: center;
+    font-size: 1.15em; font-family: Arial, Helvetica, sans-serif;
   }
-  .print-btn:hover { background: #eee; }
+  table.listino td:nth-child(odd) { font-weight: bold; font-size: 1.35em; width: 56px; }
+  table.listino td:nth-child(even) { width: 90px; }
+  table.listino tr td:nth-child(3), table.listino tr td:nth-child(4) { border-left: 3px solid #000; }
+  table.listino tr td:nth-child(5), table.listino tr td:nth-child(6) { border-left: 3px solid #000; }
+
+  /* CATEGORIA */
+  .categoria-section { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .cat-btn {
+    padding: 10px 18px; font-size: 1em; font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold; border: 2px solid #000; background: #000; color: #fff; cursor: pointer; white-space: nowrap;
+  }
+  .cat-btn:hover { background: #333; }
+  #categoria-display { font-size: 1.4em; font-weight: bold; letter-spacing: 1px; }
+
+  /* CALCOLATRICE */
+  .input-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+  #parola-input {
+    flex: 1; min-width: 180px; padding: 8px 12px; font-size: 1.4em; font-family: Arial, Helvetica, sans-serif;
+    border: 2px solid #000; text-transform: uppercase; letter-spacing: 4px;
+  }
+  .calc-btn {
+    padding: 10px 18px; font-size: 1em; font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold; border: 2px solid #000; background: #000; color: #fff; cursor: pointer;
+  }
+  .calc-btn:hover { background: #333; }
+  .reset-btn {
+    padding: 10px 18px; font-size: 1em; font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold; border: 2px solid #000; background: #fff; color: #000; cursor: pointer;
+  }
+  .reset-btn:hover { background: #eee; }
+
+  #risultato { display: none; margin-top: 6px; }
+  .dettaglio { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .lettera-chip { border: 2px solid #000; padding: 6px 12px; font-size: 1.3em; font-weight: bold; min-width: 48px; text-align: center; }
+  .lettera-chip span { font-weight: normal; font-size: 0.7em; display: block; }
+  .totale-row { font-size: 1.3em; font-weight: bold; border-top: 2px solid #000; padding-top: 8px; }
+  .errore { color: #a00; font-size: 0.95em; margin-bottom: 6px; font-weight: bold; }
+
+  /* EDITOR COSTI */
+  details.editor summary { cursor: pointer; font-weight: bold; font-size: 1em; padding: 4px 0; letter-spacing: 0.5px; }
+  .editor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px 12px; margin: 10px 0; }
+  .editor-grid label { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-weight: bold; font-size: 1.05em; }
+  .editor-grid input {
+    width: 70px; padding: 4px 6px; font-size: 1em; font-family: Arial, Helvetica, sans-serif;
+    border: 2px solid #000; text-align: center;
+  }
+  .editor-azioni { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .editor-msg { font-size: 0.9em; margin-top: 6px; min-height: 1.2em; }
+  .editor-nota { font-size: 0.85em; color: #333; margin-bottom: 6px; }
 
   /* AREA DI STAMPA */
   #print-area { display: none; }
@@ -74,54 +119,37 @@
     @page { size: A4; margin: 10mm; }
     .print-block {
       display: flex; flex-direction: column; align-items: center;
-      height: 90mm; page-break-inside: avoid; border-bottom: 1px dashed #999;
-      padding: 4mm 0; justify-content: flex-start;
+      height: 90mm; overflow: hidden; page-break-inside: avoid; border-bottom: 1px dashed #999;
+      padding: 2mm 0 0; justify-content: flex-start;
     }
+    .print-block table.listino tr { height: 7mm; }
+    .print-block table.listino td { line-height: 1; padding: 0 3px; }
+    .print-block table.listino td:nth-child(odd) { line-height: 1; }
     .print-block:last-child { border-bottom: none; }
     .print-block-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
-    .print-block-header img { width: 32px; height: 32px; object-fit: contain; border-radius: 50%; }
-    .print-block-header .print-title { font-family: 'Courier New', monospace; font-size: 1em; font-weight: bold; text-decoration: underline; letter-spacing: 1px; }
-    .print-block table.listino { width: 95%; }
-    .print-block table.listino td { font-size: 0.75em; padding: 3px 5px; }
+    .print-block-header img { width: 34px; height: 34px; object-fit: contain; border-radius: 50%; }
+    .print-block-header .print-title { font-size: 1.1em; font-weight: bold; letter-spacing: 1px; }
+    .print-block table.listino { width: 96%; }
+    .print-block table.listino td { font-size: 1.2em; padding: 4px 6px; }
+    .print-block table.listino td:nth-child(odd) { font-size: 1.4em; }
+    .print-firma {
+      position: fixed; bottom: 2mm; left: 0; width: 100%; text-align: center;
+      font-size: 9pt; color: #000;
+    }
   }
 
-  table.listino { border-collapse: collapse; width: 100%; border: 3px solid #222; }
-  table.listino td { border: 1px solid #888; padding: 6px 10px; text-align: center; font-size: 1em; }
-  table.listino td:nth-child(odd) { font-weight: bold; width: 60px; }
-  table.listino td:nth-child(even) { width: 90px; }
-  table.listino tr td:nth-child(3), table.listino tr td:nth-child(4) { border-left: 3px solid #222; }
-  table.listino tr td:nth-child(5), table.listino tr td:nth-child(6) { border-left: 3px solid #222; }
-
-  /* CATEGORIA */
-  .categoria-section { border: 3px solid #222; background: #fff; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
-  .cat-btn {
-    padding: 10px 20px; font-size: 1em; font-family: 'Courier New', monospace;
-    font-weight: bold; border: 2px solid #222; background: #222; color: #fff; cursor: pointer; white-space: nowrap;
+  /* ADATTAMENTO A SCHERMI PICCOLI: tutto resta in una schermata */
+  @media (max-width: 480px) {
+    #screen-game { padding: 8px; }
+    .game-title { font-size: 1.1em; }
+    table.listino td { font-size: 0.95em; padding: 3px 4px; }
+    table.listino td:nth-child(odd) { font-size: 1.1em; width: 40px; }
+    table.listino td:nth-child(even) { width: 70px; }
+    .cat-btn, .calc-btn, .reset-btn { font-size: 0.9em; padding: 8px 12px; }
+    #categoria-display { font-size: 1.15em; }
+    #parola-input { font-size: 1.1em; letter-spacing: 2px; }
+    .listino-btn { width: 92%; font-size: 1em; }
   }
-  .cat-btn:hover { background: #444; }
-  #categoria-display { font-size: 1.4em; font-weight: bold; letter-spacing: 1px; }
-
-  /* CALCOLATORE */
-  .calc-section { border: 3px solid #222; background: #fff; padding: 20px; }
-  .calc-section h2 { font-size: 1.1em; font-weight: bold; text-decoration: underline; margin-bottom: 14px; letter-spacing: 1px; }
-
-  .input-row { display: flex; gap: 12px; align-items: center; margin-bottom: 18px; }
-  #parola-input {
-    flex: 1; padding: 10px 14px; font-size: 1.3em; font-family: 'Courier New', monospace;
-    border: 2px solid #222; text-transform: uppercase; letter-spacing: 3px;
-  }
-  .calc-btn {
-    padding: 10px 20px; font-size: 1em; font-family: 'Courier New', monospace;
-    font-weight: bold; border: 2px solid #222; background: #222; color: #fff; cursor: pointer;
-  }
-  .calc-btn:hover { background: #444; }
-
-  #risultato { display: none; margin-top: 8px; }
-  .dettaglio { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-  .lettera-chip { border: 2px solid #222; padding: 6px 10px; background: #f5f0e8; font-size: 1em; font-weight: bold; }
-  .lettera-chip span { font-weight: normal; font-size: 0.85em; display: block; text-align: center; }
-  .totale-row { font-size: 1.4em; font-weight: bold; margin-top: 8px; border-top: 2px solid #222; padding-top: 10px; }
-  .errore { color: #a00; font-size: 0.95em; margin-top: 8px; }
 </style>
 </head>
 <body>
@@ -134,11 +162,18 @@
     <div class="logo-nome">Matematiche non si nasce</div>
   </div>
   <h1>CARE LE MIE PAROLE</h1>
-  <p style="margin-bottom:20px; font-size:0.95em; max-width:360px; margin-left:auto; margin-right:auto; line-height:1.6;">Ogni lettera ha un costo. Si estrae una categoria, si cerca una parola che vi appartiene e si calcola quanto costa. Vince chi trova la parola più costosa.</p>
-  <p style="margin-bottom:24px; font-size:0.95em;">Scegli un listino:</p>
+  <p class="intro">Ogni lettera ha un costo. Si estrae una categoria, si cerca una parola che vi appartiene e si calcola quanto costa. Vince chi trova la parola più costosa.</p>
+
+  <div class="gruppo-label">Scegli un listino</div>
   <button class="listino-btn" onclick="apriGioco('base')">Listino delle lettere<br>livello base</button>
   <button class="listino-btn" onclick="apriGioco('avanzato')">Listino delle lettere<br>livello avanzato</button>
-  <p style="margin-top:48px; font-size:0.78em; color:#555; max-width:360px; margin-left:auto; margin-right:auto; line-height:1.6;">Versione digitale ispirata al gioco cartaceo <a href="https://www.pianodilavoro.org/2021/07/15/care-le-mie-parole/" target="_blank" style="color:#555;">"Care le mie parole"</a> di Lisa Salvetti e (Emi)Lia Venturato, pubblicato su pianodilavoro.org.</p>
+
+  <div class="gruppo-label">Calcolo mentale</div>
+  <button class="listino-btn" onclick="apriGioco('mentale1')">Livello 1<br>costi da 1 a 9, che sommati a coppie fanno 10</button>
+  <button class="listino-btn" onclick="apriGioco('mentale2')">Livello 2<br>costi da 1 a 10, con alcuni 10</button>
+  <button class="listino-btn" onclick="apriGioco('mentale3')">Livello 3<br>costi da 5 in 5: 5, 10 e 15</button>
+
+  <p class="credito">Versione digitale ispirata al gioco cartaceo <a href="https://www.pianodilavoro.org/2021/07/15/care-le-mie-parole/" target="_blank">"Care le mie parole"</a> di Lisa Salvetti e (Emi)Lia Venturato, pubblicato su pianodilavoro.org.</p>
 </div>
 
 <div id="screen-game">
@@ -147,32 +182,67 @@
     <div class="game-title" id="game-title"></div>
   </div>
 
-  <div class="tabellone-wrap">
-    <div class="tabellone-header">
+  <div class="blocco">
+    <div class="blocco-header">
       <h2>LISTINO DELLE LETTERE</h2>
-      <button class="print-btn" onclick="stampaTabellone()">Stampa tabellone</button>
+      <button class="small-btn print-btn" onclick="stampaTabellone()">Stampa tabellone</button>
     </div>
     <div id="tabellone-container"></div>
   </div>
 
-  <div class="categoria-section">
+  <div class="blocco categoria-section">
     <button class="cat-btn" onclick="estraiCategoria()">Estrai categoria</button>
     <div id="categoria-display"></div>
   </div>
 
-  <div class="calc-section">
+  <div class="blocco">
     <h2>QUANTO COSTA LA MIA PAROLA?</h2>
     <div class="input-row">
       <input type="text" id="parola-input" placeholder="Scrivi una parola..." oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')calcola()">
       <button class="calc-btn" onclick="calcola()">Calcola</button>
+      <button class="reset-btn" onclick="resetCalcolatrice()">Nuova parola</button>
     </div>
     <div id="risultato"></div>
+  </div>
+
+  <div class="blocco">
+    <details class="editor" id="editor">
+      <summary>Modifica i costi delle lettere</summary>
+      <p class="editor-nota">Cambia il costo di una o più lettere, poi premi "Salva i costi". I costi modificati restano salvati su questo dispositivo.</p>
+      <div class="editor-grid" id="editor-grid"></div>
+      <div class="editor-azioni">
+        <button class="calc-btn" onclick="salvaCosti()">Salva i costi</button>
+        <button class="reset-btn" onclick="ripristinaListino()">Ripristina il listino originale</button>
+      </div>
+      <div class="editor-msg" id="editor-msg"></div>
+    </details>
   </div>
 </div>
 
 <div id="print-area"></div>
 
 <script>
+const LETTERE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+const CAT_BASE = [
+  "Animali", "Frutti", "Nomi di montagne", "Giorni della settimana e mesi", "Emozioni",
+  "Nomi di compagni di classe", "Cibi", "Animali del mare", "Sport", "Mezzi di trasporto",
+  "Insetti", "Dinosauri", "Stagioni e fenomeni atmosferici", "Oggetti di scuola"
+];
+
+const CAT_AVANZATO = [
+  "Animali", "Piante", "Nomi propri di persona", "Città italiane", "Cibi", "Oggetti di scuola",
+  "Mestieri", "Colori", "Animali del mare", "Frutti", "Sport", "Strumenti musicali", "Paesi del mondo",
+  "Mezzi di trasporto", "Stagioni e fenomeni atmosferici", "Numeri scritti in lettere",
+  "Nomi di fiumi italiani", "Nomi di montagne", "Giorni della settimana e mesi", "Materiali",
+  "Emozioni", "Aggettivi", "Verbi all'infinito", "Insetti", "Dinosauri"
+];
+
+const CAT_MENTALE = [
+  "Animali", "Frutti", "Cibi", "Sport", "Oggetti di scuola", "Colori",
+  "Mezzi di trasporto", "Emozioni", "Insetti", "Animali del mare", "Stagioni e fenomeni atmosferici"
+];
+
 const LISTINI = {
   base: {
     nome: "Listino delle lettere - livello base",
@@ -181,72 +251,79 @@ const LISTINI = {
       J:5, I:1, K:5, L:2, M:1, N:1, O:1, P:2, Q:3,
       R:2, S:2, T:3, U:2, V:3, W:5, Y:5, X:5
     },
-    categorie: [
-      "Animali",
-      "Frutti",
-      "Nomi di montagne",
-      "Giorni della settimana e mesi",
-      "Emozioni",
-      "Nomi di compagni di classe",
-      "Cibi",
-      "Animali del mare",
-      "Sport",
-      "Mezzi di trasporto",
-      "Insetti",
-      "Dinosauri",
-      "Stagioni e fenomeni atmosferici",
-      "Oggetti di scuola"
-    ]
+    categorie: CAT_BASE
   },
   avanzato: {
     nome: "Listino delle lettere - livello avanzato",
     prezzi: {
-      A:0.50, B:1, C:1, D:1.50, E:1, F:1.50, G:1.50, H:3, Z:5,
-      J:5, I:1, K:5, L:2, M:1, N:1, O:0.50, P:2, Q:3,
-      R:2, S:1.50, T:2.50, U:1.50, V:3, W:5, Y:5, X:5
+      A:0.5, B:1, C:1, D:1.5, E:1, F:1.5, G:1.5, H:3, Z:5,
+      J:5, I:1, K:5, L:2, M:1, N:1, O:0.5, P:2, Q:3,
+      R:2, S:1.5, T:2.5, U:1.5, V:3, W:5, Y:5, X:5
     },
-    categorie: [
-      "Animali",
-      "Piante",
-      "Nomi propri di persona",
-      "Città italiane",
-      "Cibi",
-      "Oggetti di scuola",
-      "Mestieri",
-      "Colori",
-      "Animali del mare",
-      "Frutti",
-      "Sport",
-      "Strumenti musicali",
-      "Paesi del mondo",
-      "Mezzi di trasporto",
-      "Stagioni e fenomeni atmosferici",
-      "Numeri scritti in lettere",
-      "Nomi di fiumi italiani",
-      "Nomi di montagne",
-      "Giorni della settimana e mesi",
-      "Materiali",
-      "Emozioni",
-      "Aggettivi",
-      "Verbi all'infinito",
-      "Insetti",
-      "Dinosauri"
-    ]
+    categorie: CAT_AVANZATO
+  },
+  /* Calcolo mentale: costi interi, scelti perché le somme restino facili da fare a mente */
+  mentale1: {
+    nome: "Calcolo mentale - livello 1 (costi che fanno 10 a coppie)",
+    prezzi: {
+      A:1, B:9, C:2, D:8, E:3, F:7, G:4, H:6, I:5, J:5, K:1, L:9, M:2,
+      N:8, O:3, P:7, Q:4, R:6, S:5, T:5, U:1, V:9, W:2, X:8, Y:3, Z:7
+    },
+    categorie: CAT_MENTALE
+  },
+  mentale2: {
+    nome: "Calcolo mentale - livello 2 (costi da 1 a 10, con alcuni 10)",
+    prezzi: {
+      A:1, B:10, C:2, D:9, E:3, F:8, G:4, H:7, I:6, J:10, K:5, L:5, M:4,
+      N:6, O:2, P:8, Q:9, R:1, S:7, T:3, U:2, V:8, W:4, X:6, Y:10, Z:5
+    },
+    categorie: CAT_MENTALE
+  },
+  mentale3: {
+    nome: "Calcolo mentale - livello 3 (costi da 5 in 5: 5, 10 e 15)",
+    prezzi: {
+      A:5, B:15, C:10, D:5, E:15, F:10, G:5, H:10, I:15, J:5, K:10, L:5, M:15,
+      N:10, O:5, P:15, Q:10, R:5, S:15, T:10, U:5, V:15, W:10, X:5, Y:15, Z:10
+    },
+    categorie: CAT_MENTALE
   }
 };
 
 let listinoCorrente = null;
 let ultimaCategoria = -1;
 
+function chiaveSalvataggio(id) { return "care_parole_costi_" + id; }
+
+function caricaPrezzi(id) {
+  const predefiniti = Object.assign({}, LISTINI[id].prezzi);
+  try {
+    const salvati = JSON.parse(localStorage.getItem(chiaveSalvataggio(id)));
+    if (salvati && typeof salvati === "object") {
+      LETTERE.forEach(L => {
+        if (typeof salvati[L] === "number" && salvati[L] >= 0) predefiniti[L] = salvati[L];
+      });
+    }
+  } catch (e) { /* memoria del browser non disponibile: si usano i costi di base */ }
+  return predefiniti;
+}
+
 function apriGioco(id) {
-  listinoCorrente = LISTINI[id];
+  listinoCorrente = {
+    id: id,
+    nome: LISTINI[id].nome,
+    categorie: LISTINI[id].categorie,
+    prezzi: caricaPrezzi(id)
+  };
   document.getElementById('game-title').textContent = listinoCorrente.nome.toUpperCase();
   costruisciTabellone(listinoCorrente.prezzi);
+  costruisciEditor(listinoCorrente.prezzi);
+  document.getElementById('editor-msg').textContent = '';
+  document.getElementById('editor').open = false;
   document.getElementById('screen-select').classList.remove('active');
   document.getElementById('screen-game').classList.add('active');
-  document.getElementById('parola-input').value = '';
-  document.getElementById('risultato').style.display = 'none';
+  resetCalcolatrice();
   document.getElementById('categoria-display').textContent = '';
+  ultimaCategoria = -1;
 }
 
 function tornaAllaScelta() {
@@ -262,38 +339,23 @@ function estraiCategoria() {
   document.getElementById('categoria-display').textContent = categorie[idx].toUpperCase();
 }
 
-function costruisciTabellone(prezzi) {
-  const voci = Object.entries(prezzi).sort((a,b)=>a[0].localeCompare(b[0]));
-  const colSize = Math.ceil(voci.length / 3);
-  const col1 = voci.slice(0, colSize);
-  const col2 = voci.slice(colSize, colSize*2);
-  const col3 = voci.slice(colSize*2);
-  const rows = Math.max(col1.length, col2.length, col3.length);
-
-  let html = '<table class="listino"><tbody>';
-  for (let i = 0; i < rows; i++) {
-    html += '<tr>';
-    html += col1[i] ? `<td>${col1[i][0]}</td><td>${fmt(col1[i][1])}</td>` : '<td></td><td></td>';
-    html += col2[i] ? `<td>${col2[i][0]}</td><td>${fmt(col2[i][1])}</td>` : '<td></td><td></td>';
-    html += col3[i] ? `<td>${col3[i][0]}</td><td>${fmt(col3[i][1])}</td>` : '<td></td><td></td>';
-    html += '</tr>';
-  }
-  html += '</tbody></table>';
-  document.getElementById('tabellone-container').innerHTML = html;
+function resetCalcolatrice() {
+  document.getElementById('parola-input').value = '';
+  document.getElementById('risultato').innerHTML = '';
+  document.getElementById('risultato').style.display = 'none';
+  document.getElementById('parola-input').focus();
 }
 
 function fmt(v) {
-  return v === Math.floor(v) ? v + ' €' : v.toFixed(2).replace('.',',') + ' €';
+  return v === Math.floor(v) ? v + ' €' : v.toFixed(2).replace('.', ',') + ' €';
 }
 
-const LOGO_URL = "https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png";
-
 function tabellaHTML(prezzi) {
-  const voci = Object.entries(prezzi).sort((a,b)=>a[0].localeCompare(b[0]));
+  const voci = Object.entries(prezzi).sort((a, b) => a[0].localeCompare(b[0]));
   const colSize = Math.ceil(voci.length / 3);
   const col1 = voci.slice(0, colSize);
-  const col2 = voci.slice(colSize, colSize*2);
-  const col3 = voci.slice(colSize*2);
+  const col2 = voci.slice(colSize, colSize * 2);
+  const col3 = voci.slice(colSize * 2);
   const rows = Math.max(col1.length, col2.length, col3.length);
 
   let html = '<table class="listino"><tbody>';
@@ -308,19 +370,66 @@ function tabellaHTML(prezzi) {
   return html;
 }
 
+function costruisciTabellone(prezzi) {
+  document.getElementById('tabellone-container').innerHTML = tabellaHTML(prezzi);
+}
+
+function costruisciEditor(prezzi) {
+  let html = '';
+  LETTERE.forEach(L => {
+    html += `<label>${L}<input type="number" id="c-${L}" min="0" step="0.5" value="${prezzi[L]}"></label>`;
+  });
+  document.getElementById('editor-grid').innerHTML = html;
+}
+
+function salvaCosti() {
+  const msg = document.getElementById('editor-msg');
+  const nuovi = {};
+  for (const L of LETTERE) {
+    const raw = document.getElementById('c-' + L).value.replace(',', '.').trim();
+    const v = parseFloat(raw);
+    if (raw === '' || isNaN(v) || v < 0) {
+      msg.style.color = '#a00';
+      msg.textContent = `Controlla il costo della lettera ${L}: deve essere un numero uguale o maggiore di zero.`;
+      return;
+    }
+    nuovi[L] = v;
+  }
+  try {
+    localStorage.setItem(chiaveSalvataggio(listinoCorrente.id), JSON.stringify(nuovi));
+  } catch (e) { /* il salvataggio non è disponibile: i costi valgono per questa sessione */ }
+  listinoCorrente.prezzi = nuovi;
+  costruisciTabellone(nuovi);
+  resetCalcolatrice();
+  msg.style.color = '#000';
+  msg.textContent = 'Costi salvati. Il tabellone è aggiornato.';
+}
+
+function ripristinaListino() {
+  try { localStorage.removeItem(chiaveSalvataggio(listinoCorrente.id)); } catch (e) {}
+  listinoCorrente.prezzi = Object.assign({}, LISTINI[listinoCorrente.id].prezzi);
+  costruisciTabellone(listinoCorrente.prezzi);
+  costruisciEditor(listinoCorrente.prezzi);
+  resetCalcolatrice();
+  const msg = document.getElementById('editor-msg');
+  msg.style.color = '#000';
+  msg.textContent = 'Listino originale ripristinato.';
+}
+
 function stampaTabellone() {
-  const prezzi = listinoCorrente.prezzi;
   const nome = listinoCorrente.nome.toUpperCase();
+  const logo = "https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png";
   let html = '';
   for (let i = 0; i < 3; i++) {
     html += `<div class="print-block">
       <div class="print-block-header">
-        <img src="${LOGO_URL}" alt="Logo">
+        <img src="${logo}" alt="Logo">
         <div class="print-title">${nome}</div>
       </div>
-      ${tabellaHTML(prezzi)}
+      ${tabellaHTML(listinoCorrente.prezzi)}
     </div>`;
   }
+  html += '<div class="print-firma">© Rita Di Ianni · matematichenonsinasce · idee e materiali per la scuola primaria</div>';
   document.getElementById('print-area').innerHTML = html;
   window.print();
 }
@@ -328,16 +437,16 @@ function stampaTabellone() {
 function calcola() {
   const input = document.getElementById('parola-input').value.trim().toUpperCase();
   const div = document.getElementById('risultato');
-  if (!input) { div.style.display='none'; return; }
+  if (!input) { div.style.display = 'none'; return; }
 
   const prezzi = listinoCorrente.prezzi;
-  let sconosciute = [];
-  let dettaglio = [];
+  const sconosciute = [];
+  const dettaglio = [];
   let totale = 0;
 
   for (const ch of input) {
     if (ch === ' ') continue;
-    if (!prezzi[ch]) { sconosciute.push(ch); continue; }
+    if (prezzi[ch] === undefined) { sconosciute.push(ch); continue; }
     dettaglio.push({ lettera: ch, costo: prezzi[ch] });
     totale += prezzi[ch];
   }
