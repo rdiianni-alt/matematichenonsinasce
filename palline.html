@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Palline e operazioni</title>
+<style>
+:root{
+  --bg:#f6f7fb; --panel:#ffffff; --ink:#15151d; --muted:#6b6f80; --line:#e2e5ee; --box:#edf0f7;
+  --accent:#3b5bdb; --warn:#e8590c;
+  --op-add:#2f9e44; --op-sub:#e03131; --op-mul:#7048e8; --op-div:#1c7ed6;
+  --c-ink:#15151d; --c-muted:#8a8fa3; --c-accent:#3b5bdb; --c-warn:#e8590c;
+  --c-tile:rgba(59,91,219,.05); --c-tileline:rgba(59,91,219,.22);
+  --c-group:rgba(59,91,219,.07); --c-groupline:rgba(59,91,219,.55);
+  --c-rest:rgba(232,89,12,.07); --c-stroke:rgba(0,0,0,.22);
+  --c-labelbg:#ffffff;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#12131a; --panel:#1b1d27; --ink:#eef0f6; --muted:#9aa0b4; --line:#2c2f3d; --box:#252836;
+    --accent:#7b93ff; --warn:#ff8a3d;
+    --c-ink:#eef0f6; --c-muted:#7d8398; --c-accent:#8fa4ff; --c-warn:#ff8a3d;
+    --c-tile:rgba(143,164,255,.06); --c-tileline:rgba(143,164,255,.25);
+    --c-group:rgba(143,164,255,.08); --c-groupline:rgba(143,164,255,.6);
+    --c-rest:rgba(255,138,61,.08); --c-stroke:rgba(0,0,0,.45);
+    --c-labelbg:#1b1d27;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12131a; --panel:#1b1d27; --ink:#eef0f6; --muted:#9aa0b4; --line:#2c2f3d; --box:#252836;
+  --accent:#7b93ff; --warn:#ff8a3d;
+  --c-ink:#eef0f6; --c-muted:#7d8398; --c-accent:#8fa4ff; --c-warn:#ff8a3d;
+  --c-tile:rgba(143,164,255,.06); --c-tileline:rgba(143,164,255,.25);
+  --c-group:rgba(143,164,255,.08); --c-groupline:rgba(143,164,255,.6);
+  --c-rest:rgba(255,138,61,.08); --c-stroke:rgba(0,0,0,.45);
+  --c-labelbg:#1b1d27;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  display:flex;flex-direction:column;height:100dvh;overflow:hidden;
+  -webkit-tap-highlight-color:transparent;
+}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px 0}
+h1{font-size:18px;margin:0;font-weight:800;letter-spacing:-.01em}
+h1 span{background:linear-gradient(90deg,#3b5bdb,#9c36b5);-webkit-background-clip:text;background-clip:text;color:transparent}
+.icon-btn{border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:10px;height:34px;min-width:34px;font-size:16px;cursor:pointer}
+
+#eq{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:center;gap:8px;padding:10px 16px 2px;min-height:92px}
+.cell{display:flex;flex-direction:column;align-items:center;gap:3px}
+.bx{
+  min-width:clamp(44px,12vw,64px);height:clamp(44px,12vw,64px);padding:0 10px;border-radius:12px;
+  background:var(--box);display:grid;place-items:center;
+  font-size:clamp(22px,7vw,34px);font-variant-numeric:tabular-nums;font-weight:500;
+}
+.bx.q{color:var(--muted)}
+.bx.res{color:var(--accent);font-weight:700;animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+.bx.rest{color:var(--warn);font-weight:700;animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+.cap{font-size:12px;color:var(--muted);white-space:nowrap}
+.sym{font-size:clamp(22px,7vw,32px);height:clamp(44px,12vw,64px);display:grid;place-items:center;padding:0 2px;color:var(--ink)}
+.sym.small{font-size:clamp(14px,4vw,18px);color:var(--muted)}
+.sym.arrow{color:var(--op-div)}
+@keyframes pop{0%{transform:scale(.6)}100%{transform:scale(1)}}
+
+#stage{flex:1;position:relative;min-height:180px}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#meta{display:flex;align-items:center;gap:10px;padding:2px 16px 4px;min-height:30px}
+#badge{
+  flex:none;font-size:14px;color:var(--muted);
+  background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px 12px;
+  font-variant-numeric:tabular-nums;pointer-events:none
+}
+#badge b{color:var(--ink)}
+#hist{flex:1;min-width:0;text-align:right;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+#controls{
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  background:var(--panel);border-top:1px solid var(--line);
+  display:flex;flex-direction:column;gap:8px;align-items:center
+}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center}
+.row label{font-size:16px;font-weight:600}
+.ops{display:flex;gap:8px}
+.op{
+  width:52px;height:52px;border-radius:14px;font-size:28px;line-height:1;cursor:pointer;
+  border:2px solid var(--line);background:var(--panel);color:var(--opc);font-weight:700;
+  transition:transform .1s
+}
+.op:active{transform:scale(.94)}
+.op[aria-pressed="true"]{background:var(--opc);color:#fff;border-color:var(--opc)}
+.op[data-op="add"]{--opc:var(--op-add)} .op[data-op="sub"]{--opc:var(--op-sub)}
+.op[data-op="mul"]{--opc:var(--op-mul)} .op[data-op="div"]{--opc:var(--op-div)}
+input.num{
+  width:92px;height:52px;font-size:26px;text-align:center;border-radius:14px;
+  border:2px solid var(--line);background:var(--box);color:var(--ink);font-family:inherit;
+  font-variant-numeric:tabular-nums
+}
+input.num:focus{outline:none;border-color:var(--accent)}
+.go{
+  height:52px;padding:0 24px;border-radius:14px;border:0;cursor:pointer;
+  background:linear-gradient(90deg,#3b5bdb,#7c3aed);color:#fff;font-size:20px;font-weight:700;font-family:inherit
+}
+.go:disabled{opacity:.45;cursor:default}
+.ghost{height:52px;padding:0 14px;border-radius:14px;border:2px solid var(--line);background:transparent;color:var(--muted);font-size:15px;cursor:pointer;font-family:inherit}
+#hint{font-size:14px;color:var(--muted);min-height:1.3em;text-align:center;max-width:640px}
+#hint.err{color:var(--warn);font-weight:600}
+.shake{animation:shake .35s}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <h1>Palline che <span>contano</span></h1>
+  <button class="icon-btn" id="mute" title="Suoni sì/no" aria-label="Suoni sì/no">🔊</button>
+</header>
+
+<div id="eq"></div>
+
+<div id="meta">
+  <div id="badge" hidden><b id="cnt">0</b> <span id="pw">palline</span><span id="restB" style="color:var(--warn)"></span></div>
+  <div id="hist"></div>
+</div>
+
+<div id="stage">
+  <canvas id="cv"></canvas>
+</div>
+
+<div id="controls">
+  <div class="row" id="startRow">
+    <label for="startN">Con quante palline cominciamo?</label>
+    <input class="num" id="startN" type="text" inputmode="numeric" value="17" autocomplete="off">
+    <button class="go" id="startBtn">Via!</button>
+  </div>
+  <div class="row" id="opRow" hidden>
+    <div class="ops" role="group" aria-label="Operazione">
+      <button class="op" data-op="add" aria-pressed="true" title="Aggiungi">+</button>
+      <button class="op" data-op="sub" aria-pressed="false" title="Togli">−</button>
+      <button class="op" data-op="mul" aria-pressed="false" title="Moltiplica">×</button>
+      <button class="op" data-op="div" aria-pressed="false" title="Dividi in gruppi">÷</button>
+    </div>
+    <input class="num" id="opN" type="text" inputmode="numeric" value="5" autocomplete="off" aria-label="Numero">
+    <button class="go" id="goBtn">Vai</button>
+    <button class="ghost" id="resetBtn">Ricomincia</button>
+  </div>
+  <div id="hint">Scrivi un numero fino a 100 e premi «Via!»</div>
+</div>
+
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const cv = $('#cv'), ctx = cv.getContext('2d'), stage = $('#stage');
+const eqEl = $('#eq'), hint = $('#hint'), badge = $('#badge'), cntEl = $('#cnt'), pwEl = $('#pw'), restEl = $('#restB'), histEl = $('#hist');
+const startRow = $('#startRow'), opRow = $('#opRow'), startN = $('#startN'), opN = $('#opN');
+const goBtn = $('#goBtn'), startBtn = $('#startBtn');
+
+const MAXB = 10000, TAU = Math.PI * 2, GA = Math.PI * (3 - Math.sqrt(5));
+const PAL = ['#3b63e0', '#f08c1a', '#1fa463', '#e64980', '#8b5cf6', '#0ea5b7', '#d9a400', '#e8590c'];
+const SYM = { add: '+', sub: '−', mul: '×', div: '÷' };
+const HINT = {
+  add: 'Aggiungi: arrivano palline nuove, di un altro colore.',
+  sub: 'Togli: alcune palline scoppiano.',
+  mul: 'Moltiplica: la stessa configurazione si ripete tante volte.',
+  div: 'Dividi: il numero dice quanti gruppi fare. Le palline si distribuiscono nei cerchi una a testa, a giro; quelle che restano fuori sono il resto.'
+};
+
+let W = 0, H = 0, DPR = 1;
+let balls = [], decos = [], drops = [], rings = [];
+let shownRest = -1;
+let count = null, busy = false, op = 'add', colorI = 0, history = [], shownCount = -1;
+let C = {};
+
+function readColors() {
+  const cs = getComputedStyle(document.documentElement);
+  for (const k of ['ink','muted','accent','warn','tile','tileline','group','groupline','rest','stroke','labelbg'])
+    C[k] = cs.getPropertyValue('--c-' + k).trim();
+}
+readColors();
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', readColors);
+
+/* ---------- size ---------- */
+function resize() {
+  const r = stage.getBoundingClientRect();
+  const nw = r.width, nh = r.height;
+  DPR = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = Math.round(nw * DPR); cv.height = Math.round(nh * DPR);
+  if (W > 0 && H > 0 && nw > 0 && nh > 0 && (nw !== W || nh !== H)) {
+    const s = Math.min(nw / W, nh / H), ocx = W / 2, ocy = H / 2, ncx = nw / 2, ncy = nh / 2;
+    const tx = x => (x - ocx) * s + ncx, ty = y => (y - ocy) * s + ncy;
+    for (const b of balls) { b.x = tx(b.x); b.y = ty(b.y); b.tx = tx(b.tx); b.ty = ty(b.ty); b.r *= s; b.tr *= s; }
+    for (const d of decos) { d.x = tx(d.x); d.y = ty(d.y); if (d.w != null) { d.w *= s; d.h *= s; } if (d.r != null) d.r *= s; d.fs *= s; }
+  }
+  if (nw > 0 && nh > 0) { W = nw; H = nh; }
+}
+new ResizeObserver(resize).observe(stage);
+resize();
+
+/* ---------- sound ---------- */
+let AC = null, muted = false, lastS = 0;
+function audio() {
+  if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+  if (AC && AC.state === 'suspended') AC.resume();
+}
+function tone(f0, f1, dur, vol, type) {
+  if (muted || !AC) return;
+  const t = AC.currentTime;
+  if (t - lastS < 0.03) return;
+  lastS = t;
+  const o = AC.createOscillator(), g = AC.createGain();
+  o.type = type;
+  o.frequency.setValueAtTime(f0, t);
+  o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(AC.destination);
+  o.start(t); o.stop(t + dur + 0.02);
+}
+const sndPop = () => tone(700 + Math.random() * 400, 110, 0.09, 0.12, 'triangle');
+const sndPlip = () => tone(450 + Math.random() * 250, 1000, 0.07, 0.05, 'sine');
+$('#mute').onclick = e => { muted = !muted; e.currentTarget.textContent = muted ? '🔇' : '🔊'; };
+
+/* ---------- balls ---------- */
+const now = () => performance.now();
+function mk(x, y, col, r) {
+  return { x, y, vx: 0, vy: 0, tx: x, ty: y, r, tr: r, col,
+    p1: Math.random() * TAU, p2: Math.random() * TAU,
+    f1: 1.3 + Math.random() * 1.7, f2: 0.9 + Math.random() * 1.9,
+    start: 0, cnt: 0, popAt: Infinity, snd: false, fresh: false, dx: 0, dy: 0 };
+}
+const alive = () => balls.filter(b => b.popAt === Infinity && !b.rest && !b.vanish);
+const restBalls = () => balls.filter(b => b.rest && !b.vanish && b.popAt === Infinity);
+const REST_H = 36;
+// zona di gioco: se c'è un resto da parte, la striscia in alto è riservata a lui
+const region = () => restBalls().length ? { x: 0, y: REST_H, w: W, h: H - REST_H } : { x: 0, y: 0, w: W, h: H };
+let lastDiv = null;
+
+function placeRest(start) {
+  const rs = restBalls();
+  decos = decos.filter(d => !d.rest);
+  if (!rs.length) return;
+  const r = Math.max(2, Math.min(9, (W - 110) / (rs.length * 2.5)));
+  rs.forEach((b, i) => { b.q = []; b.tx = 84 + r + i * r * 2.5; b.ty = REST_H / 2; b.tr = r; b.start = start; });
+  decos.push({ k: 'text', rest: true, r: 0, x: 44, y: REST_H / 2, fs: 14, label: 'resto', a: 0, ta: 1, start });
+}
+
+// dopo una divisione: si tiene un gruppo (il quoziente), il resto va da parte
+function collapseAfterDiv() {
+  const L = lastDiv; lastDiv = null;
+  if (!L) return 0;
+  const t0 = now();
+  for (const b of balls) if (b.rest) { b.rest = false; b.vanish = true; b.tr = 0; b.start = t0; }
+  const st = Math.min(120, 900 / Math.max(1, L.groups.length));
+  L.groups.forEach((g, gi) => {
+    if (gi === 0) return;
+    for (const b of g) { b.vanish = true; b.q = []; b.tr = 0; b.start = t0 + 150 + gi * st; }
+  });
+  for (const d of decos) if (d.k === 'group' && d.label !== '1') { d.ta = 0; d.start = t0 + 150 + (Number(d.label) - 1) * st; }
+  for (const b of L.rest) b.rest = true;
+  placeRest(t0 + 300);
+  const tLayout = 150 + L.groups.length * st + 500;
+  setTimeout(layoutCluster, tLayout);
+  return tLayout + 900;
+}
+const maxBall = () => Math.max(6, Math.min(28, Math.min(W, H) * 0.05));
+
+function sunflower(n, cx, cy, maxR, maxB) {
+  if (n <= 0) return { pts: [], r: 0 };
+  let c = maxR / (Math.sqrt(n) + 0.75);
+  let r = c * 0.7;
+  if (r > maxB) { r = maxB; c = r / 0.7; }
+  const pts = [];
+  for (let i = 0; i < n; i++) {
+    const rr = n === 1 ? 0 : c * Math.sqrt(i + 0.5), th = i * GA;
+    pts.push({ x: cx + rr * Math.cos(th), y: cy + rr * Math.sin(th) });
+  }
+  return { pts, r };
+}
+
+function fadeDecos() { for (const d of decos) if (!d.rest) { d.ta = 0; d.start = 0; } }
+
+function layoutCluster() {
+  const list = alive();
+  fadeDecos();
+  if (!list.length) return;
+  const R = region(), cx = R.x + R.w / 2, cy = R.y + R.h / 2;
+  const { pts, r } = sunflower(list.length, cx, cy, Math.min(R.w, R.h) * 0.44, maxBall());
+  const d2 = b => (b.tx - cx) ** 2 + (b.ty - cy) ** 2;
+  const old = list.filter(b => !b.fresh).sort((a, b) => d2(a) - d2(b));
+  const fr = list.filter(b => b.fresh);
+  [...old, ...fr].forEach((b, i) => { b.tx = pts[i].x; b.ty = pts[i].y; b.tr = r; b.fresh = false; });
+}
+
+function popBalls(list, t0, total) {
+  const st = list.length ? Math.min(90, total / list.length) : 0;
+  list.forEach((b, i) => { b.popAt = t0 + i * st; });
+  return list.length * st;
+}
+
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+/* ---------- operations ---------- */
+function opStart(n) {
+  balls = []; decos = []; colorI = 0; lastDiv = null;
+  const col = PAL[colorI++ % PAL.length];
+  const t0 = now(), st = Math.min(45, 1000 / Math.max(1, n));
+  const fresh = [];
+  for (let i = 0; i < n; i++) {
+    const b = mk(W / 2, H / 2, col, 0);
+    b.start = t0 + i * st; b.cnt = b.start; b.fresh = true; b.snd = true;
+    balls.push(b); fresh.push(b);
+  }
+  layoutCluster();
+  for (const b of fresh) { b.x = b.tx; b.y = b.ty; b.r = 0; }
+  return n * st + 700;
+}
+
+function opAdd(k) {
+  if (!k) return 300;
+  const t0 = now(), st = Math.min(60, 1400 / k), R = Math.hypot(W, H) * 0.6;
+  const back = restBalls().slice(0, k);          // le palline del resto tornano nel mucchio
+  const fresh = [];
+  back.forEach((b, i) => { b.rest = false; b.fresh = true; b.start = t0 + i * st; b.cnt = b.start + 300; b.snd = true; fresh.push(b); });
+  placeRest(t0);
+  const col = back.length < k ? PAL[colorI++ % PAL.length] : null;
+  for (let i = back.length; i < k; i++) {
+    const a = Math.random() * TAU;
+    const b = mk(W / 2 + R * Math.cos(a), H / 2 + R * Math.sin(a), col, 0);
+    b.start = t0 + i * st; b.cnt = b.start + 450; b.fresh = true; b.snd = true;
+    balls.push(b); fresh.push(b);
+  }
+  layoutCluster();
+  for (const b of fresh) if (!back.includes(b)) b.r = b.tr;
+  return k * st + 1300;
+}
+
+function opSub(k) {
+  if (!k) return 300;
+  const picked = shuffle(alive()).slice(0, k);
+  const dur = popBalls(picked, now() + 250, 1500);
+  setTimeout(layoutCluster, 250 + dur + 600);
+  return 250 + dur + 600 + 900;
+}
+
+function opMul(k) {
+  const list = alive();
+  if (!list.length) return 300;
+  const t0 = now();
+  if (k === 0) {
+    fadeDecos();
+    return popBalls(shuffle(list), t0 + 250, 1200) + 900;
+  }
+  // bounding box of current configuration (balls + decorations)
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const b of list) { x0 = Math.min(x0, b.tx - b.tr); x1 = Math.max(x1, b.tx + b.tr); y0 = Math.min(y0, b.ty - b.tr); y1 = Math.max(y1, b.ty + b.tr); }
+  const keep = decos.filter(d => d.ta > 0 && !d.rest);
+  for (const d of keep) {
+    if (d.w != null) { x0 = Math.min(x0, d.x); x1 = Math.max(x1, d.x + d.w); y0 = Math.min(y0, d.y); y1 = Math.max(y1, d.y + d.h); }
+    else { x0 = Math.min(x0, d.x - d.r); x1 = Math.max(x1, d.x + d.r); y0 = Math.min(y0, d.y - d.r); y1 = Math.max(y1, d.y + d.r); }
+  }
+  const bw = (x1 - x0) * 1.1 + 6, bh = (y1 - y0) * 1.1 + 6;
+  const pcx = (x0 + x1) / 2, pcy = (y0 + y1) / 2;
+  const RG = region(), aw = RG.w * 0.96, ah = RG.h * 0.94;
+  let best = null;
+  for (let cols = 1; cols <= k; cols++) {
+    const rows = Math.ceil(k / cols);
+    const sc = Math.min(aw / (cols * bw), ah / (rows * bh));
+    if (!best || sc > best.sc) best = { cols, rows, sc };
+  }
+  const sc = Math.min(1, best.sc), cw = bw * sc, ch = bh * sc;
+  const ox = RG.x + (RG.w - best.cols * cw) / 2, oy = RG.y + (RG.h - best.rows * ch) / 2;
+  const cen = j => ({ x: ox + ((j % best.cols) + 0.5) * cw, y: oy + (Math.floor(j / best.cols) + 0.5) * ch });
+  const map = (j, x, y) => { const c = cen(j); return { x: c.x + (x - pcx) * sc, y: c.y + (y - pcy) * sc }; };
+  const st = Math.min(220, 2600 / k);
+
+  // copy 0 = the original balls, shrunk into the first tile
+  const pattern = list.map(b => ({ tx: b.tx, ty: b.ty, tr: b.tr, col: b.col }));
+  for (const b of list) { const p = map(0, b.tx, b.ty); b.tx = p.x; b.ty = p.y; b.tr *= sc; }
+
+  // decorations: drop faded ones, copy the visible ones into every tile
+  const copyOld = keep.length * k <= 4000;
+  decos = decos.filter(d => d.rest);
+  const newDeco = (d, j, start) => {
+    const p = map(j, d.x, d.y), n = { ...d, x: p.x, y: p.y, fs: d.fs * sc, start };
+    if (d.w != null) { n.w = d.w * sc; n.h = d.h * sc; } else n.r = d.r * sc;
+    if (j > 0) n.a = 0;
+    return n;
+  };
+  for (let j = 0; j < k; j++) {
+    const start = j === 0 ? 0 : t0 + 300 + j * st;
+    if (copyOld) for (const d of keep) decos.push(newDeco(d, j, start));
+    const c = cen(j), ins = Math.max(1, cw * 0.03);
+    decos.push({ k: 'tile', x: c.x - cw / 2 + ins, y: c.y - ch / 2 + ins, w: cw - 2 * ins, h: ch - 2 * ins,
+      fs: Math.min(14, ch * 0.11), label: k > 1 ? String(j + 1) : '', a: 0, ta: 1, start: j === 0 ? t0 : start });
+  }
+  // copies 1..k-1: born in the first tile, then fly to their own tile
+  for (let j = 1; j < k; j++) {
+    pattern.forEach((p, i) => {
+      const s = map(0, p.tx, p.ty), e = map(j, p.tx, p.ty);
+      const b = mk(s.x, s.y, p.col, 0);
+      b.tx = e.x; b.ty = e.y; b.tr = p.tr * sc;
+      b.start = t0 + 300 + j * st; b.cnt = b.start + 150; b.snd = i === 0;
+      balls.push(b);
+    });
+  }
+  return 300 + k * st + 1300;
+}
+
+function opDiv(d) {
+  // d = numero di gruppi.
+  // 1) le palline si raccolgono in un mucchio fuori dai cerchi, i cerchi vuoti compaiono
+  // 2) dal mucchio si distribuisce una pallina a ogni cerchio, a giro
+  // 3) quelle che restano nel mucchio (fuori dai cerchi) sono il resto
+  const list = alive(), n = list.length;
+  const q = Math.floor(n / d), rem = n % d;
+  fadeDecos();
+  const side = W > H * 1.2;           // schermo largo: mucchio a sinistra, altrimenti in basso
+  const RG = region();
+  const pile = side ? { x: 0, y: RG.y, w: W * 0.3, h: RG.h } : { x: 0, y: RG.y + RG.h * 0.72, w: W, h: RG.h * 0.28 };
+  const area = side ? { x: W * 0.3, y: RG.y, w: W * 0.7, h: RG.h } : { x: 0, y: RG.y, w: W, h: RG.h * 0.72 };
+
+  // cerchi dei gruppi
+  const aw = area.w * 0.96, ah = area.h * 0.9;
+  let best = null;
+  for (let cols = 1; cols <= d; cols++) {
+    const rows = Math.ceil(d / cols), sz = Math.min(aw / cols, ah / rows);
+    if (!best || sz > best.s) best = { cols, rows, s: sz };
+  }
+  const cell = best.s, Rg = cell * 0.45;
+  const ox = area.x + (area.w - best.cols * cell) / 2, oy = area.y + (area.h - best.rows * cell) / 2 + cell * 0.03;
+  const tpl = sunflower(Math.max(q, 1), 0, 0, Rg * 0.84, maxBall());
+  const fs = Math.min(15, Rg * 0.3);
+  const t0 = now();
+  const centers = [];
+  for (let g = 0; g < d; g++) {
+    const cx = ox + ((g % best.cols) + 0.5) * cell, cy = oy + (Math.floor(g / best.cols) + 0.5) * cell;
+    centers.push({ x: cx, y: cy });
+    decos.push({ k: 'group', x: cx, y: cy, r: Rg, fs, label: String(g + 1), a: 0, ta: 1, start: t0 + 150 + g * 30 });
+  }
+
+  // il mucchio: le palline più vicine al centro restano per ultime (saranno il resto)
+  const pcx = pile.x + pile.w / 2, pcy = pile.y + pile.h / 2;
+  const pl = sunflower(n, pcx, pcy, Math.min(pile.w, pile.h) * 0.42, maxBall());
+  const sb = list.slice().sort((a, b) => ((a.tx - pcx) ** 2 + (a.ty - pcy) ** 2) - ((b.tx - pcx) ** 2 + (b.ty - pcy) ** 2));
+  sb.forEach((b, i) => { b.tx = pl.pts[i].x; b.ty = pl.pts[i].y; b.tr = pl.r; b.start = t0 + Math.random() * 200; b.q = []; });
+
+  // distribuzione a giro, prendendo dal bordo esterno del mucchio
+  const tDeal = t0 + 1100;
+  const roundDur = Math.min(650, 2800 / Math.max(1, q));
+  const step = Math.min(90, (roundDur * 0.85) / d);
+  let idx = n - 1;
+  const groups = Array.from({ length: d }, () => []);
+  for (let s = 0; s < q; s++) for (let g = 0; g < d; g++) {
+    const b = sb[idx--];
+    groups[g].push(b);
+    b.q.push({ at: tDeal + s * roundDur + g * step, tx: centers[g].x + tpl.pts[s].x, ty: centers[g].y + tpl.pts[s].y, tr: tpl.r, snd: true });
+  }
+  const tEnd = tDeal + q * roundDur;
+  lastDiv = { groups, rest: sb.slice(0, rem) };
+
+  // etichetta del resto (solo testo, nessun cerchio)
+  if (rem) {
+    const c = pl.r / 0.7, spread = rem === 1 ? 0 : c * Math.sqrt(rem);
+    decos.push({ k: 'text', r: 0, x: pcx, y: Math.min(H - 10, pcy + spread + pl.r + 14), fs: 15,
+      label: 'resto ' + rem, a: 0, ta: 1, start: tEnd + 300 });
+  }
+  return tEnd - t0 + 1300;
+}
+
+/* ---------- simulation ---------- */
+function burst(b) {
+  const x = b.x + b.dx, y = b.y + b.dy;
+  rings.push({ x, y, r: b.r, l: 0, col: b.col });
+  if (drops.length < 2500) for (let i = 0; i < 6; i++) {
+    const a = Math.random() * TAU, sp = 40 + Math.random() * 90 + b.r * 4;
+    drops.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, l: 0, col: b.col, s: Math.max(1, b.r * 0.28) });
+  }
+  sndPop();
+}
+
+let last = now();
+function frame(t) {
+  const dt = Math.min(0.033, (t - last) / 1000); last = t;
+  const ts = t / 1000, K = 70, D = 11;
+  let dead = false, live = 0, restN = 0;
+  for (const b of balls) {
+    if (t >= b.popAt) { burst(b); b.dead = true; dead = true; continue; }
+    if (b.q && b.q.length && t >= b.q[0].at) {
+      const w = b.q.shift(); b.tx = w.tx; b.ty = w.ty; b.tr = w.tr; if (w.snd) b.snd = true;
+    }
+    if (t >= b.start) {
+      if (b.snd) { b.snd = false; sndPlip(); }
+      b.vx += ((b.tx - b.x) * K - b.vx * D) * dt;
+      b.vy += ((b.ty - b.y) * K - b.vy * D) * dt;
+      b.x += b.vx * dt; b.y += b.vy * dt;
+      b.r += (b.tr - b.r) * Math.min(1, dt * 8);
+    }
+    const A = Math.min(2.2, Math.max(0.25, b.r * 0.1));
+    b.dx = A * (Math.sin(ts * b.f1 * 3 + b.p1) + 0.6 * Math.sin(ts * b.f2 * 5.3 + b.p2)) / 1.6;
+    b.dy = A * (Math.cos(ts * b.f2 * 3 + b.p2) + 0.6 * Math.sin(ts * b.f1 * 4.7 + b.p1)) / 1.6;
+    if (b.vanish && t >= b.start && b.r < 0.3) { b.dead = true; dead = true; }
+    else if (t >= b.cnt && !b.rest && !b.vanish) live++;
+    if (b.rest && !b.vanish) restN++;
+  }
+  if (dead) balls = balls.filter(b => !b.dead);
+  for (const d of decos) if (t >= d.start) d.a += (d.ta - d.a) * Math.min(1, dt * 6);
+  if (decos.some(d => d.ta === 0 && d.a < 0.02)) decos = decos.filter(d => !(d.ta === 0 && d.a < 0.02));
+  for (const p of drops) { p.l += dt; p.vy += 260 * dt; p.x += p.vx * dt; p.y += p.vy * dt; }
+  drops = drops.filter(p => p.l < 0.5);
+  for (const r of rings) r.l += dt;
+  rings = rings.filter(r => r.l < 0.35);
+
+  if (count !== null && live !== shownCount) { shownCount = live; cntEl.textContent = live; pwEl.textContent = live === 1 ? 'pallina' : 'palline'; }
+  if (restN !== shownRest) { shownRest = restN; restEl.textContent = restN ? ` · resto ${restN}` : ''; }
+  draw();
+  requestAnimationFrame(frame);
+}
+
+function draw() {
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+
+  // decorations
+  for (const d of decos) {
+    if (d.a < 0.01) continue;
+    ctx.globalAlpha = Math.min(1, d.a);
+    ctx.beginPath();
+    if (d.k === 'tile') {
+      const rr = Math.min(14, d.w * 0.08);
+      ctx.roundRect ? ctx.roundRect(d.x, d.y, d.w, d.h, rr) : ctx.rect(d.x, d.y, d.w, d.h);
+      ctx.fillStyle = C.tile; ctx.fill();
+      ctx.lineWidth = 1; ctx.strokeStyle = C.tileline; ctx.stroke();
+    } else if (d.k === 'group') {
+      ctx.arc(d.x, d.y, d.r, 0, TAU);
+      ctx.fillStyle = C.group; ctx.fill();
+      ctx.lineWidth = Math.max(0.5, Math.min(2, d.r * 0.05)); ctx.strokeStyle = C.groupline; ctx.stroke();
+    } else if (d.k === 'rest') {
+      ctx.arc(d.x, d.y, d.r, 0, TAU);
+      ctx.fillStyle = C.rest; ctx.fill();
+      ctx.setLineDash([Math.max(2, d.r * 0.12), Math.max(2, d.r * 0.08)]);
+      ctx.lineWidth = Math.max(0.6, Math.min(2.2, d.r * 0.05)); ctx.strokeStyle = C.warn; ctx.stroke();
+      ctx.setLineDash([]);
+    } else if (d.k === 'ghost') {
+      ctx.arc(d.x, d.y, d.r, 0, TAU);
+      ctx.setLineDash([Math.max(1.5, d.r * 0.3), Math.max(1.5, d.r * 0.25)]);
+      ctx.lineWidth = Math.max(0.5, Math.min(1.5, d.r * 0.08)); ctx.strokeStyle = C.warn; ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+  ctx.globalAlpha = 1;
+
+  // balls, batched by colour
+  const buckets = new Map();
+  for (const b of balls) {
+    if (b.r < 0.3) continue;
+    let arr = buckets.get(b.col); if (!arr) buckets.set(b.col, arr = []);
+    arr.push(b);
+  }
+  for (const [col, arr] of buckets) {
+    ctx.beginPath();
+    let rs = 0;
+    for (const b of arr) { const x = b.x + b.dx, y = b.y + b.dy; ctx.moveTo(x + b.r, y); ctx.arc(x, y, b.r, 0, TAU); rs += b.r; }
+    ctx.fillStyle = col; ctx.fill();
+    const avg = rs / arr.length;
+    if (avg > 2.5) { ctx.lineWidth = Math.min(1.6, avg * 0.1); ctx.strokeStyle = C.stroke; ctx.stroke(); }
+    if (avg > 7) {
+      ctx.beginPath();
+      for (const b of arr) { const x = b.x + b.dx - b.r * 0.32, y = b.y + b.dy - b.r * 0.34, rr = b.r * 0.28; ctx.moveTo(x + rr, y); ctx.arc(x, y, rr, 0, TAU); }
+      ctx.fillStyle = 'rgba(255,255,255,.28)'; ctx.fill();
+    }
+  }
+
+  // pops
+  for (const r of rings) {
+    ctx.globalAlpha = 1 - r.l / 0.35;
+    ctx.beginPath(); ctx.arc(r.x, r.y, r.r * (1 + r.l * 5), 0, TAU);
+    ctx.lineWidth = Math.max(1, r.r * 0.18); ctx.strokeStyle = r.col; ctx.stroke();
+  }
+  for (const p of drops) {
+    ctx.globalAlpha = 1 - p.l / 0.5;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, TAU); ctx.fillStyle = p.col; ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  // labels on top
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  for (const d of decos) {
+    if (!d.label || d.fs < 7 || d.a < 0.05) continue;
+    ctx.globalAlpha = Math.min(1, d.a);
+    if (d.k === 'text') {
+      ctx.font = `700 ${d.fs}px system-ui, sans-serif`;
+      ctx.fillStyle = C.warn; ctx.fillText(d.label, d.x, d.y);
+      continue;
+    }
+    ctx.font = `700 ${d.fs}px system-ui, sans-serif`;
+    const tw = ctx.measureText(d.label).width, ph = d.fs * 1.35, pw = Math.max(ph, tw + d.fs * 0.8);
+    let cx, cy;
+    if (d.k === 'tile') { cx = d.x + pw / 2 + d.fs * 0.35; cy = d.y + ph / 2 + d.fs * 0.35; }
+    else { cx = d.x; cy = d.y - d.r; }
+    const col = d.k === 'rest' ? C.warn : d.k === 'group' ? C.accent : C.muted;
+    ctx.beginPath();
+    ctx.roundRect ? ctx.roundRect(cx - pw / 2, cy - ph / 2, pw, ph, ph / 2) : ctx.rect(cx - pw / 2, cy - ph / 2, pw, ph);
+    ctx.fillStyle = C.labelbg; ctx.fill();
+    ctx.lineWidth = 1; ctx.strokeStyle = col; ctx.stroke();
+    ctx.fillStyle = col; ctx.fillText(d.label, cx, cy + d.fs * 0.05);
+  }
+  ctx.globalAlpha = 1;
+}
+requestAnimationFrame(frame);
+
+/* ---------- UI ---------- */
+const cellH = (v, cls = '', cap = '') => `<div class="cell"><div class="bx ${cls}">${v}</div>${cap ? `<div class="cap">${cap}</div>` : ''}</div>`;
+const symH = (s, cls = '') => `<div class="sym ${cls}">${s}</div>`;
+
+function renderEq(a, o, k, res) {
+  if (o == null) { eqEl.innerHTML = cellH(a, '', 'palline'); return; }
+  const kv = Number.isInteger(k) ? k : '?';
+  let h = cellH(a) + symH(SYM[o]) + cellH(kv, kv === '?' ? 'q' : '', o === 'div' ? 'gruppi' : '');
+  if (o === 'div') {
+    h += symH('→', 'arrow');
+    h += res ? cellH(res.q, 'res', 'in ogni gruppo') : cellH('?', 'q', 'in ogni gruppo');
+    h += symH('e', 'small');
+    h += res ? cellH(res.r, 'rest', 'resto') : cellH('?', 'q', 'resto');
+  } else {
+    h += symH('=') + (res != null ? cellH(res, 'res') : cellH('?', 'q'));
+  }
+  eqEl.innerHTML = h;
+}
+
+function setHint(text, isErr) {
+  hint.textContent = text;
+  hint.classList.toggle('err', !!isErr);
+  if (isErr) { hint.classList.remove('shake'); void hint.offsetWidth; hint.classList.add('shake'); }
+}
+function setBusy(b) { busy = b; goBtn.disabled = b; startBtn.disabled = b; }
+
+function readNum(el) {
+  const v = el.value.trim();
+  if (!/^\d+$/.test(v)) return NaN;
+  return parseInt(v, 10);
+}
+
+function preview() {
+  if (busy || count === null) return;
+  const k = readNum(opN);
+  renderEq(count, op, Number.isNaN(k) ? null : k, null);
+}
+
+function selectOp(o) {
+  op = o;
+  document.querySelectorAll('.op').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.op === o)));
+  if (!busy) setHint(HINT[o]);
+  preview();
+}
+
+function pushHist(s) {
+  history.unshift(s); history = history.slice(0, 4);
+  histEl.textContent = history.join('  ·  ');
+}
+
+function start() {
+  audio();
+  if (busy) return;
+  const n = readNum(startN);
+  if (Number.isNaN(n) || n > 100) return setHint('Scrivi un numero da 0 a 100.', true);
+  setBusy(true);
+  history = []; histEl.innerHTML = '';
+  count = n; shownCount = -1;
+  badge.hidden = false;
+  renderEq(n, null);
+  startRow.hidden = true; opRow.hidden = false;
+  const dur = opStart(n);
+  setHint(HINT[op]);
+  setTimeout(() => { setBusy(false); preview(); opN.focus({ preventScroll: true }); }, dur);
+}
+
+function go() {
+  audio();
+  if (busy || count === null) return;
+  const k = readNum(opN), a = count;
+  if (Number.isNaN(k)) return setHint('Scrivi un numero.', true);
+  if (k > 100) return setHint('Usa un numero da 0 a 100.', true);
+  if (op === 'sub' && k > a) return setHint(`Ci sono solo ${a} palline: non posso farne scoppiare ${k}!`, true);
+  if (op === 'add' && a + k > MAXB) return setHint(`Troppe palline! Il massimo è ${MAXB.toLocaleString('it-IT')}.`, true);
+  if (op === 'mul' && a * k > MAXB) return setHint(`Verrebbero più di ${MAXB.toLocaleString('it-IT')} palline: troppe anche per un mondo minuscolo!`, true);
+  if (op === 'div' && k === 0) return setHint('Non si possono fare 0 gruppi: dividere per zero non ha senso!', true);
+
+  setBusy(true);
+  // se la scena mostra ancora i gruppi di una divisione, prima si tiene il risultato (un gruppo)
+  const pre = collapseAfterDiv();
+  setTimeout(() => run(a, k), pre ? pre - 300 : 0);
+}
+
+function run(a, k) {
+  setHint(HINT[op]);
+  renderEq(a, op, k, null);
+  let dur, res;
+  if (op === 'add') { res = a + k; dur = opAdd(k); }
+  else if (op === 'sub') { res = a - k; dur = opSub(k); }
+  else if (op === 'mul') { res = a * k; dur = opMul(k); }
+  else { res = { q: Math.floor(a / k), r: a % k }; dur = opDiv(k); }
+
+  setTimeout(() => {
+    renderEq(a, op, k, res);
+    if (op === 'div') {
+      pushHist(`${a} ÷ ${k} → ${res.q} resto ${res.r}`);
+      setHint(`${k} ${k === 1 ? 'gruppo' : 'gruppi'} con ${res.q} ${res.q === 1 ? 'pallina' : 'palline'} ciascuno, e ne ${res.r === 1 ? 'avanza' : 'avanzano'} ${res.r}: non bastano per darne ${res.q === 0 ? 'una' : "un'altra"} a ogni gruppo.`);
+      count = res.q;
+      setTimeout(() => {
+        if (busy || count !== res.q) return;
+        setHint(`Il risultato è ${res.q}: quante palline ci sono in un gruppo${res.r ? `, e ${res.r} di resto` : ''}. Alla prossima operazione si parte da ${res.q}. Prova × ${k}${res.r ? ` e poi + ${res.r}` : ''}: torni a ${a}!`);
+      }, 3500);
+    } else {
+      count = res;
+      pushHist(`${a} ${SYM[op]} ${k} = ${res}`);
+      const rn = restBalls().length;
+      if (op === 'mul' && rn) setHint(`${a} × ${k} = ${res}. Poi c'è il resto messo da parte: ${res} + ${rn} = ${res + rn}. Prova + ${rn} per rimetterlo nel mucchio!`);
+      else setHint(HINT[op]);
+    }
+    setBusy(false);
+  }, dur);
+}
+
+function reset() {
+  audio();
+  if (busy) return;
+  fadeDecos();
+  lastDiv = null;
+  popBalls(shuffle(balls.filter(b => b.popAt === Infinity && !b.vanish)), now(), 700);
+  decos.forEach(d => { d.ta = 0; d.start = 0; });
+  count = null; history = []; histEl.innerHTML = ''; eqEl.innerHTML = '';
+  badge.hidden = true;
+  opRow.hidden = true; startRow.hidden = false;
+  setHint('Scrivi un numero fino a 100 e premi «Via!»');
+  startN.focus({ preventScroll: true }); startN.select();
+}
+
+document.querySelectorAll('.op').forEach(b => b.addEventListener('click', () => { audio(); selectOp(b.dataset.op); }));
+startBtn.onclick = start;
+goBtn.onclick = go;
+$('#resetBtn').onclick = reset;
+startN.addEventListener('keydown', e => { if (e.key === 'Enter') start(); });
+opN.addEventListener('input', preview);
+opN.addEventListener('keydown', e => {
+  const map = { '+': 'add', '-': 'sub', '*': 'mul', 'x': 'mul', 'X': 'mul', '/': 'div', ':': 'div' };
+  if (map[e.key]) { e.preventDefault(); selectOp(map[e.key]); }
+  else if (e.key === 'Enter') go();
+});
+startN.focus({ preventScroll: true });
+startN.select();
+})();
+</script>
+</body>
+</html>
