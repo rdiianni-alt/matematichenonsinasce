@@ -2,692 +2,304 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Numeri Fantasmino</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Fantasmino · Matematiche non si nasce</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', sans-serif; background: #f7f3ff; min-height: 100vh; }
+  :root{
+    --ink:#1A1A1A; --muted:#6A6A6A; --red:#C81D25; --paper:#FFFFFF;
+    --line:#BFD7EA; --line2:#E6F0F8;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{
+    font-family:'Poppins',system-ui,-apple-system,'Segoe UI',sans-serif;
+    color:var(--ink); background:#fff;
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  header{
+    display:flex; flex-direction:column; align-items:center; gap:6px; padding:6px 10px 2px;
+    text-align:center;
+  }
+  header img{height:64px; width:auto;}
+  header h1{font-size:20px; margin:0; color:var(--red); letter-spacing:.3px;}
+  .cats{display:flex; gap:5px; flex-wrap:wrap; justify-content:center;}
+  button{
+    font:inherit; font-size:12px; font-weight:600; cursor:pointer;
+    border:1px solid #CFCAC0; background:#fff; color:var(--ink);
+    border-radius:999px; padding:3px 9px; line-height:1.3;
+  }
+  button:hover{border-color:var(--ink);}
+  button.on{background:var(--ink); color:#fff; border-color:var(--ink);}
+  button.primary{background:var(--red); color:#fff; border-color:var(--red);}
+  .tools{display:flex; gap:5px; align-items:center; flex-wrap:wrap; justify-content:center;}
+  .sw{width:14px; height:14px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 1px #CFCAC0; cursor:pointer; padding:0;}
+  .sw.on{box-shadow:0 0 0 2.5px var(--ink);}
 
-.header {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 6px; padding: 14px 18px; background: #fff;
-  border-bottom: 1.5px solid #e0d9f7;
-}
-.logo-link { display: flex; flex-direction: column; align-items: center; gap: 6px; text-decoration: none; }
-.logo-link img { width: 54px; height: 54px; border-radius: 50%; object-fit: contain; }
-.blog-name { font-size: 14px; font-weight: 600; color: #5a3dbf; line-height: 1.4; text-align: center; }
+  main{flex:1; position:relative; min-height:0;}
+  .paper{
+    position:absolute; inset:10px; background:var(--paper);
+    border:1px solid #C9D6E2; border-radius:6px; overflow:hidden;
+    background-image:
+      linear-gradient(var(--line2) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line2) 1px, transparent 1px),
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:14px 14px, 14px 14px, 70px 70px, 70px 70px;
+  }
+  #board{position:absolute; inset:0; width:100%; height:100%; touch-action:none; z-index:2; cursor:crosshair;}
+  #board.eraser{cursor:cell;}
 
-.main { padding: 14px 14px 30px; max-width: 640px; margin: 0 auto; }
+  .cardWrap{
+    position:absolute; left:50%; top:10px; transform:translateX(-50%);
+    width:auto; z-index:1; pointer-events:none;
+  }
+  .card{
+    background:#fff; border:3px solid #111; border-radius:10px;
+    display:flex; align-items:center; justify-content:center; position:relative;
+    padding:6px 18px; box-shadow:0 4px 12px rgba(0,0,0,.10);
+  }
+  .eq{display:flex; align-items:center; gap:10px; font-weight:700; font-size:24px; white-space:nowrap; color:#111;}
+  .eq svg{width:40px; height:40px; overflow:visible; flex:none;}
+  .eq .sol{min-width:50px;}
+  .hint{position:absolute; left:0; right:0; bottom:6px; text-align:center; font-size:12px; color:var(--muted);}
 
-/* DIFFICOLTÀ */
-.diff-bar {
-  display: flex; gap: 8px; justify-content: center;
-  margin-bottom: 16px; flex-wrap: wrap;
-}
-.diff-btn {
-  border: 2px solid #b3a0ee; background: #f3efff; color: #4a2ea0;
-  font-size: 13px; font-weight: 700; border-radius: 20px;
-  padding: 6px 16px; cursor: pointer; transition: background .15s;
-}
-.diff-btn.active { background: #7c5cbf; color: #fff; border-color: #7c5cbf; }
-.diff-btn:hover:not(.active) { background: #e0d6ff; }
-
-.card-wrap { display: flex; justify-content: center; margin-bottom: 18px; }
-.card {
-  background: #fff; border: 3px solid #7c5cbf; border-radius: 20px;
-  padding: 20px 36px; text-align: center;
-  box-shadow: 0 4px 16px #7c5cbf22;
-}
-.card-eq { font-size: 34px; font-weight: 700; color: #2d1a6e; display: flex; align-items: center; gap: 12px; }
-.ghost-icon { font-size: 40px; }
-.eq-op { color: #7c5cbf; }
-.card-hint { font-size: 13px; color: #888; margin-top: 6px; }
-
-.percorso-title { font-size: 15px; font-weight: 600; color: #5a3dbf; margin-bottom: 10px; text-align: center; }
-
-.number-row {
-  display: flex; align-items: center; flex-wrap: wrap;
-  gap: 0; justify-content: flex-start;
-  min-height: 60px; background: #fff;
-  border: 1.5px solid #d4c8f5; border-radius: 14px;
-  padding: 10px 12px; margin-bottom: 14px;
-}
-.num-bubble {
-  min-width: 54px; height: 54px; border-radius: 27px;
-  padding: 0 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px; font-weight: 700; flex-shrink: 0;
-}
-.num-start { background: #7c5cbf; color: #fff; }
-.num-end   { background: #2d1a6e; color: #fff; }
-.num-mid   { background: #e8e0ff; color: #2d1a6e; border: 2px solid #b3a0ee; }
-
-.arrow-step {
-  display: flex; flex-direction: column; align-items: center;
-  margin: 0 2px; flex-shrink: 0;
-}
-.arrow-line {
-  height: 3px; background: #b3a0ee; border-radius: 2px;
-  position: relative; min-width: 36px;
-}
-.arrow-line::after {
-  content: ''; position: absolute; right: -7px; top: -4px;
-  border: 6px solid transparent; border-left: 10px solid #b3a0ee;
-}
-.arrow-line.neg { background: #f0a0c0; }
-.arrow-line.neg::after { border-left-color: #f0a0c0; }
-.step-label {
-  font-size: 12px; font-weight: 700; color: #7c5cbf;
-  margin-bottom: 4px; white-space: nowrap;
-}
-
-.add-panel {
-  background: #fff; border: 1.5px solid #d4c8f5; border-radius: 14px;
-  padding: 14px; margin-bottom: 14px;
-}
-.add-panel h3 { font-size: 14px; color: #5a3dbf; margin-bottom: 10px; }
-.quick-btns { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 10px; }
-.qbtn {
-  border: 2px solid #b3a0ee; background: #f3efff; color: #4a2ea0;
-  font-size: 13px; font-weight: 700; border-radius: 10px;
-  padding: 6px 10px; cursor: pointer; transition: background .15s;
-}
-.qbtn:hover { background: #e0d6ff; }
-.qbtn.neg { border-color: #f0a0c0; background: #fff0f5; color: #a02060; }
-.qbtn.neg:hover { background: #ffd6e8; }
-
-.custom-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.custom-row input[type=number] {
-  width: 90px; padding: 7px 10px; border: 1.5px solid #b3a0ee;
-  border-radius: 8px; font-size: 15px; font-weight: 600; color: #2d1a6e;
-}
-.btn-add {
-  background: #7c5cbf; color: #fff; border: none;
-  border-radius: 10px; padding: 8px 16px; font-size: 14px;
-  font-weight: 700; cursor: pointer;
-}
-.btn-add:hover { background: #5a3dbf; }
-.btn-add.neg { background: #c0406a; }
-.btn-add.neg:hover { background: #a02050; }
-.sign-toggle { display: flex; border: 1.5px solid #b3a0ee; border-radius: 8px; overflow: hidden; }
-.sign-toggle button {
-  padding: 7px 14px; border: none; font-size: 16px; font-weight: 700;
-  cursor: pointer; background: #f3efff; color: #4a2ea0;
-}
-.sign-toggle button.active { background: #7c5cbf; color: #fff; }
-
-.stato {
-  text-align: center; padding: 10px; border-radius: 12px;
-  font-size: 15px; font-weight: 600; margin-bottom: 12px;
-}
-.stato.ok { background: #e6faf0; color: #1a7a4a; border: 1.5px solid #a0e0c0; }
-.stato.warn { background: #fff7e0; color: #8a6000; border: 1.5px solid #ffd070; }
-.stato.err { background: #ffe8f0; color: #a02060; border: 1.5px solid #f0a0c0; }
-.stato.hidden { display: none; }
-
-.risposta-box {
-  background: #2d1a6e; color: #fff; border-radius: 16px;
-  padding: 18px; text-align: center; margin-bottom: 14px; display: none;
-}
-.risposta-box.show { display: block; }
-.risposta-ghost { font-size: 48px; }
-.risposta-val { font-size: 36px; font-weight: 800; color: #ffd166; }
-.risposta-label { font-size: 14px; opacity: .8; margin-top: 4px; }
-.strade-count { font-size: 13px; color: #c4a0ff; margin-top: 6px; }
-
-.azioni { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 6px; }
-.btn-azione {
-  border-radius: 12px; padding: 10px 20px; font-size: 14px;
-  font-weight: 700; cursor: pointer; border: 2px solid transparent;
-}
-.btn-reset { background: #fff; border-color: #b3a0ee; color: #5a3dbf; }
-.btn-reset:hover { background: #f0ebff; }
-.btn-nuova { background: #7c5cbf; color: #fff; }
-.btn-nuova:hover { background: #5a3dbf; }
-.btn-salva { background: #e0f7ea; border-color: #7adda4; color: #1a7a4a; }
-.btn-salva:hover { background: #c4f0d8; }
-
-.strade-wrap { margin-top: 14px; }
-.strade-wrap h3 { font-size: 14px; color: #5a3dbf; margin-bottom: 8px; }
-.strada {
-  background: #fff; border: 1.5px solid #d4c8f5; border-radius: 10px;
-  padding: 8px 12px; margin-bottom: 6px; font-size: 13px; color: #2d1a6e;
-  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
-}
-.strada .badge {
-  background: #e8e0ff; color: #4a2ea0; font-weight: 700;
-  border-radius: 6px; padding: 2px 7px; font-size: 12px;
-}
-
-.btn-stampa { background: #fff3e0; border-color: #ffb84d; color: #a05a00; }
-.btn-stampa:hover { background: #ffe6c0; }
-
-/* ---- MODALE STAMPA ---- */
-.modal-overlay {
-  display: none; position: fixed; inset: 0; background: rgba(45,26,110,0.45);
-  align-items: center; justify-content: center; z-index: 100; padding: 16px;
-}
-.modal-overlay.show { display: flex; }
-.modal-box {
-  background: #fff; border-radius: 18px; padding: 24px 22px;
-  max-width: 360px; width: 100%; box-shadow: 0 8px 30px #2d1a6e33;
-}
-.modal-box h3 { font-size: 17px; color: #2d1a6e; margin-bottom: 6px; text-align: center; }
-.modal-box p { font-size: 13px; color: #666; text-align: center; margin-bottom: 18px; }
-.slider-row { margin-bottom: 20px; }
-.slider-row label { display: flex; justify-content: space-between; font-size: 14px; font-weight: 700; color: #5a3dbf; margin-bottom: 8px; }
-.slider-row input[type=range] { width: 100%; accent-color: #7c5cbf; }
-.modal-azioni { display: flex; gap: 10px; }
-.modal-azioni button { flex: 1; }
-.btn-annulla { background: #fff; border: 2px solid #d4c8f5; color: #5a3dbf; }
-.btn-annulla:hover { background: #f0ebff; }
-.btn-conferma { background: #7c5cbf; color: #fff; border: 2px solid #7c5cbf; }
-.btn-conferma:hover { background: #5a3dbf; }
-
-/* ---- SCHEDA STAMPABILE ---- */
-.foglio-stampa { display: none; background: #fff; }
-
-@media print {
-  html, body { background: #fff !important; }
-  body * { visibility: hidden; }
-  .foglio-stampa, .foglio-stampa * { visibility: visible; }
-  .foglio-stampa { display: block; position: absolute; top: 0; left: 0; width: 100%; background: #fff; padding: 6mm; }
-  .no-print { display: none !important; }
-  @page { size: A4; margin: 16mm; }
-}
-
-.foglio-header {
-  display: flex; flex-direction: column; align-items: center; text-align: center;
-  border-bottom: 2px solid #7c5cbf; padding-bottom: 10px; margin-bottom: 8px;
-}
-.foglio-logo { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.foglio-logo img { width: 39px; height: 39px; border-radius: 50%; object-fit: contain; }
-.foglio-logo span { font-size: 11px; font-weight: 600; color: #5a3dbf; }
-.foglio-titolo { font-size: 23px; font-weight: 800; color: #2d1a6e; margin-top: 9px; }
-.foglio-sottotitolo { font-size: 11px; color: #888; margin-top: 2px; }
-
-.foglio-nome {
-  font-size: 12px; color: #444; margin: 9px 0 14px; display: flex; gap: 30px;
-}
-.foglio-nome span { border-bottom: 1px solid #999; flex: 1; padding-bottom: 2px; }
-
-.foglio-griglia {
-  display: grid; grid-template-columns: repeat(2, 1fr); gap: 9mm 9mm;
-}
-.foglio-card {
-  border: 2px solid #b3a0ee; border-radius: 13px;
-  padding: 17px 10px; text-align: center;
-}
-.foglio-num { font-size: 11px; color: #aaa; text-align: left; margin-bottom: 6px; }
-.foglio-eq { font-size: 27px; font-weight: 700; color: #2d1a6e; display: flex; align-items: center; justify-content: center; gap: 11px; }
-.foglio-eq .op { color: #7c5cbf; }
-.foglio-eq .ghost { font-size: 30px; }
+  .empty{
+    position:absolute; left:50%; top:14px; transform:translateX(-50%);
+    font-size:15px; color:var(--muted); background:rgba(255,255,255,.85);
+    padding:10px 16px; border-radius:10px; z-index:1; pointer-events:none;
+  }
+  .count{
+    position:absolute; right:12px; bottom:8px; font-size:12px; color:var(--muted);
+    background:rgba(255,255,255,.8); padding:2px 8px; border-radius:6px; z-index:3;
+  }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <a class="logo-link" href="https://matematichenonsinasce.com/"  rel="noopener">
-    <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="Logo blog">
-    <span class="blog-name">Matematiche non si nasce</span>
-  </a>
-</div>
-
-<div class="main">
-
-  <!-- DIFFICOLTÀ -->
-  <div class="diff-bar">
-    <button class="diff-btn active" onclick="setDiff('interi')">🔢 Numeri interi</button>
-    <button class="diff-btn" onclick="setDiff('decimi')">🔟 Decimi (0,1)</button>
-    <button class="diff-btn" onclick="setDiff('centesimi')">💯 Centesimi (0,01)</button>
+<header>
+  <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/055f4e9caf74c856ae2f59926ae544fc0e493e33/logoconkalimba.png" alt="Matematiche non si nasce">
+  <h1>Fantasmino</h1>
+  <div class="cats" id="cats"></div>
+  <div class="tools">
+    <button class="primary" id="draw">Pesca una carta</button>
+    <button id="sol">Mostra soluzione</button>
+    <span class="sw" data-c="#111" style="background:#111" title="Penna nera"></span>
+    <span class="sw" data-c="#1F5FBF" style="background:#1F5FBF" title="Penna blu"></span>
+    <span class="sw" data-c="#C81D25" style="background:#C81D25" title="Penna rossa"></span>
+    <span class="sw" data-c="#2E9C8C" style="background:#2E9C8C" title="Penna verde acqua"></span>
+    <button id="eraser">Gomma</button>
+    <button id="clear">Pulisci</button>
   </div>
+</header>
 
-  <!-- CARTA -->
-  <div class="card-wrap">
-    <div class="card">
-      <div class="card-eq">
-        <span id="num-a">3,4</span>
-        <span class="eq-op">+</span>
-        <span class="ghost-icon">👻</span>
-        <span class="eq-eq">=</span>
-        <span id="num-b">7,6</span>
+<main>
+  <div class="paper" id="paper">
+    <div class="cardWrap" id="cardWrap">
+      <div class="card" id="card" style="display:none">
+        <div class="eq" id="eq"></div>
       </div>
-      <div class="card-hint">Qual è il numero nascosto sotto al fantasmino?</div>
     </div>
+    <div class="empty" id="empty">Scegli una categoria e pesca una carta.</div>
+    <canvas id="board"></canvas>
+    <div class="count" id="count"></div>
   </div>
-
-  <div class="percorso-title">Costruisci il tuo percorso 🗺️</div>
-  <div class="number-row" id="number-row"></div>
-  <div class="stato hidden" id="stato"></div>
-
-  <div class="risposta-box" id="risposta-box">
-    <div class="risposta-ghost">👻</div>
-    <div class="risposta-val" id="risposta-val"></div>
-    <div class="risposta-label">era il numero nascosto!</div>
-    <div class="risposta-percorso" id="risposta-percorso" style="font-size:14px;color:#e0d6ff;margin-top:10px;line-height:1.8;"></div>
-    <div class="strade-count" id="strade-count"></div>
-  </div>
-
-  <div class="add-panel" id="add-panel">
-    <h3>Aggiungi una tappa</h3>
-    <div class="quick-btns" id="quick-btns"></div>
-    <div class="custom-row">
-      <div class="sign-toggle">
-        <button id="btn-plus" class="active" onclick="setSign(1)">+</button>
-        <button id="btn-minus" onclick="setSign(-1)">−</button>
-      </div>
-      <input type="number" id="custom-val" min="0" step="1" value="1" placeholder="num">
-      <button class="btn-add" id="btn-add-custom" onclick="addCustomStep()">Aggiungi</button>
-    </div>
-  </div>
-
-  <div class="azioni">
-    <button class="btn-azione btn-reset" onclick="resetPercorso()">↩ Ricomincia</button>
-    <button class="btn-azione btn-salva" id="btn-salva" onclick="salvaStrada()" style="display:none">💾 Salva questa strada</button>
-    <button class="btn-azione btn-nuova" onclick="nuovaCarta()">🃏 Nuova carta</button>
-  </div>
-
-  <div class="azioni" style="margin-top:2px;">
-    <button class="btn-azione btn-stampa" onclick="apriPannelloStampa()">🖨️ Stampa scheda per il quaderno</button>
-  </div>
-
-  <div class="strade-wrap" id="strade-wrap" style="display:none">
-    <h3>Le mie strade trovate 🌟</h3>
-    <div id="strade-list"></div>
-  </div>
-
-</div>
-
-<!-- MODALE STAMPA -->
-<div class="modal-overlay no-print" id="modal-overlay">
-  <div class="modal-box">
-    <h3>🖨️ Scheda per il quaderno</h3>
-    <p>Genera una pagina A4 con tanti fantasmini da risolvere sul quaderno, senza risultato.</p>
-    <div class="slider-row">
-      <label>Quanti fantasmini? <span id="slider-val">8</span></label>
-      <input type="range" id="slider-count" min="4" max="12" step="2" value="8" oninput="document.getElementById('slider-val').textContent=this.value">
-    </div>
-    <div class="slider-row" id="max-result-row" style="display:none">
-      <label>Il risultato non deve superare <span id="slider-maxrisultato-val">100</span></label>
-      <input type="range" id="slider-maxrisultato" min="10" max="100" step="10" value="100" oninput="document.getElementById('slider-maxrisultato-val').textContent=this.value">
-    </div>
-    <div class="modal-azioni">
-      <button class="btn-azione btn-annulla" onclick="chiudiPannelloStampa()">Annulla</button>
-      <button class="btn-azione btn-conferma" onclick="generaEStampa()">Genera e stampa</button>
-    </div>
-  </div>
-</div>
-
-<!-- SCHEDA STAMPABILE -->
-<div class="foglio-stampa" id="foglio-stampa">
-  <div class="foglio-header">
-    <div class="foglio-logo">
-      <img src="https://raw.githubusercontent.com/rdiianni-alt/quiz-matematica-prima/fca31cdfe65286a5abbf269e23429e4ddc479c78/logo.png" alt="Logo blog">
-      <span>Matematiche non si nasce</span>
-    </div>
-    <div class="foglio-titolo">👻 Numeri Fantasmino</div>
-    <div class="foglio-sottotitolo" id="foglio-sottotitolo"></div>
-  </div>
-  <div class="foglio-nome">
-    Nome: <span>&nbsp;</span> Data: <span>&nbsp;</span>
-  </div>
-  <div class="foglio-griglia" id="foglio-griglia"></div>
-</div>
+</main>
 
 <script>
-// ---- CONFIGURAZIONE DIFFICOLTÀ ----
-const CONFIGS = {
-  interi: {
-    decimali: 0,
-    step: 1,
-    rangeA: [10, 60],
-    rangeFant: [6, 40],
-    max: 100,
-    quickPos: [1, 2, 5, 10, 20],
-    quickNeg: [1, 2, 5, 10],
-    inputStep: '1',
-    inputMin: '1'
-  },
-  decimi: {
-    decimali: 1,
-    step: 0.1,
-    rangeA: [1, 8],
-    rangeFant: [0.5, 4],
-    max: 10,
-    quickPos: [0.1, 0.2, 0.5, 1, 2],
-    quickNeg: [0.1, 0.2, 0.5, 1],
-    inputStep: '0.1',
-    inputMin: '0.1'
-  },
-  centesimi: {
-    decimali: 2,
-    step: 0.01,
-    rangeA: [1, 8],
-    rangeFant: [0.5, 3],
-    max: 10,
-    quickPos: [0.01, 0.05, 0.1, 0.25, 0.5, 1],
-    quickNeg: [0.01, 0.05, 0.1, 0.25],
-    inputStep: '0.01',
-    inputMin: '0.01'
+(function(){
+  // ---------- categories (same colours as the printed cards) ----------
+  var CATS = {
+    "20":    {label:"Fino a 20",    d:0, max:20,   fill:"#F2B45E", dk:"#C2822A"},
+    "100":   {label:"Fino a 100",   d:0, max:100,  fill:"#8ED17A", dk:"#4E9A3C"},
+    "1000":  {label:"Fino a 1000",  d:0, max:1000, fill:"#E88A7A", dk:"#B45A4B"},
+    "dec":   {label:"Decimi",       d:1, max:100,  fill:"#5CC8B8", dk:"#2E9C8C"},
+    "cen":   {label:"Centesimi",    d:2, max:100,  fill:"#6FA8E8", dk:"#2F6FB5"},
+    "mil":   {label:"Millesimi",    d:3, max:100,  fill:"#A38BE0", dk:"#6B52B0"}
+  };
+  var ORDER = ["20","100","1000","dec","cen","mil"];
+  var current = null;
+  var seen = {};          // per category: set of "a,b" already drawn
+  ORDER.forEach(function(k){ seen[k] = {}; });
+  var solutionOn = false;
+  var lastCard = null;
+
+  // ---------- helpers ----------
+  function fmt(n, d){
+    if(d === 0) return String(n);
+    var p = Math.pow(10, d);
+    var ip = Math.floor(n / p), fp = n % p;
+    var fs = String(fp); while(fs.length < d) fs = "0" + fs;
+    return ip + "," + fs;
   }
-};
-
-let diff = 'interi';
-let cfg = CONFIGS[diff];
-let numA, numB, corretta;
-let steps = [];
-let sign = 1;
-let strade = [];
-
-function setDiff(d) {
-  diff = d; cfg = CONFIGS[d];
-  document.querySelectorAll('.diff-btn').forEach((b,i)=>{
-    b.classList.toggle('active', ['interi','decimi','centesimi'][i]===d);
-  });
-  // aggiorna input
-  const inp = document.getElementById('custom-val');
-  inp.step = cfg.inputStep;
-  inp.min = cfg.inputMin;
-  inp.value = cfg.quickPos[Math.floor(cfg.quickPos.length/2)];
-  nuovaCarta();
-}
-
-function r(n){ return Math.round(n * 10000) / 10000; }
-
-function fmt(n){
-  return n.toLocaleString('it-IT', {
-    minimumFractionDigits: cfg.decimali,
-    maximumFractionDigits: cfg.decimali
-  });
-}
-
-function rndDec(min, max, step){
-  const steps = Math.floor((max - min) / step);
-  return r(min + Math.floor(Math.random() * steps) * step);
-}
-
-function init(){
-  const [aMin, aMax] = cfg.rangeA;
-  const [fMin, fMax] = cfg.rangeFant;
-  numA = rndDec(aMin, aMax, cfg.step);
-  let fant = rndDec(fMin, fMax, cfg.step);
-  numB = r(numA + fant);
-  if(numB > cfg.max){ numB = cfg.max; fant = r(numB - numA); }
-  corretta = fant;
-  steps = []; strade = [];
-  document.getElementById('num-a').textContent = fmt(numA);
-  document.getElementById('num-b').textContent = fmt(numB);
-  document.getElementById('strade-wrap').style.display = 'none';
-  document.getElementById('strade-list').innerHTML = '';
-  document.getElementById('risposta-box').classList.remove('show');
-  document.getElementById('btn-salva').style.display = 'none';
-  document.getElementById('add-panel').style.display = '';
-  setStato('hidden','');
-  aggiornaQuickBtns();
-  renderPercorso();
-}
-
-function current(){ return steps.length ? steps[steps.length-1].to : numA; }
-
-function eq(a,b){ return Math.abs(a-b) < cfg.step * 0.01; }
-
-function aggiornaQuickBtns(){
-  const container = document.getElementById('quick-btns');
-  container.innerHTML = '';
-  // Mostra sempre gli stessi strumenti fissi, indipendentemente da dove si è arrivati
-  cfg.quickPos.forEach(v=>{
-    const b = document.createElement('button');
-    b.className = 'qbtn';
-    b.textContent = '+' + fmt(v);
-    b.onclick = ()=>addStep(v);
-    container.appendChild(b);
-  });
-  cfg.quickNeg.forEach(v=>{
-    const b = document.createElement('button');
-    b.className = 'qbtn neg';
-    b.textContent = '−' + fmt(v);
-    b.onclick = ()=>addStep(-v);
-    container.appendChild(b);
-  });
-}
-
-function setSign(s){
-  sign = s;
-  document.getElementById('btn-plus').classList.toggle('active', s===1);
-  document.getElementById('btn-minus').classList.toggle('active', s===-1);
-  document.getElementById('btn-add-custom').classList.toggle('neg', s===-1);
-}
-
-function addCustomStep(){
-  const raw = parseFloat(document.getElementById('custom-val').value);
-  if(!raw || raw <= 0) return;
-  // arrotonda al passo della difficoltà
-  const v = r(Math.round(raw / cfg.step) * cfg.step);
-  addStep(sign * v);
-}
-
-function addStep(delta){
-  const from = current();
-  const to = r(from + delta);
-  if(to < 0){ setStato('err','Non puoi andare sotto zero!'); return; }
-  steps.push({from, to, delta});
-  setStato('hidden','');
-  renderPercorso();
-  aggiornaQuickBtns();
-  checkArrivo();
-}
-
-function checkArrivo(){
-  const cur = current();
-  if(eq(cur, numB)){
-    const val = r(numB - numA);
-    document.getElementById('risposta-val').textContent = fmt(val);
-    // esplicita il percorso
-    const tappe = steps.map(s => (s.delta>0?'+':'')+fmt(s.delta)).join(' + ').replace(/\+ \−/g,'− ');
-    const spiegazione = steps.map(s=>(s.delta>0?'+':'')+fmt(s.delta)).join(', ');
-    const eq2 = steps.map(s=>Math.abs(s.delta)).reduce((a,b)=>r(a+b),0);
-    document.getElementById('risposta-percorso').innerHTML =
-      `Hai fatto: ${spiegazione}<br>` +
-      `${steps.map(s=>(s.delta>0?'+':'')+fmt(s.delta)).map(x=>`<strong>${x}</strong>`).join(' ')} = <strong>${fmt(val)}</strong>`;
-    document.getElementById('risposta-box').classList.add('show');
-    document.getElementById('btn-salva').style.display = '';
-    document.getElementById('add-panel').style.display = 'none';
-    setStato('ok','Perfetto! Hai trovato una strada! 🎉');
-    return;
-  }
-  if(cur > numB){
-    setStato('warn',`Attenzione: sei a ${fmt(cur)}, hai superato ${fmt(numB)}. Puoi sottrarre!`);
-  } else {
-    setStato('hidden','');
-  }
-}
-
-function renderPercorso(){
-  const row = document.getElementById('number-row');
-  row.innerHTML = '';
-  row.appendChild(makeBubble(numA, 'num-start'));
-
-  steps.forEach((s,i)=>{
-    const arrowDiv = document.createElement('div');
-    arrowDiv.className = 'arrow-step';
-    const lbl = document.createElement('div');
-    lbl.className = 'step-label';
-    lbl.textContent = (s.delta>0?'+':'') + fmt(s.delta);
-    lbl.style.color = s.delta>0 ? '#5a3dbf' : '#a02060';
-    const line = document.createElement('div');
-    line.className = 'arrow-line' + (s.delta<0?' neg':'');
-    arrowDiv.appendChild(lbl);
-    arrowDiv.appendChild(line);
-    row.appendChild(arrowDiv);
-    const isLast = i===steps.length-1;
-    const cls = (eq(s.to, numB) && isLast) ? 'num-end' : 'num-mid';
-    row.appendChild(makeBubble(s.to, cls));
-  });
-
-  if(!steps.length || !eq(current(), numB)){
-    const arrowDiv = document.createElement('div');
-    arrowDiv.className = 'arrow-step';
-    const lbl = document.createElement('div');
-    lbl.className = 'step-label';
-    lbl.style.opacity = '.35';
-    lbl.textContent = '?';
-    const line = document.createElement('div');
-    line.className = 'arrow-line';
-    line.style.opacity = '.3';
-    arrowDiv.appendChild(lbl);
-    arrowDiv.appendChild(line);
-    row.appendChild(arrowDiv);
-    const ghost = makeBubble(numB, 'num-end');
-    ghost.style.opacity = '.35';
-    row.appendChild(ghost);
-  }
-}
-
-function makeBubble(n, cls){
-  const d = document.createElement('div');
-  d.className = 'num-bubble ' + cls;
-  d.textContent = fmt(n);
-  return d;
-}
-
-function setStato(tipo, msg){
-  const el = document.getElementById('stato');
-  el.className = 'stato ' + (tipo==='hidden'?'hidden':tipo);
-  el.textContent = msg;
-}
-
-function resetPercorso(){
-  steps = [];
-  document.getElementById('risposta-box').classList.remove('show');
-  document.getElementById('add-panel').style.display = '';
-  document.getElementById('btn-salva').style.display = 'none';
-  setStato('hidden','');
-  aggiornaQuickBtns();
-  renderPercorso();
-}
-
-function salvaStrada(){
-  const desc = steps.map(s=>(s.delta>0?'+':'')+fmt(s.delta)).join(' → ');
-  strade.push(desc);
-  const wrap = document.getElementById('strade-wrap');
-  const list = document.getElementById('strade-list');
-  wrap.style.display = '';
-  const div = document.createElement('div');
-  div.className = 'strada';
-  div.innerHTML = `<span class="badge">Strada ${strade.length}</span> ${desc} → 👻 = <strong>${fmt(corretta)}</strong>`;
-  list.appendChild(div);
-  document.getElementById('strade-count').textContent = `Hai trovato ${strade.length} strada${strade.length>1?'':''}!`;
-  resetPercorso();
-  document.getElementById('risposta-box').classList.remove('show');
-  setStato('ok','Strada salvata! Riesci a trovarne un\'altra? 🌟');
-}
-
-function nuovaCarta(){
-  document.getElementById('add-panel').style.display = '';
-  init();
-}
-
-// ---- STAMPA SCHEDA PER IL QUADERNO ----
-const NOMI_DIFF = { interi: 'Numeri interi', decimi: 'Decimi', centesimi: 'Centesimi' };
-
-function apriPannelloStampa(){
-  const row = document.getElementById('max-result-row');
-  if(diff === 'interi'){
-    row.style.display = '';
-    const slider = document.getElementById('slider-maxrisultato');
-    slider.max = cfg.max;
-    if(parseInt(slider.value, 10) > cfg.max) slider.value = cfg.max;
-    document.getElementById('slider-maxrisultato-val').textContent = slider.value;
-  } else {
-    row.style.display = 'none';
-  }
-  document.getElementById('modal-overlay').classList.add('show');
-}
-
-function chiudiPannelloStampa(){
-  document.getElementById('modal-overlay').classList.remove('show');
-}
-
-function generaEquazioniStampa(n, maxRisultato){
-  const [aMin, aMax] = cfg.rangeA;
-  const [fMin, fMax] = cfg.rangeFant;
-  const step = cfg.step;
-  const eqs = [];
-  const viste = new Set();
-  let tentativi = 0;
-
-  if(maxRisultato){
-    // con un tetto scelto dall'insegnante, pesco prima il risultato
-    // (sparso su tutto l'intervallo consentito) e poi il primo numero,
-    // così il fantasmino può essere sia piccolo che grande, non solo
-    // ammassato vicino al tetto massimo
-    const maxCap = Math.min(maxRisultato, cfg.max);
-    const bMinBase = Math.max(step, r(step * 3)); // partenza bassa ma non 0+0
-    while(eqs.length < n && tentativi < n * 100){
-      tentativi++;
-      const b = rndDec(Math.min(bMinBase, maxCap), maxCap, step);
-      if(b <= step) continue;
-      const a = rndDec(step, r(b - step), step);
-      const f = r(b - a);
-      if(f <= 0 || a <= 0) continue;
-      const chiave = a + '_' + b;
-      if(viste.has(chiave)) continue;
-      viste.add(chiave);
-      eqs.push({a, b});
+  function randInt(a, b){ return a + Math.floor(Math.random() * (b - a + 1)); }
+  function newCard(key){
+    var c = CATS[key], scale = Math.pow(10, c.d), seenSet = seen[key];
+    for(var tries = 0; tries < 5000; tries++){
+      var a, b, s;
+      if(c.d === 0){
+        a = randInt(1, c.max - 1); b = randInt(1, c.max - 1); s = a + b;
+        if(s > c.max) continue;
+      } else {
+        b = randInt(Math.max(1, scale/10), 60*scale);
+        a = randInt(1, 60*scale); s = a + b;
+        if(s >= 100*scale) continue;
+      }
+      var k = a + "," + b;
+      if(seenSet[k]) continue;
+      seenSet[k] = true;
+      return {a:a, b:b, c:s, d:c.d, key:key};
     }
-    return eqs;
+    return null; // category exhausted
   }
 
-  // logica originale (nessun tetto scelto)
-  while(eqs.length < n && tentativi < n * 60){
-    tentativi++;
-    let a = rndDec(aMin, aMax, cfg.step);
-    let f = rndDec(fMin, fMax, cfg.step);
-    let b = r(a + f);
-    if(b > cfg.max){ b = cfg.max; f = r(b - a); }
-    if(f <= 0) continue;
-    const chiave = a + '_' + b;
-    if(viste.has(chiave)) continue;
-    viste.add(chiave);
-    eqs.push({a, b});
+  // ---------- ghost drawing (SVG) ----------
+  function ghostSVG(fill, dk){
+    return '<svg viewBox="0 0 100 100" aria-hidden="true">' +
+      '<path d="M10 50 C10 8 90 8 90 50 L90 88 Q82 80 74 88 Q66 96 58 88 Q50 80 42 88 Q34 96 26 88 Q18 80 10 88 Z" fill="'+fill+'" stroke="'+dk+'" stroke-width="2.5"/>' +
+      '<circle cx="24" cy="62" r="5" fill="#F4A7B9"/><circle cx="76" cy="62" r="5" fill="#F4A7B9"/>' +
+      '<circle cx="36" cy="48" r="10" fill="#fff" stroke="'+dk+'" stroke-width="1.5"/>' +
+      '<circle cx="64" cy="48" r="10" fill="#fff" stroke="'+dk+'" stroke-width="1.5"/>' +
+      '<circle cx="38" cy="50" r="5" fill="#111"/><circle cx="66" cy="50" r="5" fill="#111"/>' +
+      '<circle cx="40" cy="48" r="1.8" fill="#fff"/><circle cx="68" cy="48" r="1.8" fill="#fff"/>' +
+      '<path d="M42 66 Q50 72 58 66" fill="none" stroke="'+dk+'" stroke-width="2.2" stroke-linecap="round"/>' +
+      '</svg>';
   }
-  return eqs;
-}
 
-function generaEStampa(){
-  const n = parseInt(document.getElementById('slider-count').value, 10);
-  const maxRisultato = (diff === 'interi') ? parseInt(document.getElementById('slider-maxrisultato').value, 10) : null;
-  const eqs = generaEquazioniStampa(n, maxRisultato);
+  // ---------- UI: category buttons ----------
+  var catsEl = document.getElementById("cats");
+  ORDER.forEach(function(k){
+    var b = document.createElement("button");
+    b.textContent = CATS[k].label; b.dataset.k = k;
+    b.addEventListener("click", function(){ selectCat(k); });
+    catsEl.appendChild(b);
+  });
+  function selectCat(k){
+    current = k;
+    [].forEach.call(catsEl.children, function(b){ b.classList.toggle("on", b.dataset.k === k); });
+    updateCount();
+    drawCard();
+  }
+  function updateCount(){
+    var el = document.getElementById("count");
+    if(!current){ el.textContent = ""; return; }
+    var drawnCount = Object.keys(seen[current] || {}).length;
+    el.textContent = CATS[current].label + " · carte pescate: " + drawnCount;
+  }
 
-  document.getElementById('foglio-sottotitolo').textContent = NOMI_DIFF[diff];
-
-  const griglia = document.getElementById('foglio-griglia');
-  griglia.innerHTML = '';
-  eqs.forEach((eq, i) => {
-    const card = document.createElement('div');
-    card.className = 'foglio-card';
-    card.innerHTML = `
-      <div class="foglio-num">${i + 1}</div>
-      <div class="foglio-eq">
-        <span>${fmt(eq.a)}</span>
-        <span class="op">+</span>
-        <span class="ghost">👻</span>
-        <span class="op">=</span>
-        <span>${fmt(eq.b)}</span>
-      </div>`;
-    griglia.appendChild(card);
+  // ---------- draw a card ----------
+  var cardEl = document.getElementById("card");
+  var eqEl = document.getElementById("eq");
+  var emptyEl = document.getElementById("empty");
+  function render(card){
+    var c = CATS[card.key];
+    var sol = solutionOn ? '<span class="sol">= '+fmt(card.b, card.d)+'</span>' : '';
+    eqEl.innerHTML =
+      '<span>'+fmt(card.a, card.d)+' +</span>' +
+      ghostSVG(c.fill, c.dk) +
+      (solutionOn ? '<span>= '+fmt(card.c, card.d)+'</span>' : '<span>= '+fmt(card.c, card.d)+'</span>');
+    if(solutionOn){
+      eqEl.innerHTML = '<span>'+fmt(card.a, card.d)+' +</span>' +
+        ghostSVG(c.fill, c.dk) +
+        '<span>= '+fmt(card.c, card.d)+'</span>' +
+        '<span style="margin-left:4%;color:'+c.dk+'">(fantasmino = '+fmt(card.b, card.d)+')</span>';
+    }
+  }
+  function drawCard(){
+    if(!current){
+      cardEl.style.display = "none";
+      emptyEl.style.display = "block";
+      emptyEl.textContent = "Scegli una categoria e pesca una carta.";
+      return;
+    }
+    var card = newCard(current);
+    if(!card){
+      cardEl.style.display = "none";
+      emptyEl.style.display = "block";
+      emptyEl.textContent = "Hai già pescato tutte le carte di questa categoria.";
+      return;
+    }
+    lastCard = card;
+    emptyEl.style.display = "none";
+    cardEl.style.display = "flex";
+    render(card);
+    updateCount();
+  }
+  document.getElementById("draw").addEventListener("click", function(){
+    if(!current){ emptyEl.style.display = "block"; return; }
+    drawCard();
+  });
+  document.getElementById("sol").addEventListener("click", function(){
+    solutionOn = !solutionOn;
+    this.classList.toggle("on", solutionOn);
+    if(lastCard && cardEl.style.display !== "none") render(lastCard);
   });
 
-  chiudiPannelloStampa();
-  setTimeout(() => window.print(), 100);
-}
+  // ---------- whiteboard ----------
+  var board = document.getElementById("board");
+  var ctx = board.getContext("2d");
+  var pen = "#111", eraser = false, drawing = false, lx = 0, ly = 0;
+  var snapshot = null;
 
-// avvio
-const inp = document.getElementById('custom-val');
-inp.step = cfg.inputStep;
-inp.min = cfg.inputMin;
-inp.value = cfg.quickPos[Math.floor(cfg.quickPos.length/2)];
-init();
+  function resize(){
+    var r = board.getBoundingClientRect();
+    var tmp = document.createElement("canvas");
+    tmp.width = board.width; tmp.height = board.height;
+    if(board.width) tmp.getContext("2d").drawImage(board, 0, 0);
+    var dpr = window.devicePixelRatio || 1;
+    board.width = Math.round(r.width * dpr); board.height = Math.round(r.height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.drawImage(tmp, 0, 0, tmp.width / dpr, tmp.height / dpr);
+  }
+  function pos(e){
+    var r = board.getBoundingClientRect();
+    return {x: e.clientX - r.left, y: e.clientY - r.top};
+  }
+  board.addEventListener("pointerdown", function(e){
+    drawing = true; board.setPointerCapture(e.pointerId);
+    var p = pos(e); lx = p.x; ly = p.y;
+    ctx.beginPath(); ctx.arc(lx, ly, stroke()/2, 0, Math.PI*2);
+    ctx.fillStyle = eraser ? "rgba(0,0,0,1)" : pen;
+    ctx.globalCompositeOperation = eraser ? "destination-out" : "source-over";
+    ctx.fill();
+  });
+  board.addEventListener("pointermove", function(e){
+    if(!drawing) return;
+    var p = pos(e);
+    ctx.globalCompositeOperation = eraser ? "destination-out" : "source-over";
+    ctx.strokeStyle = eraser ? "#000" : pen;
+    ctx.lineWidth = stroke(); ctx.lineCap = "round"; ctx.lineJoin = "round";
+    ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(p.x, p.y); ctx.stroke();
+    lx = p.x; ly = p.y;
+  });
+  function end(){ drawing = false; }
+  board.addEventListener("pointerup", end);
+  board.addEventListener("pointercancel", end);
+  function stroke(){ return eraser ? 26 : 3.2; }
+
+  document.querySelectorAll(".sw").forEach(function(s){
+    s.addEventListener("click", function(){
+      pen = s.dataset.c; eraser = false;
+      document.getElementById("eraser").classList.remove("on");
+      document.querySelectorAll(".sw").forEach(function(x){ x.classList.toggle("on", x === s); });
+      board.classList.remove("eraser");
+    });
+  });
+  document.getElementById("eraser").addEventListener("click", function(){
+    eraser = !eraser;
+    this.classList.toggle("on", eraser);
+    board.classList.toggle("eraser", eraser);
+  });
+  document.getElementById("clear").addEventListener("click", function(){
+    ctx.save(); ctx.setTransform(1,0,0,1,0,0);
+    ctx.clearRect(0, 0, board.width, board.height); ctx.restore();
+  });
+
+  window.addEventListener("resize", resize);
+  resize();
+  // default pen
+  document.querySelector(".sw").classList.add("on");
+  selectCat("100");
+})();
 </script>
 </body>
 </html>
