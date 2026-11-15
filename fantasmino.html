@@ -16,13 +16,6 @@
     color:var(--ink); background:#fff;
     display:flex; flex-direction:column; overflow:hidden;
   }
-  header{
-    display:flex; flex-direction:column; align-items:center; gap:6px; padding:6px 10px 2px;
-    text-align:center;
-  }
-  header img{height:64px; width:auto;}
-  header h1{font-size:20px; margin:0; color:var(--red); letter-spacing:.3px;}
-  .cats{display:flex; gap:5px; flex-wrap:wrap; justify-content:center;}
   button{
     font:inherit; font-size:12px; font-weight:600; cursor:pointer;
     border:1px solid #CFCAC0; background:#fff; color:var(--ink);
@@ -31,13 +24,36 @@
   button:hover{border-color:var(--ink);}
   button.on{background:var(--ink); color:#fff; border-color:var(--ink);}
   button.primary{background:var(--red); color:#fff; border-color:var(--red);}
-  .tools{display:flex; gap:5px; align-items:center; flex-wrap:wrap; justify-content:center;}
+
+  /* barra comandi: una sola fascia compatta, va a capo solo se serve */
+  header{
+    flex:none; display:flex; flex-direction:column; align-items:center; gap:5px;
+    padding:6px 8px; border-bottom:1px solid #E6E2DC;
+  }
+  .cats,.tools{display:flex; gap:5px; flex-wrap:wrap; justify-content:center; align-items:center;}
   .sw{width:14px; height:14px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 0 1px #CFCAC0; cursor:pointer; padding:0;}
   .sw.on{box-shadow:0 0 0 2.5px var(--ink);}
 
-  main{flex:1; position:relative; min-height:0;}
+  /* area di lavoro: fascia della carta in alto, lavagna libera sotto */
+  .stage{flex:1; display:flex; flex-direction:column; min-height:0; padding:8px 10px 10px;}
+  .cardBar{
+    flex:none; height:clamp(70px, 15vh, 110px);
+    display:flex; align-items:center; justify-content:center; position:relative;
+  }
+  .card{
+    background:#fff; border:3px solid #111; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    padding:6px 18px; box-shadow:0 4px 12px rgba(0,0,0,.10);
+    max-width:100%;
+  }
+  .eq{display:flex; align-items:center; gap:clamp(6px,1.5vw,10px); font-weight:700; font-size:clamp(18px,4.6vw,26px); white-space:nowrap; color:#111;}
+  .eq svg{width:clamp(28px,5vw,40px); height:clamp(28px,5vw,40px); overflow:visible; flex:none;}
+  .eq .sol{min-width:50px;}
+  .empty{font-size:15px; color:var(--muted); text-align:center; padding:10px 16px;}
+
   .paper{
-    position:absolute; inset:10px; background:var(--paper);
+    flex:1; min-height:0; position:relative;
+    background:var(--paper);
     border:1px solid #C9D6E2; border-radius:6px; overflow:hidden;
     background-image:
       linear-gradient(var(--line2) 1px, transparent 1px),
@@ -48,37 +64,19 @@
   }
   #board{position:absolute; inset:0; width:100%; height:100%; touch-action:none; z-index:2; cursor:crosshair;}
   #board.eraser{cursor:cell;}
-
-  .cardWrap{
-    position:absolute; left:50%; top:10px; transform:translateX(-50%);
-    width:auto; z-index:1; pointer-events:none;
-  }
-  .card{
-    background:#fff; border:3px solid #111; border-radius:10px;
-    display:flex; align-items:center; justify-content:center; position:relative;
-    padding:6px 18px; box-shadow:0 4px 12px rgba(0,0,0,.10);
-  }
-  .eq{display:flex; align-items:center; gap:10px; font-weight:700; font-size:24px; white-space:nowrap; color:#111;}
-  .eq svg{width:40px; height:40px; overflow:visible; flex:none;}
-  .eq .sol{min-width:50px;}
-  .hint{position:absolute; left:0; right:0; bottom:6px; text-align:center; font-size:12px; color:var(--muted);}
-
-  .empty{
-    position:absolute; left:50%; top:14px; transform:translateX(-50%);
-    font-size:15px; color:var(--muted); background:rgba(255,255,255,.85);
-    padding:10px 16px; border-radius:10px; z-index:1; pointer-events:none;
-  }
   .count{
-    position:absolute; right:12px; bottom:8px; font-size:12px; color:var(--muted);
+    position:absolute; right:8px; bottom:6px; font-size:12px; color:var(--muted);
     background:rgba(255,255,255,.8); padding:2px 8px; border-radius:6px; z-index:3;
+  }
+  @media (max-width:480px){
+    button{font-size:11px; padding:3px 7px;}
+    .stage{padding:6px 6px 6px;}
   }
 </style>
 </head>
 <body>
 
 <header>
-  <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/055f4e9caf74c856ae2f59926ae544fc0e493e33/logoconkalimba.png" alt="Matematiche non si nasce">
-  <h1>Fantasmino</h1>
   <div class="cats" id="cats"></div>
   <div class="tools">
     <button class="primary" id="draw">Pesca una carta</button>
@@ -92,18 +90,18 @@
   </div>
 </header>
 
-<main>
-  <div class="paper" id="paper">
-    <div class="cardWrap" id="cardWrap">
-      <div class="card" id="card" style="display:none">
-        <div class="eq" id="eq"></div>
-      </div>
+<div class="stage">
+  <div class="cardBar">
+    <div class="card" id="card" style="display:none">
+      <div class="eq" id="eq"></div>
     </div>
     <div class="empty" id="empty">Scegli una categoria e pesca una carta.</div>
+  </div>
+  <div class="paper" id="paper">
     <canvas id="board"></canvas>
     <div class="count" id="count"></div>
   </div>
-</main>
+</div>
 
 <script>
 (function(){
