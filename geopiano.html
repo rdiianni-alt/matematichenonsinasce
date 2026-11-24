@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Geopiano</title>
+<style>
+  html, body { margin:0; height:100%; }
+  body {
+    background:#f5f4ef; font-family:Arial, Helvetica, sans-serif; color:#2b2b2b;
+    display:flex; flex-direction:column; height:100vh; height:100dvh; overflow:hidden;
+    -webkit-user-select:none; user-select:none;
+  }
+  header { flex:none; display:flex; flex-direction:column; align-items:center; padding:8px 0 2px; }
+  .logo { display:flex; flex-direction:column; align-items:center; gap:6px; text-decoration:none; }
+  .logo img { width:60px; height:60px; object-fit:contain; border-radius:50%; }
+  .logo span { font-size:14px; color:#5f5e5a; }
+  h1 { margin:4px 0 0; font-size:clamp(16px, 2.4vh, 22px); letter-spacing:3px; text-transform:uppercase; }
+
+  main { flex:1; min-height:0; display:flex; gap:16px; padding:8px 16px 12px; }
+  .boardwrap { flex:1; min-width:0; min-height:0; display:flex; flex-direction:column; align-items:center; }
+  #geo { flex:1; min-height:0; width:100%; touch-action:none; display:block; }
+  .hint { flex:none; min-height:2.6em; max-width:640px; text-align:center; font-size:clamp(12px, 1.8vh, 15px); color:#5f5e5a; padding-top:6px; line-height:1.3; }
+
+  .panel { flex:none; width:230px; display:flex; flex-direction:column; gap:12px; overflow:auto; }
+  .grp { background:#fff; border:1px solid #ddd8cb; padding:10px; }
+  .lab { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#5f5e5a; margin-bottom:8px; font-weight:bold; }
+  .row { display:flex; flex-wrap:wrap; gap:6px; }
+
+  .sw { width:40px; height:40px; border:1px solid #cfc9b8; background:#f5f4ef; cursor:pointer; padding:0; display:flex; align-items:center; justify-content:center; }
+  .sw i { display:block; width:22px; height:22px; border-radius:50%; border:5px solid; box-sizing:border-box; }
+  .sw.on { outline:3px solid #e10600; outline-offset:1px; }
+  .bc { width:32px; height:32px; border:1px solid #bdb7a6; cursor:pointer; padding:0; }
+  .bc.on { outline:3px solid #e10600; outline-offset:1px; }
+
+  .btn { font-family:inherit; font-size:12px; letter-spacing:1px; text-transform:uppercase; font-weight:bold;
+         background:#ece8dc; color:#2b2b2b; border:1px solid #cfc9b8; padding:9px 8px; cursor:pointer; }
+  .btn.on { background:#e10600; border-color:#e10600; color:#fff; }
+  .col { display:flex; flex-direction:column; gap:6px; }
+  .col .btn { width:100%; text-align:left; }
+  .size .btn { flex:1; text-align:center; padding:9px 4px; }
+
+  @media (max-aspect-ratio: 1/1) {
+    main { flex-direction:column; gap:8px; padding:4px 8px 8px; }
+    .panel { width:auto; flex-direction:row; flex-wrap:wrap; gap:6px; overflow:visible; }
+    .grp { padding:6px; flex:1 1 auto; }
+    .lab { margin-bottom:4px; font-size:10px; }
+    .col { flex-direction:row; flex-wrap:wrap; }
+    .col .btn { width:auto; text-align:center; }
+    .sw { width:34px; height:34px; }
+    .sw i { width:18px; height:18px; border-width:4px; }
+    .bc { width:26px; height:26px; }
+    .btn { padding:7px 6px; font-size:11px; }
+  }
+  @media (max-height: 560px) {
+    .logo img { width:40px; height:40px; }
+    .logo span { display:none; }
+    h1 { margin-top:2px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="https://matematichenonsinasce.com/" target="_top">
+    <img src="https://raw.githubusercontent.com/rdiianni-alt/matematichenonsinasce/main/logo.png" alt="Matematiche non si nasce">
+    <span>Matematiche non si nasce</span>
+  </a>
+  <h1>Geopiano</h1>
+</header>
+
+<main>
+  <div class="boardwrap">
+    <svg id="geo" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet" aria-label="Geopiano"></svg>
+    <div class="hint" id="hint"></div>
+  </div>
+
+  <div class="panel">
+    <div class="grp">
+      <div class="lab">Elastici</div>
+      <div class="row" id="elastici"></div>
+    </div>
+    <div class="grp">
+      <div class="lab">Cosa fare</div>
+      <div class="col" id="modi">
+        <button class="btn on" data-m="crea">Metti elastico</button>
+        <button class="btn" data-m="sposta">Tira / sposta</button>
+        <button class="btn" data-m="cancella">Togli elastico</button>
+      </div>
+    </div>
+    <div class="grp">
+      <div class="lab">Pioli</div>
+      <div class="row size" id="misure">
+        <button class="btn" data-n="5">5×5</button>
+        <button class="btn" data-n="7">7×7</button>
+        <button class="btn on" data-n="11">11×11</button>
+      </div>
+      <div class="lab" style="margin-top:10px">Geopiano</div>
+      <div class="row" id="tavole"></div>
+    </div>
+    <div class="grp">
+      <div class="col">
+        <button class="btn" id="annulla">Annulla</button>
+        <button class="btn" id="svuota">Togli tutti</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+var ELASTICI = ['#d62828', '#1f5fbf', '#2e9c48', '#f2c200', '#f07a1a', '#7b3fa0', '#222222', '#fafafa'];
+var TAVOLE = ['#f2efe6', '#5f9e4f', '#e3b23c', '#e8873a', '#7a4f99', '#c2503a'];
+
+var svg = document.getElementById('geo');
+var hintEl = document.getElementById('hint');
+
+var n = 11;
+var tavola = TAVOLE[1];
+var colore = ELASTICI[0];
+var modo = 'crea';
+var bands = [];          // {c, pts:[[i,j],...], closed}
+var cur = null;          // elastico in costruzione
+var drag = null;         // trascinamento in modalità crea
+var grab = null;         // vertice afferrato in modalità sposta
+var sel = null;          // vertice selezionato con un tocco (modalità sposta)
+var hover = null;        // posizione del puntatore
+var storia = [];
+
+var M = 95;
+function S() { return (1000 - 2 * M) / (n - 1); }
+function px(q) { return [M + q[0] * S(), M + q[1] * S()]; }
+function eq(a, b) { return a && b && a[0] === b[0] && a[1] === b[1]; }
+function last(a) { return a[a.length - 1]; }
+function W() { return Math.min(10, Math.max(6, S() * 0.08)); }
+function R() { return Math.min(24, S() * 0.16); }
+
+function snap() { return JSON.stringify({ n: n, bands: bands }); }
+function save() { storia.push(snap()); if (storia.length > 100) storia.shift(); }
+function restore(s) { var o = JSON.parse(s); n = o.n; bands = o.bands; }
+
+function shade(hex, amt) {
+  var c = parseInt(hex.slice(1), 16), r = c >> 16, g = (c >> 8) & 255, b = c & 255;
+  function f(v) { return Math.round(amt < 0 ? v * (1 + amt) : v + (255 - v) * amt); }
+  return 'rgb(' + f(r) + ',' + f(g) + ',' + f(b) + ')';
+}
+
+function svgPt(e) {
+  var p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
+  var t = p.matrixTransform(svg.getScreenCTM().inverse());
+  return { x: t.x, y: t.y };
+}
+function nearestPeg(pt, thr) {
+  var s = S(), i = Math.round((pt.x - M) / s), j = Math.round((pt.y - M) / s);
+  if (i < 0 || j < 0 || i >= n || j >= n) return null;
+  var c = px([i, j]);
+  return Math.hypot(pt.x - c[0], pt.y - c[1]) <= (thr || s * 0.45) ? [i, j] : null;
+}
+function distSeg(p, a, b) {
+  var dx = b[0] - a[0], dy = b[1] - a[1], L = dx * dx + dy * dy;
+  var t = L ? Math.max(0, Math.min(1, ((p.x - a[0]) * dx + (p.y - a[1]) * dy) / L)) : 0;
+  return Math.hypot(p.x - a[0] - t * dx, p.y - a[1] - t * dy);
+}
+
+// coordinate di un elastico (con eventuale vertice "in volo")
+function coords(b) {
+  var out = [];
+  for (var k = 0; k < b.pts.length; k++) {
+    var g = grab || sel;
+    if (g && g.b === b && g.i === k && g.float) out.push([g.float.x, g.float.y]);
+    else if (b.pts[k]) out.push(px(b.pts[k]));
+  }
+  return out;
+}
+
+function hitVertex(pt) {
+  var thr = S() * 0.35;
+  for (var bi = bands.length - 1; bi >= 0; bi--) {
+    var b = bands[bi];
+    for (var k = 0; k < b.pts.length; k++) {
+      var c = px(b.pts[k]);
+      if (Math.hypot(pt.x - c[0], pt.y - c[1]) <= thr) return { b: b, i: k };
+    }
+  }
+  return null;
+}
+function hitEdge(pt) {
+  var thr = Math.max(W() * 2.5, S() * 0.2);
+  for (var bi = bands.length - 1; bi >= 0; bi--) {
+    var b = bands[bi], c = coords(b), m = b.closed ? c.length : c.length - 1;
+    for (var k = 0; k < m; k++) {
+      if (distSeg(pt, c[k], c[(k + 1) % c.length]) <= thr) return { b: b, i: k };
+    }
+  }
+  return null;
+}
+
+function normalize(b) {
+  var p = [];
+  for (var k = 0; k < b.pts.length; k++) if (!eq(b.pts[k], last(p))) p.push(b.pts[k]);
+  if (p.length > 1 && eq(p[0], last(p))) p.pop();
+  b.pts = p;
+  b.closed = p.length >= 3;   // l'elastico è sempre chiuso; con due pioli è doppio
+  if (p.length < 2) bands.splice(bands.indexOf(b), 1);
+}
+
+// ---------- costruzione elastico ----------
+function commit(closed) {
+  if (cur && cur.pts.length >= 2) { save(); cur.closed = !!closed; bands.push(cur); }
+  cur = null;
+}
+// b sta sulla retta a→c, proseguendo nella stessa direzione
+function straight(a, b, c) {
+  var ux = b[0] - a[0], uy = b[1] - a[1], vx = c[0] - b[0], vy = c[1] - b[1];
+  return ux * vy - uy * vx === 0 && ux * vx + uy * vy > 0;
+}
+function cleanStraight(p, closed) {
+  var changed = true;
+  while (changed && p.length > (closed ? 3 : 2)) {
+    changed = false;
+    for (var k = 0; k < p.length; k++) {
+      if (!closed && (k === 0 || k === p.length - 1)) continue;
+      var a = p[(k - 1 + p.length) % p.length], c = p[(k + 1) % p.length];
+      if (straight(a, p[k], c)) { p.splice(k, 1); changed = true; break; }
+    }
+  }
+  return p;
+}
+// aggiunge un piolo: se si prosegue nella stessa direzione l'elastico si allunga senza nuovo angolo
+function withPeg(p, q) {
+  p = p.slice();
+  if (p.length >= 2 && straight(p[p.length - 2], last(p), q)) p[p.length - 1] = q;
+  else p.push(q);
+  return p;
+}
+// lasciare l'elastico: resta com'è, sempre chiuso (con due pioli è un elastico doppio)
+function finish() {
+  if (cur && cur.pts.length >= 2) { cleanStraight(cur.pts, cur.pts.length >= 3); commit(cur.pts.length >= 3); }
+  else cur = null;
+}
+function addPt(q) {
+  if (cur.pts.length >= 2 && eq(q, cur.pts[0])) { finish(); return; }   // tornati al punto di partenza
+  cur.pts = withPeg(cur.pts, q);
+}
+
+// ---------- disegno ----------
+function strand(c, col, w) {
+  var s = '';
+  for (var k = 0; k < c.length - 1; k++) {
+    var a = c[k], b = c[k + 1], dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1;
+    var ox = -dy / L * w * 0.6, oy = dx / L * w * 0.6;
+    s += '<line x1="' + (a[0] + ox) + '" y1="' + (a[1] + oy) + '" x2="' + (b[0] + ox) + '" y2="' + (b[1] + oy) + '" stroke="' + col + '" stroke-width="' + (w * 0.62) + '" stroke-linecap="round"/>';
+    s += '<line x1="' + (a[0] - ox) + '" y1="' + (a[1] - oy) + '" x2="' + (b[0] - ox) + '" y2="' + (b[1] - oy) + '" stroke="' + col + '" stroke-width="' + (w * 0.62) + '" stroke-linecap="round"/>';
+  }
+  return s;
+}
+function bandSVG(b, extra) {
+  var c = coords(b), w = W();
+  var pts = c.map(function (p) { return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' ');
+  if (b.closed) return '<polygon points="' + pts + '" fill="none" stroke="' + b.c + '" stroke-width="' + w + '" stroke-linejoin="round"' + (extra || '') + '/>';
+  return strand(c, b.c, w);
+}
+
+function render() {
+  var s = S(), r = R(), w = W(), h = '';
+  h += '<defs><filter id="sh" x="-10%" y="-10%" width="120%" height="120%"><feDropShadow dx="2" dy="3" stdDeviation="1.6" flood-color="#000" flood-opacity=".35"/></filter>';
+  h += '<radialGradient id="pg" cx="35%" cy="32%" r="70%"><stop offset="0" stop-color="' + shade(tavola, 0.45) + '"/><stop offset="1" stop-color="' + shade(tavola, -0.12) + '"/></radialGradient></defs>';
+  // tavola
+  h += '<rect x="12" y="12" width="976" height="976" rx="16" fill="' + shade(tavola, -0.18) + '" filter="url(#sh)"/>';
+  h += '<rect x="34" y="34" width="932" height="932" rx="6" fill="' + tavola + '"/>';
+  // elastici posati
+  h += '<g filter="url(#sh)">';
+  for (var k = 0; k < bands.length; k++) h += bandSVG(bands[k]);
+  // elastico in costruzione
+  if (cur && cur.pts.length > 1) h += bandSVG({ c: cur.c, pts: cur.pts, closed: cur.pts.length >= 3 });
+  h += '</g>';
+  // anteprima: come diventerebbe l'elastico agganciandolo al piolo indicato
+  if (cur && hover) {
+    var t = nearestPeg(hover);
+    if (t && !eq(t, last(cur.pts)) && !eq(t, cur.pts[0])) {
+      var pp = withPeg(cur.pts, t);
+      h += '<g opacity=".45">' + bandSVG({ c: cur.c, pts: pp, closed: pp.length >= 3 }) + '</g>';
+    }
+  }
+  // pioli
+  for (var j = 0; j < n; j++) for (var i = 0; i < n; i++) {
+    var p = px([i, j]);
+    h += '<circle cx="' + (p[0] + r * 0.22) + '" cy="' + (p[1] + r * 0.32) + '" r="' + r + '" fill="#000" opacity=".22"/>';
+    h += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + r + '" fill="url(#pg)" stroke="' + shade(tavola, -0.25) + '" stroke-width="1"/>';
+  }
+  // evidenze
+  if (cur) {
+    var f = px(cur.pts[0]);
+    if (cur.pts.length >= 2) h += '<circle cx="' + f[0] + '" cy="' + f[1] + '" r="' + (r + 7) + '" fill="none" stroke="' + cur.c + '" stroke-width="3" stroke-dasharray="6 5"/>';
+  }
+  if (hover && (modo === 'crea' || sel || grab)) {
+    var hp = nearestPeg(hover);
+    if (hp) { var q = px(hp); h += '<circle cx="' + q[0] + '" cy="' + q[1] + '" r="' + (r + 5) + '" fill="none" stroke="#2b2b2b" stroke-width="2" opacity=".45"/>'; }
+  }
+  var g = grab || sel;
+  if (g) {
+    var gc = coords(g.b)[g.i];
+    if (gc) h += '<circle cx="' + gc[0] + '" cy="' + gc[1] + '" r="' + (r + 8) + '" fill="none" stroke="#e10600" stroke-width="4"/>';
+  }
+  svg.innerHTML = h;
+  hint();
+}
+
+function hint() {
+  var t = '';
+  if (modo === 'crea') t = cur
+    ? 'Tocca altri pioli e l’elastico si allarga. Per lasciarlo: torna al primo piolo, tocca di nuovo l’ultimo o tocca fuori dai pioli.'
+    : 'Tocca un piolo per agganciare l’elastico, poi tocca gli altri pioli (oppure trascina da un piolo all’altro).';
+  else if (modo === 'sposta') t = sel ? 'Ora tocca il piolo su cui portare l’elastico.' : 'Tocca un angolo o un lato di un elastico, poi tocca il piolo su cui portarlo (oppure trascina).';
+  else t = 'Tocca un elastico per toglierlo.';
+  hintEl.textContent = t;
+}
+
+// ---------- eventi ----------
+svg.addEventListener('pointerdown', function (e) {
+  e.preventDefault();
+  try { svg.setPointerCapture(e.pointerId); } catch (x) {}
+  var pt = svgPt(e); hover = pt;
+
+  if (modo === 'crea') {
+    var q = nearestPeg(pt);
+    if (!q) { if (cur) { finish(); render(); } return; }   // tocco fuori dai pioli: si lascia l'elastico
+    if (!cur) { cur = { c: colore, pts: [q], closed: false }; drag = { from: q }; }
+    else if (eq(q, last(cur.pts))) drag = { from: q, finish: true };
+    else { addPt(q); drag = cur ? { from: q } : null; }
+    render(); return;
+  }
+
+  if (modo === 'cancella') {
+    var hb = hitVertex(pt) || hitEdge(pt);
+    if (hb) { save(); bands.splice(bands.indexOf(hb.b), 1); render(); }
+    return;
+  }
+
+  // sposta
+  if (sel) {
+    var tq = nearestPeg(pt);
+    if (tq) { place(sel, tq); sel = null; render(); return; }
+    restore(sel.snap); sel = null;
+  }
+  var before = snap(), hv = hitVertex(pt);
+  if (hv) { grab = { b: hv.b, i: hv.i, snap: before, start: pt, moved: false }; render(); return; }
+  var he = hitEdge(pt);
+  if (he) {
+    var c = coords(he.b), a = c[he.i], b2 = c[(he.i + 1) % c.length];
+    he.b.pts.splice(he.i + 1, 0, null);
+    grab = { b: he.b, i: he.i + 1, snap: before, start: pt, moved: false, ins: true,
+             float: { x: (a[0] + b2[0]) / 2, y: (a[1] + b2[1]) / 2 }, wasOpen2: !he.b.closed && he.b.pts.length === 3 };
+  }
+  render();
+});
+
+svg.addEventListener('pointermove', function (e) {
+  var pt = svgPt(e); hover = pt;
+  if (grab) {
+    if (Math.hypot(pt.x - grab.start.x, pt.y - grab.start.y) > 10) grab.moved = true;
+    if (grab.moved) grab.float = pt;
+  }
+  render();
+});
+
+svg.addEventListener('pointerup', function (e) {
+  var pt = svgPt(e);
+  if (modo === 'crea' && drag && cur) {
+    var q = nearestPeg(pt);
+    if (q && !eq(q, drag.from)) addPt(q);
+    else if (drag.finish && q && eq(q, drag.from)) finish();
+  }
+  drag = null;
+  if (grab) {
+    if (grab.moved) {
+      var q2 = nearestPeg(pt);
+      if (q2) place(grab, q2); else restore(grab.snap);
+    } else {
+      sel = grab;   // selezione con un tocco: si aspetta il piolo di arrivo
+    }
+    grab = null;
+  }
+  if (e.pointerType !== 'mouse') hover = null;
+  render();
+});
+svg.addEventListener('pointerleave', function () { if (!grab && !drag) { hover = null; render(); } });
+
+function place(g, q) {
+  storia.push(g.snap);
+  g.b.pts[g.i] = q;
+  normalize(g.b);
+  if (g.b.closed) cleanStraight(g.b.pts, true);
+}
+
+function cancelPending() {
+  if (sel) { restore(sel.snap); sel = null; }
+  finish();
+}
+
+// ---------- pannello ----------
+var elEl = document.getElementById('elastici');
+ELASTICI.forEach(function (c, k) {
+  var b = document.createElement('button');
+  b.className = 'sw' + (k === 0 ? ' on' : ''); b.setAttribute('aria-label', 'Elastico');
+  b.innerHTML = '<i style="border-color:' + c + '"></i>';
+  b.onclick = function () {
+    colore = c; if (cur) cur.c = c;
+    [].forEach.call(elEl.children, function (x) { x.classList.remove('on'); }); b.classList.add('on');
+    if (modo !== 'crea') setModo('crea');
+    render();
+  };
+  elEl.appendChild(b);
+});
+
+var tvEl = document.getElementById('tavole');
+TAVOLE.forEach(function (c) {
+  var b = document.createElement('button');
+  b.className = 'bc' + (c === tavola ? ' on' : ''); b.style.background = c; b.setAttribute('aria-label', 'Colore del geopiano');
+  b.onclick = function () {
+    tavola = c;
+    [].forEach.call(tvEl.children, function (x) { x.classList.remove('on'); }); b.classList.add('on');
+    render();
+  };
+  tvEl.appendChild(b);
+});
+
+function setModo(m) {
+  cancelPending(); modo = m;
+  [].forEach.call(document.querySelectorAll('#modi .btn'), function (x) { x.classList.toggle('on', x.dataset.m === m); });
+  render();
+}
+[].forEach.call(document.querySelectorAll('#modi .btn'), function (b) { b.onclick = function () { setModo(b.dataset.m); }; });
+
+function syncSize() {
+  [].forEach.call(document.querySelectorAll('#misure .btn'), function (x) { x.classList.toggle('on', +x.dataset.n === n); });
+}
+[].forEach.call(document.querySelectorAll('#misure .btn'), function (b) {
+  b.onclick = function () {
+    var v = +b.dataset.n; if (v === n) return;
+    cancelPending(); save(); n = v; bands = []; syncSize(); render();
+  };
+});
+
+document.getElementById('annulla').onclick = function () {
+  if (sel) { restore(sel.snap); sel = null; }
+  else if (cur) cur = null;
+  else if (storia.length) { restore(storia.pop()); syncSize(); }
+  render();
+};
+document.getElementById('svuota').onclick = function () {
+  cur = null; sel = null;
+  if (bands.length) { save(); bands = []; }
+  render();
+};
+
+render();
+</script>
+</body>
+</html>
