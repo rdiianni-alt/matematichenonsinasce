@@ -45,6 +45,7 @@
   .sfida .grp { display:flex; flex-direction:column; gap:8px; }
   .sftit { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#5f5e5a; font-weight:bold; }
   .sftxt { font-size:clamp(16px, 2.5vh, 21px); font-weight:bold; line-height:1.3; }
+  .sfcod { display:inline-block; background:#2b2b2b; color:#fff; font-size:13px; font-weight:bold; letter-spacing:1px; padding:3px 8px; margin-bottom:6px; }
   .sfnota { font-size:13px; color:#5f5e5a; line-height:1.35; }
   #modello { width:130px; height:130px; display:block; margin:0 auto; }
   .punti { display:flex; flex-wrap:wrap; gap:5px; }
@@ -58,7 +59,7 @@
   .tasti { flex:1; display:grid; grid-template-columns:repeat(6, 1fr); gap:4px; }
   .tasti button { font-family:inherit; font-size:15px; font-weight:bold; padding:6px 0; border:1px solid #cfc9b8; background:#ece8dc; cursor:pointer; }
   .liv { gap:4px; }
-  .liv .btn { flex:0 0 calc((100% - 32px) / 9); padding:6px 0; font-size:11px; letter-spacing:0; }
+  .liv .btn { flex:0 0 calc((100% - 36px) / 10); padding:6px 0; font-size:11px; letter-spacing:0; }
   .nav .btn { flex:none; width:48px; text-align:center; font-size:16px; padding:7px 0; }
   .nav #controlla { flex:1; width:auto; font-size:13px; }
   .nav .btn:disabled { opacity:.35; cursor:default; }
@@ -69,7 +70,7 @@
     .sfida { width:auto; overflow:visible; gap:6px; }
     .sfida .grp { padding:6px; gap:5px; }
     .sfida .grp:first-child .lab { display:none; }
-    .liv .btn { padding:4px 0; flex-basis:calc((100% - 64px) / 17); }
+    .liv .btn { padding:4px 0; }
     .punti button { width:26px; height:26px; }
     .sftxt { font-size:15px; }
     .sfcorpo { flex-direction:row; align-items:flex-start; justify-content:space-between; }
@@ -120,6 +121,7 @@
       <div class="punti" id="punti"></div>
       <div class="sfcorpo">
         <div>
+          <div class="sfcod" id="sfCod"></div>
           <div class="sftxt" id="sfTesto"></div>
           <div class="sfnota" id="sfNota"></div>
         </div>
@@ -166,7 +168,7 @@
       </div>
     </div>
     <div class="grp" id="impost">
-      <div class="lab">Pioli</div>
+      <div class="lab">Puntini</div>
       <div class="row size" id="misure">
         <button class="btn" data-n="5">5×5</button>
         <button class="btn" data-n="7">7×7</button>
@@ -276,7 +278,7 @@ function normalize(b) {
   for (var k = 0; k < b.pts.length; k++) if (!eq(b.pts[k], last(p))) p.push(b.pts[k]);
   if (p.length > 1 && eq(p[0], last(p))) p.pop();
   b.pts = p;
-  b.closed = p.length >= 3;   // l'elastico è sempre chiuso; con due pioli è doppio
+  b.closed = p.length >= 3;   // l'elastico è sempre chiuso; con due puntini è doppio
   if (p.length < 2) bands.splice(bands.indexOf(b), 1);
 }
 
@@ -302,14 +304,14 @@ function cleanStraight(p, closed) {
   }
   return p;
 }
-// aggiunge un piolo: se si prosegue nella stessa direzione l'elastico si allunga senza nuovo angolo
+// aggiunge un puntino: se si prosegue nella stessa direzione l'elastico si allunga senza nuovo angolo
 function withPeg(p, q) {
   p = p.slice();
   if (p.length >= 2 && straight(p[p.length - 2], last(p), q)) p[p.length - 1] = q;
   else p.push(q);
   return p;
 }
-// lasciare l'elastico: resta com'è, sempre chiuso (con due pioli è un elastico doppio)
+// lasciare l'elastico: resta com'è, sempre chiuso (con due puntini è un elastico doppio)
 function finish() {
   if (cur && cur.pts.length >= 2) { cleanStraight(cur.pts, cur.pts.length >= 3); commit(cur.pts.length >= 3); }
   else cur = null;
@@ -370,7 +372,7 @@ function render() {
   // elastico in costruzione
   if (cur && cur.pts.length > 1) h += bandSVG({ c: cur.c, pts: cur.pts, closed: cur.pts.length >= 3 });
   h += '</g>';
-  // anteprima: come diventerebbe l'elastico agganciandolo al piolo indicato
+  // anteprima: come diventerebbe l'elastico agganciandolo al puntino indicato
   if (cur && hover) {
     var t = nearestPeg(hover);
     if (t && !eq(t, last(cur.pts)) && !eq(t, cur.pts[0])) {
@@ -378,7 +380,7 @@ function render() {
       h += '<g opacity=".45">' + bandSVG({ c: cur.c, pts: pp, closed: pp.length >= 3 }) + '</g>';
     }
   }
-  // pioli
+  // puntini
   for (var j = 0; j < n; j++) for (var i = 0; i < n; i++) {
     var p = px([i, j]);
     h += '<circle cx="' + (p[0] + r * 0.22) + '" cy="' + (p[1] + r * 0.32) + '" r="' + r + '" fill="#000" opacity=".22"/>';
@@ -412,9 +414,9 @@ function render() {
 function hint() {
   var t = '';
   if (modo === 'crea') t = cur
-    ? 'Tocca altri pioli e l’elastico si allarga. Per lasciarlo: torna al primo piolo, tocca di nuovo l’ultimo o tocca fuori dai pioli.'
-    : 'Tocca un piolo per agganciare l’elastico, poi tocca gli altri pioli (oppure trascina da un piolo all’altro).';
-  else if (modo === 'sposta') t = sel ? 'Ora tocca il piolo su cui portare l’elastico.' : 'Tocca un angolo o un lato di un elastico, poi tocca il piolo su cui portarlo (oppure trascina).';
+    ? 'Tocca altri puntini e l’elastico si allarga. Per lasciarlo: torna al primo puntino, tocca di nuovo l’ultimo o tocca fuori dai puntini.'
+    : 'Tocca un puntino per agganciare l’elastico, poi tocca gli altri puntini (oppure trascina da un puntino all’altro).';
+  else if (modo === 'sposta') t = sel ? 'Ora tocca il puntino su cui portare l’elastico.' : 'Tocca un angolo o un lato di un elastico, poi tocca il puntino su cui portarlo (oppure trascina).';
   else t = 'Tocca un elastico per toglierlo.';
   hintEl.textContent = t;
 }
@@ -427,7 +429,7 @@ svg.addEventListener('pointerdown', function (e) {
 
   if (modo === 'crea') {
     var q = nearestPeg(pt);
-    if (!q) { if (cur) { finish(); render(); } return; }   // tocco fuori dai pioli: si lascia l'elastico
+    if (!q) { if (cur) { finish(); render(); } return; }   // tocco fuori dai puntini: si lascia l'elastico
     if (!cur) { cur = { c: colore, pts: [q], closed: false }; drag = { from: q }; }
     else if (eq(q, last(cur.pts))) drag = { from: q, finish: true };
     else { addPt(q); drag = cur ? { from: q } : null; }
@@ -480,7 +482,7 @@ svg.addEventListener('pointerup', function (e) {
       var q2 = nearestPeg(pt);
       if (q2) place(grab, q2); else restore(grab.snap);
     } else {
-      sel = grab;   // selezione con un tocco: si aspetta il piolo di arrivo
+      sel = grab;   // selezione con un tocco: si aspetta il puntino di arrivo
     }
     grab = null;
   }
@@ -636,7 +638,7 @@ function quad(a2) {
   if (w === 0) return 'mezzo quadretto';
   return w + (w === 1 ? ' quadretto' : ' quadretti') + (h ? ' e mezzo' : '');
 }
-function pioli(k) { return k + (k === 1 ? ' piolo' : ' pioli'); }
+function puntini(k) { return k + (k === 1 ? ' puntino' : ' puntini'); }
 function nome(v) { return ({ 3: 'triangolo', 4: 'quadrilatero', 5: 'pentagono', 6: 'esagono' })[v] || 'figura con ' + v + ' lati'; }
 function lati(f, k, cosa) { return f.v === k ? true : 'Questa figura ha ' + f.v + ' lati: ' + cosa + ' ne ha ' + k + '.'; }
 
@@ -657,9 +659,9 @@ function msgPassi(f, per) {
   if (!f.axis) return 'Per contare i passi usa solo lati orizzontali e verticali.';
   return f.per === per ? true : 'Il contorno di questa figura è di ' + f.per + ' passi.';
 }
-function msgPioli(f, I, B) {
+function msgPuntini(f, I, B) {
   if ((I === null || f.I === I) && (B === null || f.B === B)) return true;
-  return 'Questa figura ha ' + pioli(f.I) + ' dentro e ' + pioli(f.B) + ' sul contorno.';
+  return 'Questa figura ha ' + puntini(f.I) + ' dentro e ' + puntini(f.B) + ' sul contorno.';
 }
 function tutte() { var a = arguments; return function (f) { for (var k = 0; k < a.length; k++) { var r = a[k](f); if (r !== true) return r; } return true; }; }
 
@@ -669,7 +671,7 @@ function figure() { return bands.filter(function (b) { return b.pts.length >= 3;
 function una(test) {
   return function () {
     var fs = figure();
-    if (!fs.length) return 'Metti un elastico intorno ad almeno tre pioli.';
+    if (!fs.length) return 'Metti un elastico intorno ad almeno tre puntini.';
     var msg = '';
     for (var k = 0; k < fs.length; k++) {
       if (!fs[k].simple) { msg = 'L’elastico si incrocia: così non forma una figura.'; continue; }
@@ -722,7 +724,7 @@ function retto(f, q) {
 // coordinate sul geopiano 7×7: lettera = colonna, numero = riga dal basso
 function C(s) { return [s.charCodeAt(0) - 65, 7 - parseInt(s.slice(1), 10)]; }
 
-// tutti i "passi" (tratti fra pioli vicini) coperti da una serie di linee
+// tutti i "passi" (tratti fra puntini vicini) coperti da una serie di linee
 function passiDi(linee) {
   var set = {};
   linee.forEach(function (l) {
@@ -784,10 +786,10 @@ function percorso(A, B, L, giri) {
     return true;
   };
 }
-// figura con tutti gli angoli sui pioli segnati
+// figura con tutti gli angoli sui puntini segnati
 function segreta(marks, test) {
   return una(function (f) {
-    for (var k = 0; k < f.v; k++) if (!marks.some(function (m) { return eq(m, f.p[k]); })) return 'Un angolo della figura non è su un piolo scuro.';
+    for (var k = 0; k < f.v; k++) if (!marks.some(function (m) { return eq(m, f.p[k]); })) return 'Un angolo della figura non è su un puntino scuro.';
     return test(f);
   });
 }
@@ -855,8 +857,34 @@ var S_DIAG = [[2, 0], [6, 0], [6, 3]];
 function per(p) { return analizza(p).per; }
 function a2di(p) { return analizza(p).a2; }
 
+function ap(perim, a2, rett) {
+  return function (f) {
+    if (!f.axis) return 'Usa solo lati orizzontali e verticali, così puoi contare i passi.';
+    if (rett && !rettangolo(f)) return 'Serve un rettangolo.';
+    if (perim !== null && f.per !== perim) return 'Il perimetro di questa figura è di ' + f.per + ' passi.';
+    if (a2 !== null && f.a2 !== a2) return 'L’area di questa figura è di ' + quad(f.a2) + '.';
+    return true;
+  };
+}
+function diverse(k, test, msg) {
+  return function () {
+    var fs = figure().filter(function (f) { return f.simple; }), sig = {};
+    if (fs.some(function (f) { return !f.axis; })) return 'Usa solo lati orizzontali e verticali, così puoi contare i passi.';
+    fs.forEach(function (f) { if (test(f) === true) sig[firma(f)] = 1; });
+    return Object.keys(sig).length >= k ? true : msg;
+  };
+}
+var SCALA = [[1, 1], [3, 1], [3, 3], [5, 3], [5, 5], [7, 5], [7, 7], [1, 7]];
+var R34 = [[1, 1], [5, 1], [5, 4], [1, 4]], Q4 = [[1, 1], [5, 1], [5, 5], [1, 5]], R26 = [[1, 1], [7, 1], [7, 3], [1, 3]];
+function rxc(r, c) {
+  return function (f) {
+    if (!rettDritto(f)) return f.v === 4 && f.rights === 4 ? 'Questo quadrilatero non è fatto di file e colonne di quadretti.' : 'Serve un rettangolo.';
+    var d = dims(f);
+    return (d.h === r && d.w === c) || (d.h === c && d.w === r) ? true : 'Questo rettangolo è ' + d.h + ' × ' + d.w + '.';
+  };
+}
 var LIVELLI = [
-  { tit: 'Copia i disegni', n: 5, nota: 'Per fare una linea tendi un elastico fra due pioli. Il disegno si può copiare in qualsiasi punto del geopiano.', sfide: [
+  { tit: 'Copia i disegni', n: 5, nota: 'Per fare una linea tendi un elastico fra due puntini. Il disegno si può copiare in qualsiasi punto del geopiano.', sfide: [
     { t: 'Copia il disegno.', model: [[[0, 0], [4, 0]], [[2, 0], [2, 4]]] },
     { t: 'Copia il disegno.', model: [[[2, 0], [2, 4]], [[0, 2], [4, 2]]] },
     { t: 'Copia il disegno.', model: [[[0, 1], [0, 4]], [[2, 0], [2, 4]], [[4, 2], [4, 4]]] },
@@ -872,7 +900,7 @@ var LIVELLI = [
     { t: 'Fai un triangolo con un angolo retto.', c: una(tutte(tri, function (f) { return f.rights ? true : 'Questo triangolo non ha angoli retti.'; })) },
     { t: 'Copia la figura del modello, dove vuoi sul geopiano.', model: [[[0, 0], [3, 0], [3, 1], [1, 1], [1, 3], [0, 3], [0, 0]]] }
   ]},
-  { tit: 'Passi e percorsi', n: 7, nota: 'Un passo è il salto da un piolo a quello vicino, in orizzontale o in verticale. Per ogni tratto diritto usa un elastico.', sfide: [
+  { tit: 'Passi e percorsi', n: 7, nota: 'Un passo è il salto da un puntino a quello vicino, in orizzontale o in verticale. Per ogni tratto diritto usa un elastico.', sfide: [
     { t: 'Collega A e B con un percorso di 4 passi.', lettere: { A: [1, 5], B: [5, 5] }, c: percorso([1, 5], [5, 5], 4) },
     { t: 'Collega A e B con il percorso più corto possibile.', lettere: { A: [1, 5], B: [4, 2] }, c: percorso([1, 5], [4, 2], 6) },
     { t: 'Collega A e B con un percorso di 8 passi.', lettere: { A: [1, 5], B: [4, 2] }, c: percorso([1, 5], [4, 2], 8) },
@@ -881,7 +909,7 @@ var LIVELLI = [
     { t: 'Collega A e B con il percorso più corto che cambia direzione 3 volte.', lettere: { A: [0, 6], B: [6, 0] }, c: percorso([0, 6], [6, 0], 12, 3) },
     { t: 'Quanti passi è lungo questo percorso?', fissi: [{ pts: [[0, 6], [0, 3], [3, 3], [3, 1], [6, 1]], linea: true }], num: 11 }
   ]},
-  { tit: 'Quanti quadretti?', n: 5, nota: 'Un quadretto è lo spazio chiuso fra quattro pioli vicini.', sfide: [
+  { tit: 'Quanti quadretti?', n: 5, nota: 'Un quadretto è lo spazio chiuso fra quattro puntini vicini.', sfide: [
     { t: 'Fai un quadrato che copre 4 quadretti.', c: una(tutte(msgQuadrato, area(8))) },
     { t: 'Fai un rettangolo che copre 6 quadretti.', c: una(tutte(function (f) { return msgRettangolo(f, false); }, area(12))) },
     { t: 'Fai un triangolo che copre mezzo quadretto.', c: una(tutte(tri, area(1))) },
@@ -899,7 +927,7 @@ var LIVELLI = [
     { t: 'Quanti passi in più misura il contorno del recinto blu rispetto a quello rosso?', fissi: [{ pts: ROSSO, c: '#c62828' }, { pts: BLU, c: '#1f5fbf' }], num: per(BLU) - per(ROSSO) },
     { t: 'Quanti angoli retti ha questo recinto?', fissi: [{ pts: ELLE }], num: 6 }
   ]},
-  { tit: 'Il contorno', n: 7, nota: 'Il contorno si misura in passi: un passo è la distanza fra due pioli vicini. Usa solo lati orizzontali e verticali.', sfide: [
+  { tit: 'Il contorno', n: 7, nota: 'Il contorno si misura in passi: un passo è la distanza fra due puntini vicini. Usa solo lati orizzontali e verticali.', sfide: [
     { t: 'Fai un rettangolo con il contorno di 10 passi.', c: una(tutte(function (f) { return msgRettangolo(f, false); }, function (f) { return msgPassi(f, 10); })) },
     { t: 'Fai una figura che copre 6 quadretti e ha il contorno di 12 passi.', c: una(tutte(function (f) { return msgPassi(f, 12); }, area(12))) },
     { t: 'Fai un quadrato e un rettangolo con lo stesso contorno: 12 passi.',
@@ -925,47 +953,90 @@ var LIVELLI = [
       } },
     { t: 'Fai il quadrato più grande che si può fare su questo geopiano.', c: una(tutte(msgQuadrato, function (f) { return f.a2 === 72 ? true : 'Questo quadrato copre ' + quad(f.a2) + ': se ne può fare uno più grande.'; })) }
   ]},
-  { tit: 'Pioli segreti', n: 7, nota: 'Usa come angoli della figura solo i pioli scuri.', sfide: [
-    { t: 'Fra i pioli scuri c’è un quadrato nascosto: trovalo e mettici l’elastico.', segnati: [[1, 1], [4, 1], [1, 4], [4, 4], [2, 5], [5, 2], [0, 3], [6, 6], [3, 0], [6, 0]],
+  { tit: 'Area e perimetro', n: 11, nota: 'Il perimetro è la lunghezza del contorno, in passi. L’area è lo spazio dentro la figura, in quadretti. Usa solo lati orizzontali e verticali.', sfide: [
+    { t: 'Fai un rettangolo con il perimetro di 16 passi e l’area di 15 quadretti.', c: una(ap(16, 30, true)) },
+    { t: 'Fai un rettangolo con l’area di 16 quadretti e il perimetro più piccolo possibile.', c: una(tutte(ap(null, 32, true), function (f) { return f.per === 16 ? true : 'Il perimetro è di ' + f.per + ' passi: si può fare più corto.'; })) },
+    { t: 'Fai un rettangolo con l’area di 16 quadretti e il perimetro più lungo possibile su questo geopiano.', c: una(tutte(ap(null, 32, true), function (f) { return f.per === 20 ? true : 'Il perimetro è di ' + f.per + ' passi: su questo geopiano si può fare più lungo.'; })) },
+    { t: 'Fai una figura con l’area di 5 quadretti e il perimetro di 12 passi.', c: una(ap(12, 10)) },
+    { t: 'Fai una figura con l’area di 5 quadretti e il perimetro di 10 passi.', c: una(ap(10, 10)) },
+    { t: 'Quanti passi misura il perimetro di questa figura?', fissi: [{ pts: SCALA }], num: per(SCALA) },
+    { t: 'Quanti quadretti misura l’area di questa figura?', fissi: [{ pts: SCALA }], num: a2di(SCALA) / 2 },
+    { t: 'Fai una figura con il perimetro di 14 passi e l’area più grande possibile.', c: una(tutte(ap(14, null), function (f) { return f.a2 === 24 ? true : 'L’area è di ' + quad(f.a2) + ': si può fare più grande.'; })) },
+    { t: 'Fai una figura con il perimetro di 14 passi e l’area più piccola possibile.', c: una(tutte(ap(14, null), function (f) { return f.a2 === 12 ? true : 'L’area è di ' + quad(f.a2) + ': si può fare più piccola.'; })) }
+  ]},
+  { tit: 'Figure isoperimetriche', n: 11, nota: 'Due figure sono isoperimetriche quando hanno lo stesso perimetro. Usa solo lati orizzontali e verticali.', sfide: [
+    { t: 'Fai due rettangoli diversi con il perimetro di 12 passi.', c: diverse(2, ap(12, null, true), 'Servono due rettangoli diversi, tutti e due con il perimetro di 12 passi.') },
+    { t: 'Fai tre rettangoli diversi con il perimetro di 16 passi.', c: diverse(3, ap(16, null, true), 'Servono tre rettangoli diversi, tutti con il perimetro di 16 passi.') },
+    { t: 'Fai tutti i rettangoli diversi che hanno il perimetro di 10 passi.', c: diverse(2, ap(10, null, true), 'Non ci sono ancora tutti i rettangoli con il perimetro di 10 passi.') },
+    { t: 'Fai due figure isoperimetriche che hanno l’area diversa.', c: function () {
+        var fs = figure().filter(function (f) { return f.simple; });
+        if (fs.length < 2) return 'Servono due figure: metti due elastici.';
+        if (fs.some(function (f) { return !f.axis; })) return 'Usa solo lati orizzontali e verticali, così puoi contare i passi.';
+        for (var i = 0; i < fs.length; i++) for (var j = 0; j < fs.length; j++) if (i !== j && fs[i].per === fs[j].per && fs[i].a2 !== fs[j].a2) return true;
+        return 'Le figure non hanno lo stesso perimetro, oppure hanno la stessa area.';
+      } },
+    { t: 'Fai due figure con il perimetro di 14 passi: una con l’area di 6 quadretti e una con l’area di 10.',
+      c: due(ap(14, 12), ap(14, 20), false, 'Servono due figure con il perimetro di 14 passi: una con l’area di 6 quadretti e una con l’area di 10.') },
+    { t: 'Fai una figura isoperimetrica al rettangolo disegnato, ma con l’area diversa.', fissi: [{ pts: R34 }],
+      c: una(tutte(ap(per(R34), null), function (f) { return f.a2 !== a2di(R34) ? true : 'Questa figura ha la stessa area del rettangolo.'; })) },
+    { t: 'Fai una figura isoperimetrica al quadrato disegnato che non sia un rettangolo.', fissi: [{ pts: Q4 }],
+      c: una(tutte(ap(per(Q4), null), function (f) { return rettangolo(f) ? 'Questa figura è un rettangolo.' : true; })) },
+    { t: 'Fai una figura con la stessa area del rettangolo disegnato, ma con il perimetro diverso.', fissi: [{ pts: R26 }],
+      c: una(tutte(ap(null, a2di(R26)), function (f) { return f.per !== per(R26) ? true : 'Questa figura ha lo stesso perimetro del rettangolo.'; })) },
+    { t: 'Fra i rettangoli con il perimetro di 20 passi, fai quello con l’area più grande.', c: una(tutte(ap(20, null, true), function (f) { return f.a2 === 50 ? true : 'L’area è di ' + quad(f.a2) + ': c’è un rettangolo con il perimetro di 20 passi e l’area più grande.'; })) }
+  ]},
+  { tit: 'Puntini segreti', n: 7, nota: 'Usa come angoli della figura solo i puntini scuri.', sfide: [
+    { t: 'Fra i puntini scuri c’è un quadrato nascosto: trovalo e mettici l’elastico.', segnati: [[1, 1], [4, 1], [1, 4], [4, 4], [2, 5], [5, 2], [0, 3], [6, 6], [3, 0], [6, 0]],
       c: segreta([[1, 1], [4, 1], [1, 4], [4, 4], [2, 5], [5, 2], [0, 3], [6, 6], [3, 0], [6, 0]], msgQuadrato) },
-    { t: 'Fra i pioli scuri c’è un rettangolo che non è un quadrato: trovalo.', segnati: [[0, 1], [4, 1], [0, 3], [4, 3], [2, 5], [6, 0], [5, 5], [1, 6], [3, 4], [6, 2]],
+    { t: 'Fra i puntini scuri c’è un rettangolo che non è un quadrato: trovalo.', segnati: [[0, 1], [4, 1], [0, 3], [4, 3], [2, 5], [6, 0], [5, 5], [1, 6], [3, 4], [6, 2]],
       c: segreta([[0, 1], [4, 1], [0, 3], [4, 3], [2, 5], [6, 0], [5, 5], [1, 6], [3, 4], [6, 2]], function (f) { return msgRettangolo(f, true); }) },
-    { t: 'Fra i pioli scuri c’è un quadrato inclinato: trovalo.', segnati: [[2, 0], [5, 1], [4, 4], [1, 3], [0, 0], [6, 3], [3, 6], [0, 5], [6, 6], [5, 5]],
+    { t: 'Fra i puntini scuri c’è un quadrato nascosto: trovalo.', segnati: [[2, 0], [5, 1], [4, 4], [1, 3], [0, 0], [6, 3], [3, 6], [0, 5], [6, 6], [5, 5]],
       c: segreta([[2, 0], [5, 1], [4, 4], [1, 3], [0, 0], [6, 3], [3, 6], [0, 5], [6, 6], [5, 5]], msgQuadrato) },
-    { t: 'Usa i pioli scuri per fare un triangolo con un angolo retto.', segnati: [[3, 3], [5, 4], [2, 5], [6, 1], [1, 0], [4, 0], [0, 4], [5, 6]],
+    { t: 'Usa i puntini scuri per fare un triangolo con un angolo retto.', segnati: [[3, 3], [5, 4], [2, 5], [6, 1], [1, 0], [4, 0], [0, 4], [5, 6]],
       c: segreta([[3, 3], [5, 4], [2, 5], [6, 1], [1, 0], [4, 0], [0, 4], [5, 6]], tutte(tri, function (f) { return f.rights ? true : 'Questo triangolo non ha angoli retti.'; })) },
-    { t: 'Fra i pioli scuri c’è un parallelogramma che non è un rettangolo: trovalo.', segnati: [[1, 1], [4, 1], [2, 3], [5, 3], [0, 5], [6, 5], [3, 6], [6, 0], [0, 3]],
+    { t: 'Fra i puntini scuri c’è un parallelogramma che non è un rettangolo: trovalo.', segnati: [[1, 1], [4, 1], [2, 3], [5, 3], [0, 5], [6, 5], [3, 6], [6, 0], [0, 3]],
       c: segreta([[1, 1], [4, 1], [2, 3], [5, 3], [0, 5], [6, 5], [3, 6], [6, 0], [0, 3]], function (f) { return f.v === 4 && paralleli(f) === 2 && f.rights === 0 ? true : 'Questa figura non è un parallelogramma con angoli non retti.'; }) },
-    { t: 'Fra i pioli scuri c’è un rombo che non è un quadrato: trovalo.', segnati: [[1, 1], [4, 2], [5, 5], [2, 4], [0, 4], [6, 1], [3, 0], [0, 6], [6, 6]],
+    { t: 'Fra i puntini scuri c’è un rombo che non è un quadrato: trovalo.', segnati: [[1, 1], [4, 2], [5, 5], [2, 4], [0, 4], [6, 1], [3, 0], [0, 6], [6, 6]],
       c: segreta([[1, 1], [4, 2], [5, 5], [2, 4], [0, 4], [6, 1], [3, 0], [0, 6], [6, 6]], function (f) { return f.v === 4 && rombo(f) && f.rights === 0 ? true : 'Questa figura non è un rombo con angoli non retti.'; }) }
   ]},
-  { tit: 'Rettangoli e moltiplicazioni', n: 11, nota: 'Un rettangolo di quadretti mostra una moltiplicazione: le file per i quadretti di ogni fila.', sfide: [
-    { t: 'Fai un rettangolo con 3 file da 4 quadretti.', c: una(function (f) { if (!rettDritto(f)) return 'Serve un rettangolo con i lati orizzontali e verticali.'; var d = dims(f); return d.h === 3 && d.w === 4 ? true : 'Questo rettangolo ha ' + d.h + ' file da ' + d.w + ' quadretti.'; }) },
-    { t: 'Fai un rettangolo con 5 file da 6 quadretti.', c: una(function (f) { if (!rettDritto(f)) return 'Serve un rettangolo con i lati orizzontali e verticali.'; var d = dims(f); return d.h === 5 && d.w === 6 ? true : 'Questo rettangolo ha ' + d.h + ' file da ' + d.w + ' quadretti.'; }) },
-    { t: 'Fai un rettangolo con 2 file che copre 14 quadretti.', c: una(function (f) { if (!rettDritto(f)) return 'Serve un rettangolo con i lati orizzontali e verticali.'; var d = dims(f); return d.h === 2 && d.w === 7 ? true : 'Questo rettangolo ha ' + d.h + ' file da ' + d.w + ' quadretti.'; }) },
-    { t: 'Fai due rettangoli diversi che coprono tutti e due 12 quadretti.',
-      c: due(function (f) { return rettDritto(f) && f.a2 === 24 ? true : 'no'; }, function (f) { return rettDritto(f) && f.a2 === 24 ? true : 'no'; }, true, 'Servono due rettangoli diversi da 12 quadretti ciascuno.') },
-    { t: 'Su questo geopiano stanno due rettangoli diversi di 24 quadretti: falli tutti e due.',
-      c: due(function (f) { return rettDritto(f) && f.a2 === 48 ? true : 'no'; }, function (f) { return rettDritto(f) && f.a2 === 48 ? true : 'no'; }, true, 'Servono due rettangoli diversi da 24 quadretti ciascuno.') },
-    { t: 'Fai un quadrato che copre 36 quadretti.', c: una(tutte(msgQuadrato, area(72))) },
-    { t: 'Fai un rettangolo con 3 file da 7 e, attaccato, uno con 3 file da 3.',
-      c: due(function (f) { var d = dims(f); return rettDritto(f) && d.h === 3 && d.w === 7 ? true : 'no'; }, function (f) { var d = dims(f); return rettDritto(f) && d.h === 3 && d.w === 3 ? true : 'no'; }, false, 'Servono un rettangolo con 3 file da 7 quadretti e uno con 3 file da 3.') }
+  { tit: 'Rettangoli e moltiplicazioni', n: 11, nota: 'Un rettangolo 3 × 4 ha 3 file e 4 colonne di quadretti. Va bene anche 4 × 3: i quadretti sono gli stessi.', sfide: [
+    { t: 'Fai un rettangolo 3 × 4.', c: una(rxc(3, 4)) },
+    { t: 'Fai un rettangolo 5 × 6.', c: una(rxc(5, 6)) },
+    { t: 'Fai un rettangolo 2 × 7.', c: una(rxc(2, 7)) },
+    { t: 'Fai un rettangolo 3 × 5 e un rettangolo 5 × 3.',
+      c: due(function (f) { var d = dims(f); return rettDritto(f) && d.h === 3 && d.w === 5 ? true : 'no'; }, function (f) { var d = dims(f); return rettDritto(f) && d.h === 5 && d.w === 3 ? true : 'no'; }, false, 'Servono un rettangolo 3 × 5 (3 file e 5 colonne) e un rettangolo 5 × 3 (5 file e 3 colonne).') },
+    { t: 'Fai un quadrato 6 × 6.', c: una(rxc(6, 6)) },
+    { t: 'Fai due rettangoli diversi, tutti e due con l’area di 12 quadretti.',
+      c: due(function (f) { return rettDritto(f) && f.a2 === 24 ? true : 'no'; }, function (f) { return rettDritto(f) && f.a2 === 24 ? true : 'no'; }, true, 'Servono due rettangoli diversi, tutti e due con l’area di 12 quadretti.') },
+    { t: 'Su questo geopiano si possono fare solo due rettangoli diversi con l’area di 24 quadretti. Costruiscili entrambi.',
+      c: due(function (f) { return rettDritto(f) && f.a2 === 48 ? true : 'no'; }, function (f) { return rettDritto(f) && f.a2 === 48 ? true : 'no'; }, true, 'Servono due rettangoli diversi, tutti e due con l’area di 24 quadretti.') },
+    { t: 'Fai un rettangolo 3 × 7 e, attaccato, un rettangolo 3 × 3: insieme formano un rettangolo 3 × 10.', c: function () {
+        var fs = figure().filter(function (f) { return f.simple && rettDritto(f); });
+        var A = fs.filter(function (f) { var d = dims(f); return Math.min(d.w, d.h) === 3 && Math.max(d.w, d.h) === 7; });
+        var B = fs.filter(function (f) { var d = dims(f); return d.w === 3 && d.h === 3; });
+        if (!A.length || !B.length) return 'Servono un rettangolo 3 × 7 e un rettangolo 3 × 3.';
+        for (var i = 0; i < A.length; i++) for (var j = 0; j < B.length; j++) {
+          var pts = A[i].p.concat(B[j].p), d = dims({ p: pts });
+          if (Math.min(d.w, d.h) === 3 && Math.max(d.w, d.h) === 10) return true;
+        }
+        return 'I due rettangoli non sono attaccati in modo da formare un rettangolo 3 × 10.';
+      } }
   ]},
-  { tit: 'Le coordinate', n: 7, coord: true, nota: 'Ogni piolo ha un nome: la lettera della colonna e il numero della riga.', sfide: [
-    { t: 'Metti un elastico sui pioli A1, E1 e A4.', c: una(function (f) { return uguale(f, [C('A1'), C('E1'), C('A4')]) ? true : 'L’elastico non è sui pioli giusti.'; }) },
-    { t: 'Metti un elastico sui pioli B2, F2, F6 e B6.', c: una(function (f) { return uguale(f, [C('B2'), C('F2'), C('F6'), C('B6')]) ? true : 'L’elastico non è sui pioli giusti.'; }) },
-    { t: 'Metti un elastico sui pioli D1, G4, D7 e A4. Che figura è?', c: una(function (f) { return uguale(f, [C('D1'), C('G4'), C('D7'), C('A4')]) ? true : 'L’elastico non è sui pioli giusti.'; }) },
+  { tit: 'Le coordinate', n: 7, coord: true, nota: 'Ogni puntino ha un nome: la lettera della colonna e il numero della riga.', sfide: [
+    { t: 'Metti un elastico sui puntini A1, E1 e A4.', c: una(function (f) { return uguale(f, [C('A1'), C('E1'), C('A4')]) ? true : 'L’elastico non è sui puntini giusti.'; }) },
+    { t: 'Metti un elastico sui puntini B2, F2, F6 e B6.', c: una(function (f) { return uguale(f, [C('B2'), C('F2'), C('F6'), C('B6')]) ? true : 'L’elastico non è sui puntini giusti.'; }) },
+    { t: 'Metti un elastico sui puntini D1, G4, D7 e A4. Che figura è?', c: una(function (f) { return uguale(f, [C('D1'), C('G4'), C('D7'), C('A4')]) ? true : 'L’elastico non è sui puntini giusti.'; }) },
     { t: 'Fai un quadrato con un lato che va da B2 a E2.', c: una(tutte(msgQuadrato, function (f) { return haVertice(f, C('B2')) && haVertice(f, C('E2')) && f.len2[0] === 9 ? true : 'Il quadrato deve avere un lato da B2 a E2.'; })) },
     { t: 'Fai un rettangolo con due angoli opposti in A2 e F5.', c: una(tutte(function (f) { return msgRettangolo(f, false); }, function (f) { return haVertice(f, C('A2')) && haVertice(f, C('F5')) ? true : 'Il rettangolo deve avere un angolo in A2 e uno in F5.'; })) },
     { t: 'Fai un triangolo con l’angolo retto in C3.', c: una(tutte(tri, function (f) { return retto(f, C('C3')) ? true : 'Il triangolo deve avere l’angolo retto in C3.'; })) }
   ]},
-  { tit: 'Quadrati inclinati', n: 7, nota: 'Un quadrato può anche essere inclinato: i lati sono tutti lunghi uguali e gli angoli sono tutti retti.', sfide: [
-    { t: 'Fai un quadrato inclinato.', c: una(tutte(msgQuadrato, function (f) { return f.axis ? 'Questo quadrato è diritto: prova a inclinarlo.' : true; })) },
-    { t: 'Fai un quadrato che copre 2 quadretti.', c: una(tutte(msgQuadrato, area(4))) },
+  { tit: 'Quadrati di ogni grandezza', n: 7, nota: 'Un quadrato ha i lati tutti lunghi uguali e gli angoli tutti retti. Sul geopiano si possono fare quadrati che coprono anche 2, 5 o 10 quadretti.', sfide: [
+    { t: 'Fai un quadrato che copre 1 quadretto e uno che ne copre 2.', c: due(function (f) { return quadrato(f) && f.a2 === 2 ? true : 'no'; }, function (f) { return quadrato(f) && f.a2 === 4 ? true : 'no'; }, false, 'Servono due quadrati: uno che copre 1 quadretto e uno che ne copre 2.') },
     { t: 'Fai un quadrato che copre 5 quadretti.', c: una(tutte(msgQuadrato, area(10))) },
     { t: 'Fai un quadrato che copre 8 quadretti.', c: una(tutte(msgQuadrato, area(16))) },
     { t: 'Fai un quadrato che copre 10 quadretti.', c: una(tutte(msgQuadrato, area(20))) },
-    { t: 'Fai un rettangolo inclinato che non sia un quadrato.', c: una(tutte(function (f) { return msgRettangolo(f, true); }, function (f) { return f.axis ? 'Questo rettangolo è diritto: prova a inclinarlo.' : true; })) }
+    { t: 'Fai un quadrato che copre 13 quadretti.', c: una(tutte(msgQuadrato, area(26))) },
+    { t: 'Fai due quadrati diversi che coprono più di 4 quadretti e meno di 9.', c: due(function (f) { return quadrato(f) && f.a2 > 8 && f.a2 < 18 ? true : 'no'; }, function (f) { return quadrato(f) && f.a2 > 8 && f.a2 < 18 ? true : 'no'; }, true, 'Servono due quadrati diversi, ognuno con più di 4 quadretti e meno di 9.') },
   ]},
   { tit: 'Parti uguali', n: 7, nota: 'Con gli elastici fai figure uguali che, insieme, coprono tutta la figura grigia senza sovrapporsi.', sfide: [
     { t: 'Dividi il quadrato in 2 parti uguali.', fissi: [{ pts: Q44 }], c: dividi(Q44, 2) },
@@ -990,7 +1061,7 @@ var LIVELLI = [
     { t: 'Fai un parallelogramma che non sia un rettangolo.', c: una(function (f) {
         var r = lati(f, 4, 'un parallelogramma'); if (r !== true) return r;
         if (paralleli(f) < 2) return 'I lati opposti non sono tutti paralleli.';
-        return f.rights === 4 ? 'Questo è un rettangolo: prova a inclinare due lati.' : true; }) },
+        return f.rights === 4 ? 'Questo è un rettangolo: prova con angoli che non siano retti.' : true; }) },
     { t: 'Fai un rombo che non sia un quadrato.', c: una(function (f) {
         var r = lati(f, 4, 'un rombo'); if (r !== true) return r;
         if (!rombo(f)) return 'I lati non sono tutti lunghi uguali.';
@@ -1018,9 +1089,9 @@ var LIVELLI = [
   { tit: 'Spostare e ruotare', n: 11, sfide: [
     { t: 'Costruisci la freccia spostata di 4 passi verso destra.', fissi: [{ pts: FRECCIA }], c: una(function (f) { return uguale(f, trasla(FRECCIA, 4, 0)) ? true : 'La figura non è nella posizione giusta: conta i passi.'; }) },
     { t: 'Costruisci la figura spostata di 5 passi a destra e 3 in basso.', fissi: [{ pts: GANCIO }], c: una(function (f) { return uguale(f, trasla(GANCIO, 5, 3)) ? true : 'La figura non è nella posizione giusta: conta i passi.'; }) },
-    { t: 'Fai ruotare la bandiera di un quarto di giro in senso orario intorno al piolo rosso.', fissi: [{ pts: BANDIERA }], centro: CENTRO, c: una(function (f) { return uguale(f, ruota(BANDIERA, CENTRO, 'orario')) ? true : 'La bandiera non è ruotata nel modo giusto.'; }) },
-    { t: 'Fai ruotare la bandiera di un quarto di giro in senso antiorario intorno al piolo rosso.', fissi: [{ pts: BANDIERA }], centro: CENTRO, c: una(function (f) { return uguale(f, ruota(BANDIERA, CENTRO, 'antiorario')) ? true : 'La bandiera non è ruotata nel modo giusto.'; }) },
-    { t: 'Fai ruotare la bandiera di mezzo giro intorno al piolo rosso.', fissi: [{ pts: BANDIERA }], centro: CENTRO, c: una(function (f) { return uguale(f, ruota(BANDIERA, CENTRO, 'mezzo')) ? true : 'La bandiera non è ruotata nel modo giusto.'; }) },
+    { t: 'Fai ruotare la bandiera di un quarto di giro in senso orario intorno al puntino rosso.', fissi: [{ pts: BANDIERA }], centro: CENTRO, c: una(function (f) { return uguale(f, ruota(BANDIERA, CENTRO, 'orario')) ? true : 'La bandiera non è ruotata nel modo giusto.'; }) },
+    { t: 'Fai ruotare la bandiera di un quarto di giro in senso antiorario intorno al puntino rosso.', fissi: [{ pts: BANDIERA }], centro: CENTRO, c: una(function (f) { return uguale(f, ruota(BANDIERA, CENTRO, 'antiorario')) ? true : 'La bandiera non è ruotata nel modo giusto.'; }) },
+    { t: 'Fai ruotare la bandiera di mezzo giro intorno al puntino rosso.', fissi: [{ pts: BANDIERA }], centro: CENTRO, c: una(function (f) { return uguale(f, ruota(BANDIERA, CENTRO, 'mezzo')) ? true : 'La bandiera non è ruotata nel modo giusto.'; }) },
     { t: 'Di quanti passi verso destra è stata spostata la figura rossa per arrivare a quella blu?', fissi: [{ pts: PIEDE, c: '#c62828' }, { pts: trasla(PIEDE, 6, 0), c: '#1f5fbf' }], num: 6 },
     { t: 'Di quanti passi verso l’alto è stata spostata la figura rossa per arrivare a quella blu?', fissi: [{ pts: trasla(PIEDE, 2, 0), c: '#c62828' }, { pts: trasla(PIEDE, 6, -5), c: '#1f5fbf' }], num: 5 }
   ]},
@@ -1031,25 +1102,25 @@ var LIVELLI = [
     { t: 'Ho 6 lati, tutti orizzontali o verticali, e copro 5 quadretti.', c: indizi([[function (f) { return f.v === 6; }, 'La figura deve avere 6 lati.'], [function (f) { return f.axis; }, 'Non tutti i lati sono orizzontali o verticali.'], [function (f) { return f.a2 === 10; }, 'La figura non copre 5 quadretti.']]) },
     { t: 'Ho 5 lati, un asse di simmetria e 3 angoli retti.', c: indizi([[function (f) { return f.v === 5; }, 'La figura deve avere 5 lati.'], [simmetrica, 'La figura non ha un asse di simmetria.'], [function (f) { return f.rights === 3; }, 'La figura non ha 3 angoli retti.']]) },
     { t: 'Ho 4 lati, i lati opposti paralleli, nessun angolo retto e copro 6 quadretti.', c: indizi([[function (f) { return f.v === 4; }, 'La figura deve avere 4 lati.'], [function (f) { return paralleli(f) === 2; }, 'I lati opposti non sono tutti paralleli.'], [function (f) { return f.rights === 0; }, 'La figura ha degli angoli retti.'], [function (f) { return f.a2 === 12; }, 'La figura non copre 6 quadretti.']]) },
-    { t: 'Ho 3 lati, due lati lunghi uguali, e nessun lato è orizzontale o verticale.', c: indizi([[function (f) { return f.v === 3; }, 'La figura deve avere 3 lati.'], [function (f) { return f.len2[0] === f.len2[1] || f.len2[1] === f.len2[2] || f.len2[0] === f.len2[2]; }, 'Non ci sono due lati lunghi uguali.'], [function (f) { return f.e.every(function (e) { return e[0] !== 0 && e[1] !== 0; }); }, 'C’è un lato orizzontale o verticale.']]) }
+    { t: 'Ho 3 lati, due lati lunghi uguali, nessun angolo retto e copro 4 quadretti.', c: indizi([[function (f) { return f.v === 3; }, 'La figura deve avere 3 lati.'], [function (f) { return f.len2[0] === f.len2[1] || f.len2[1] === f.len2[2] || f.len2[0] === f.len2[2]; }, 'Non ci sono due lati lunghi uguali.'], [function (f) { return f.rights === 0; }, 'La figura ha un angolo retto.'], [function (f) { return f.a2 === 8; }, 'La figura non copre 4 quadretti.']]) }
   ]},
-  { tit: 'Pioli dentro e sul contorno', n: 11, nota: 'Sul contorno: i pioli toccati dall’elastico. Dentro: i pioli chiusi nella figura.', sfide: [
-    { t: 'Fai una figura con un solo piolo dentro.', c: una(function (f) { return msgPioli(f, 1, null); }) },
-    { t: 'Fai un triangolo con nessun piolo dentro e 4 pioli sul contorno.', c: una(tutte(tri, function (f) { return msgPioli(f, 0, 4); })) },
-    { t: 'Fai un quadrato con 9 pioli dentro.', c: una(tutte(msgQuadrato, function (f) { return msgPioli(f, 9, null); })) },
-    { t: 'Fai un rettangolo con 12 pioli sul contorno e 3 dentro.', c: una(tutte(function (f) { return msgRettangolo(f, false); }, function (f) { return msgPioli(f, 3, 12); })) },
-    { t: 'Fai una figura con 4 pioli dentro e 4 sul contorno.', c: una(function (f) { return msgPioli(f, 4, 4); }) },
-    { t: 'Fai due figure diverse, tutte e due con 2 pioli dentro e 6 sul contorno.',
-      c: due(function (f) { return f.I === 2 && f.B === 6 ? true : 'no'; }, function (f) { return f.I === 2 && f.B === 6 ? true : 'no'; }, true, 'Servono due figure con 2 pioli dentro e 6 sul contorno ciascuna.') },
-    { t: 'Quanti pioli ci sono dentro questo quadrato?', fissi: [{ pts: [[3, 0], [6, 3], [3, 6], [0, 3]] }], num: 13 }
+  { tit: 'Puntini dentro e sul contorno', n: 11, nota: 'Sul contorno: i puntini toccati dall’elastico. Dentro: i puntini chiusi nella figura.', sfide: [
+    { t: 'Fai una figura con un solo puntino dentro.', c: una(function (f) { return msgPuntini(f, 1, null); }) },
+    { t: 'Fai un triangolo con nessun puntino dentro e 4 puntini sul contorno.', c: una(tutte(tri, function (f) { return msgPuntini(f, 0, 4); })) },
+    { t: 'Fai un quadrato con 9 puntini dentro.', c: una(tutte(msgQuadrato, function (f) { return msgPuntini(f, 9, null); })) },
+    { t: 'Fai un rettangolo con 12 puntini sul contorno e 3 dentro.', c: una(tutte(function (f) { return msgRettangolo(f, false); }, function (f) { return msgPuntini(f, 3, 12); })) },
+    { t: 'Fai una figura con 4 puntini dentro e 4 sul contorno.', c: una(function (f) { return msgPuntini(f, 4, 4); }) },
+    { t: 'Fai due figure diverse, tutte e due con 2 puntini dentro e 6 sul contorno.',
+      c: due(function (f) { return f.I === 2 && f.B === 6 ? true : 'no'; }, function (f) { return f.I === 2 && f.B === 6 ? true : 'no'; }, true, 'Servono due figure con 2 puntini dentro e 6 sul contorno ciascuna.') },
+    { t: 'Quanti puntini ci sono dentro questo quadrato?', fissi: [{ pts: [[3, 0], [6, 3], [3, 6], [0, 3]] }], num: 13 }
   ]}
 ];
 // le sfide di copia usano il modello
 LIVELLI.forEach(function (L) { L.sfide.forEach(function (S) { if (S.model && !S.c) S.c = copia(S.model); }); });
 
 var vista = 'libero', liv = 0, sf = 0, fatte = {}, libero = null, risposta = '';
-try { fatte = JSON.parse(localStorage.getItem('geopiano-sfide-2') || '{}') || {}; } catch (x) { fatte = {}; }
-function salvaFatte() { try { localStorage.setItem('geopiano-sfide-2', JSON.stringify(fatte)); } catch (x) {} }
+try { fatte = JSON.parse(localStorage.getItem('geopiano-sfide-3') || '{}') || {}; } catch (x) { fatte = {}; }
+function salvaFatte() { try { localStorage.setItem('geopiano-sfide-3', JSON.stringify(fatte)); } catch (x) {} }
 function sfidaAtt() { return vista === 'sfide' ? LIVELLI[liv].sfide[sf] : null; }
 
 var sfidaEl = document.getElementById('sfida'), esitoEl = document.getElementById('esito');
@@ -1074,6 +1145,7 @@ function caricaSfida() {
   n = L.n; bands = []; storia = []; risposta = '';
   syncSize();
   document.getElementById('sfTit').textContent = 'Livello ' + (liv + 1) + ' · ' + L.tit;
+  document.getElementById('sfCod').textContent = 'SFIDA ' + (liv + 1) + '.' + (sf + 1);
   document.getElementById('sfTesto').textContent = S.t;
   var nota = document.getElementById('sfNota'); nota.textContent = L.nota || ''; nota.style.display = L.nota ? 'block' : 'none';
   mostraModello(S.model, L.n);
