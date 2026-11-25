@@ -40,7 +40,47 @@
   .col .btn { width:100%; text-align:left; }
   .size .btn { flex:1; text-align:center; padding:9px 4px; }
 
+  .tabs .btn { flex:1; text-align:center; padding:9px 4px; }
+  .sfida { flex:none; width:270px; display:flex; flex-direction:column; gap:10px; overflow:auto; }
+  .sfida .grp { display:flex; flex-direction:column; gap:8px; }
+  .sftit { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#5f5e5a; font-weight:bold; }
+  .sftxt { font-size:clamp(16px, 2.5vh, 21px); font-weight:bold; line-height:1.3; }
+  .sfnota { font-size:13px; color:#5f5e5a; line-height:1.35; }
+  #modello { width:130px; height:130px; display:block; margin:0 auto; }
+  .punti { display:flex; flex-wrap:wrap; gap:5px; }
+  .punti button { width:30px; height:30px; padding:0; font-family:inherit; font-size:12px; font-weight:bold; border:1px solid #cfc9b8; background:#ece8dc; cursor:pointer; }
+  .punti button.fatta { background:#5f5e5a; border-color:#5f5e5a; color:#fff; }
+  .punti button.qui { outline:3px solid #e10600; outline-offset:1px; }
+  .esito { min-height:2.8em; font-size:14px; line-height:1.35; color:#5f5e5a; }
+  .esito.ok { color:#2e7d32; font-weight:bold; font-size:20px; }
+  .tastiera { display:flex; gap:8px; align-items:stretch; }
+  .risposta { flex:none; width:64px; border:2px solid #2b2b2b; background:#fff; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:bold; }
+  .tasti { flex:1; display:grid; grid-template-columns:repeat(6, 1fr); gap:4px; }
+  .tasti button { font-family:inherit; font-size:15px; font-weight:bold; padding:6px 0; border:1px solid #cfc9b8; background:#ece8dc; cursor:pointer; }
+  .liv { gap:4px; }
+  .liv .btn { flex:0 0 calc((100% - 32px) / 9); padding:6px 0; font-size:11px; letter-spacing:0; }
+  .nav .btn { flex:none; width:48px; text-align:center; font-size:16px; padding:7px 0; }
+  .nav #controlla { flex:1; width:auto; font-size:13px; }
+  .nav .btn:disabled { opacity:.35; cursor:default; }
+  .sfcorpo { display:flex; flex-direction:column; gap:8px; }
+  .sfcorpo .sfnota { margin-top:6px; }
+
   @media (max-aspect-ratio: 1/1) {
+    .sfida { width:auto; overflow:visible; gap:6px; }
+    .sfida .grp { padding:6px; gap:5px; }
+    .sfida .grp:first-child .lab { display:none; }
+    .liv .btn { padding:4px 0; flex-basis:calc((100% - 64px) / 17); }
+    .punti button { width:26px; height:26px; }
+    .sftxt { font-size:15px; }
+    .sfcorpo { flex-direction:row; align-items:flex-start; justify-content:space-between; }
+    #modello { width:70px; height:70px; flex:none; }
+    .panel .lab { display:none; }
+    .sw { width:30px; height:30px; }
+    .sw i { width:16px; height:16px; }
+    .hint { min-height:0; font-size:12px; }
+    .sfnota { font-size:12px; }
+    .esito { min-height:1.4em; }
+    .esito.ok { font-size:16px; }
     main { flex-direction:column; gap:8px; padding:4px 8px 8px; }
     .panel { width:auto; flex-direction:row; flex-wrap:wrap; gap:6px; overflow:visible; }
     .grp { padding:6px; flex:1 1 auto; }
@@ -70,12 +110,49 @@
 </header>
 
 <main>
+  <div class="sfida" id="sfida" style="display:none">
+    <div class="grp">
+      <div class="lab" style="margin-bottom:0">Livello</div>
+      <div class="row liv" id="livelli"></div>
+    </div>
+    <div class="grp">
+      <div class="sftit" id="sfTit"></div>
+      <div class="punti" id="punti"></div>
+      <div class="sfcorpo">
+        <div>
+          <div class="sftxt" id="sfTesto"></div>
+          <div class="sfnota" id="sfNota"></div>
+        </div>
+        <svg id="modello" viewBox="0 0 100 100" style="display:none"></svg>
+      </div>
+      <div class="tastiera" id="tastiera" style="display:none">
+        <div class="risposta" id="risposta">?</div>
+        <div class="tasti" id="tasti">
+          <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button><button data-k="4">4</button><button data-k="5">5</button><button data-k="del" aria-label="Cancella">⌫</button>
+          <button data-k="6">6</button><button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button><button data-k="0">0</button>
+        </div>
+      </div>
+      <div class="row nav">
+        <button class="btn" id="prec" aria-label="Sfida precedente">←</button>
+        <button class="btn on" id="controlla">Controlla</button>
+        <button class="btn" id="succ" aria-label="Sfida successiva">→</button>
+      </div>
+      <div class="esito" id="esito"></div>
+    </div>
+  </div>
+
   <div class="boardwrap">
     <svg id="geo" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet" aria-label="Geopiano"></svg>
     <div class="hint" id="hint"></div>
   </div>
 
   <div class="panel">
+    <div class="grp">
+      <div class="row tabs" id="viste">
+        <button class="btn on" data-v="libero">Gioco libero</button>
+        <button class="btn" data-v="sfide">Sfide</button>
+      </div>
+    </div>
     <div class="grp">
       <div class="lab">Elastici</div>
       <div class="row" id="elastici"></div>
@@ -88,7 +165,7 @@
         <button class="btn" data-m="cancella">Togli elastico</button>
       </div>
     </div>
-    <div class="grp">
+    <div class="grp" id="impost">
       <div class="lab">Pioli</div>
       <div class="row size" id="misure">
         <button class="btn" data-n="5">5×5</button>
@@ -99,7 +176,7 @@
       <div class="row" id="tavole"></div>
     </div>
     <div class="grp">
-      <div class="col">
+      <div class="row size">
         <button class="btn" id="annulla">Annulla</button>
         <button class="btn" id="svuota">Togli tutti</button>
       </div>
@@ -267,8 +344,28 @@ function render() {
   // tavola
   h += '<rect x="12" y="12" width="976" height="976" rx="16" fill="' + shade(tavola, -0.18) + '" filter="url(#sh)"/>';
   h += '<rect x="34" y="34" width="932" height="932" rx="6" fill="' + tavola + '"/>';
+  var SF = typeof sfidaAtt === 'function' ? sfidaAtt() : null;
+  if (SF && LIVELLI[liv].coord) {
+    for (var c = 0; c < n; c++) {
+      var lp = px([c, n - 1]), np = px([0, c]);
+      h += '<text x="' + lp[0] + '" y="958" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="30" fill="#2b2b2b">' + String.fromCharCode(65 + c) + '</text>';
+      h += '<text x="52" y="' + (np[1] + 10) + '" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="30" fill="#2b2b2b">' + (n - c) + '</text>';
+    }
+  }
+  if (SF && SF.asse) {
+    var A = SF.asse, a1, a2;
+    if (A.x !== undefined) { a1 = [px([A.x, 0])[0], 40]; a2 = [a1[0], 960]; }
+    else if (A.y !== undefined) { a1 = [40, px([0, A.y])[1]]; a2 = [960, a1[1]]; }
+    else { a1 = [40, 40]; a2 = [960, 960]; }
+    h += '<line x1="' + a1[0] + '" y1="' + a1[1] + '" x2="' + a2[0] + '" y2="' + a2[1] + '" stroke="#e10600" stroke-width="5" stroke-dasharray="18 12"/>';
+  }
   // elastici posati
   h += '<g filter="url(#sh)">';
+  if (SF && SF.fissi) SF.fissi.forEach(function (fx) {
+    var col = fx.c || '#4a4a4a';
+    if (fx.linea) h += '<polyline points="' + fx.pts.map(function (q) { return px(q).join(','); }).join(' ') + '" fill="none" stroke="' + col + '" stroke-width="' + w + '" stroke-linejoin="round" stroke-linecap="round"/>';
+    else h += bandSVG({ c: col, pts: fx.pts, closed: true });
+  });
   for (var k = 0; k < bands.length; k++) h += bandSVG(bands[k]);
   // elastico in costruzione
   if (cur && cur.pts.length > 1) h += bandSVG({ c: cur.c, pts: cur.pts, closed: cur.pts.length >= 3 });
@@ -285,8 +382,15 @@ function render() {
   for (var j = 0; j < n; j++) for (var i = 0; i < n; i++) {
     var p = px([i, j]);
     h += '<circle cx="' + (p[0] + r * 0.22) + '" cy="' + (p[1] + r * 0.32) + '" r="' + r + '" fill="#000" opacity=".22"/>';
-    h += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + r + '" fill="url(#pg)" stroke="' + shade(tavola, -0.25) + '" stroke-width="1"/>';
+    var scuro = SF && SF.segnati && SF.segnati.some(function (m) { return m[0] === i && m[1] === j; });
+    h += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + r + '" fill="' + (scuro ? '#2b2b2b' : 'url(#pg)') + '" stroke="' + shade(tavola, -0.25) + '" stroke-width="1"/>';
   }
+  if (SF && SF.centro) { var cc0 = px(SF.centro); h += '<circle cx="' + cc0[0] + '" cy="' + cc0[1] + '" r="' + (r + 6) + '" fill="none" stroke="#e10600" stroke-width="5"/>'; }
+  if (SF && SF.lettere) Object.keys(SF.lettere).forEach(function (k) {
+    var lq = px(SF.lettere[k]);
+    h += '<circle cx="' + lq[0] + '" cy="' + lq[1] + '" r="' + (r + 6) + '" fill="none" stroke="#e10600" stroke-width="5"/>';
+    h += '<text x="' + (lq[0] - r - 10) + '" y="' + (lq[1] - r - 6) + '" text-anchor="end" font-family="Arial" font-weight="bold" font-size="40" fill="#2b2b2b" stroke="#fff" stroke-width="6" paint-order="stroke">' + k + '</text>';
+  });
   // evidenze
   if (cur) {
     var f = px(cur.pts[0]);
@@ -452,6 +556,590 @@ document.getElementById('svuota').onclick = function () {
   if (bands.length) { save(); bands = []; }
   render();
 };
+
+// =====================================================================
+// SFIDE
+// =====================================================================
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { var t = a % b; a = b; b = t; } return a; }
+function cross(u, v) { return u[0] * v[1] - u[1] * v[0]; }
+function dot(u, v) { return u[0] * v[0] + u[1] * v[1]; }
+
+function segCross(a, b, c, d) {
+  function o(p, q, r) { var v = (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]); return v > 0 ? 1 : v < 0 ? -1 : 0; }
+  function on(p, q, r) { return Math.min(p[0], r[0]) <= q[0] && q[0] <= Math.max(p[0], r[0]) && Math.min(p[1], r[1]) <= q[1] && q[1] <= Math.max(p[1], r[1]); }
+  var o1 = o(a, b, c), o2 = o(a, b, d), o3 = o(c, d, a), o4 = o(c, d, b);
+  if (o1 !== o2 && o3 !== o4) return true;
+  return (o1 === 0 && on(a, c, b)) || (o2 === 0 && on(a, d, b)) || (o3 === 0 && on(c, a, d)) || (o4 === 0 && on(c, b, d));
+}
+
+// analisi di una figura (elastico chiuso)
+function analizza(pts) {
+  var p = [];
+  pts.forEach(function (q) { if (!eq(q, last(p))) p.push(q); });
+  if (p.length > 1 && eq(p[0], last(p))) p.pop();
+  cleanStraight(p, true);
+  var v = p.length, e = [], a2 = 0, B = 0, rights = 0, len2 = [], axis = true;
+  for (var k = 0; k < v; k++) {
+    var a = p[k], b = p[(k + 1) % v];
+    e.push([b[0] - a[0], b[1] - a[1]]);
+    a2 += cross(a, b);
+    B += gcd(b[0] - a[0], b[1] - a[1]);
+  }
+  a2 = Math.abs(a2);
+  for (k = 0; k < v; k++) {
+    len2.push(dot(e[k], e[k]));
+    if (dot(e[(k - 1 + v) % v], e[k]) === 0) rights++;
+    if (e[k][0] !== 0 && e[k][1] !== 0) axis = false;
+  }
+  var simple = v >= 3 && a2 > 0;
+  for (var i = 0; i < v && simple; i++) for (var j = i + 1; j < v; j++) {
+    if (j === i + 1 || (i === 0 && j === v - 1)) continue;
+    if (segCross(p[i], p[(i + 1) % v], p[j], p[(j + 1) % v])) { simple = false; break; }
+  }
+  var per = 0; e.forEach(function (d) { per += Math.abs(d[0]) + Math.abs(d[1]); });
+  return { p: p, v: v, e: e, a2: a2, B: B, I: (a2 - B + 2) / 2, rights: rights, len2: len2, axis: axis, per: per, simple: simple };
+}
+function tuttiUguali(a) { return a.every(function (x) { return x === a[0]; }); }
+function quadrato(f) { return f.v === 4 && f.rights === 4 && tuttiUguali(f.len2); }
+function rettangolo(f) { return f.v === 4 && f.rights === 4; }
+function rombo(f) { return f.v === 4 && tuttiUguali(f.len2); }
+function paralleli(f) { if (f.v !== 4) return 0; return (cross(f.e[0], f.e[2]) === 0 ? 1 : 0) + (cross(f.e[1], f.e[3]) === 0 ? 1 : 0); }
+function simmetrica(f) {
+  var xs = f.p.map(function (q) { return q[0]; }), ys = f.p.map(function (q) { return q[1]; });
+  var sx = Math.min.apply(0, xs) + Math.max.apply(0, xs), sy = Math.min.apply(0, ys) + Math.max.apply(0, ys);
+  var key = function (arr) { return arr.map(function (q) { return q[0] + ',' + q[1]; }).sort().join(' '); };
+  var base = key(f.p.map(function (q) { return [2 * q[0], 2 * q[1]]; }));
+  var cx = sx / 2, cy = sy / 2;
+  var tr = [
+    function (q) { return [sx - q[0], q[1]]; },
+    function (q) { return [q[0], sy - q[1]]; },
+    function (q) { return [cx + (q[1] - cy), cy + (q[0] - cx)]; },
+    function (q) { return [cx - (q[1] - cy), cy - (q[0] - cx)]; }
+  ];
+  return tr.some(function (t) { return key(f.p.map(function (q) { var r = t(q); return [2 * r[0], 2 * r[1]]; })) === base; });
+}
+function firma(f) {
+  var d = [];
+  for (var i = 0; i < f.v; i++) for (var j = i + 1; j < f.v; j++) d.push(Math.pow(f.p[i][0] - f.p[j][0], 2) + Math.pow(f.p[i][1] - f.p[j][1], 2));
+  return f.v + ':' + f.a2 + ':' + d.sort(function (a, b) { return a - b; }).join(',');
+}
+function stessaPosa(f, model) {
+  var norm = function (p) {
+    var mx = Math.min.apply(0, p.map(function (q) { return q[0]; })), my = Math.min.apply(0, p.map(function (q) { return q[1]; }));
+    return p.map(function (q) { return (q[0] - mx) + ',' + (q[1] - my); }).sort().join(' ');
+  };
+  return f.v === model.length && norm(f.p) === norm(model);
+}
+
+function quad(a2) {
+  var w = Math.floor(a2 / 2), h = a2 % 2;
+  if (w === 0) return 'mezzo quadretto';
+  return w + (w === 1 ? ' quadretto' : ' quadretti') + (h ? ' e mezzo' : '');
+}
+function pioli(k) { return k + (k === 1 ? ' piolo' : ' pioli'); }
+function nome(v) { return ({ 3: 'triangolo', 4: 'quadrilatero', 5: 'pentagono', 6: 'esagono' })[v] || 'figura con ' + v + ' lati'; }
+function lati(f, k, cosa) { return f.v === k ? true : 'Questa figura ha ' + f.v + ' lati: ' + cosa + ' ne ha ' + k + '.'; }
+
+function msgQuadrato(f) {
+  var r = lati(f, 4, 'un quadrato'); if (r !== true) return r;
+  if (!tuttiUguali(f.len2)) return 'I lati non sono tutti lunghi uguali.';
+  if (f.rights < 4) return 'Gli angoli non sono tutti retti.';
+  return true;
+}
+function msgRettangolo(f, noQuadrato) {
+  var r = lati(f, 4, 'un rettangolo'); if (r !== true) return r;
+  if (f.rights < 4) return 'Gli angoli non sono tutti retti.';
+  if (noQuadrato && tuttiUguali(f.len2)) return 'Questo è un quadrato: prova con due lati di lunghezza diversa.';
+  return true;
+}
+function msgArea(f, a2) { return f.a2 === a2 ? true : 'Questa figura copre ' + quad(f.a2) + '.'; }
+function msgPassi(f, per) {
+  if (!f.axis) return 'Per contare i passi usa solo lati orizzontali e verticali.';
+  return f.per === per ? true : 'Il contorno di questa figura è di ' + f.per + ' passi.';
+}
+function msgPioli(f, I, B) {
+  if ((I === null || f.I === I) && (B === null || f.B === B)) return true;
+  return 'Questa figura ha ' + pioli(f.I) + ' dentro e ' + pioli(f.B) + ' sul contorno.';
+}
+function tutte() { var a = arguments; return function (f) { for (var k = 0; k < a.length; k++) { var r = a[k](f); if (r !== true) return r; } return true; }; }
+
+function figure() { return bands.filter(function (b) { return b.pts.length >= 3; }).map(function (b) { return analizza(b.pts); }); }
+
+// una figura sul geopiano deve rispettare la richiesta
+function una(test) {
+  return function () {
+    var fs = figure();
+    if (!fs.length) return 'Metti un elastico intorno ad almeno tre pioli.';
+    var msg = '';
+    for (var k = 0; k < fs.length; k++) {
+      if (!fs[k].simple) { msg = 'L’elastico si incrocia: così non forma una figura.'; continue; }
+      var r = test(fs[k]); if (r === true) return true; msg = r;
+    }
+    return (fs.length > 1 ? 'Nessuna figura va bene. ' : '') + msg;
+  };
+}
+// due figure: una rispetta testA, l'altra testB (diverse fra loro se richiesto)
+function due(testA, testB, diverse, msgNo) {
+  return function () {
+    var fs = figure().filter(function (f) { return f.simple; });
+    if (fs.length < 2) return 'Servono due figure: metti due elastici.';
+    for (var i = 0; i < fs.length; i++) for (var j = 0; j < fs.length; j++) {
+      if (i === j || testA(fs[i]) !== true || testB(fs[j]) !== true) continue;
+      if (diverse && firma(fs[i]) === firma(fs[j])) continue;
+      return true;
+    }
+    for (i = 0; i < fs.length; i++) for (j = 0; j < fs.length; j++)
+      if (i !== j && testA(fs[i]) === true && testB(fs[j]) === true) return 'Le due figure sono uguali: devono essere diverse.';
+    return msgNo;
+  };
+}
+
+// ---------- strumenti per le sfide ----------
+function chiave(pts) { return pts.map(function (q) { return q[0] + ',' + q[1]; }).sort().join(' '); }
+function pulito(pts) { return analizza(pts).p; }
+function uguale(f, target) { return f.v === pulito(target).length && chiave(f.p) === chiave(pulito(target)); }
+function trasla(pts, dx, dy) { return pts.map(function (q) { return [q[0] + dx, q[1] + dy]; }); }
+function rifletti(pts, a) {
+  return pts.map(function (q) { return a.x !== undefined ? [2 * a.x - q[0], q[1]] : a.y !== undefined ? [q[0], 2 * a.y - q[1]] : [q[1], q[0]]; });
+}
+function ruota(pts, c, tipo) {
+  return pts.map(function (q) {
+    var dx = q[0] - c[0], dy = q[1] - c[1];
+    var r = tipo === 'orario' ? [-dy, dx] : tipo === 'antiorario' ? [dy, -dx] : [-dx, -dy];
+    return [c[0] + r[0], c[1] + r[1]];
+  });
+}
+function dims(f) {
+  var xs = f.p.map(function (q) { return q[0]; }), ys = f.p.map(function (q) { return q[1]; });
+  return { w: Math.max.apply(0, xs) - Math.min.apply(0, xs), h: Math.max.apply(0, ys) - Math.min.apply(0, ys) };
+}
+function rettDritto(f) { return rettangolo(f) && f.axis; }
+function haVertice(f, q) { return f.p.some(function (r) { return eq(r, q); }); }
+function retto(f, q) {
+  for (var k = 0; k < f.v; k++) if (eq(f.p[k], q)) return dot(f.e[(k - 1 + f.v) % f.v], f.e[k]) === 0;
+  return false;
+}
+// coordinate sul geopiano 7×7: lettera = colonna, numero = riga dal basso
+function C(s) { return [s.charCodeAt(0) - 65, 7 - parseInt(s.slice(1), 10)]; }
+
+// tutti i "passi" (tratti fra pioli vicini) coperti da una serie di linee
+function passiDi(linee) {
+  var set = {};
+  linee.forEach(function (l) {
+    for (var k = 0; k < l.length - 1; k++) {
+      var a = l[k], b = l[k + 1], dx = b[0] - a[0], dy = b[1] - a[1], g = gcd(dx, dy);
+      if (!g) continue;
+      var sx = dx / g, sy = dy / g;
+      for (var t = 0; t < g; t++) {
+        var p = [a[0] + t * sx, a[1] + t * sy], q = [p[0] + sx, p[1] + sy];
+        var s1 = p[0] + ',' + p[1], s2 = q[0] + ',' + q[1];
+        set[s1 < s2 ? s1 + '|' + s2 : s2 + '|' + s1] = [p, q];
+      }
+    }
+  });
+  return set;
+}
+function lineeUtente() { return bands.map(function (b) { return b.closed ? b.pts.concat([b.pts[0]]) : b.pts; }); }
+function normPassi(set) {
+  var ks = Object.keys(set), mx = Infinity, my = Infinity;
+  ks.forEach(function (k) { set[k].forEach(function (q) { mx = Math.min(mx, q[0]); my = Math.min(my, q[1]); }); });
+  return ks.map(function (k) {
+    var a = set[k][0], b = set[k][1], s1 = (a[0] - mx) + ',' + (a[1] - my), s2 = (b[0] - mx) + ',' + (b[1] - my);
+    return s1 < s2 ? s1 + '|' + s2 : s2 + '|' + s1;
+  }).sort().join(' ');
+}
+// copiare un disegno (anche fatto di linee), in qualsiasi posizione
+function copia(model) {
+  return function () {
+    if (!bands.length) return 'Metti gli elastici sul geopiano.';
+    return normPassi(passiDi(lineeUtente())) === normPassi(passiDi(model)) ? true : 'Il disegno non è uguale al modello: controlla gli elastici, uno per uno.';
+  };
+}
+// percorso da A a B fatto di passi orizzontali e verticali
+function percorso(A, B, L, giri) {
+  return function () {
+    if (!bands.length) return 'Metti gli elastici per fare il percorso.';
+    var set = passiDi(lineeUtente()), adj = {}, tot = 0, ok = true;
+    Object.keys(set).forEach(function (k) {
+      var a = set[k][0], b = set[k][1];
+      if (a[0] !== b[0] && a[1] !== b[1]) ok = false;
+      var s1 = a.join(','), s2 = b.join(',');
+      (adj[s1] = adj[s1] || []).push(s2); (adj[s2] = adj[s2] || []).push(s1); tot++;
+    });
+    if (!ok) return 'Usa solo tratti orizzontali e verticali.';
+    var sA = A.join(','), sB = B.join(',');
+    if (!adj[sA] || !adj[sB]) return 'Il percorso deve partire da A e arrivare a B.';
+    for (var k in adj) if (adj[k].length > ((k === sA || k === sB) ? 1 : 2)) return 'Il percorso non deve avere rami o giri chiusi.';
+    var prev = null, now = sA, cnt = 0, turns = 0, dir = null;
+    while (now !== sB) {
+      var nx = adj[now].filter(function (x) { return x !== prev; })[0];
+      if (!nx) return 'Il percorso si interrompe prima di arrivare a B.';
+      var a = now.split(',').map(Number), b = nx.split(',').map(Number), d = (b[0] - a[0]) + ',' + (b[1] - a[1]);
+      if (dir && d !== dir) turns++;
+      dir = d; prev = now; now = nx; cnt++;
+    }
+    if (cnt !== tot) return 'Ci sono elastici che non fanno parte del percorso.';
+    if (cnt !== L) return 'Questo percorso è lungo ' + cnt + ' passi.';
+    if (giri !== undefined && turns !== giri) return 'Questo percorso cambia direzione ' + (turns === 1 ? 'una volta' : turns + ' volte') + '.';
+    return true;
+  };
+}
+// figura con tutti gli angoli sui pioli segnati
+function segreta(marks, test) {
+  return una(function (f) {
+    for (var k = 0; k < f.v; k++) if (!marks.some(function (m) { return eq(m, f.p[k]); })) return 'Un angolo della figura non è su un piolo scuro.';
+    return test(f);
+  });
+}
+// dividere una figura in k parti uguali
+function dentro(pt, poly) {
+  var c = false;
+  for (var i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    var a = poly[i], b = poly[j];
+    if ((a[1] > pt[1]) !== (b[1] > pt[1]) && pt[0] < (b[0] - a[0]) * (pt[1] - a[1]) / (b[1] - a[1]) + a[0]) c = !c;
+  }
+  return c;
+}
+function dividi(fig, k, extra) {
+  return function () {
+    var fs = figure();
+    if (fs.some(function (f) { return !f.simple; })) return 'Un elastico si incrocia: così non forma una figura.';
+    if (fs.length !== k) return 'Servono ' + k + ' parti: sul geopiano ci sono ' + fs.length + ' figure.';
+    for (var i = 1; i < k; i++) if (firma(fs[i]) !== firma(fs[0])) return 'Le parti non sono tutte uguali.';
+    if (extra) { var r = extra(fs[0]); if (r !== true) return r; }
+    var xs = fig.map(function (q) { return q[0]; }), ys = fig.map(function (q) { return q[1]; });
+    for (var x = Math.min.apply(0, xs) - 1 + 0.137; x < Math.max.apply(0, xs) + 1; x += 0.25)
+      for (var y = Math.min.apply(0, ys) - 1 + 0.291; y < Math.max.apply(0, ys) + 1; y += 0.25) {
+        var cop = fs.filter(function (f) { return dentro([x, y], f.p); }).length;
+        if (cop !== (dentro([x, y], fig) ? 1 : 0)) return 'Le parti devono coprire tutta la figura grigia, senza uscire e senza sovrapporsi.';
+      }
+    return true;
+  };
+}
+// triangolo con base (lato orizzontale o verticale) e altezza date
+function baseAltezza(f, b, h, fuori) {
+  if (f.v !== 3) return 'Questa figura ha ' + f.v + ' lati: un triangolo ne ha 3.';
+  for (var k = 0; k < 3; k++) {
+    var e = f.e[k], a = f.p[k], o = f.p[(k + 2) % 3];
+    if (e[0] !== 0 && e[1] !== 0) continue;
+    if (Math.abs(e[0] + e[1]) !== b) continue;
+    var hor = e[1] === 0, d = hor ? Math.abs(o[1] - a[1]) : Math.abs(o[0] - a[0]);
+    if (d !== h) continue;
+    if (fuori) { var c = hor ? o[0] : o[1], lo = hor ? Math.min(a[0], a[0] + e[0]) : Math.min(a[1], a[1] + e[1]); if (c >= lo && c <= lo + b) continue; }
+    return true;
+  }
+  return 'Questo triangolo non ha una base di ' + b + ' passi con l’altezza di ' + h + (fuori ? ' e il vertice fuori dalla base.' : '.');
+}
+// indovinelli: elenco di [condizione, messaggio]
+function indizi(lista) { return una(function (f) { for (var k = 0; k < lista.length; k++) if (!lista[k][0](f)) return lista[k][1]; return true; }); }
+
+function tri(f) { return lati(f, 3, 'un triangolo'); }
+function area(a2) { return function (f) { return msgArea(f, a2); }; }
+
+// ---------- figure usate nelle sfide ----------
+var REC = [[1, 1], [5, 1], [5, 4], [1, 4]];
+var ELLE = [[1, 1], [3, 1], [3, 4], [5, 4], [5, 5], [1, 5]];
+var CROCE = [[2, 1], [4, 1], [4, 2], [5, 2], [5, 4], [4, 4], [4, 5], [2, 5], [2, 4], [1, 4], [1, 2], [2, 2]];
+var TI = [[1, 1], [5, 1], [5, 2], [4, 2], [4, 5], [2, 5], [2, 2], [1, 2]];
+var ROSSO = [[0, 0], [3, 0], [3, 2], [0, 2]], BLU = [[1, 3], [6, 3], [6, 6], [1, 6]];
+var Q44 = [[1, 1], [5, 1], [5, 5], [1, 5]], R62 = [[0, 2], [6, 2], [6, 4], [0, 4]], R43 = [[1, 1], [5, 1], [5, 4], [1, 4]];
+var ELLE2 = [[1, 1], [3, 1], [3, 3], [5, 3], [5, 5], [1, 5]];
+var TRI_OTT = [[2, 6], [8, 6], [10, 2]];
+var FRECCIA = [[1, 2], [3, 2], [3, 1], [5, 3], [3, 5], [3, 4], [1, 4]];
+var GANCIO = [[1, 1], [2, 1], [2, 4], [4, 4], [4, 5], [1, 5]];
+var BANDIERA = [[5, 5], [5, 1], [8, 1], [8, 3], [6, 3], [6, 5]], CENTRO = [5, 5];
+var PIEDE = [[1, 6], [3, 6], [3, 8], [2, 9], [1, 8]];
+var S_TRI = [[1, 2], [4, 2], [1, 6]], S_ELLE = [[1, 1], [3, 1], [3, 5], [4, 5], [4, 7], [1, 7]];
+var S_FLAG = [[2, 1], [8, 1], [6, 2], [8, 3], [2, 3]], S_MEZZA = [[5, 1], [2, 4], [2, 8], [5, 8]];
+var S_DIAG = [[2, 0], [6, 0], [6, 3]];
+function per(p) { return analizza(p).per; }
+function a2di(p) { return analizza(p).a2; }
+
+var LIVELLI = [
+  { tit: 'Copia i disegni', n: 5, nota: 'Per fare una linea tendi un elastico fra due pioli. Il disegno si può copiare in qualsiasi punto del geopiano.', sfide: [
+    { t: 'Copia il disegno.', model: [[[0, 0], [4, 0]], [[2, 0], [2, 4]]] },
+    { t: 'Copia il disegno.', model: [[[2, 0], [2, 4]], [[0, 2], [4, 2]]] },
+    { t: 'Copia il disegno.', model: [[[0, 1], [0, 4]], [[2, 0], [2, 4]], [[4, 2], [4, 4]]] },
+    { t: 'Copia il disegno.', model: [[[0, 4], [0, 2], [2, 2], [2, 0], [4, 0]]] },
+    { t: 'Copia il disegno.', model: [[[0, 2], [4, 2]], [[2, 0], [4, 2], [2, 4]]] },
+    { t: 'Copia il disegno.', model: [[[0, 0], [4, 0], [4, 4], [0, 4], [0, 0]], [[0, 0], [4, 4]], [[4, 0], [0, 4]]] },
+    { t: 'Copia il disegno.', model: [[[0, 2], [2, 0], [4, 2], [4, 4], [0, 4], [0, 2]], [[0, 2], [4, 2]]] }
+  ]},
+  { tit: 'Prime figure', n: 5, sfide: [
+    { t: 'Fai un triangolo.', c: una(tri) },
+    { t: 'Fai un quadrato.', c: una(msgQuadrato) },
+    { t: 'Fai un rettangolo che non sia un quadrato.', c: una(function (f) { return msgRettangolo(f, true); }) },
+    { t: 'Fai un triangolo con un angolo retto.', c: una(tutte(tri, function (f) { return f.rights ? true : 'Questo triangolo non ha angoli retti.'; })) },
+    { t: 'Copia la figura del modello, dove vuoi sul geopiano.', model: [[[0, 0], [3, 0], [3, 1], [1, 1], [1, 3], [0, 3], [0, 0]]] }
+  ]},
+  { tit: 'Passi e percorsi', n: 7, nota: 'Un passo è il salto da un piolo a quello vicino, in orizzontale o in verticale. Per ogni tratto diritto usa un elastico.', sfide: [
+    { t: 'Collega A e B con un percorso di 4 passi.', lettere: { A: [1, 5], B: [5, 5] }, c: percorso([1, 5], [5, 5], 4) },
+    { t: 'Collega A e B con il percorso più corto possibile.', lettere: { A: [1, 5], B: [4, 2] }, c: percorso([1, 5], [4, 2], 6) },
+    { t: 'Collega A e B con un percorso di 8 passi.', lettere: { A: [1, 5], B: [4, 2] }, c: percorso([1, 5], [4, 2], 8) },
+    { t: 'Collega A e B con un percorso di 10 passi.', lettere: { A: [1, 3], B: [5, 3] }, c: percorso([1, 3], [5, 3], 10) },
+    { t: 'Collega A e B con il percorso più corto che cambia direzione una volta sola.', lettere: { A: [0, 6], B: [6, 0] }, c: percorso([0, 6], [6, 0], 12, 1) },
+    { t: 'Collega A e B con il percorso più corto che cambia direzione 3 volte.', lettere: { A: [0, 6], B: [6, 0] }, c: percorso([0, 6], [6, 0], 12, 3) },
+    { t: 'Quanti passi è lungo questo percorso?', fissi: [{ pts: [[0, 6], [0, 3], [3, 3], [3, 1], [6, 1]], linea: true }], num: 11 }
+  ]},
+  { tit: 'Quanti quadretti?', n: 5, nota: 'Un quadretto è lo spazio chiuso fra quattro pioli vicini.', sfide: [
+    { t: 'Fai un quadrato che copre 4 quadretti.', c: una(tutte(msgQuadrato, area(8))) },
+    { t: 'Fai un rettangolo che copre 6 quadretti.', c: una(tutte(function (f) { return msgRettangolo(f, false); }, area(12))) },
+    { t: 'Fai un triangolo che copre mezzo quadretto.', c: una(tutte(tri, area(1))) },
+    { t: 'Fai un triangolo che copre 2 quadretti.', c: una(tutte(tri, area(4))) },
+    { t: 'Fai una figura che copre 3 quadretti e non è un rettangolo.', c: una(tutte(area(6), function (f) { return rettangolo(f) ? 'Questo è un rettangolo: prova con un’altra forma.' : true; })) },
+    { t: 'Fai una figura con 6 lati che copre 4 quadretti.', c: una(tutte(function (f) { return lati(f, 6, 'questa figura'); }, area(8))) }
+  ]},
+  { tit: 'Misura i recinti', n: 7, nota: 'Il contorno si misura in passi. Lo spazio dentro si misura in quadretti.', sfide: [
+    { t: 'Quanti passi misura il contorno di questo recinto?', fissi: [{ pts: REC }], num: per(REC) },
+    { t: 'Quanti quadretti copre questo recinto?', fissi: [{ pts: REC }], num: a2di(REC) / 2 },
+    { t: 'Quanti passi misura il contorno di questo recinto?', fissi: [{ pts: ELLE }], num: per(ELLE) },
+    { t: 'Quanti quadretti copre questo recinto?', fissi: [{ pts: ELLE }], num: a2di(ELLE) / 2 },
+    { t: 'Quanti passi misura il contorno di questo recinto?', fissi: [{ pts: CROCE }], num: per(CROCE) },
+    { t: 'Quanti quadretti copre questo recinto?', fissi: [{ pts: TI }], num: a2di(TI) / 2 },
+    { t: 'Quanti passi in più misura il contorno del recinto blu rispetto a quello rosso?', fissi: [{ pts: ROSSO, c: '#c62828' }, { pts: BLU, c: '#1f5fbf' }], num: per(BLU) - per(ROSSO) },
+    { t: 'Quanti angoli retti ha questo recinto?', fissi: [{ pts: ELLE }], num: 6 }
+  ]},
+  { tit: 'Il contorno', n: 7, nota: 'Il contorno si misura in passi: un passo è la distanza fra due pioli vicini. Usa solo lati orizzontali e verticali.', sfide: [
+    { t: 'Fai un rettangolo con il contorno di 10 passi.', c: una(tutte(function (f) { return msgRettangolo(f, false); }, function (f) { return msgPassi(f, 10); })) },
+    { t: 'Fai una figura che copre 6 quadretti e ha il contorno di 12 passi.', c: una(tutte(function (f) { return msgPassi(f, 12); }, area(12))) },
+    { t: 'Fai un quadrato e un rettangolo con lo stesso contorno: 12 passi.',
+      c: due(function (f) { return quadrato(f) && f.axis && f.per === 12 ? true : 'no'; }, function (f) { return rettangolo(f) && !quadrato(f) && f.per === 12 ? true : 'no'; }, false,
+             'Servono un quadrato e un rettangolo (non quadrato), tutti e due con il contorno di 12 passi.') },
+    { t: 'Fai due rettangoli diversi che coprono tutti e due 6 quadretti.',
+      c: due(function (f) { return rettangolo(f) && f.a2 === 12 ? true : 'no'; }, function (f) { return rettangolo(f) && f.a2 === 12 ? true : 'no'; }, true, 'Servono due rettangoli che coprono 6 quadretti ciascuno.') },
+    { t: 'Fai due figure con lo stesso contorno che coprono un numero diverso di quadretti.',
+      c: function () {
+        var fs = figure().filter(function (f) { return f.simple; });
+        if (fs.length < 2) return 'Servono due figure: metti due elastici.';
+        if (fs.some(function (f) { return !f.axis; })) return 'Usa solo lati orizzontali e verticali, così puoi contare i passi.';
+        for (var i = 0; i < fs.length; i++) for (var j = 0; j < fs.length; j++) if (i !== j && fs[i].per === fs[j].per && fs[i].a2 !== fs[j].a2) return true;
+        return 'Le figure non hanno lo stesso contorno, oppure coprono gli stessi quadretti.';
+      } },
+    { t: 'Fai due figure che coprono gli stessi quadretti ma hanno il contorno diverso.',
+      c: function () {
+        var fs = figure().filter(function (f) { return f.simple; });
+        if (fs.length < 2) return 'Servono due figure: metti due elastici.';
+        if (fs.some(function (f) { return !f.axis; })) return 'Usa solo lati orizzontali e verticali, così puoi contare i passi.';
+        for (var i = 0; i < fs.length; i++) for (var j = 0; j < fs.length; j++) if (i !== j && fs[i].a2 === fs[j].a2 && fs[i].per !== fs[j].per) return true;
+        return 'Le figure non coprono gli stessi quadretti, oppure hanno lo stesso contorno.';
+      } },
+    { t: 'Fai il quadrato più grande che si può fare su questo geopiano.', c: una(tutte(msgQuadrato, function (f) { return f.a2 === 72 ? true : 'Questo quadrato copre ' + quad(f.a2) + ': se ne può fare uno più grande.'; })) }
+  ]},
+  { tit: 'Pioli segreti', n: 7, nota: 'Usa come angoli della figura solo i pioli scuri.', sfide: [
+    { t: 'Fra i pioli scuri c’è un quadrato nascosto: trovalo e mettici l’elastico.', segnati: [[1, 1], [4, 1], [1, 4], [4, 4], [2, 5], [5, 2], [0, 3], [6, 6], [3, 0], [6, 0]],
+      c: segreta([[1, 1], [4, 1], [1, 4], [4, 4], [2, 5], [5, 2], [0, 3], [6, 6], [3, 0], [6, 0]], msgQuadrato) },
+    { t: 'Fra i pioli scuri c’è un rettangolo che non è un quadrato: trovalo.', segnati: [[0, 1], [4, 1], [0, 3], [4, 3], [2, 5], [6, 0], [5, 5], [1, 6], [3, 4], [6, 2]],
+      c: segreta([[0, 1], [4, 1], [0, 3], [4, 3], [2, 5], [6, 0], [5, 5], [1, 6], [3, 4], [6, 2]], function (f) { return msgRettangolo(f, true); }) },
+    { t: 'Fra i pioli scuri c’è un quadrato inclinato: trovalo.', segnati: [[2, 0], [5, 1], [4, 4], [1, 3], [0, 0], [6, 3], [3, 6], [0, 5], [6, 6], [5, 5]],
+      c: segreta([[2, 0], [5, 1], [4, 4], [1, 3], [0, 0], [6, 3], [3, 6], [0, 5], [6, 6], [5, 5]], msgQuadrato) },
+    { t: 'Usa i pioli scuri per fare un triangolo con un angolo retto.', segnati: [[3, 3], [5, 4], [2, 5], [6, 1], [1, 0], [4, 0], [0, 4], [5, 6]],
+      c: segreta([[3, 3], [5, 4], [2, 5], [6, 1], [1, 0], [4, 0], [0, 4], [5, 6]], tutte(tri, function (f) { return f.rights ? true : 'Questo triangolo non ha angoli retti.'; })) },
+    { t: 'Fra i pioli scuri c’è un parallelogramma che non è un rettangolo: trovalo.', segnati: [[1, 1], [4, 1], [2, 3], [5, 3], [0, 5], [6, 5], [3, 6], [6, 0], [0, 3]],
+      c: segreta([[1, 1], [4, 1], [2, 3], [5, 3], [0, 5], [6, 5], [3, 6], [6, 0], [0, 3]], function (f) { return f.v === 4 && paralleli(f) === 2 && f.rights === 0 ? true : 'Questa figura non è un parallelogramma con angoli non retti.'; }) },
+    { t: 'Fra i pioli scuri c’è un rombo che non è un quadrato: trovalo.', segnati: [[1, 1], [4, 2], [5, 5], [2, 4], [0, 4], [6, 1], [3, 0], [0, 6], [6, 6]],
+      c: segreta([[1, 1], [4, 2], [5, 5], [2, 4], [0, 4], [6, 1], [3, 0], [0, 6], [6, 6]], function (f) { return f.v === 4 && rombo(f) && f.rights === 0 ? true : 'Questa figura non è un rombo con angoli non retti.'; }) }
+  ]},
+  { tit: 'Rettangoli e moltiplicazioni', n: 11, nota: 'Un rettangolo di quadretti mostra una moltiplicazione: le file per i quadretti di ogni fila.', sfide: [
+    { t: 'Fai un rettangolo con 3 file da 4 quadretti.', c: una(function (f) { if (!rettDritto(f)) return 'Serve un rettangolo con i lati orizzontali e verticali.'; var d = dims(f); return d.h === 3 && d.w === 4 ? true : 'Questo rettangolo ha ' + d.h + ' file da ' + d.w + ' quadretti.'; }) },
+    { t: 'Fai un rettangolo con 5 file da 6 quadretti.', c: una(function (f) { if (!rettDritto(f)) return 'Serve un rettangolo con i lati orizzontali e verticali.'; var d = dims(f); return d.h === 5 && d.w === 6 ? true : 'Questo rettangolo ha ' + d.h + ' file da ' + d.w + ' quadretti.'; }) },
+    { t: 'Fai un rettangolo con 2 file che copre 14 quadretti.', c: una(function (f) { if (!rettDritto(f)) return 'Serve un rettangolo con i lati orizzontali e verticali.'; var d = dims(f); return d.h === 2 && d.w === 7 ? true : 'Questo rettangolo ha ' + d.h + ' file da ' + d.w + ' quadretti.'; }) },
+    { t: 'Fai due rettangoli diversi che coprono tutti e due 12 quadretti.',
+      c: due(function (f) { return rettDritto(f) && f.a2 === 24 ? true : 'no'; }, function (f) { return rettDritto(f) && f.a2 === 24 ? true : 'no'; }, true, 'Servono due rettangoli diversi da 12 quadretti ciascuno.') },
+    { t: 'Su questo geopiano stanno due rettangoli diversi di 24 quadretti: falli tutti e due.',
+      c: due(function (f) { return rettDritto(f) && f.a2 === 48 ? true : 'no'; }, function (f) { return rettDritto(f) && f.a2 === 48 ? true : 'no'; }, true, 'Servono due rettangoli diversi da 24 quadretti ciascuno.') },
+    { t: 'Fai un quadrato che copre 36 quadretti.', c: una(tutte(msgQuadrato, area(72))) },
+    { t: 'Fai un rettangolo con 3 file da 7 e, attaccato, uno con 3 file da 3.',
+      c: due(function (f) { var d = dims(f); return rettDritto(f) && d.h === 3 && d.w === 7 ? true : 'no'; }, function (f) { var d = dims(f); return rettDritto(f) && d.h === 3 && d.w === 3 ? true : 'no'; }, false, 'Servono un rettangolo con 3 file da 7 quadretti e uno con 3 file da 3.') }
+  ]},
+  { tit: 'Le coordinate', n: 7, coord: true, nota: 'Ogni piolo ha un nome: la lettera della colonna e il numero della riga.', sfide: [
+    { t: 'Metti un elastico sui pioli A1, E1 e A4.', c: una(function (f) { return uguale(f, [C('A1'), C('E1'), C('A4')]) ? true : 'L’elastico non è sui pioli giusti.'; }) },
+    { t: 'Metti un elastico sui pioli B2, F2, F6 e B6.', c: una(function (f) { return uguale(f, [C('B2'), C('F2'), C('F6'), C('B6')]) ? true : 'L’elastico non è sui pioli giusti.'; }) },
+    { t: 'Metti un elastico sui pioli D1, G4, D7 e A4. Che figura è?', c: una(function (f) { return uguale(f, [C('D1'), C('G4'), C('D7'), C('A4')]) ? true : 'L’elastico non è sui pioli giusti.'; }) },
+    { t: 'Fai un quadrato con un lato che va da B2 a E2.', c: una(tutte(msgQuadrato, function (f) { return haVertice(f, C('B2')) && haVertice(f, C('E2')) && f.len2[0] === 9 ? true : 'Il quadrato deve avere un lato da B2 a E2.'; })) },
+    { t: 'Fai un rettangolo con due angoli opposti in A2 e F5.', c: una(tutte(function (f) { return msgRettangolo(f, false); }, function (f) { return haVertice(f, C('A2')) && haVertice(f, C('F5')) ? true : 'Il rettangolo deve avere un angolo in A2 e uno in F5.'; })) },
+    { t: 'Fai un triangolo con l’angolo retto in C3.', c: una(tutte(tri, function (f) { return retto(f, C('C3')) ? true : 'Il triangolo deve avere l’angolo retto in C3.'; })) }
+  ]},
+  { tit: 'Quadrati inclinati', n: 7, nota: 'Un quadrato può anche essere inclinato: i lati sono tutti lunghi uguali e gli angoli sono tutti retti.', sfide: [
+    { t: 'Fai un quadrato inclinato.', c: una(tutte(msgQuadrato, function (f) { return f.axis ? 'Questo quadrato è diritto: prova a inclinarlo.' : true; })) },
+    { t: 'Fai un quadrato che copre 2 quadretti.', c: una(tutte(msgQuadrato, area(4))) },
+    { t: 'Fai un quadrato che copre 5 quadretti.', c: una(tutte(msgQuadrato, area(10))) },
+    { t: 'Fai un quadrato che copre 8 quadretti.', c: una(tutte(msgQuadrato, area(16))) },
+    { t: 'Fai un quadrato che copre 10 quadretti.', c: una(tutte(msgQuadrato, area(20))) },
+    { t: 'Fai un rettangolo inclinato che non sia un quadrato.', c: una(tutte(function (f) { return msgRettangolo(f, true); }, function (f) { return f.axis ? 'Questo rettangolo è diritto: prova a inclinarlo.' : true; })) }
+  ]},
+  { tit: 'Parti uguali', n: 7, nota: 'Con gli elastici fai figure uguali che, insieme, coprono tutta la figura grigia senza sovrapporsi.', sfide: [
+    { t: 'Dividi il quadrato in 2 parti uguali.', fissi: [{ pts: Q44 }], c: dividi(Q44, 2) },
+    { t: 'Dividi il quadrato in 4 parti uguali.', fissi: [{ pts: Q44 }], c: dividi(Q44, 4) },
+    { t: 'Dividi il quadrato in 4 triangoli uguali.', fissi: [{ pts: Q44 }], c: dividi(Q44, 4, tri) },
+    { t: 'Dividi il rettangolo in 3 quadrati uguali.', fissi: [{ pts: R62 }], c: dividi(R62, 3, msgQuadrato) },
+    { t: 'Dividi il rettangolo in 2 parti uguali che non siano rettangoli.', fissi: [{ pts: R43 }], c: dividi(R43, 2, function (f) { return rettangolo(f) ? 'Le parti sono rettangoli: prova un altro taglio.' : true; }) },
+    { t: 'Dividi il quadrato in 8 triangoli uguali.', fissi: [{ pts: Q44 }], c: dividi(Q44, 8, tri) },
+    { t: 'Dividi la figura in 4 parti uguali.', fissi: [{ pts: ELLE2 }], c: dividi(ELLE2, 4) }
+  ]},
+  { tit: 'Triangoli: base e altezza', n: 11, nota: 'La base è un lato orizzontale o verticale. L’altezza è la distanza, in passi, fra la base e il vertice opposto.', sfide: [
+    { t: 'Fai un triangolo con la base di 4 passi e l’altezza di 3.', c: una(function (f) { return baseAltezza(f, 4, 3); }) },
+    { t: 'Fai un triangolo con la base di 6 passi e l’altezza di 4, senza angoli retti.', c: una(tutte(function (f) { return baseAltezza(f, 6, 4); }, function (f) { return f.rights ? 'Questo triangolo ha un angolo retto.' : true; })) },
+    { t: 'Fai un triangolo con la base di 5 passi, l’altezza di 5 e un angolo retto.', c: una(tutte(function (f) { return baseAltezza(f, 5, 5); }, function (f) { return f.rights ? true : 'Questo triangolo non ha angoli retti.'; })) },
+    { t: 'Fai due triangoli diversi, tutti e due con la base di 4 passi e l’altezza di 6.',
+      c: due(function (f) { return baseAltezza(f, 4, 6); }, function (f) { return baseAltezza(f, 4, 6); }, true, 'Servono due triangoli diversi con la base di 4 passi e l’altezza di 6.') },
+    { t: 'Fai un triangolo con la base di 4 passi, l’altezza di 4 e il vertice fuori dalla base.', c: una(function (f) { return baseAltezza(f, 4, 4, true); }) },
+    { t: 'Quanti quadretti copre questo triangolo?', fissi: [{ pts: TRI_OTT }], num: a2di(TRI_OTT) / 2 },
+    { t: 'Fai un triangolo con la base di 6 passi che copre 15 quadretti.', c: una(function (f) { return baseAltezza(f, 6, 5) === true ? true : f.v === 3 ? 'Questo triangolo copre ' + quad(f.a2) + ', oppure non ha una base di 6 passi.' : 'Questa figura non è un triangolo.'; }) }
+  ]},
+  { tit: 'Quadrilateri e simmetria', n: 11, sfide: [
+    { t: 'Fai un parallelogramma che non sia un rettangolo.', c: una(function (f) {
+        var r = lati(f, 4, 'un parallelogramma'); if (r !== true) return r;
+        if (paralleli(f) < 2) return 'I lati opposti non sono tutti paralleli.';
+        return f.rights === 4 ? 'Questo è un rettangolo: prova a inclinare due lati.' : true; }) },
+    { t: 'Fai un rombo che non sia un quadrato.', c: una(function (f) {
+        var r = lati(f, 4, 'un rombo'); if (r !== true) return r;
+        if (!rombo(f)) return 'I lati non sono tutti lunghi uguali.';
+        return f.rights === 4 ? 'Questo è un quadrato: prova con angoli non retti.' : true; }) },
+    { t: 'Fai un trapezio.', c: una(function (f) {
+        var r = lati(f, 4, 'un trapezio'); if (r !== true) return r;
+        var k = paralleli(f);
+        return k === 1 ? true : k === 2 ? 'Questa figura ha due coppie di lati paralleli: un trapezio ne ha una sola.' : 'Questa figura non ha lati paralleli.'; }) },
+    { t: 'Fai un pentagono con un asse di simmetria.', c: una(tutte(function (f) { return lati(f, 5, 'un pentagono'); }, function (f) { return simmetrica(f) ? true : 'Questo pentagono non ha un asse di simmetria.'; })) },
+    { t: 'Fai un esagono con un asse di simmetria.', c: una(tutte(function (f) { return lati(f, 6, 'un esagono'); }, function (f) { return simmetrica(f) ? true : 'Questo esagono non ha un asse di simmetria.'; })) },
+    { t: 'Fai due triangoli diversi che coprono tutti e due 6 quadretti.',
+      c: due(function (f) { return f.v === 3 && f.a2 === 12 ? true : 'no'; }, function (f) { return f.v === 3 && f.a2 === 12 ? true : 'no'; }, true, 'Servono due triangoli che coprono 6 quadretti ciascuno.') },
+    { t: 'Copia la figura del modello, dove vuoi sul geopiano.', model: [[[0, 2], [2, 0], [4, 2], [6, 0], [6, 4], [3, 6], [0, 4], [0, 2]]] }
+  ]},
+  { tit: 'Simmetria con l’asse', n: 11, nota: 'La figura simmetrica è alla stessa distanza dall’asse, dalla parte opposta.', sfide: [
+    { t: 'Costruisci la figura simmetrica rispetto all’asse.', asse: { x: 5 }, fissi: [{ pts: S_TRI }], c: una(function (f) { return uguale(f, rifletti(S_TRI, { x: 5 })) ? true : 'La figura non è simmetrica a quella grigia: controlla le distanze dall’asse.'; }) },
+    { t: 'Costruisci la figura simmetrica rispetto all’asse.', asse: { x: 5 }, fissi: [{ pts: S_ELLE }], c: una(function (f) { return uguale(f, rifletti(S_ELLE, { x: 5 })) ? true : 'La figura non è simmetrica a quella grigia: controlla le distanze dall’asse.'; }) },
+    { t: 'Costruisci la figura simmetrica rispetto all’asse.', asse: { y: 5 }, fissi: [{ pts: S_FLAG }], c: una(function (f) { return uguale(f, rifletti(S_FLAG, { y: 5 })) ? true : 'La figura non è simmetrica a quella grigia: controlla le distanze dall’asse.'; }) },
+    { t: 'Completa la figura: costruisci la metà che manca.', asse: { x: 5 }, fissi: [{ pts: S_MEZZA }],
+      c: una(function (f) { return uguale(f, rifletti(S_MEZZA, { x: 5 })) || uguale(f, [[5, 1], [8, 4], [8, 8], [2, 8], [2, 4]]) ? true : 'La metà costruita non è simmetrica a quella grigia.'; }) },
+    { t: 'Costruisci la figura simmetrica rispetto all’asse.', asse: { diag: 1 }, fissi: [{ pts: S_DIAG }], c: una(function (f) { return uguale(f, rifletti(S_DIAG, {})) ? true : 'La figura non è simmetrica a quella grigia: controlla le distanze dall’asse.'; }) },
+    { t: 'Fai una figura con 6 lati che abbia questo asse di simmetria.', asse: { x: 5 }, c: una(tutte(function (f) { return lati(f, 6, 'questa figura'); }, function (f) { return chiave(f.p) === chiave(rifletti(f.p, { x: 5 })) ? true : 'Ribaltata sull’asse, la figura non resta uguale.'; })) },
+    { t: 'Fai un triangolo che, ribaltato su questo asse, resta uguale.', asse: { y: 5 }, c: una(tutte(tri, function (f) { return chiave(f.p) === chiave(rifletti(f.p, { y: 5 })) ? true : 'Ribaltato sull’asse, il triangolo non resta uguale.'; })) }
+  ]},
+  { tit: 'Spostare e ruotare', n: 11, sfide: [
+    { t: 'Costruisci la freccia spostata di 4 passi verso destra.', fissi: [{ pts: FRECCIA }], c: una(function (f) { return uguale(f, trasla(FRECCIA, 4, 0)) ? true : 'La figura non è nella posizione giusta: conta i passi.'; }) },
+    { t: 'Costruisci la figura spostata di 5 passi a destra e 3 in basso.', fissi: [{ pts: GANCIO }], c: una(function (f) { return uguale(f, trasla(GANCIO, 5, 3)) ? true : 'La figura non è nella posizione giusta: conta i passi.'; }) },
+    { t: 'Fai ruotare la bandiera di un quarto di giro in senso orario intorno al piolo rosso.', fissi: [{ pts: BANDIERA }], centro: CENTRO, c: una(function (f) { return uguale(f, ruota(BANDIERA, CENTRO, 'orario')) ? true : 'La bandiera non è ruotata nel modo giusto.'; }) },
+    { t: 'Fai ruotare la bandiera di un quarto di giro in senso antiorario intorno al piolo rosso.', fissi: [{ pts: BANDIERA }], centro: CENTRO, c: una(function (f) { return uguale(f, ruota(BANDIERA, CENTRO, 'antiorario')) ? true : 'La bandiera non è ruotata nel modo giusto.'; }) },
+    { t: 'Fai ruotare la bandiera di mezzo giro intorno al piolo rosso.', fissi: [{ pts: BANDIERA }], centro: CENTRO, c: una(function (f) { return uguale(f, ruota(BANDIERA, CENTRO, 'mezzo')) ? true : 'La bandiera non è ruotata nel modo giusto.'; }) },
+    { t: 'Di quanti passi verso destra è stata spostata la figura rossa per arrivare a quella blu?', fissi: [{ pts: PIEDE, c: '#c62828' }, { pts: trasla(PIEDE, 6, 0), c: '#1f5fbf' }], num: 6 },
+    { t: 'Di quanti passi verso l’alto è stata spostata la figura rossa per arrivare a quella blu?', fissi: [{ pts: trasla(PIEDE, 2, 0), c: '#c62828' }, { pts: trasla(PIEDE, 6, -5), c: '#1f5fbf' }], num: 5 }
+  ]},
+  { tit: 'Indovina la figura', n: 11, nota: 'Leggi tutti gli indizi e costruisci la figura che li rispetta.', sfide: [
+    { t: 'Ho 4 lati tutti lunghi uguali e nessun angolo retto.', c: indizi([[function (f) { return f.v === 4; }, 'La figura deve avere 4 lati.'], [rombo, 'I lati non sono tutti lunghi uguali.'], [function (f) { return f.rights === 0; }, 'La figura ha degli angoli retti.']]) },
+    { t: 'Ho 3 lati, un angolo retto e copro 8 quadretti.', c: indizi([[function (f) { return f.v === 3; }, 'La figura deve avere 3 lati.'], [function (f) { return f.rights > 0; }, 'Manca l’angolo retto.'], [function (f) { return f.a2 === 16; }, 'La figura non copre 8 quadretti.']]) },
+    { t: 'Ho 4 lati, solo due angoli retti e una sola coppia di lati paralleli.', c: indizi([[function (f) { return f.v === 4; }, 'La figura deve avere 4 lati.'], [function (f) { return f.rights === 2; }, 'La figura non ha esattamente due angoli retti.'], [function (f) { return paralleli(f) === 1; }, 'La figura non ha una sola coppia di lati paralleli.']]) },
+    { t: 'Ho 6 lati, tutti orizzontali o verticali, e copro 5 quadretti.', c: indizi([[function (f) { return f.v === 6; }, 'La figura deve avere 6 lati.'], [function (f) { return f.axis; }, 'Non tutti i lati sono orizzontali o verticali.'], [function (f) { return f.a2 === 10; }, 'La figura non copre 5 quadretti.']]) },
+    { t: 'Ho 5 lati, un asse di simmetria e 3 angoli retti.', c: indizi([[function (f) { return f.v === 5; }, 'La figura deve avere 5 lati.'], [simmetrica, 'La figura non ha un asse di simmetria.'], [function (f) { return f.rights === 3; }, 'La figura non ha 3 angoli retti.']]) },
+    { t: 'Ho 4 lati, i lati opposti paralleli, nessun angolo retto e copro 6 quadretti.', c: indizi([[function (f) { return f.v === 4; }, 'La figura deve avere 4 lati.'], [function (f) { return paralleli(f) === 2; }, 'I lati opposti non sono tutti paralleli.'], [function (f) { return f.rights === 0; }, 'La figura ha degli angoli retti.'], [function (f) { return f.a2 === 12; }, 'La figura non copre 6 quadretti.']]) },
+    { t: 'Ho 3 lati, due lati lunghi uguali, e nessun lato è orizzontale o verticale.', c: indizi([[function (f) { return f.v === 3; }, 'La figura deve avere 3 lati.'], [function (f) { return f.len2[0] === f.len2[1] || f.len2[1] === f.len2[2] || f.len2[0] === f.len2[2]; }, 'Non ci sono due lati lunghi uguali.'], [function (f) { return f.e.every(function (e) { return e[0] !== 0 && e[1] !== 0; }); }, 'C’è un lato orizzontale o verticale.']]) }
+  ]},
+  { tit: 'Pioli dentro e sul contorno', n: 11, nota: 'Sul contorno: i pioli toccati dall’elastico. Dentro: i pioli chiusi nella figura.', sfide: [
+    { t: 'Fai una figura con un solo piolo dentro.', c: una(function (f) { return msgPioli(f, 1, null); }) },
+    { t: 'Fai un triangolo con nessun piolo dentro e 4 pioli sul contorno.', c: una(tutte(tri, function (f) { return msgPioli(f, 0, 4); })) },
+    { t: 'Fai un quadrato con 9 pioli dentro.', c: una(tutte(msgQuadrato, function (f) { return msgPioli(f, 9, null); })) },
+    { t: 'Fai un rettangolo con 12 pioli sul contorno e 3 dentro.', c: una(tutte(function (f) { return msgRettangolo(f, false); }, function (f) { return msgPioli(f, 3, 12); })) },
+    { t: 'Fai una figura con 4 pioli dentro e 4 sul contorno.', c: una(function (f) { return msgPioli(f, 4, 4); }) },
+    { t: 'Fai due figure diverse, tutte e due con 2 pioli dentro e 6 sul contorno.',
+      c: due(function (f) { return f.I === 2 && f.B === 6 ? true : 'no'; }, function (f) { return f.I === 2 && f.B === 6 ? true : 'no'; }, true, 'Servono due figure con 2 pioli dentro e 6 sul contorno ciascuna.') },
+    { t: 'Quanti pioli ci sono dentro questo quadrato?', fissi: [{ pts: [[3, 0], [6, 3], [3, 6], [0, 3]] }], num: 13 }
+  ]}
+];
+// le sfide di copia usano il modello
+LIVELLI.forEach(function (L) { L.sfide.forEach(function (S) { if (S.model && !S.c) S.c = copia(S.model); }); });
+
+var vista = 'libero', liv = 0, sf = 0, fatte = {}, libero = null, risposta = '';
+try { fatte = JSON.parse(localStorage.getItem('geopiano-sfide-2') || '{}') || {}; } catch (x) { fatte = {}; }
+function salvaFatte() { try { localStorage.setItem('geopiano-sfide-2', JSON.stringify(fatte)); } catch (x) {} }
+function sfidaAtt() { return vista === 'sfide' ? LIVELLI[liv].sfide[sf] : null; }
+
+var sfidaEl = document.getElementById('sfida'), esitoEl = document.getElementById('esito');
+
+function mostraModello(model, nn) {
+  var m = document.getElementById('modello');
+  if (!model) { m.style.display = 'none'; return; }
+  m.style.display = 'block';
+  var mg = 10, st = (100 - 2 * mg) / (nn - 1), h = '<rect x="1" y="1" width="98" height="98" fill="#fff" stroke="#2b2b2b" stroke-width="2"/>';
+  for (var j = 0; j < nn; j++) for (var i = 0; i < nn; i++) h += '<circle cx="' + (mg + i * st) + '" cy="' + (mg + j * st) + '" r="' + (nn > 7 ? 1.8 : 2.6) + '" fill="#2b2b2b"/>';
+  model.forEach(function (l) {
+    h += '<polyline points="' + l.map(function (q) { return (mg + q[0] * st) + ',' + (mg + q[1] * st); }).join(' ') + '" fill="none" stroke="#2b2b2b" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>';
+  });
+  m.innerHTML = h;
+}
+
+function scriviRisposta() { document.getElementById('risposta').textContent = risposta === '' ? '?' : risposta; }
+
+function caricaSfida() {
+  var L = LIVELLI[liv], S = L.sfide[sf];
+  cur = null; sel = null; grab = null;
+  n = L.n; bands = []; storia = []; risposta = '';
+  syncSize();
+  document.getElementById('sfTit').textContent = 'Livello ' + (liv + 1) + ' · ' + L.tit;
+  document.getElementById('sfTesto').textContent = S.t;
+  var nota = document.getElementById('sfNota'); nota.textContent = L.nota || ''; nota.style.display = L.nota ? 'block' : 'none';
+  mostraModello(S.model, L.n);
+  document.getElementById('tastiera').style.display = S.num !== undefined ? 'flex' : 'none';
+  scriviRisposta();
+  esitoEl.textContent = ''; esitoEl.className = 'esito';
+  var lv = document.getElementById('livelli'); lv.innerHTML = '';
+  LIVELLI.forEach(function (x, k) {
+    var b = document.createElement('button'); b.className = 'btn' + (k === liv ? ' on' : ''); b.textContent = k + 1; b.title = x.tit;
+    b.onclick = function () { liv = k; sf = 0; caricaSfida(); };
+    lv.appendChild(b);
+  });
+  var pu = document.getElementById('punti'); pu.innerHTML = '';
+  L.sfide.forEach(function (x, k) {
+    var b = document.createElement('button'); b.textContent = k + 1;
+    b.className = (fatte[liv + '-' + k] ? 'fatta' : '') + (k === sf ? ' qui' : '');
+    b.onclick = function () { sf = k; caricaSfida(); };
+    pu.appendChild(b);
+  });
+  document.getElementById('prec').disabled = liv === 0 && sf === 0;
+  document.getElementById('succ').disabled = liv === LIVELLI.length - 1 && sf === L.sfide.length - 1;
+  render();
+}
+
+[].forEach.call(document.querySelectorAll('#tasti button'), function (b) {
+  b.onclick = function () {
+    var k = b.dataset.k;
+    if (k === 'del') risposta = risposta.slice(0, -1);
+    else if (risposta.length < 3) risposta = (risposta === '0' ? '' : risposta) + k;
+    scriviRisposta(); esitoEl.textContent = ''; esitoEl.className = 'esito';
+  };
+});
+
+document.getElementById('controlla').onclick = function () {
+  finish(); sel = null;
+  var S = LIVELLI[liv].sfide[sf], r;
+  if (S.num !== undefined) r = risposta === '' ? 'Scrivi la risposta con i tasti dei numeri.' : (+risposta === S.num ? true : 'Non ancora: prova a contare di nuovo.');
+  else r = S.c();
+  if (r === true) {
+    esitoEl.textContent = 'Esatto!'; esitoEl.className = 'esito ok';
+    fatte[liv + '-' + sf] = 1; salvaFatte();
+    document.getElementById('punti').children[sf].className = 'fatta qui';
+  } else { esitoEl.textContent = r; esitoEl.className = 'esito'; }
+  render();
+};
+document.getElementById('prec').onclick = function () {
+  if (sf > 0) sf--; else if (liv > 0) { liv--; sf = LIVELLI[liv].sfide.length - 1; }
+  caricaSfida();
+};
+document.getElementById('succ').onclick = function () {
+  if (sf < LIVELLI[liv].sfide.length - 1) sf++; else if (liv < LIVELLI.length - 1) { liv++; sf = 0; }
+  caricaSfida();
+};
+
+function setVista(v) {
+  if (v === vista) return;
+  cancelPending();
+  if (v === 'sfide') { libero = { n: n, bands: bands, storia: storia }; }
+  vista = v;
+  [].forEach.call(document.querySelectorAll('#viste .btn'), function (x) { x.classList.toggle('on', x.dataset.v === v); });
+  sfidaEl.style.display = v === 'sfide' ? 'flex' : 'none';
+  document.getElementById('impost').style.display = v === 'sfide' ? 'none' : '';
+  if (v === 'sfide') caricaSfida();
+  else { if (libero) { n = libero.n; bands = libero.bands; storia = libero.storia; } syncSize(); render(); }
+}
+[].forEach.call(document.querySelectorAll('#viste .btn'), function (b) { b.onclick = function () { setVista(b.dataset.v); }; });
 
 render();
 </script>
